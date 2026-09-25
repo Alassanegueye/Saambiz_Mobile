@@ -1,0 +1,116 @@
+import 'package:saambiz/core/theme/app_color.dart';
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+
+class SecondaryButton extends StatefulWidget {
+  final VoidCallback onTap;
+  final String text;
+  final String? iconPath; 
+  final Widget? iconWidget; 
+  final double width;
+  final double height;
+  final double borderRadius;
+  final double? fontSize;
+  final Color textColor, bgColor;
+
+  const SecondaryButton({
+    super.key,
+    required this.onTap,
+    required this.text,
+    required this.width,
+    required this.height,
+    this.iconPath,
+    this.iconWidget,
+    required this.borderRadius,
+    this.fontSize,
+    required this.textColor,
+    required this.bgColor,
+  });
+
+  @override
+  State<SecondaryButton> createState() => _SecondaryButtonState();
+}
+
+class _SecondaryButtonState extends State<SecondaryButton>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  final Duration _animationDuration = const Duration(milliseconds: 300);
+  final Tween<double> _tween = Tween<double>(begin: 1.0, end: 0.95);
+
+  @override
+  void initState() {
+    _controller = AnimationController(
+      vsync: this,
+      duration: _animationDuration,
+    )..addListener(() {
+        setState(() {});
+      });
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Widget? _buildIcon() {
+    if (widget.iconWidget != null) {
+      return widget.iconWidget;
+    } else if (widget.iconPath != null && widget.iconPath!.isNotEmpty) {
+      return Image.asset(widget.iconPath!, width: 24, height: 24);
+    }
+    return null;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final icon = _buildIcon();
+
+    return GestureDetector(
+      onTap: () {
+        _controller.forward().then((_) {
+          _controller.reverse();
+        });
+        widget.onTap();
+      },
+      child: ScaleTransition(
+        scale: _tween.animate(
+          CurvedAnimation(
+            parent: _controller,
+            curve: Curves.easeOut,
+            reverseCurve: Curves.easeIn,
+          ),
+        ),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 17),
+          height: widget.height,
+          alignment: Alignment.center,
+          width: widget.width,
+          decoration: BoxDecoration(
+            color: widget.bgColor,
+            border: Border.all(color: AppColor.kLine),
+            borderRadius: BorderRadius.circular(widget.borderRadius),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (icon != null) ...[
+                icon,
+                const SizedBox(width: 12),
+              ],
+              Text(
+                widget.text,
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: widget.fontSize ?? 14,
+                  fontWeight: FontWeight.w600,
+                  color: widget.textColor,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
