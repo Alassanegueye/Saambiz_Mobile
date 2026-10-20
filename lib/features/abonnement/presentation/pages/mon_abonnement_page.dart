@@ -3,18 +3,19 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../../core/utils/libelles.dart';
 import '../../../../injection_container.dart';
 import '../bloc/abonnement_bloc.dart';
 import '../bloc/abonnement_event.dart';
 import '../bloc/abonnement_state.dart';
 
 class _C {
-  static const green = Color(0xFF1B3A6B);
-  static const black = Color(0xFF1A1A1A);
+  static const green = Color(0xFF0D1B3D);
+  static const black = Color(0xFF0D1B3D);
   static const white = Color(0xFFFFFFFF);
-  static const bg = Color(0xFFF5F7F2);
-  static const sub = Color(0xFF7A8473);
-  static const border = Color(0xFFE3EAD0);
+  static const bg = Color(0xFFF5F7FB);
+  static const sub = Color(0xFF5B6C8A);
+  static const border = Color(0xFFE3E8F0);
   static const orange = Color(0xFFFF8F00);
 }
 
@@ -160,7 +161,7 @@ class _MonAbonnementViewState extends State<_MonAbonnementView> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(a.type.isNotEmpty ? a.type : 'Abonnement',
+                  Text(libelle(a.type, vide: 'Abonnement'),
                       style: const TextStyle(
                           fontWeight: FontWeight.w800, fontSize: 18, color: _C.black)),
                   Container(
@@ -170,7 +171,7 @@ class _MonAbonnementViewState extends State<_MonAbonnementView> {
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Text(
-                      actif ? 'Actif' : a.statut,
+                      libelle(a.statut),
                       style: TextStyle(
                           color: actif ? _C.green : _C.orange,
                           fontWeight: FontWeight.w700,
@@ -246,7 +247,7 @@ class _MonAbonnementViewState extends State<_MonAbonnementView> {
                     ],
                   ),
                 ),
-                Text(p.statut,
+                Text(libelle(p.statut),
                     style: TextStyle(
                         color: p.statut == 'reussi' ? _C.green : _C.orange,
                         fontWeight: FontWeight.w700)),
