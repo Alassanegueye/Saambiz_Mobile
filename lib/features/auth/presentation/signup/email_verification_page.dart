@@ -9,13 +9,14 @@ import '../../../../core/routes/app_router.dart';
 import '../../../../injection_container.dart';
 import '../../data/datasources/signup_remote_datasource.dart';
 import '../../domain/usecases/login_user.dart';
+import '../widgets/mise_en_page_auth.dart';
 import 'signup_form_page.dart';
 import 'signup_kit.dart';
 
 /// Écrans 3A et 3B : saisie du code à 6 chiffres reçu par email.
 ///
 /// La maquette prévoyait un SMS ; la vérification passe par l'adresse email
-/// (expéditeur noreply@saambiz.sn), ce qui évite les coûts et les
+/// (expéditeur noreply@saambiz.com), ce qui évite les coûts et les
 /// indisponibilités SMS et fonctionne hors du Sénégal.
 class EmailVerificationPage extends StatefulWidget {
   final SignupDraft draft;
@@ -133,6 +134,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
         motDePasse: widget.draft.motDePasse,
         role: widget.draft.role,
         jetonEmail: jeton,
+        telephone: widget.draft.telephone,
       );
 
       // 3. On connecte l'utilisateur pour qu'il enchaîne sur ses centres
@@ -205,149 +207,81 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Sb.bg,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(24, 12, 24, 28),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Align(alignment: Alignment.centerLeft, child: SbBackButton()),
-              const SizedBox(height: 26),
-
-              Center(
-                child: Container(
-                  width: 74,
-                  height: 74,
-                  decoration: BoxDecoration(
-                    color: Sb.goldSoft,
-                    borderRadius: BorderRadius.circular(24),
-                  ),
-                  child: const Icon(
-                    Icons.mark_email_unread_outlined,
-                    size: 34,
-                    color: Sb.navy,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 24),
-
-              Center(child: Text('Vérifiez votre email', style: Sb.title(23))),
-              const SizedBox(height: 12),
-              Center(
-                child: Text(
-                  'Un code à 6 chiffres a été envoyé à',
-                  textAlign: TextAlign.center,
-                  style: Sb.body(14),
-                ),
-              ),
-              const SizedBox(height: 4),
-              Center(
-                child: Text(
-                  widget.draft.email,
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.dmSans(
-                    fontSize: 14.5,
-                    fontWeight: FontWeight.w700,
-                    color: Sb.navy,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 32),
-
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: List.generate(_length, (i) => _buildBox(i)),
-              ),
-              const SizedBox(height: 22),
-
-              if (_error != null) SbErrorBanner(_error),
-              if (_info != null)
-                Container(
-                  width: double.infinity,
-                  margin: const EdgeInsets.only(bottom: 16),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 12,
-                  ),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFE8F8EE),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Sb.green.withOpacity(0.35)),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(
-                        Icons.check_circle_outline_rounded,
-                        size: 18,
-                        color: Sb.green,
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          _info!,
-                          style: GoogleFonts.dmSans(
-                            fontSize: 13,
-                            color: const Color(0xFF15803D),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-              Center(
-                child: _resending
-                    ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2.2),
-                      )
-                    : _secondsLeft > 0
-                    ? Text(
-                        'Renvoyer le code dans $_secondsLeft secondes',
-                        style: Sb.body(13),
-                      )
-                    : GestureDetector(
-                        onTap: _renvoyer,
-                        child: Text(
-                          'Renvoyer le code',
-                          style: GoogleFonts.dmSans(
-                            fontSize: 13.5,
-                            fontWeight: FontWeight.w700,
-                            color: Sb.gold,
-                          ),
-                        ),
-                      ),
-              ),
-              const SizedBox(height: 26),
-
-              SbPrimaryButton(
-                label: 'Vérifier',
-                loading: _loading,
-                onPressed: _verifier,
-              ),
-              const SizedBox(height: 18),
-              Center(
-                child: Text(
-                  "Pensez à regarder dans vos courriers indésirables : l'email vient de noreply@saambiz.sn.",
-                  textAlign: TextAlign.center,
-                  style: Sb.body(12),
-                ),
-              ),
+    return SbPageAuth(
+      etape: 4,
+      vendeur: widget.draft.isVendeur,
+      icone: Icons.mark_email_unread_outlined,
+      titre: 'Vérifiez votre e-mail',
+      sousTitre: 'Code envoyé à ${widget.draft.email}',
+      carte: [
+        const LibelleChamp('Code à 6 chiffres'),
+        Row(
+          children: [
+            for (var i = 0; i < _length; i++) ...[
+              Expanded(child: _buildBox(i)),
+              if (i < _length - 1) const SizedBox(width: 8),
             ],
-          ),
+          ],
         ),
-      ),
+        const SizedBox(height: 18),
+        if (_error != null) SbErrorBanner(_error),
+        if (_info != null)
+          Container(
+            width: double.infinity,
+            margin: const EdgeInsets.only(bottom: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            decoration: BoxDecoration(
+              color: const Color(0xFFE8F8EE),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Sb.green.withValues(alpha: 0.35)),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.check_circle_outline_rounded, size: 18, color: Sb.green),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    _info!,
+                    style: GoogleFonts.plusJakartaSans(fontSize: 13, color: const Color(0xFF15803D)),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        SbPrimaryButton(label: 'Vérifier', loading: _loading, onPressed: _verifier),
+        const SizedBox(height: 14),
+        Center(
+          child: _resending
+              ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2.2))
+              : _secondsLeft > 0
+                  ? Text('Renvoyer dans $_secondsLeft s', style: Sb.body(13))
+                  : TextButton(
+                      onPressed: _renvoyer,
+                      child: Text(
+                        'Renvoyer le code',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 13.5,
+                          fontWeight: FontWeight.w700,
+                          color: Sb.navy,
+                        ),
+                      ),
+                    ),
+        ),
+      ],
+      apres: [
+        Text(
+          'Pensez à vérifier vos spams.',
+          textAlign: TextAlign.center,
+          style: Sb.body(12),
+        ),
+      ],
     );
   }
 
   Widget _buildBox(int i) {
     final filled = _ctrls[i].text.isNotEmpty;
     return SizedBox(
-      width: 48,
-      height: 56,
+      height: 54,
       // « Retour » dans une case vide remonte à la précédente et l'efface :
       // sans ça, corriger un chiffre oblige à tout reprendre.
       child: KeyboardListener(
@@ -370,7 +304,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
           // Une seule case n'accepte qu'un chiffre, mais on laisse passer un
           // collage plus long pour le remplissage automatique du code.
           inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-          style: GoogleFonts.sora(
+          style: GoogleFonts.plusJakartaSans(
             fontSize: 21,
             fontWeight: FontWeight.w700,
             color: Sb.navy,
@@ -383,18 +317,18 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
           decoration: InputDecoration(
             counterText: '',
             filled: true,
-            fillColor: filled ? Sb.goldSoft : Sb.white,
+            fillColor: filled ? Sb.navyTint : Sb.surface,
             contentPadding: EdgeInsets.zero,
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(
-                color: filled ? Sb.gold : Sb.border,
+                color: filled ? Sb.navy : Sb.border,
                 width: 1.4,
               ),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Sb.gold, width: 1.8),
+              borderSide: const BorderSide(color: Sb.navy, width: 1.8),
             ),
           ),
         ),

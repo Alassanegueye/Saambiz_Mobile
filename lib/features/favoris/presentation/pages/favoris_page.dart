@@ -6,14 +6,18 @@ import '../../../../injection_container.dart';
 import '../bloc/favoris_bloc.dart';
 import '../bloc/favoris_event.dart';
 import '../bloc/favoris_state.dart';
+import 'package:saambiz/core/utils/image_url.dart';
+
+import '../../../catalogue/data/favoris_produits.dart';
+import '../../../catalogue/presentation/widgets/produit_card.dart';
 
 class _C {
-  static const green = Color(0xFF1B3A6B);
-  static const black = Color(0xFF1A1A1A);
+  static const green = Color(0xFF0D1B3D);
+  static const black = Color(0xFF0D1B3D);
   static const white = Color(0xFFFFFFFF);
-  static const bg = Color(0xFFF5F7F2);
-  static const sub = Color(0xFF7A8473);
-  static const border = Color(0xFFE3EAD0);
+  static const bg = Color(0xFFF5F7FB);
+  static const sub = Color(0xFF5B6C8A);
+  static const border = Color(0xFFE3E8F0);
 }
 
 /// Boutiques favorites de l'acheteur connecté (GET/POST/DELETE /favoris).
@@ -42,7 +46,12 @@ class _FavorisView extends StatelessWidget {
         foregroundColor: _C.black,
         title: const Text('Mes favoris'),
       ),
-      body: BlocConsumer<FavorisBloc, FavorisState>(
+      body: Column(
+        children: [
+          // Produits aimés (cœur des cartes produits), puis boutiques suivies.
+          const _ProduitsAimes(),
+          Expanded(
+            child: BlocConsumer<FavorisBloc, FavorisState>(
         listener: (context, state) {
           if (state is FavorisError) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -83,7 +92,7 @@ class _FavorisView extends StatelessWidget {
                           borderRadius: BorderRadius.circular(12),
                           child: (b.logo ?? '').isNotEmpty
                               ? CachedNetworkImage(
-                                  imageUrl: b.logo!,
+                                  imageUrl: imageOptimisee(b.logo!),
                                   width: 56,
                                   height: 56,
                                   fit: BoxFit.cover,
@@ -136,6 +145,9 @@ class _FavorisView extends StatelessWidget {
           }
           return const SizedBox.shrink();
         },
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -146,4 +158,46 @@ class _FavorisView extends StatelessWidget {
         color: _C.bg,
         child: const Icon(Icons.storefront_outlined, color: _C.sub),
       );
+}
+
+/// Les produits aimés, sur une ligne qui défile. Rien tant qu'il n'y en a pas.
+class _ProduitsAimes extends StatelessWidget {
+  const _ProduitsAimes();
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<List<Map<String, dynamic>>>(
+      valueListenable: FavorisProduits.liste,
+      builder: (context, liste, _) {
+        if (liste.isEmpty) return const SizedBox.shrink();
+        final produits = FavorisProduits.produits;
+        const largeur = 150.0;
+        return Container(
+          color: _C.white,
+          padding: const EdgeInsets.only(top: 14, bottom: 14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Text('Produits aimés (${produits.length})',
+                    style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16, color: _C.black)),
+              ),
+              const SizedBox(height: 10),
+              SizedBox(
+                height: largeur / ratioCarteProduit,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  itemCount: produits.length,
+                  separatorBuilder: (_, __) => const SizedBox(width: 10),
+                  itemBuilder: (_, i) => SizedBox(width: largeur, child: ProduitCard(produit: produits[i])),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 }

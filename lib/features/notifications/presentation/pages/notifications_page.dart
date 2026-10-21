@@ -11,12 +11,12 @@ import '../bloc/notifications_event.dart';
 import '../bloc/notifications_state.dart';
 
 class _C {
-  static const green = Color(0xFF1B3A6B);
-  static const black = Color(0xFF1A1A1A);
+  static const green = Color(0xFF0D1B3D);
+  static const black = Color(0xFF0D1B3D);
   static const white = Color(0xFFFFFFFF);
-  static const bg = Color(0xFFF5F7F2);
-  static const sub = Color(0xFF7A8473);
-  static const border = Color(0xFFE3EAD0);
+  static const bg = Color(0xFFF5F7FB);
+  static const sub = Color(0xFF5B6C8A);
+  static const border = Color(0xFFE3E8F0);
 }
 
 /// Notifications (GET /notifications), mises à jour en temps réel via

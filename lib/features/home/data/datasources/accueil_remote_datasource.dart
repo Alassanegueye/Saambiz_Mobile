@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 
 import '../../../../core/utils/app_logger.dart';
+import '../../../categories/data/categorie.dart';
 
 /// Une bande de l'accueil : « Sélectionné pour vous », « Près de chez vous »…
 /// Le backend décide des sections, de leur ordre et de leur libellé — c'est lui
@@ -38,11 +39,15 @@ class AccueilPersonnalise {
   final bool positionConnue;
   final List<AccueilSection> sections;
 
+  /// Rangée de catégories en tête d'accueil, dans l'ordre fixé par l'admin.
+  final List<Categorie> categories;
+
   const AccueilPersonnalise({
     required this.invite,
     required this.interets,
     required this.positionConnue,
     required this.sections,
+    this.categories = const [],
   });
 
   factory AccueilPersonnalise.fromJson(Map<String, dynamic> json) =>
@@ -56,9 +61,14 @@ class AccueilPersonnalise {
             .whereType<Map>()
             .map((e) => AccueilSection.fromJson(Map<String, dynamic>.from(e)))
             .toList(),
+        categories: (json['categories'] as List? ?? [])
+            .whereType<Map>()
+            .map((e) => Categorie.fromJson(Map<String, dynamic>.from(e)))
+            .where((c) => c.nom.isNotEmpty)
+            .toList(),
       );
 
-  bool get estVide => sections.isEmpty;
+  bool get estVide => sections.isEmpty && categories.isEmpty;
 }
 
 /// Accueil personnalisé — la seule route de l'application ouverte aux invités.
@@ -87,6 +97,31 @@ class AccueilRemoteDataSource {
       );
     } on DioException catch (e) {
       logDebug('❌ accueil: ${e.response?.statusCode} ${e.response?.data}');
+      rethrow;
+    }
+  }
+
+  /// Tout le contenu d'une section de l'accueil (bouton « Voir tout »).
+  Future<AccueilSection> chargerSection(
+    String cle, {
+    List<String> interets = const [],
+    double? latitude,
+    double? longitude,
+  }) async {
+    try {
+      final res = await dio.get(
+        '/acheteurs/accueil-section/$cle',
+        queryParameters: {
+          if (interets.isNotEmpty) 'interets': interets.join(','),
+          if (latitude != null) 'latitude': latitude,
+          if (longitude != null) 'longitude': longitude,
+          'limit': 60,
+        },
+      );
+      final json = Map<String, dynamic>.from(res.data as Map);
+      return AccueilSection.fromJson({...json, 'cle': cle, 'titre': json['titre'] ?? ''});
+    } on DioException catch (e) {
+      logDebug('❌ section $cle: ${e.response?.statusCode} ${e.response?.data}');
       rethrow;
     }
   }

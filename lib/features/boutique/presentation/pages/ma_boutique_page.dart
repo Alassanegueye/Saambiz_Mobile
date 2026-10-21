@@ -7,14 +7,15 @@ import '../bloc/boutique_bloc.dart';
 import '../bloc/boutique_event.dart';
 import '../bloc/boutique_state.dart';
 import 'boutique_form_page.dart';
+import 'package:saambiz/core/utils/image_url.dart';
 
 class _C {
-  static const green = Color(0xFF1B3A6B);
-  static const black = Color(0xFF1A1A1A);
+  static const green = Color(0xFF0D1B3D);
+  static const black = Color(0xFF0D1B3D);
   static const white = Color(0xFFFFFFFF);
-  static const bg = Color(0xFFF5F7F2);
-  static const sub = Color(0xFF7A8473);
-  static const border = Color(0xFFE3EAD0);
+  static const bg = Color(0xFFF5F7FB);
+  static const sub = Color(0xFF5B6C8A);
+  static const border = Color(0xFFE3E8F0);
   static const orange = Color(0xFFFF8F00);
 }
 
@@ -109,7 +110,7 @@ class _MaBoutiqueView extends StatelessWidget {
                             borderRadius: BorderRadius.circular(12),
                             child: (b.logo ?? '').isNotEmpty
                                 ? CachedNetworkImage(
-                                    imageUrl: b.logo!,
+                                    imageUrl: imageOptimisee(b.logo!),
                                     width: 64,
                                     height: 64,
                                     fit: BoxFit.cover)

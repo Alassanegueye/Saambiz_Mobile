@@ -13,6 +13,7 @@ class CreerBoutique {
     required String description,
     required String localisation,
     required String telephone,
+    List<String>? categories,
     String? logoPath,
   }) {
     return repository.creerBoutique(
@@ -20,6 +21,7 @@ class CreerBoutique {
       description: description,
       localisation: localisation,
       telephone: telephone,
+      categories: categories,
       logoPath: logoPath,
     );
   }

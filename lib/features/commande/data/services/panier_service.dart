@@ -58,7 +58,7 @@ class PanierService extends ChangeNotifier {
     if (_items.isNotEmpty && _items.first.vendeurId != item.vendeurId) {
       throw PanierVendeurDifferentException();
     }
-    final index = _items.indexWhere((e) => e.produitId == item.produitId);
+    final index = _items.indexWhere((e) => e.cle == item.cle);
     if (index >= 0) {
       _items[index].quantite += item.quantite;
     } else {
@@ -67,8 +67,9 @@ class PanierService extends ChangeNotifier {
     await _sauvegarder();
   }
 
-  Future<void> changerQuantite(String produitId, int quantite) async {
-    final index = _items.indexWhere((e) => e.produitId == produitId);
+  /// [cle] : `PanierItem.cle` (produit + options choisies).
+  Future<void> changerQuantite(String cle, int quantite) async {
+    final index = _items.indexWhere((e) => e.cle == cle);
     if (index < 0) return;
     if (quantite <= 0) {
       _items.removeAt(index);
@@ -78,8 +79,8 @@ class PanierService extends ChangeNotifier {
     await _sauvegarder();
   }
 
-  Future<void> retirer(String produitId) async {
-    _items.removeWhere((e) => e.produitId == produitId);
+  Future<void> retirer(String cle) async {
+    _items.removeWhere((e) => e.cle == cle);
     await _sauvegarder();
   }
 
@@ -92,7 +93,11 @@ class PanierService extends ChangeNotifier {
   /// Transforme le panier en payload `items` pour l'API de création de commande.
   List<Map<String, dynamic>> toApiItems() {
     return _items
-        .map((e) => {'produitId': e.produitId, 'quantite': e.quantite})
+        .map((e) => {
+              'produitId': e.produitId,
+              'quantite': e.quantite,
+              if (e.options.isNotEmpty) 'options': e.options,
+            })
         .toList();
   }
 }

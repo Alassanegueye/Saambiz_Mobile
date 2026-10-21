@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 
 import '../../../../core/constants/api_endpoints.dart';
@@ -29,6 +31,7 @@ abstract class VitrineRemoteDataSource {
     bool commande,
     bool paiementLivraison,
     bool active,
+    Map<String, dynamic>? blocs,
   });
 
   /// Reprise des réglages, une fois le site créé.
@@ -88,6 +91,7 @@ class VitrineRemoteDataSourceImpl implements VitrineRemoteDataSource {
     bool commande = true,
     bool paiementLivraison = true,
     bool active = true,
+    Map<String, dynamic>? blocs,
   }) async {
     // Multipart et non JSON : le logo voyage avec les réponses, et refaire un
     // second appel pour le fichier laisserait un site créé sans son logo si le
@@ -105,6 +109,8 @@ class VitrineRemoteDataSourceImpl implements VitrineRemoteDataSource {
       'commande': commande.toString(),
       'paiementLivraison': paiementLivraison.toString(),
       'active': active.toString(),
+      // Avantages (« Livraison rapide »…) et icônes des catégories.
+      if (blocs != null) 'blocs': jsonEncode(blocs),
     });
 
     final res = await dio.post(VitrineEndpoints.generer, data: form);

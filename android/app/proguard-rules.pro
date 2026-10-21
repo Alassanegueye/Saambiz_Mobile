@@ -1,4 +1,4 @@
-# Règles R8/ProGuard — Fait Maison
+# Règles R8/ProGuard — SaamBiz
 # La majorité du code métier est en Dart (compilé en natif ARM, non affecté par R8).
 # Ces règles ne concernent que la partie Android/Kotlin + les plugins natifs.
 

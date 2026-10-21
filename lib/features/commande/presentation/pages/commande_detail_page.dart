@@ -1,12 +1,16 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:saambiz/core/utils/image_url.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../../../core/theme/app_color.dart';
 import '../../../../injection_container.dart';
 import '../../data/models/commande_model.dart';
 import '../bloc/commande_bloc.dart';
 import '../bloc/commande_event.dart';
 import '../bloc/commande_state.dart';
-import '../widgets/commande_card.dart' show couleurStatutCommande;
+import '../widgets/commande_card.dart' show couleurStatutCommande, iconeStatutCommande;
 
 /// Argument de navigation pour la page détail.
 class CommandeDetailArgs {
@@ -15,13 +19,14 @@ class CommandeDetailArgs {
   const CommandeDetailArgs(this.commande, {this.isVendeur = false});
 }
 
+// Charte SaamBiz (bleu marine / or), alignée sur le reste de l'espace client.
 class _C {
-  static const green = Color(0xFF1B3A6B);
-  static const black = Color(0xFF1A1A1A);
-  static const white = Color(0xFFFFFFFF);
-  static const bg = Color(0xFFF5F7F2);
-  static const sub = Color(0xFF7A8473);
-  static const border = Color(0xFFE3EAD0);
+  static const green = AppColor.kPrimary;
+  static const black = AppColor.kGrayscaleDark100;
+  static const white = AppColor.kWhite;
+  static const bg = AppColor.kBackground;
+  static const sub = AppColor.kGrayscale40;
+  static const border = AppColor.kLine;
 }
 
 // Ordre du suivi (hors annulation)
@@ -129,15 +134,23 @@ class _DetailViewState extends State<_DetailView> {
       backgroundColor: _C.bg,
       appBar: AppBar(
         backgroundColor: _C.white,
-        elevation: 0.5,
+        surfaceTintColor: _C.white,
+        elevation: 0,
         foregroundColor: _C.black,
-        title: Text(commande.referenceCommande),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Commande', style: GoogleFonts.plusJakartaSans(fontSize: 16, fontWeight: FontWeight.w700)),
+            Text('#${commande.referenceCommande}',
+                style: GoogleFonts.plusJakartaSans(fontSize: 11.5, color: _C.sub)),
+          ],
+        ),
       ),
       body: BlocConsumer<CommandeBloc, CommandeState>(
         listener: (context, state) async {
           if (state is CommandeError) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message), backgroundColor: Colors.red),
+              SnackBar(content: Text(state.message), backgroundColor: AppColor.kErreur),
             );
           } else if (state is CommandeMiseAJour) {
             setState(() => commande = state.commande);
@@ -175,13 +188,15 @@ class _DetailViewState extends State<_DetailView> {
                     ),
                     child: Row(
                       children: [
-                        Icon(Icons.local_shipping_outlined, color: couleur),
+                        Icon(iconeStatutCommande(commande.statut), color: couleur),
                         const SizedBox(width: 10),
-                        Text(
-                          kStatutCommandeLabels[commande.statut] ??
-                              commande.statut,
-                          style: TextStyle(
-                              color: couleur, fontWeight: FontWeight.w800),
+                        Expanded(
+                          child: Text(
+                            kStatutCommandeLabels[commande.statut] ??
+                                commande.statut,
+                            style: GoogleFonts.plusJakartaSans(
+                                color: couleur, fontWeight: FontWeight.w800, fontSize: 15),
+                          ),
                         ),
                       ],
                     ),
@@ -241,7 +256,7 @@ class _DetailViewState extends State<_DetailView> {
       boutons.add(Expanded(
         child: OutlinedButton(
           onPressed: _annuler,
-          style: OutlinedButton.styleFrom(foregroundColor: Colors.red),
+          style: OutlinedButton.styleFrom(foregroundColor: AppColor.kErreur),
           child: const Text('Annuler'),
         ),
       ));
@@ -336,16 +351,51 @@ class _DetailViewState extends State<_DetailView> {
   Widget _articles() {
     return Column(
       children: commande.lignes.map((l) {
+        final defaut = Container(
+          color: AppColor.kSurface,
+          child: const Icon(Icons.shopping_bag_outlined, size: 20, color: AppColor.kGrayscale30),
+        );
+        final image = l.imageProduit;
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 6),
           child: Row(
             children: [
-              Expanded(
-                child: Text('${l.nomProduit}  ×${l.quantite}',
-                    style: const TextStyle(color: _C.black)),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: SizedBox(
+                  width: 52,
+                  height: 52,
+                  child: image != null && image.isNotEmpty
+                      ? CachedNetworkImage(
+                          imageUrl: imageOptimisee(image, largeur: 160),
+                          fit: BoxFit.cover,
+                          errorWidget: (_, __, ___) => defaut,
+                        )
+                      : defaut,
+                ),
               ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(l.nomProduit,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.plusJakartaSans(
+                            color: _C.black, fontWeight: FontWeight.w600, fontSize: 13.5)),
+                    // Taille, couleur, parfum… choisis par le client.
+                    if (l.libelleOptions.isNotEmpty)
+                      Text(l.libelleOptions,
+                          style: GoogleFonts.plusJakartaSans(color: _C.sub, fontSize: 12)),
+                    Text('${l.prixUnitaire.toStringAsFixed(0)} FCFA × ${l.quantite}',
+                        style: GoogleFonts.plusJakartaSans(color: _C.sub, fontSize: 12)),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
               Text('${l.sousTotal.toStringAsFixed(0)} FCFA',
-                  style: const TextStyle(fontWeight: FontWeight.w700)),
+                  style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w700, color: _C.black)),
             ],
           ),
         );
@@ -413,7 +463,7 @@ class _DetailViewState extends State<_DetailView> {
       width: double.infinity,
       decoration: BoxDecoration(
         color: _C.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(18),
         border: Border.all(color: _C.border),
       ),
       padding: const EdgeInsets.all(16),
@@ -421,7 +471,7 @@ class _DetailViewState extends State<_DetailView> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(titre,
-              style: const TextStyle(
+              style: GoogleFonts.plusJakartaSans(
                   fontWeight: FontWeight.w800, color: _C.black, fontSize: 15)),
           const SizedBox(height: 12),
           child,

@@ -21,7 +21,7 @@ import 'package:flutter/foundation.dart';
 /// Compilation de production :
 /// ```
 /// flutter build apk --release \
-///   --dart-define=API_BASE_URL=https://api.saambiz.sn/saambiz/v1 \
+///   --dart-define=API_BASE_URL=https://saambiz-back-uj2z.onrender.com/saambiz/v1 \
 ///   --dart-define=ENVIRONNEMENT=prod \
 ///   --dart-define=EMPREINTES_CERTIFICAT=sha256/AAAA…,sha256/BBBB…
 /// ```
@@ -43,8 +43,43 @@ class Env {
   /// l'adresse IP du poste de développement par `--dart-define`.
   static const String apiBaseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'http://10.0.2.2:5000/saambiz/v1',
+    // Adresse de l'API en ligne (Render) : un build lancé sans --dart-define
+    // ni .env vise la production plutôt qu'un émulateur.
+    defaultValue: 'https://saambiz-back-uj2z.onrender.com/saambiz/v1',
   );
+
+  /// Vrai si `API_BASE_URL` a réellement été passée par `--dart-define`.
+  ///
+  /// `String.fromEnvironment` ne permet pas de distinguer « non fournie » de
+  /// « fournie avec la valeur par défaut » : il faut `hasEnvironment`.
+  static const bool apiBaseUrlCompilee = bool.hasEnvironment('API_BASE_URL');
+
+  static String _apiBaseUrlEffective = apiBaseUrl;
+
+  /// L'adresse que le client HTTP utilise vraiment. **C'est celle-ci qu'il
+  /// faut lire**, pas [apiBaseUrl].
+  static String get apiBaseUrlEffective => _apiBaseUrlEffective;
+
+  /// Arbitre entre le `--dart-define` et le `.env`, une fois pour toutes.
+  ///
+  /// Le `--dart-define` l'emporte dès qu'il a été fourni : c'est lui qui porte
+  /// la configuration de production. Le `.env` ne sert que de repli pour les
+  /// postes de développement qui ne le passent pas encore.
+  ///
+  /// L'ordre était inversé, et silencieusement : le `.env` gagnait toujours.
+  /// Comme `pubspec.yaml` le déclare en asset, il part dans l'APK — un build
+  /// de production compilé avec l'URL HTTPS réelle continuait donc d'appeler
+  /// l'adresse LAN du poste de développement qui traînait dans ce fichier.
+  /// [verifier] ne voyait rien : elle contrôlait [apiBaseUrl], pas la valeur
+  /// employée.
+  static void resoudreApiBaseUrl(String? depuisDotenv) {
+    if (apiBaseUrlCompilee) {
+      _apiBaseUrlEffective = apiBaseUrl;
+      return;
+    }
+    final repli = depuisDotenv?.trim() ?? '';
+    _apiBaseUrlEffective = repli.isNotEmpty ? repli : apiBaseUrl;
+  }
 
   static const Duration timeoutConnexion = Duration(seconds: 30);
   static const Duration timeoutReception = Duration(seconds: 60);
@@ -83,24 +118,32 @@ class Env {
   ///
   /// Mieux vaut un écran d'erreur explicite au lancement qu'une application
   /// qui tourne en production contre l'API de développement.
+  /// À appeler APRÈS [resoudreApiBaseUrl] : le contrôle porte sur l'adresse
+  /// réellement employée. Le faire sur [apiBaseUrl] laissait passer une
+  /// configuration de production qui appelait ensuite tout autre chose.
   static void verifier() {
-    if (apiBaseUrl.isEmpty) {
+    final url = _apiBaseUrlEffective;
+
+    if (url.isEmpty) {
       throw StateError(
         'API_BASE_URL est vide. Passez-la par --dart-define au lancement.',
       );
     }
 
     if (estProduction) {
-      if (apiBaseUrl.startsWith('http://')) {
+      if (url.startsWith('http://')) {
         throw StateError(
-          'API_BASE_URL est en HTTP simple en production ($apiBaseUrl). '
+          'API_BASE_URL est en HTTP simple en production ($url). '
           'Le trafic passerait en clair.',
         );
       }
-      if (apiBaseUrl.contains('localhost') || apiBaseUrl.contains('10.0.2.2')) {
+      if (url.contains('localhost')
+          || url.contains('10.0.2.2')
+          || RegExp(r'//(127\.|192\.168\.|10\.|172\.(1[6-9]|2\d|3[01])\.)')
+              .hasMatch(url)) {
         throw StateError(
           "API_BASE_URL pointe sur une adresse de développement en production "
-          '($apiBaseUrl).',
+          '($url).',
         );
       }
     }

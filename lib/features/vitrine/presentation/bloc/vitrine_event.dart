@@ -34,6 +34,7 @@ class GenererVitrineDemande extends VitrineEvent {
   final String? annonce;
   final bool commande;
   final bool paiementLivraison;
+  final Map<String, dynamic>? blocs;
 
   const GenererVitrineDemande({
     this.logoPath,
@@ -47,12 +48,13 @@ class GenererVitrineDemande extends VitrineEvent {
     this.annonce,
     this.commande = true,
     this.paiementLivraison = true,
+    this.blocs,
   });
 
   @override
   List<Object?> get props => [
         logoPath, secteur, activite, modele, accent, slogan, apropos,
-        horaires, annonce, commande, paiementLivraison,
+        horaires, annonce, commande, paiementLivraison, blocs,
       ];
 }
 

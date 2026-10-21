@@ -5,13 +5,12 @@ import 'package:jwt_decode/jwt_decode.dart';
 import '../../../../core/routes/app_router.dart';
 import '../../../../injection_container.dart';
 
-/// Premier écran de l'application — sans interface.
+/// Écran de chargement, juste après l'écran de démarrage natif (pictogramme
+/// bleu marine sur fond blanc) : logo SaamBiz complet et fine barre de
+/// chargement, sur le même fond blanc — comme Yobante Boutique.
 ///
-/// Il remplace l'ancienne page de chargement (logo + « Préparation en cours »)
-/// qui imposait près de 3 secondes d'attente à chaque ouverture. La lecture du
-/// jeton prend quelques millisecondes : on redirige aussitôt, sur un simple
-/// fond bleu marine identique à celui de l'écran de démarrage natif, donc sans
-/// transition visible.
+/// Le jeton est lu pendant que le logo s'affiche : l'écran reste au moins
+/// 0,6 s (le temps de voir la marque), sans attente fixe supplémentaire.
 class AppBootstrap extends StatefulWidget {
   const AppBootstrap({super.key});
 
@@ -19,22 +18,36 @@ class AppBootstrap extends StatefulWidget {
   State<AppBootstrap> createState() => _AppBootstrapState();
 }
 
-class _AppBootstrapState extends State<AppBootstrap> {
+class _AppBootstrapState extends State<AppBootstrap> with SingleTickerProviderStateMixin {
+  late final AnimationController _fondu = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 350),
+  )..forward();
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) => _router());
   }
 
-  Future<void> _router() async {
-    final storage = sl<FlutterSecureStorage>();
+  @override
+  void dispose() {
+    _fondu.dispose();
+    super.dispose();
+  }
 
-    String? token;
+  Future<String?> _lireJeton() async {
     try {
-      token = await storage.read(key: 'jwt_token');
+      return await sl<FlutterSecureStorage>().read(key: 'jwt_token');
     } catch (_) {
-      /* jeton illisible : on repart de l'onboarding */
+      return null; // jeton illisible : on repart de l'onboarding
     }
+  }
+
+  Future<void> _router() async {
+    final lecture = _lireJeton();
+    await Future.wait([lecture, Future.delayed(const Duration(milliseconds: 600))]);
+    final token = await lecture;
 
     if (!mounted) return;
 
@@ -69,7 +82,51 @@ class _AppBootstrapState extends State<AppBootstrap> {
 
   @override
   Widget build(BuildContext context) {
-    // Aucun contenu : ce fond ne doit pas se distinguer du splash natif.
-    return const Scaffold(backgroundColor: Color(0xFF0D1B3D));
+    // Fond blanc, comme l'écran de démarrage natif : aucune coupure de couleur.
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Barre invisible au-dessus : le logo reste exactement au centre.
+            const TickerMode(
+              enabled: false,
+              child: ExcludeSemantics(child: Opacity(opacity: 0, child: _Chargement())),
+            ),
+            Image.asset(
+              'assets/images/logo.png',
+              width: 240,
+              cacheWidth: 960,
+              semanticLabel: 'SaamBiz',
+            ),
+            FadeTransition(opacity: _fondu, child: const _Chargement()),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Barre de chargement sous le logo.
+class _Chargement extends StatelessWidget {
+  const _Chargement();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Padding(
+      padding: EdgeInsets.symmetric(vertical: 32),
+      child: SizedBox(
+        width: 120,
+        child: ClipRRect(
+          borderRadius: BorderRadius.all(Radius.circular(4)),
+          child: LinearProgressIndicator(
+            minHeight: 4,
+            color: Color(0xFF0D1B3D),
+            backgroundColor: Color(0xFFFEF3D6),
+          ),
+        ),
+      ),
+    );
   }
 }

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 
 import '../../../../core/constants/api_endpoints.dart';
@@ -12,6 +14,7 @@ abstract class BoutiqueRemoteDataSource {
     required String localisation,
     required String telephone,
     String? categorie,
+    List<String>? categories,
     String? slogan,
     String? logoPath,
   });
@@ -22,6 +25,7 @@ abstract class BoutiqueRemoteDataSource {
     String? localisation,
     String? telephone,
     String? categorie,
+    List<String>? categories,
     String? slogan,
     String? logoPath,
   });
@@ -48,6 +52,7 @@ class BoutiqueRemoteDataSourceImpl implements BoutiqueRemoteDataSource {
     required String localisation,
     required String telephone,
     String? categorie,
+    List<String>? categories,
     String? slogan,
     String? logoPath,
   }) async {
@@ -57,6 +62,9 @@ class BoutiqueRemoteDataSourceImpl implements BoutiqueRemoteDataSource {
       'localisation': localisation,
       'telephone': telephone,
       if (categorie != null) 'categorie': categorie,
+      // 1 à 3 slugs ; envoyés en JSON car le formulaire est multipart.
+      if (categories != null && categories.isNotEmpty)
+        'categories': jsonEncode(categories),
       if (slogan != null) 'slogan': slogan,
       if (logoPath != null) 'logo': await MultipartFile.fromFile(logoPath),
     });
@@ -71,6 +79,7 @@ class BoutiqueRemoteDataSourceImpl implements BoutiqueRemoteDataSource {
     String? localisation,
     String? telephone,
     String? categorie,
+    List<String>? categories,
     String? slogan,
     String? logoPath,
   }) async {
@@ -80,6 +89,9 @@ class BoutiqueRemoteDataSourceImpl implements BoutiqueRemoteDataSource {
       if (localisation != null) 'localisation': localisation,
       if (telephone != null) 'telephone': telephone,
       if (categorie != null) 'categorie': categorie,
+      // 1 à 3 slugs ; envoyés en JSON car le formulaire est multipart.
+      if (categories != null && categories.isNotEmpty)
+        'categories': jsonEncode(categories),
       if (slogan != null) 'slogan': slogan,
       if (logoPath != null) 'logo': await MultipartFile.fromFile(logoPath),
     });

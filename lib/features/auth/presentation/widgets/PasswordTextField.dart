@@ -53,13 +53,13 @@ class _PasswordTextFieldState extends State<PasswordTextField> {
           controller: widget.controller,
           focusNode: widget.focusNode,
           style: widget.style ??
-              GoogleFonts.dmSans(
+              GoogleFonts.plusJakartaSans(
                 fontSize: 15,
                 fontWeight: FontWeight.w500,
-                color: const Color(0xFF1A1A1A),
+                color: const Color(0xFF0D1B3D),
               ),
           validator: widget.validator,
-          cursorColor: const Color(0xFF1B3A6B), // curseur vert, cohérent
+          cursorColor: const Color(0xFF0D1B3D), // curseur vert, cohérent
           decoration: InputDecoration(
             // On neutralise chaque état de bordure explicitement
             border:               _noBorder,
@@ -83,13 +83,13 @@ class _PasswordTextFieldState extends State<PasswordTextField> {
                       ? Icons.visibility_outlined
                       : Icons.visibility_off_outlined,
                   key: ValueKey(_obscureText),
-                  color: const Color(0xFF9EAA94),
+                  color: const Color(0xFF93A1B8),
                   size: 20,
                 ),
               ),
             ),
             hintText: widget.hintText,
-            hintStyle: GoogleFonts.dmSans(
+            hintStyle: GoogleFonts.plusJakartaSans(
               color: const Color(0xFFC2CCBA),
               fontWeight: FontWeight.w400,
               fontSize: 14,

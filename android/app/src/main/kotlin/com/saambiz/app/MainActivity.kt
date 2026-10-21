@@ -1,4 +1,4 @@
-package com.example.fait_maison
+package com.saambiz.app
 
 import io.flutter.embedding.android.FlutterActivity
 

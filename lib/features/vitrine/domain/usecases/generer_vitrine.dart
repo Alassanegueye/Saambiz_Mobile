@@ -22,6 +22,7 @@ class GenererVitrine {
     bool commande = true,
     bool paiementLivraison = true,
     bool active = true,
+    Map<String, dynamic>? blocs,
   }) =>
       repository.genererVitrine(
         logoPath: logoPath,
@@ -36,5 +37,6 @@ class GenererVitrine {
         commande: commande,
         paiementLivraison: paiementLivraison,
         active: active,
+        blocs: blocs,
       );
 }

@@ -16,11 +16,11 @@ class VendeurCommandesPage extends StatelessWidget {
     return BlocProvider(
       create: (_) => sl<CommandeBloc>()..add(LoadCommandesVendeur()),
       child: Scaffold(
-        backgroundColor: const Color(0xFFF5F7F2),
+        backgroundColor: const Color(0xFFF5F7FB),
         appBar: AppBar(
           backgroundColor: Colors.white,
           elevation: 0.5,
-          foregroundColor: const Color(0xFF1A1A1A),
+          foregroundColor: const Color(0xFF0D1B3D),
           title: const Text('Commandes reçues'),
         ),
         body: BlocBuilder<CommandeBloc, CommandeState>(
@@ -35,7 +35,7 @@ class VendeurCommandesPage extends StatelessWidget {
                   children: [
                     Text(state.message,
                         textAlign: TextAlign.center,
-                        style: const TextStyle(color: Color(0xFF7A8473))),
+                        style: const TextStyle(color: Color(0xFF5B6C8A))),
                     TextButton(
                       onPressed: () => context
                           .read<CommandeBloc>()
@@ -50,7 +50,7 @@ class VendeurCommandesPage extends StatelessWidget {
               if (state.commandes.isEmpty) {
                 return const Center(
                   child: Text('Aucune commande reçue',
-                      style: TextStyle(color: Color(0xFF7A8473))),
+                      style: TextStyle(color: Color(0xFF5B6C8A))),
                 );
               }
               return RefreshIndicator(

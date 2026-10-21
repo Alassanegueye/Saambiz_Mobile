@@ -7,14 +7,15 @@ import '../../../../injection_container.dart';
 import '../bloc/promotions_bloc.dart';
 import '../bloc/promotions_event.dart';
 import '../bloc/promotions_state.dart';
+import 'package:saambiz/core/utils/image_url.dart';
 
 class _C {
-  static const green = Color(0xFF1B3A6B);
-  static const black = Color(0xFF1A1A1A);
+  static const green = Color(0xFF0D1B3D);
+  static const black = Color(0xFF0D1B3D);
   static const white = Color(0xFFFFFFFF);
-  static const bg = Color(0xFFF5F7F2);
-  static const sub = Color(0xFF7A8473);
-  static const border = Color(0xFFE3EAD0);
+  static const bg = Color(0xFFF5F7FB);
+  static const sub = Color(0xFF5B6C8A);
+  static const border = Color(0xFFE3E8F0);
 }
 
 /// Promotions actives, publiques (GET /promotions/actives) — affichées côté
@@ -85,7 +86,7 @@ class _PromotionsActivesView extends StatelessWidget {
                           borderRadius: BorderRadius.circular(12),
                           child: (p.produitImage ?? '').isNotEmpty
                               ? CachedNetworkImage(
-                                  imageUrl: p.produitImage!,
+                                  imageUrl: imageOptimisee(p.produitImage!),
                                   width: 60,
                                   height: 60,
                                   fit: BoxFit.cover)

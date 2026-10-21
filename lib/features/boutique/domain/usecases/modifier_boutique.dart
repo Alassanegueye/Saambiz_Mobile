@@ -13,6 +13,7 @@ class ModifierBoutique {
     String? description,
     String? localisation,
     String? telephone,
+    List<String>? categories,
     String? logoPath,
   }) {
     return repository.modifierBoutique(
@@ -20,6 +21,7 @@ class ModifierBoutique {
       description: description,
       localisation: localisation,
       telephone: telephone,
+      categories: categories,
       logoPath: logoPath,
     );
   }

@@ -16,17 +16,19 @@ import '../../../../favoris/presentation/bloc/favoris_bloc.dart';
 import '../../../../favoris/presentation/bloc/favoris_event.dart';
 import '../../../../favoris/presentation/bloc/favoris_state.dart';
 import '../../../../signalements/presentation/pages/signaler_form_page.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:saambiz/core/utils/image_url.dart';
 
 class _C {
-  static const green      = Color(0xFF1B3A6B);
+  static const green      = Color(0xFF0D1B3D);
   static const greenLight = Color(0xFFE8EEF7);
-  static const black      = Color(0xFF1A1A1A);
+  static const black      = Color(0xFF0D1B3D);
   static const white      = Color(0xFFFFFFFF);
-  static const bg         = Color(0xFFF5F7F2);
-  static const surface    = Color(0xFFF7F9F5);
-  static const border     = Color(0xFFF0F4EC);
-  static const label      = Color(0xFF9EAA94);
-  static const sub        = Color(0xFF7A8473);
+  static const bg         = Color(0xFFF5F7FB);
+  static const surface    = Color(0xFFF7F9FC);
+  static const border     = Color(0xFFE8EDF7);
+  static const label      = Color(0xFF93A1B8);
+  static const sub        = Color(0xFF5B6C8A);
   static const orange     = Color(0xFFFF5722);
   static const whatsapp   = Color(0xFF25D366);
 }
@@ -83,7 +85,7 @@ class _ProduitPageState extends State<ProduitPage> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text('WhatsApp non disponible',
-                style: GoogleFonts.dmSans(color: _C.white)),
+                style: GoogleFonts.plusJakartaSans(color: _C.white)),
             backgroundColor: _C.orange,
             behavior: SnackBarBehavior.floating,
           ));
@@ -93,7 +95,7 @@ class _ProduitPageState extends State<ProduitPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text('Erreur: ${e.toString()}',
-              style: GoogleFonts.dmSans(color: _C.white)),
+              style: GoogleFonts.plusJakartaSans(color: _C.white)),
           backgroundColor: _C.orange,
           behavior: SnackBarBehavior.floating,
         ));
@@ -247,14 +249,14 @@ class _ProduitPageState extends State<ProduitPage> {
                 text: TextSpan(children: [
                   TextSpan(
                     text: 'Les ',
-                    style: GoogleFonts.sora(
+                    style: GoogleFonts.plusJakartaSans(
                       fontSize: 20, fontWeight: FontWeight.w800,
                       color: _C.white, letterSpacing: -0.5,
                     ),
                   ),
                   TextSpan(
                     text: 'Produits',
-                    style: GoogleFonts.sora(
+                    style: GoogleFonts.plusJakartaSans(
                       fontSize: 20, fontWeight: FontWeight.w800,
                       color: _C.green, letterSpacing: -0.5,
                     ),
@@ -270,11 +272,11 @@ class _ProduitPageState extends State<ProduitPage> {
             child: TextField(
               controller: _searchCtrl,
               onChanged: (v) => setState(() => _search = v),
-              style: GoogleFonts.dmSans(fontSize: 15, color: _C.white),
+              style: GoogleFonts.plusJakartaSans(fontSize: 15, color: _C.white),
               cursorColor: _C.green,
               decoration: InputDecoration(
                 hintText: 'Rechercher un produit...',
-                hintStyle: GoogleFonts.dmSans(
+                hintStyle: GoogleFonts.plusJakartaSans(
                   fontSize: 15,
                   color: Colors.white.withOpacity(0.4),
                 ),
@@ -320,7 +322,7 @@ class _ProduitPageState extends State<ProduitPage> {
         children: [
           Text(
             'Produits',
-            style: GoogleFonts.sora(
+            style: GoogleFonts.plusJakartaSans(
               fontSize: 14, fontWeight: FontWeight.w700, color: _C.black,
             ),
           ),
@@ -329,7 +331,7 @@ class _ProduitPageState extends State<ProduitPage> {
             child: Row(
               children: [
                 Text('Actualiser',
-                    style: GoogleFonts.dmSans(
+                    style: GoogleFonts.plusJakartaSans(
                       fontSize: 12, fontWeight: FontWeight.w600,
                       color: _C.green,
                     )),
@@ -371,7 +373,7 @@ class _ProduitPageState extends State<ProduitPage> {
                   padding: const EdgeInsets.symmetric(horizontal: 32),
                   child: Text(
                     'Erreur: ${state.message}',
-                    style: GoogleFonts.dmSans(color: _C.orange),
+                    style: GoogleFonts.plusJakartaSans(color: _C.orange),
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -385,7 +387,7 @@ class _ProduitPageState extends State<ProduitPage> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text('Réessayer',
-                        style: GoogleFonts.dmSans(
+                        style: GoogleFonts.plusJakartaSans(
                             color: _C.white, fontWeight: FontWeight.w600)),
                   ),
                 ),
@@ -405,7 +407,7 @@ class _ProduitPageState extends State<ProduitPage> {
                   const Icon(Icons.search_off_rounded, color: _C.label, size: 48),
                   const SizedBox(height: 12),
                   Text('Aucun produit trouvé',
-                      style: GoogleFonts.sora(
+                      style: GoogleFonts.plusJakartaSans(
                         fontSize: 15, fontWeight: FontWeight.w700,
                         color: _C.label,
                       )),
@@ -463,7 +465,7 @@ class _ProduitPageState extends State<ProduitPage> {
                   color: _C.surface,
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(19)),
                   image: p.image.isNotEmpty
-                      ? DecorationImage(image: NetworkImage(p.image), fit: BoxFit.cover)
+                      ? DecorationImage(image: CachedNetworkImageProvider(imageOptimisee(p.image)), fit: BoxFit.cover)
                       : null,
                 ),
                 child: Stack(children: [
@@ -481,12 +483,12 @@ class _ProduitPageState extends State<ProduitPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(p.nom,
-                      style: GoogleFonts.sora(
+                      style: GoogleFonts.plusJakartaSans(
                           fontSize: 12, fontWeight: FontWeight.w700, color: _C.black),
                       maxLines: 1, overflow: TextOverflow.ellipsis),
                   const SizedBox(height: 2),
                   Text(p.ville,
-                      style: GoogleFonts.dmSans(fontSize: 10, color: _C.label)),
+                      style: GoogleFonts.plusJakartaSans(fontSize: 10, color: _C.label)),
                   const SizedBox(height: 8),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -495,12 +497,12 @@ class _ProduitPageState extends State<ProduitPage> {
                         text: TextSpan(children: [
                           TextSpan(
                             text: p.prix,
-                            style: GoogleFonts.sora(
+                            style: GoogleFonts.plusJakartaSans(
                                 fontSize: 13, fontWeight: FontWeight.w800, color: _C.black),
                           ),
                           TextSpan(
                             text: ' F',
-                            style: GoogleFonts.dmSans(fontSize: 10, color: _C.label),
+                            style: GoogleFonts.plusJakartaSans(fontSize: 10, color: _C.label),
                           ),
                         ]),
                       ),
@@ -641,7 +643,7 @@ class _ProduitModalState extends State<_ProduitModal> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text('WhatsApp non disponible',
-                style: GoogleFonts.dmSans(color: _C.white)),
+                style: GoogleFonts.plusJakartaSans(color: _C.white)),
             backgroundColor: _C.black,
           ));
         }
@@ -650,7 +652,7 @@ class _ProduitModalState extends State<_ProduitModal> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text('Erreur: ${e.toString()}',
-              style: GoogleFonts.dmSans(color: _C.white)),
+              style: GoogleFonts.plusJakartaSans(color: _C.white)),
           backgroundColor: _C.orange,
         ));
       }
@@ -686,7 +688,7 @@ class _ProduitModalState extends State<_ProduitModal> {
             width: 36, height: 4,
             margin: const EdgeInsets.only(top: 12),
             decoration: BoxDecoration(
-              color: const Color(0xFFE3EAD0),
+              color: const Color(0xFFE3E8F0),
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -705,7 +707,7 @@ class _ProduitModalState extends State<_ProduitModal> {
                       color: _C.surface,
                       borderRadius: BorderRadius.circular(20),
                       image: p.image.isNotEmpty
-                          ? DecorationImage(image: NetworkImage(p.image), fit: BoxFit.cover)
+                          ? DecorationImage(image: CachedNetworkImageProvider(imageOptimisee(p.image)), fit: BoxFit.cover)
                           : null,
                     ),
                     child: Stack(children: [
@@ -740,7 +742,7 @@ class _ProduitModalState extends State<_ProduitModal> {
                           children: [
                             Expanded(
                               child: Text(p.nom,
-                                  style: GoogleFonts.sora(
+                                  style: GoogleFonts.plusJakartaSans(
                                     fontSize: 20, fontWeight: FontWeight.w800,
                                     color: _C.black, letterSpacing: -0.5,
                                   )),
@@ -753,7 +755,7 @@ class _ProduitModalState extends State<_ProduitModal> {
                                 decoration: BoxDecoration(
                                   color: isFav
                                       ? const Color(0xFFFEF3F2)
-                                      : const Color(0xFFF5F7F2),
+                                      : const Color(0xFFF5F7FB),
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                                 child: Icon(
@@ -778,7 +780,7 @@ class _ProduitModalState extends State<_ProduitModal> {
                             ),
                             child: Text(
                               p.categorie!,
-                              style: GoogleFonts.dmSans(
+                              style: GoogleFonts.plusJakartaSans(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
                                 color: _C.green,
@@ -798,7 +800,7 @@ class _ProduitModalState extends State<_ProduitModal> {
                           ),
                           const SizedBox(width: 8),
                           Text(p.ville,
-                              style: GoogleFonts.dmSans(fontSize: 13, color: _C.label)),
+                              style: GoogleFonts.plusJakartaSans(fontSize: 13, color: _C.label)),
                         ]),
                         const SizedBox(height: 16),
 
@@ -808,7 +810,7 @@ class _ProduitModalState extends State<_ProduitModal> {
                             padding: const EdgeInsets.only(bottom: 16),
                             child: Text(
                               p.description!,
-                              style: GoogleFonts.dmSans(fontSize: 13, color: _C.sub),
+                              style: GoogleFonts.plusJakartaSans(fontSize: 13, color: _C.sub),
                             ),
                           ),
 
@@ -829,7 +831,7 @@ class _ProduitModalState extends State<_ProduitModal> {
                                 const SizedBox(width: 8),
                                 Text(
                                   'Stock disponible : ${p.quantite}',
-                                  style: GoogleFonts.dmSans(fontSize: 13, color: _C.label),
+                                  style: GoogleFonts.plusJakartaSans(fontSize: 13, color: _C.label),
                                 ),
                               ],
                             ),
@@ -860,7 +862,7 @@ class _ProduitModalState extends State<_ProduitModal> {
                                   children: [
                                     Text(
                                       p.vendeurNom,
-                                      style: GoogleFonts.sora(
+                                      style: GoogleFonts.plusJakartaSans(
                                         fontSize: 14,
                                         fontWeight: FontWeight.w700,
                                         color: _C.black,
@@ -869,7 +871,7 @@ class _ProduitModalState extends State<_ProduitModal> {
                                     const SizedBox(height: 2),
                                     Text(
                                       'Vendeur',
-                                      style: GoogleFonts.dmSans(
+                                      style: GoogleFonts.plusJakartaSans(
                                         fontSize: 11,
                                         color: _C.label,
                                       ),
@@ -889,7 +891,7 @@ class _ProduitModalState extends State<_ProduitModal> {
                                     const Icon(Icons.phone_rounded, size: 14, color: _C.green),
                                     const SizedBox(width: 4),
                                     Text(p.vendeurNumero,
-                                      style: GoogleFonts.dmSans(
+                                      style: GoogleFonts.plusJakartaSans(
                                         fontSize: 12,
                                         fontWeight: FontWeight.w600,
                                         color: _C.green,
@@ -911,7 +913,7 @@ class _ProduitModalState extends State<_ProduitModal> {
                             icon: const Icon(Icons.flag_outlined,
                                 size: 18, color: Colors.redAccent),
                             label: Text('Signaler',
-                                style: GoogleFonts.dmSans(
+                                style: GoogleFonts.plusJakartaSans(
                                     fontSize: 12.5,
                                     fontWeight: FontWeight.w600,
                                     color: Colors.redAccent)),
@@ -940,7 +942,7 @@ class _ProduitModalState extends State<_ProduitModal> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text('PRIX UNITAIRE',
-                                        style: GoogleFonts.dmSans(
+                                        style: GoogleFonts.plusJakartaSans(
                                           fontSize: 9.5, fontWeight: FontWeight.w700,
                                           color: _C.label, letterSpacing: 0.6,
                                         )),
@@ -949,14 +951,14 @@ class _ProduitModalState extends State<_ProduitModal> {
                                       text: TextSpan(children: [
                                         TextSpan(
                                           text: '$prixUnitaire ',
-                                          style: GoogleFonts.sora(
+                                          style: GoogleFonts.plusJakartaSans(
                                             fontSize: 22, fontWeight: FontWeight.w800,
                                             color: _C.black,
                                           ),
                                         ),
                                         TextSpan(
                                           text: 'FCFA',
-                                          style: GoogleFonts.dmSans(fontSize: 12, color: _C.label),
+                                          style: GoogleFonts.plusJakartaSans(fontSize: 12, color: _C.label),
                                         ),
                                       ]),
                                     ),
@@ -1010,7 +1012,7 @@ class _ProduitModalState extends State<_ProduitModal> {
                       child: Center(
                         child: Text(
                           'Fermer',
-                          style: GoogleFonts.dmSans(
+                          style: GoogleFonts.plusJakartaSans(
                             color: _C.white,
                             fontWeight: FontWeight.w600,
                           ),

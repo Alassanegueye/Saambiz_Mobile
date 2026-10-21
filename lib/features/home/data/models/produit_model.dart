@@ -29,6 +29,10 @@ class ProduitModel {
   final String vendeurId;   // id du vendeur (pour le panier / commande)
   final String boutiqueId;  // id de la boutique (favoris / avis / signalements)
   final List<ProduitImage>? images; // galerie d'images supplémentaires (vendeur)
+  final String categorieId;
+  /// Caractéristiques propres à la catégorie : { tailles: [...], etat: 'Neuf' }.
+  /// Un tableau = variantes que le client choisit ; sinon, une information.
+  final Map<String, dynamic> attributs;
 
   ProduitModel({
     required this.id,
@@ -44,6 +48,8 @@ class ProduitModel {
     required this.vendeurId,
     this.boutiqueId = '',
     this.images,
+    this.categorieId = '',
+    this.attributs = const {},
   });
 
   factory ProduitModel.fromJson(Map<String, dynamic> json) {
@@ -97,6 +103,10 @@ class ProduitModel {
       vendeurId:   vendeurId,
       boutiqueId:  boutiqueId,
       images:      images,
+      categorieId: (json['categorieId'] ?? categorieMap?['id'] ?? '').toString(),
+      attributs:   json['attributs'] is Map
+          ? Map<String, dynamic>.from(json['attributs'] as Map)
+          : const {},
     );
   }
 

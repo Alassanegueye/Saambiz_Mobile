@@ -8,11 +8,11 @@ import '../bloc/signalements_event.dart';
 import '../bloc/signalements_state.dart';
 
 class _C {
-  static const black = Color(0xFF1A1A1A);
+  static const black = Color(0xFF0D1B3D);
   static const white = Color(0xFFFFFFFF);
-  static const bg = Color(0xFFF5F7F2);
-  static const sub = Color(0xFF7A8473);
-  static const border = Color(0xFFE3EAD0);
+  static const bg = Color(0xFFF5F7FB);
+  static const sub = Color(0xFF5B6C8A);
+  static const border = Color(0xFFE3E8F0);
   static const orange = Color(0xFFFF8F00);
 }
 

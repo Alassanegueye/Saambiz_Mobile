@@ -5,18 +5,20 @@ import 'package:image_picker/image_picker.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 import '../../../../injection_container.dart';
+import '../../../categories/presentation/widgets/selecteur_categories.dart';
 import '../../domain/entities/boutique.dart';
 import '../bloc/boutique_bloc.dart';
 import '../bloc/boutique_event.dart';
 import '../bloc/boutique_state.dart';
+import 'package:saambiz/core/utils/image_url.dart';
 
 class _C {
-  static const green = Color(0xFF1B3A6B);
-  static const black = Color(0xFF1A1A1A);
+  static const green = Color(0xFF0D1B3D);
+  static const black = Color(0xFF0D1B3D);
   static const white = Color(0xFFFFFFFF);
-  static const bg = Color(0xFFF5F7F2);
-  static const sub = Color(0xFF7A8473);
-  static const border = Color(0xFFE3EAD0);
+  static const bg = Color(0xFFF5F7FB);
+  static const sub = Color(0xFF5B6C8A);
+  static const border = Color(0xFFE3E8F0);
 }
 
 /// Création (POST /vendeur/creer-boutique) ou modification
@@ -52,6 +54,8 @@ class _BoutiqueFormViewState extends State<_BoutiqueFormView> {
   late final _telephoneCtrl =
       TextEditingController(text: widget.boutique?.telephone ?? '');
   String? _logoPath;
+  late List<String> _categories = List.of(widget.boutique?.categories ?? const <String>[]);
+  String? _erreurCategories;
 
   bool get _isEdit => widget.boutique != null;
 
@@ -72,7 +76,10 @@ class _BoutiqueFormViewState extends State<_BoutiqueFormView> {
   }
 
   void _soumettre() {
-    if (!_formKey.currentState!.validate()) return;
+    final formulaireValide = _formKey.currentState!.validate();
+    setState(() => _erreurCategories =
+        _categories.isEmpty ? 'Choisissez au moins une catégorie.' : null);
+    if (!formulaireValide || _categories.isEmpty) return;
     final bloc = context.read<BoutiqueBloc>();
     if (_isEdit) {
       bloc.add(ModifierBoutiqueRequested(
@@ -80,6 +87,7 @@ class _BoutiqueFormViewState extends State<_BoutiqueFormView> {
         description: _descCtrl.text.trim(),
         localisation: _localisationCtrl.text.trim(),
         telephone: _telephoneCtrl.text.trim(),
+        categories: _categories,
         logoPath: _logoPath,
       ));
     } else {
@@ -88,6 +96,7 @@ class _BoutiqueFormViewState extends State<_BoutiqueFormView> {
         description: _descCtrl.text.trim(),
         localisation: _localisationCtrl.text.trim(),
         telephone: _telephoneCtrl.text.trim(),
+        categories: _categories,
         logoPath: _logoPath,
       ));
     }
@@ -122,13 +131,25 @@ class _BoutiqueFormViewState extends State<_BoutiqueFormView> {
               children: [
                 _logoPicker(),
                 const SizedBox(height: 16),
-                _input(_nomCtrl, 'Nom de la boutique'),
+                _input(_nomCtrl, 'Nom de la boutique',
+                    verifier: (v) => RegExp(r'^\p{L}', unicode: true).hasMatch(v)
+                        ? null
+                        : 'Le nom de la boutique doit commencer par une lettre.'),
                 const SizedBox(height: 12),
                 _input(_descCtrl, 'Description', maxLines: 3),
                 const SizedBox(height: 12),
                 _input(_localisationCtrl, 'Localisation (ville)'),
                 const SizedBox(height: 12),
                 _input(_telephoneCtrl, 'Téléphone', keyboard: TextInputType.phone),
+                const SizedBox(height: 20),
+                SelecteurCategories(
+                  initiales: _categories,
+                  erreur: _erreurCategories,
+                  onChanged: (choix) => setState(() {
+                    _categories = choix;
+                    if (choix.isNotEmpty) _erreurCategories = null;
+                  }),
+                ),
                 const SizedBox(height: 24),
                 ElevatedButton(
                   onPressed: loading ? null : _soumettre,
@@ -161,7 +182,7 @@ class _BoutiqueFormViewState extends State<_BoutiqueFormView> {
     if (_logoPath != null) {
       content = Image.file(File(_logoPath!), fit: BoxFit.cover);
     } else if (_isEdit && (widget.boutique!.logo ?? '').isNotEmpty) {
-      content = CachedNetworkImage(imageUrl: widget.boutique!.logo!, fit: BoxFit.cover);
+      content = CachedNetworkImage(imageUrl: imageOptimisee(widget.boutique!.logo!), fit: BoxFit.cover);
     } else {
       content = const Center(
         child: Icon(Icons.storefront_outlined, color: _C.sub, size: 32),
@@ -184,12 +205,14 @@ class _BoutiqueFormViewState extends State<_BoutiqueFormView> {
   }
 
   Widget _input(TextEditingController c, String label,
-      {TextInputType? keyboard, int maxLines = 1}) {
+      {TextInputType? keyboard, int maxLines = 1, String? Function(String)? verifier}) {
     return TextFormField(
       controller: c,
       keyboardType: keyboard,
       maxLines: maxLines,
-      validator: (v) => (v == null || v.trim().isEmpty) ? '$label requis' : null,
+      validator: (v) => (v == null || v.trim().isEmpty)
+          ? '$label requis'
+          : verifier?.call(v.trim()),
       decoration: InputDecoration(
         labelText: label,
         filled: true,

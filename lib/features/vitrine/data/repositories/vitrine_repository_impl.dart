@@ -67,6 +67,7 @@ class VitrineRepositoryImpl implements VitrineRepository {
     bool commande = true,
     bool paiementLivraison = true,
     bool active = true,
+    Map<String, dynamic>? blocs,
   }) =>
       _proteger(() => remoteDataSource.genererVitrine(
             logoPath: logoPath,
@@ -81,6 +82,7 @@ class VitrineRepositoryImpl implements VitrineRepository {
             commande: commande,
             paiementLivraison: paiementLivraison,
             active: active,
+            blocs: blocs,
           ));
 
   @override

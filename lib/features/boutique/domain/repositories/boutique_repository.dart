@@ -11,6 +11,7 @@ abstract class BoutiqueRepository {
     required String description,
     required String localisation,
     required String telephone,
+    List<String>? categories,
     String? logoPath,
   });
 
@@ -19,6 +20,7 @@ abstract class BoutiqueRepository {
     String? description,
     String? localisation,
     String? telephone,
+    List<String>? categories,
     String? logoPath,
   });
 

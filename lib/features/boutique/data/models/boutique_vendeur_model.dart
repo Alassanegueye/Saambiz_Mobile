@@ -9,6 +9,7 @@ class BoutiqueVendeurModel extends Boutique {
     super.telephone,
     super.logo,
     super.enPause,
+    super.categories,
   });
 
   factory BoutiqueVendeurModel.fromJson(Map<String, dynamic> json) {
@@ -23,6 +24,11 @@ class BoutiqueVendeurModel extends Boutique {
       telephone: data['telephone']?.toString(),
       logo: data['logo']?.toString(),
       enPause: statut == 'pause' || data['enPause'] == true,
+      categories: (data['categories'] as List? ?? [])
+          .map((c) => c is Map ? (c['slug'] ?? c['nom'] ?? c['id'])?.toString() : c?.toString())
+          .whereType<String>()
+          .where((c) => c.isNotEmpty)
+          .toList(),
     );
   }
 }

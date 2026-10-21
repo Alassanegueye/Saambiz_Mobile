@@ -6,6 +6,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/routes/app_router.dart';
 import '../../../../core/services/localisation_service.dart';
 import '../../../../injection_container.dart';
+import '../../../categories/data/categorie.dart';
+import '../../../categories/presentation/icones_categories.dart';
 import '../../../home/data/datasources/accueil_remote_datasource.dart';
 import '../../domain/entities/user.dart';
 import 'signup_kit.dart';
@@ -17,17 +19,6 @@ import 'signup_kit.dart';
 /// client connecté, la sélection part aussi vers le backend (elle le suit
 /// alors d'un appareil à l'autre) et cette copie locale sert de secours.
 const String kInteretsKey = 'client_interets';
-
-const List<({String label, IconData icon})> _categories = [
-  (label: 'Mode', icon: Icons.checkroom_outlined),
-  (label: 'Chaussures', icon: Icons.ice_skating_outlined),
-  (label: 'Électronique', icon: Icons.smartphone_outlined),
-  (label: 'Beauté', icon: Icons.spa_outlined),
-  (label: 'Maison', icon: Icons.chair_outlined),
-  (label: 'Alimentation', icon: Icons.shopping_basket_outlined),
-  (label: 'Sport', icon: Icons.sports_soccer_outlined),
-  (label: 'Autres', icon: Icons.more_horiz_rounded),
-];
 
 /// Centres d'intérêt du client.
 ///
@@ -54,7 +45,12 @@ class InteretsPage extends StatefulWidget {
 }
 
 class _InteretsPageState extends State<InteretsPage> {
+  // Slugs des catégories choisies. La liste elle-même vient du serveur
+  // (gérée dans le dashboard admin) ; la liste de secours s'affiche tant
+  // que le réseau n'a pas répondu.
   final Set<String> _selection = {};
+  List<Categorie> _categories = kCategoriesSecours;
+  List<String> _enregistrees = const [];
   bool _saving = false;
 
   // Deux catégories minimum : en dessous, le fil personnalisé n'a pas
@@ -68,10 +64,32 @@ class _InteretsPageState extends State<InteretsPage> {
     // grille vide : le client ajuste, il ne recommence pas.
     if (widget.modeEdition) {
       try {
-        _selection.addAll(
-          sl<SharedPreferences>().getStringList(kInteretsKey) ?? const [],
-        );
+        _enregistrees =
+            sl<SharedPreferences>().getStringList(kInteretsKey) ?? const [];
       } catch (_) {/* grille vide */}
+      _reprendreSelection();
+    }
+    _chargerCategories();
+  }
+
+  Future<void> _chargerCategories() async {
+    final liste = await CategoriesRemoteDataSource(sl<Dio>()).lister();
+    if (!mounted) return;
+    setState(() {
+      _categories = liste;
+      _reprendreSelection();
+    });
+  }
+
+  /// La sélection enregistrée peut contenir des slugs ou, pour une ancienne
+  /// version de l'application, des noms : on la ramène aux slugs affichés.
+  void _reprendreSelection() {
+    final slugs = _categories.map((c) => c.slug).toSet();
+    _selection.removeWhere((s) => !slugs.contains(s));
+    for (final v in _enregistrees) {
+      for (final c in _categories) {
+        if (c.correspond(v)) _selection.add(c.slug);
+      }
     }
   }
 
@@ -123,47 +141,42 @@ class _InteretsPageState extends State<InteretsPage> {
   @override
   Widget build(BuildContext context) {
     final prenom = widget.user?.prenom;
-    return SbScaffold(
-      children: [
-        const SizedBox(height: 14),
-        Text(
-          prenom == null || prenom.isEmpty
-              ? 'Bienvenue sur SaamBiz 🎉'
-              : 'Bienvenue $prenom 🎉',
-          style: Sb.title(23),
-        ),
-        const SizedBox(height: 10),
-        Text(
-          "Qu'est-ce qui vous intéresse ?\nChoisissez au moins 2 catégories.",
-          style: Sb.body(14),
-        ),
-        const SizedBox(height: 24),
-
+    return SbPageAuth(
+      // Dernière étape de l'inscription d'un client (pas en modification).
+      etape: widget.modeEdition ? null : 5,
+      icone: Icons.favorite_border_rounded,
+      titre: widget.modeEdition
+          ? 'Vos goûts'
+          : prenom == null || prenom.isEmpty
+              ? 'Bienvenue !'
+              : 'Bienvenue $prenom',
+      sousTitre: 'Choisissez au moins 2 catégories.',
+      carte: [
         GridView.builder(
           shrinkWrap: true,
+          padding: EdgeInsets.zero,
           physics: const NeverScrollableScrollPhysics(),
           itemCount: _categories.length,
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 3,
-            crossAxisSpacing: 12,
-            mainAxisSpacing: 12,
-            childAspectRatio: 0.95,
+            crossAxisSpacing: 10,
+            mainAxisSpacing: 10,
+            childAspectRatio: 0.9,
           ),
           itemBuilder: (_, i) {
             final cat = _categories[i];
-            final on = _selection.contains(cat.label);
+            final on = _selection.contains(cat.slug);
             return _CategoryTile(
-              label: cat.label,
-              icon: cat.icon,
+              label: cat.nom,
+              icon: iconeCategorie(cat.icone),
               selected: on,
               onTap: () => setState(() {
-                on ? _selection.remove(cat.label) : _selection.add(cat.label);
+                on ? _selection.remove(cat.slug) : _selection.add(cat.slug);
               }),
             );
           },
         ),
-
-        const SizedBox(height: 26),
+        const SizedBox(height: 22),
         SbPrimaryButton(
           label: widget.modeEdition ? 'Enregistrer' : 'Découvrir SaamBiz',
           icon: Icons.arrow_forward_rounded,
@@ -173,9 +186,7 @@ class _InteretsPageState extends State<InteretsPage> {
         const SizedBox(height: 12),
         Center(
           child: Text(
-            _valide
-                ? '${_selection.length} catégories sélectionnées'
-                : 'Sélectionnez au moins 2 catégories',
+            '${_selection.length} sélectionnée${_selection.length > 1 ? 's' : ''}',
             style: Sb.body(12.5),
           ),
         ),
@@ -208,10 +219,10 @@ class _CategoryTile extends StatelessWidget {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
           decoration: BoxDecoration(
-            color: selected ? Sb.goldSoft : Sb.white,
+            color: selected ? Sb.navyTint : Sb.surface,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: selected ? Sb.gold : Sb.border,
+              color: selected ? Sb.navy : Sb.border,
               width: selected ? 1.8 : 1.3,
             ),
           ),
@@ -228,7 +239,7 @@ class _CategoryTile extends StatelessWidget {
                       child: Text(
                         label,
                         textAlign: TextAlign.center,
-                        style: GoogleFonts.dmSans(
+                        style: GoogleFonts.plusJakartaSans(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
                           color: Sb.navy,
@@ -244,8 +255,8 @@ class _CategoryTile extends StatelessWidget {
                   right: 6,
                   child: CircleAvatar(
                     radius: 9,
-                    backgroundColor: Sb.gold,
-                    child: Icon(Icons.check_rounded, size: 12, color: Sb.navy),
+                    backgroundColor: Sb.navy,
+                    child: Icon(Icons.check_rounded, size: 12, color: Sb.white),
                   ),
                 ),
             ],

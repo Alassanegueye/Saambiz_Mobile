@@ -4,10 +4,11 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/routes/app_router.dart';
 import 'signup_kit.dart';
 
-/// Écran 1 du parcours : client ou vendeur.
-/// Affiché juste après l'onboarding, et accessible ensuite depuis « Créer un
-/// compte ». Le choix n'est pas définitif : un client peut ouvrir une boutique
-/// plus tard depuis son profil.
+/// Écran 1 de l'inscription : client ou vendeur.
+///
+/// Affiché après l'onboarding et depuis « Créer un compte ». Même mise en
+/// page que la connexion (en-tête bleu marine, contenu à cheval), deux cartes
+/// à choix unique puis le bouton. Le client est présélectionné.
 class ProfileChoicePage extends StatefulWidget {
   const ProfileChoicePage({super.key});
 
@@ -16,182 +17,182 @@ class ProfileChoicePage extends StatefulWidget {
 }
 
 class _ProfileChoicePageState extends State<ProfileChoicePage> {
-  // null = rien de sélectionné : le bouton reste inactif tant qu'on n'a pas
-  // choisi, comme sur la maquette.
-  String? _role;
+  String _role = 'Acheteur';
 
   void _continuer() {
-    if (_role == null) return;
     Navigator.of(context).pushNamed(
-      _role == 'Vendeur'
-          ? AppRouter.vendeurSignupRoute
-          : AppRouter.clientSignupRoute,
+      _role == 'Vendeur' ? AppRouter.vendeurSignupRoute : AppRouter.clientSignupRoute,
+    );
+  }
+
+  void _sansCompte() {
+    Navigator.of(context).pushNamedAndRemoveUntil(
+      AppRouter.acheteurRoute,
+      (_) => false,
+      arguments: const {'isGuest': true},
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return SbScaffold(
-      children: [
-        const SbWordmark(),
-        const SizedBox(height: 34),
-        Text('Bienvenue sur SaamBiz 👋', style: Sb.title(24)),
-        const SizedBox(height: 10),
-        Text('Comment souhaitez-vous utiliser SaamBiz ?', style: Sb.body(14.5)),
-        const SizedBox(height: 26),
-
-        _RoleCard(
-          icon: Icons.shopping_bag_outlined,
-          title: 'Je suis client',
-          subtitle:
-              'Je veux découvrir et acheter des produits près de chez moi.',
-          selected: _role == 'Acheteur',
+    return SbPageAuth(
+      titre: 'Créer un compte',
+      sousTitre: 'Choisissez votre espace.',
+      apres: [
+        _CarteProfil(
+          icone: Icons.shopping_bag_outlined,
+          titre: 'Je veux acheter',
+          texte: 'Commander et suivre mes livraisons.',
+          atouts: const ['Promotions', 'Paiement mobile'],
+          choisie: _role == 'Acheteur',
           onTap: () => setState(() => _role = 'Acheteur'),
         ),
-        const SizedBox(height: 14),
-        _RoleCard(
-          icon: Icons.storefront_outlined,
-          title: 'Je suis vendeur',
-          subtitle: 'Je veux créer ma boutique et vendre mes produits.',
-          selected: _role == 'Vendeur',
+        const SizedBox(height: 12),
+        _CarteProfil(
+          icone: Icons.storefront_outlined,
+          titre: 'Je veux vendre',
+          texte: 'Ouvrir ma boutique en quelques minutes.',
+          atouts: const ['Gratuit', 'Site web inclus'],
+          choisie: _role == 'Vendeur',
           onTap: () => setState(() => _role = 'Vendeur'),
         ),
-
-        const SizedBox(height: 26),
+        const SizedBox(height: 22),
         SbPrimaryButton(
           label: 'Continuer',
           icon: Icons.arrow_forward_rounded,
-          onPressed: _role == null ? null : _continuer,
+          onPressed: _continuer,
         ),
-        const SizedBox(height: 14),
-        Center(
-          child: Text(
-            'Vous pourrez changer votre choix plus tard.',
-            textAlign: TextAlign.center,
-            style: Sb.body(12.5),
-          ),
-        ),
-
-        const SizedBox(height: 22),
-        // Consultation libre : on peut parcourir les boutiques sans
-        // compte, la connexion n'est demandée qu'à la commande.
-        Center(
-          child: TextButton(
-            onPressed: () => Navigator.of(context).pushNamedAndRemoveUntil(
-              AppRouter.acheteurRoute,
-              (_) => false,
-              arguments: const {'isGuest': true},
-            ),
-            child: Text(
-              'Continuer sans compte',
-              style: GoogleFonts.dmSans(
-                fontSize: 13.5,
-                fontWeight: FontWeight.w600,
-                color: Sb.textMid,
-                decoration: TextDecoration.underline,
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 8),
-        SbLoginLink(
-          onTap: () => Navigator.of(context).pushNamed(AppRouter.loginRoute),
-        ),
+        const SizedBox(height: 10),
+        SbSecondaryButton(label: 'Explorer sans compte', onPressed: _sansCompte),
+        const SizedBox(height: 6),
+        SbLoginLink(onTap: () => Navigator.of(context).pushNamed(AppRouter.loginRoute)),
       ],
     );
   }
 }
 
-class _RoleCard extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final bool selected;
+/// Carte de choix : toujours blanche ; une fois choisie, seuls la pastille
+/// d'icône et le bouton radio passent au jaune de la marque.
+class _CarteProfil extends StatelessWidget {
+  final IconData icone;
+  final String titre;
+  final String texte;
+  final List<String> atouts;
+  final bool choisie;
   final VoidCallback onTap;
 
-  const _RoleCard({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.selected,
+  const _CarteProfil({
+    required this.icone,
+    required this.titre,
+    required this.texte,
+    required this.atouts,
+    required this.choisie,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    // Sélectionnée, la carte passe en bleu marine plein : c'est le seul repère
-    // de la maquette, sans case à cocher.
+    const encre = Sb.navy;
+    const secondaire = Sb.textMid;
+
     return Semantics(
       button: true,
-      selected: selected,
-      label: '$title. $subtitle',
-      child: InkWell(
+      selected: choisie,
+      label: '$titre. $texte',
+      child: GestureDetector(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(18),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 220),
+          curve: Curves.easeOut,
           padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(
-            color: selected ? Sb.navy : Sb.white,
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(
-              color: selected ? Sb.navy : Sb.border,
-              width: 1.4,
-            ),
+            color: Sb.white,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: choisie ? Sb.gold : Sb.border, width: choisie ? 1.8 : 1.3),
             boxShadow: [
               BoxShadow(
-                color: Sb.navy.withOpacity(selected ? 0.22 : 0.05),
-                blurRadius: selected ? 22 : 10,
+                color: Sb.navy.withValues(alpha: choisie ? 0.12 : 0.08),
+                blurRadius: 24,
                 offset: const Offset(0, 8),
               ),
             ],
           ),
-          child: Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: 46,
-                height: 46,
-                decoration: BoxDecoration(
-                  color: selected ? Sb.white.withOpacity(0.12) : Sb.navySoft,
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: Icon(
-                  icon,
-                  size: 23,
-                  color: selected ? Sb.gold : Sb.navy,
-                ),
+              Row(
+                children: [
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 220),
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: choisie ? Sb.gold : Sb.navySoft,
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Icon(icone, size: 24, color: Sb.navy),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Text(
+                      titre,
+                      style: GoogleFonts.plusJakartaSans(fontSize: 17, fontWeight: FontWeight.w800, color: encre),
+                    ),
+                  ),
+                  _Radio(coche: choisie),
+                ],
               ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: GoogleFonts.sora(
-                        fontSize: 15.5,
-                        fontWeight: FontWeight.w700,
-                        color: selected ? Sb.white : Sb.navy,
+              const SizedBox(height: 12),
+              Text(texte, style: GoogleFonts.plusJakartaSans(fontSize: 13.5, height: 1.45, color: secondaire)),
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 6,
+                runSpacing: 6,
+                children: [
+                  for (final a in atouts)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: Sb.bg,
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.check_rounded, size: 13, color: choisie ? Sb.goldDark : Sb.textLight),
+                          const SizedBox(width: 4),
+                          Text(a,
+                              style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 11.5, fontWeight: FontWeight.w600, color: encre)),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      subtitle,
-                      style: GoogleFonts.dmSans(
-                        fontSize: 12.5,
-                        height: 1.45,
-                        color: selected
-                            ? Sb.white.withOpacity(0.72)
-                            : Sb.textMid,
-                      ),
-                    ),
-                  ],
-                ),
+                ],
               ),
             ],
           ),
         ),
       ),
+    );
+  }
+}
+
+class _Radio extends StatelessWidget {
+  final bool coche;
+  const _Radio({required this.coche});
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      width: 24,
+      height: 24,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: coche ? Sb.gold : Colors.transparent,
+        border: Border.all(color: coche ? Sb.gold : Sb.border, width: 2),
+      ),
+      child: coche ? const Icon(Icons.check_rounded, size: 15, color: Sb.navy) : null,
     );
   }
 }

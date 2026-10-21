@@ -1,5 +1,6 @@
 import java.util.Properties
 import java.io.FileInputStream
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     id("com.android.application")
@@ -18,7 +19,7 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    namespace = "com.example.fait_maison"
+    namespace = "com.saambiz.app"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -27,14 +28,14 @@ android {
         targetCompatibility = JavaVersion.VERSION_11
     }
 
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_11.toString()
-    }
-
     defaultConfig {
-        // Identifiant unique de l'application sur les stores (ne doit PAS commencer par com.example).
-        // Le namespace interne reste inchangé pour ne pas avoir à déplacer MainActivity.kt.
-        applicationId = "com.faitmaison.app"
+        // Identité de l'application sur le Play Store. Définitive dès la
+        // première mise en ligne : Google n'autorise aucun changement ensuite.
+        //
+        // Elle valait « com.faitmaison.app » — l'ancien nom du projet, hérité
+        // de fait_maison — et le namespace restait sur « com.example.fait_maison ».
+        // Corrigé avant publication, seul moment où c'était encore possible.
+        applicationId = "com.saambiz.app"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
@@ -77,4 +78,11 @@ android {
 
 flutter {
     source = "../.."
+}
+
+// Kotlin 2.2 : `kotlinOptions` dans le bloc android n'est plus accepté.
+kotlin {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_11)
+    }
 }

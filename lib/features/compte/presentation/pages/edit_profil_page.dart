@@ -7,14 +7,16 @@ import '../../../auth/domain/entities/user.dart';
 import '../bloc/compte_bloc.dart';
 import '../bloc/compte_event.dart';
 import '../bloc/compte_state.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:saambiz/core/utils/image_url.dart';
 
 class _C {
-  static const green = Color(0xFF1B3A6B);
-  static const black = Color(0xFF1A1A1A);
+  static const green = Color(0xFF0D1B3D);
+  static const black = Color(0xFF0D1B3D);
   static const white = Color(0xFFFFFFFF);
-  static const bg = Color(0xFFF5F7F2);
-  static const sub = Color(0xFF7A8473);
-  static const border = Color(0xFFE3EAD0);
+  static const bg = Color(0xFFF5F7FB);
+  static const sub = Color(0xFF5B6C8A);
+  static const border = Color(0xFFE3E8F0);
 }
 
 /// Édition du profil (PUT /account/modifier-profil).
@@ -111,7 +113,7 @@ class _EditProfileViewState extends State<_EditProfileView> {
                           ? null
                           : (widget.user?.photoProfil != null &&
                                   widget.user!.photoProfil!.isNotEmpty)
-                              ? NetworkImage(widget.user!.photoProfil!)
+                              ? CachedNetworkImageProvider(imageOptimisee(widget.user!.photoProfil!))
                               : null,
                       child: const Icon(Icons.camera_alt_outlined, color: _C.green),
                     ),

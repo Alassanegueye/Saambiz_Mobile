@@ -112,8 +112,6 @@ Future<void> init() async {
   // Contrôle de cohérence de la configuration compilée. Mieux vaut un écran
   // d'erreur explicite au lancement qu'une application de production qui
   // parle à l'API de développement.
-  Env.verifier();
-
   // Le .env reste chargé en repli pour les postes de développement qui ne
   // passent pas encore les --dart-define. Son absence n'est plus bloquante :
   // Env fournit des valeurs par défaut.
@@ -122,6 +120,12 @@ Future<void> init() async {
   } catch (_) {
     // Fichier absent : la configuration vient des --dart-define.
   }
+
+  // L'arbitrage doit précéder le contrôle, et le chargement du .env doit
+  // précéder l'arbitrage : `Env.verifier()` tournait avant `dotenv.load()` et
+  // validait donc une adresse que l'application n'utilisait pas.
+  Env.resoudreApiBaseUrl(dotenv.maybeGet('API_BASE_URL'));
+  Env.verifier();
 
   // SharedPreferences
   final sharedPreferences = await SharedPreferences.getInstance();
@@ -151,12 +155,11 @@ Future<void> init() async {
 
   sl.registerLazySingleton(() {
     // Priorité au --dart-define ; le .env n'intervient que s'il apporte une
-    // valeur là où la compilation n'en a pas fourni. Env.verifier() a déjà
-    // refusé les configurations incohérentes au démarrage.
-    final depuisEnv = dotenv.maybeGet('API_BASE_URL')?.trim();
-    final baseUrl = (depuisEnv != null && depuisEnv.isNotEmpty)
-        ? depuisEnv
-        : Env.apiBaseUrl;
+    // valeur là où la compilation n'en a pas fourni. L'arbitrage vit dans
+    // Env.resoudreApiBaseUrl : il était écrit ici, et à l'envers de ce que ce
+    // commentaire annonçait. Env.verifier() a déjà refusé les configurations
+    // incohérentes au démarrage.
+    final baseUrl = Env.apiBaseUrlEffective;
 
     // Configuration améliorée de Dio
     final dio = Dio(

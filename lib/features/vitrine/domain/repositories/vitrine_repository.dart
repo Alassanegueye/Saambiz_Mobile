@@ -31,6 +31,7 @@ abstract class VitrineRepository {
     bool commande,
     bool paiementLivraison,
     bool active,
+    Map<String, dynamic>? blocs,
   });
 
   Future<Either<Failure, Vitrine>> modifierVitrine(Map<String, dynamic> champs);

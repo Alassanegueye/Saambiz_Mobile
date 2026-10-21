@@ -6,14 +6,17 @@ import '../../../../injection_container.dart';
 import '../../../home/data/models/produit_model.dart';
 import '../../data/datasources/vendeur_produit_datasource.dart';
 import '../../data/models/categorie_model.dart';
+import '../../../categories/data/specification.dart';
+import '../../../categories/presentation/widgets/champs_specifications.dart';
+import 'package:saambiz/core/utils/image_url.dart';
 
 class _C {
-  static const green = Color(0xFF1B3A6B);
-  static const black = Color(0xFF1A1A1A);
+  static const green = Color(0xFF0D1B3D);
+  static const black = Color(0xFF0D1B3D);
   static const white = Color(0xFFFFFFFF);
-  static const bg = Color(0xFFF5F7F2);
-  static const sub = Color(0xFF7A8473);
-  static const border = Color(0xFFE3EAD0);
+  static const bg = Color(0xFFF5F7FB);
+  static const sub = Color(0xFF5B6C8A);
+  static const border = Color(0xFFE3E8F0);
 }
 
 class ProduitFormPage extends StatefulWidget {
@@ -34,6 +37,16 @@ class _ProduitFormPageState extends State<ProduitFormPage> {
   final _ds = sl<VendeurProduitDataSource>();
   List<CategorieModel> _categories = [];
   String? _categorieId;
+  // Caractéristiques propres à la catégorie (tailles, pointures, parfums…).
+  Map<String, dynamic> _attributs = {};
+  Map<String, String> _erreursSpecs = {};
+
+  List<SpecificationProduit> get _specifications {
+    for (final c in _categories) {
+      if (c.id == _categorieId) return c.specifications;
+    }
+    return const [];
+  }
   String? _imagePath;
   bool _loading = false;
   bool _loadingCats = true;
@@ -56,6 +69,8 @@ class _ProduitFormPageState extends State<ProduitFormPage> {
       _descCtrl.text = p.description;
       _prixCtrl.text = p.prix;
       _qteCtrl.text = p.quantite.toString();
+      _attributs = Map<String, dynamic>.from(p.attributs);
+      if (p.categorieId.isNotEmpty) _categorieId = p.categorieId;
     }
     _chargerCategories();
   }
@@ -71,9 +86,9 @@ class _ProduitFormPageState extends State<ProduitFormPage> {
         _categories = cats;
         _loadingCats = false;
         // Pré-sélection en édition si la catégorie existe
-        if (_isEdit) {
+        if (_isEdit && !cats.any((c) => c.id == _categorieId)) {
           final match = cats.where((c) => c.nom == widget.produit!.categorie);
-          if (match.isNotEmpty) _categorieId = match.first.id;
+          _categorieId = match.isNotEmpty ? match.first.id : null;
         }
       });
     } catch (e) {
@@ -154,6 +169,14 @@ class _ProduitFormPageState extends State<ProduitFormPage> {
       );
       return;
     }
+    final erreurs = SpecificationProduit.verifier(_specifications, _attributs);
+    setState(() => _erreursSpecs = erreurs);
+    if (erreurs.isNotEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Complétez les caractéristiques du produit')),
+      );
+      return;
+    }
     setState(() => _loading = true);
     try {
       final prix = num.tryParse(_prixCtrl.text.trim()) ?? 0;
@@ -167,6 +190,7 @@ class _ProduitFormPageState extends State<ProduitFormPage> {
           quantite: qte,
           categorieId: _categorieId,
           imagePath: _imagePath,
+          attributs: _attributs,
         );
       } else {
         await _ds.ajouterProduit(
@@ -176,6 +200,7 @@ class _ProduitFormPageState extends State<ProduitFormPage> {
           quantite: qte,
           categorieId: _categorieId!,
           imagePath: _imagePath,
+          attributs: _attributs,
         );
       }
       if (!mounted) return;
@@ -234,6 +259,21 @@ class _ProduitFormPageState extends State<ProduitFormPage> {
             ),
             const SizedBox(height: 12),
             _categoriePicker(),
+            if (_specifications.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              ChampsSpecifications(
+                // Nouvelle catégorie = nouveaux champs : la clé force leur
+                // reconstruction (valeurs initiales des champs texte).
+                key: ValueKey(_categorieId),
+                specifications: _specifications,
+                valeurs: _attributs,
+                erreurs: _erreursSpecs,
+                onChanged: (v) => setState(() {
+                  _attributs = v;
+                  _erreursSpecs.removeWhere((cle, _) => v.containsKey(cle));
+                }),
+              ),
+            ],
             if (_isEdit) ...[
               const SizedBox(height: 24),
               _photosSupplementairesSection(),
@@ -269,7 +309,7 @@ class _ProduitFormPageState extends State<ProduitFormPage> {
       content = Image.file(File(_imagePath!), fit: BoxFit.cover);
     } else if (_isEdit && widget.produit!.image.isNotEmpty) {
       content = CachedNetworkImage(
-          imageUrl: widget.produit!.image, fit: BoxFit.cover);
+          imageUrl: imageOptimisee(widget.produit!.image), fit: BoxFit.cover);
     } else {
       content = const Center(
         child: Column(
@@ -349,7 +389,7 @@ class _ProduitFormPageState extends State<ProduitFormPage> {
                       ClipRRect(
                         borderRadius: BorderRadius.circular(12),
                         child: CachedNetworkImage(
-                          imageUrl: img.url,
+                          imageUrl: imageOptimisee(img.url),
                           width: 90,
                           height: 90,
                           fit: BoxFit.cover,
@@ -413,7 +453,15 @@ class _ProduitFormPageState extends State<ProduitFormPage> {
       items: _categories
           .map((c) => DropdownMenuItem(value: c.id, child: Text(c.nom)))
           .toList(),
-      onChanged: (v) => setState(() => _categorieId = v),
+      // Des pointures n'ont pas de sens pour un jus : changer de catégorie
+      // repart de caractéristiques vides.
+      onChanged: (v) => setState(() {
+        if (v != _categorieId) {
+          _attributs = {};
+          _erreursSpecs = {};
+        }
+        _categorieId = v;
+      }),
     );
   }
 

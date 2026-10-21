@@ -1,6 +1,5 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/routes/app_router.dart';
 import '../../../../core/services/localisation_service.dart';
@@ -74,91 +73,24 @@ class _LocalisationPageState extends State<LocalisationPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Sb.bg,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(24, 12, 24, 28),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const Spacer(),
-
-              Center(
-                child: Container(
-                  width: 96,
-                  height: 96,
-                  decoration: BoxDecoration(
-                    color: Sb.goldSoft,
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  child: const Icon(Icons.place_outlined, size: 44, color: Sb.navy),
-                ),
-              ),
-              const SizedBox(height: 28),
-
-              Text(
-                'Les boutiques près de vous',
-                textAlign: TextAlign.center,
-                style: Sb.title(23),
-              ),
-              const SizedBox(height: 14),
-              Text(
-                'Autorisez la localisation et nous vous montrerons d’abord les '
-                'boutiques de votre quartier, avec la distance depuis chez vous.',
-                textAlign: TextAlign.center,
-                style: Sb.body(14.5),
-              ),
-              const SizedBox(height: 24),
-
-              const _Argument(
-                icon: Icons.storefront_outlined,
-                texte: 'Les commerces de votre ville en premier',
-              ),
-              const _Argument(
-                icon: Icons.local_shipping_outlined,
-                texte: 'Des retraits et livraisons plus rapides',
-              ),
-              const _Argument(
-                icon: Icons.lock_outline_rounded,
-                texte: 'Votre position n’est jamais partagée avec les vendeurs',
-              ),
-
-              const Spacer(),
-
-              SbPrimaryButton(
-                label: 'Autoriser la localisation',
-                loading: _enCours,
-                onPressed: _autoriser,
-              ),
-              const SizedBox(height: 12),
-              SizedBox(
-                height: 52,
-                child: OutlinedButton(
-                  onPressed: _enCours ? null : _plusTard,
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: Sb.navy,
-                    side: const BorderSide(color: Sb.border, width: 1.4),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14)),
-                  ),
-                  child: Text(
-                    'Plus tard',
-                    style: GoogleFonts.dmSans(
-                        fontSize: 15, fontWeight: FontWeight.w600),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                'Vous pourrez l’activer à tout moment depuis votre profil.',
-                textAlign: TextAlign.center,
-                style: Sb.body(12),
-              ),
-            ],
-          ),
+    return SbPageAuth(
+      icone: Icons.place_outlined,
+      titre: 'Près de chez vous',
+      sousTitre: 'Voir d’abord les boutiques de votre quartier.',
+      carte: const [
+        _Argument(icon: Icons.storefront_outlined, texte: 'Commerces proches en premier'),
+        _Argument(icon: Icons.local_shipping_outlined, texte: 'Livraisons plus rapides'),
+        _Argument(icon: Icons.lock_outline_rounded, texte: 'Jamais partagée aux vendeurs'),
+      ],
+      apres: [
+        SbPrimaryButton(
+          label: 'Autoriser la localisation',
+          loading: _enCours,
+          onPressed: _autoriser,
         ),
-      ),
+        const SizedBox(height: 10),
+        SbSecondaryButton(label: 'Plus tard', onPressed: _enCours ? null : _plusTard),
+      ],
     );
   }
 }

@@ -9,6 +9,9 @@ class LigneCommandeModel {
   final int quantite;
   final double sousTotal;
 
+  /// Options choisies par le client (taille, parfum…).
+  final Map<String, String> options;
+
   LigneCommandeModel({
     required this.id,
     required this.produitId,
@@ -17,7 +20,11 @@ class LigneCommandeModel {
     required this.prixUnitaire,
     required this.quantite,
     required this.sousTotal,
+    this.options = const {},
   });
+
+  String get libelleOptions =>
+      options.entries.map((e) => '${e.key} : ${e.value}').join(' · ');
 
   factory LigneCommandeModel.fromJson(Map<String, dynamic> json) {
     return LigneCommandeModel(
@@ -30,6 +37,9 @@ class LigneCommandeModel {
           ? json['quantite']
           : int.tryParse('${json['quantite']}') ?? 0,
       sousTotal: _toDouble(json['sousTotal']),
+      options: json['options'] is Map
+          ? (json['options'] as Map).map((k, v) => MapEntry(k.toString(), v.toString()))
+          : const {},
     );
   }
 }

@@ -6,16 +6,18 @@ import '../../../data/datasources/produit_remote_datasource.dart';
 import '../../../../../injection_container.dart';
 import '../../../../promotions/data/datasources/promotions_remote_datasource.dart';
 import '../../../../promotions/data/models/promotion_model.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:saambiz/core/utils/image_url.dart';
 
 class _C {
-  static const green   = Color(0xFF1B3A6B);
-  static const navyDk  = Color(0xFF0F2547);
-  static const gold    = Color(0xFFD4A72C);
-  static const black   = Color(0xFF1A1A1A);
+  static const green   = Color(0xFF0D1B3D);
+  static const navyDk  = Color(0xFF060F26);
+  static const gold    = Color(0xFFF2B705);
+  static const black   = Color(0xFF0D1B3D);
   static const white   = Color(0xFFFFFFFF);
   static const bg      = Color(0xFFF7F8FA);
-  static const sub     = Color(0xFF7A8473);
-  static const label   = Color(0xFF9EAA94);
+  static const sub     = Color(0xFF5B6C8A);
+  static const label   = Color(0xFF93A1B8);
   static const border  = Color(0xFFE6EAF0);
   static const greenLight = Color(0xFFE8EEF7);
   static const surface = Color(0xFFF2F4F7);
@@ -130,8 +132,8 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
                 ),
               ),
               child: (hasLogo)
-                  ? Opacity(opacity: 0.25, child: Image.network(b.logo!, fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => const SizedBox()))
+                  ? Opacity(opacity: 0.25, child: CachedNetworkImage(imageUrl: imageOptimisee(b.logo!), fit: BoxFit.cover,
+                      errorWidget: (_, __, ___) => const SizedBox()))
                   : null,
             ),
             SafeArea(
@@ -143,7 +145,7 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
                     _circleBtn(Icons.arrow_back_ios_new_rounded, () => Navigator.of(context).pop()),
                     Expanded(
                       child: Text('Boutique', textAlign: TextAlign.center,
-                          style: GoogleFonts.sora(fontSize: 16, fontWeight: FontWeight.w700, color: _C.white)),
+                          style: GoogleFonts.plusJakartaSans(fontSize: 16, fontWeight: FontWeight.w700, color: _C.white)),
                     ),
                     _circleBtn(Icons.share_outlined, () {}),
                     const SizedBox(width: 6),
@@ -165,8 +167,8 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
                 ),
                 clipBehavior: Clip.antiAlias,
                 child: hasLogo
-                    ? Image.network(b.logo!, fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => const Icon(Icons.storefront_rounded, color: _C.green, size: 36))
+                    ? CachedNetworkImage(imageUrl: imageOptimisee(b.logo!), fit: BoxFit.cover,
+                        errorWidget: (_, __, ___) => const Icon(Icons.storefront_rounded, color: _C.green, size: 36))
                     : const Icon(Icons.storefront_rounded, color: _C.green, size: 36),
               ),
             ),
@@ -181,36 +183,36 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(b.nom,
-                  style: GoogleFonts.sora(fontSize: 20, fontWeight: FontWeight.w800, color: _C.black)),
+                  style: GoogleFonts.plusJakartaSans(fontSize: 20, fontWeight: FontWeight.w800, color: _C.black)),
               const SizedBox(height: 6),
               Row(children: [
                 if (_effTotal > 0) ...[
                   const Icon(Icons.star_rounded, color: _C.gold, size: 17),
                   const SizedBox(width: 3),
                   Text(_effNote.toStringAsFixed(1),
-                      style: GoogleFonts.dmSans(fontSize: 13, fontWeight: FontWeight.w700, color: _C.black)),
+                      style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.w700, color: _C.black)),
                   const SizedBox(width: 4),
-                  Text('($_effTotal avis)', style: GoogleFonts.dmSans(fontSize: 13, color: _C.sub)),
+                  Text('($_effTotal avis)', style: GoogleFonts.plusJakartaSans(fontSize: 13, color: _C.sub)),
                 ] else ...[
                   const Icon(Icons.star_border_rounded, color: _C.label, size: 17),
                   const SizedBox(width: 3),
-                  Text('Nouveau', style: GoogleFonts.dmSans(fontSize: 13, color: _C.sub)),
+                  Text('Nouveau', style: GoogleFonts.plusJakartaSans(fontSize: 13, color: _C.sub)),
                 ],
                 if (b.localisation.isNotEmpty) ...[
                   const SizedBox(width: 6),
-                  Text('•', style: GoogleFonts.dmSans(fontSize: 13, color: _C.label)),
+                  Text('•', style: GoogleFonts.plusJakartaSans(fontSize: 13, color: _C.label)),
                   const SizedBox(width: 6),
                   Flexible(
                     child: Text(b.localisation,
                         maxLines: 1, overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.dmSans(fontSize: 13, color: _C.sub)),
+                        style: GoogleFonts.plusJakartaSans(fontSize: 13, color: _C.sub)),
                   ),
                 ],
               ]),
               if (b.description.isNotEmpty) ...[
                 const SizedBox(height: 8),
                 Text(b.description,
-                    style: GoogleFonts.dmSans(fontSize: 13.5, height: 1.4, color: _C.sub)),
+                    style: GoogleFonts.plusJakartaSans(fontSize: 13.5, height: 1.4, color: _C.sub)),
               ],
               const SizedBox(height: 16),
               Row(children: [
@@ -218,7 +220,7 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
                   child: OutlinedButton.icon(
                     onPressed: () {},
                     icon: const Icon(Icons.chat_bubble_outline_rounded, size: 17),
-                    label: Text('Message', style: GoogleFonts.sora(fontSize: 14, fontWeight: FontWeight.w700)),
+                    label: Text('Message', style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.w700)),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: _C.green,
                       side: const BorderSide(color: _C.border, width: 1.5),
@@ -233,7 +235,7 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
                     onPressed: () => setState(() => _suivi = !_suivi),
                     icon: Icon(_suivi ? Icons.check_rounded : Icons.add_rounded, size: 18),
                     label: Text(_suivi ? 'Suivi' : 'Suivre',
-                        style: GoogleFonts.sora(fontSize: 14, fontWeight: FontWeight.w700)),
+                        style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.w700)),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: _C.green,
                       foregroundColor: _C.white,
@@ -282,7 +284,7 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
                   ),
                 ),
                 child: Text(tabs[i], textAlign: TextAlign.center,
-                    style: GoogleFonts.dmSans(
+                    style: GoogleFonts.plusJakartaSans(
                         fontSize: 14,
                         fontWeight: active ? FontWeight.w700 : FontWeight.w500,
                         color: active ? _C.green : _C.sub)),
@@ -316,7 +318,7 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
     if (_error != null) {
       return Padding(
         padding: const EdgeInsets.all(28),
-        child: Center(child: Text(_error!, style: GoogleFonts.dmSans(color: _C.sub))),
+        child: Center(child: Text(_error!, style: GoogleFonts.plusJakartaSans(color: _C.sub))),
       );
     }
     return Column(
@@ -326,7 +328,7 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
         if (_produits.isEmpty)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-            child: Text('Aucun produit disponible', style: GoogleFonts.dmSans(color: _C.label)),
+            child: Text('Aucun produit disponible', style: GoogleFonts.plusJakartaSans(color: _C.label)),
           )
         else
           Padding(
@@ -357,7 +359,7 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
                 color: _C.surface,
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(15)),
                 image: p.image.isNotEmpty
-                    ? DecorationImage(image: NetworkImage(p.image), fit: BoxFit.cover)
+                    ? DecorationImage(image: CachedNetworkImageProvider(imageOptimisee(p.image)), fit: BoxFit.cover)
                     : null,
               ),
             ),
@@ -368,10 +370,10 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(p.nom, maxLines: 1, overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.sora(fontSize: 13, fontWeight: FontWeight.w700, color: _C.black)),
+                    style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.w700, color: _C.black)),
                 const SizedBox(height: 4),
                 Text('${p.prix} FCFA',
-                    style: GoogleFonts.dmSans(fontSize: 12.5, fontWeight: FontWeight.w700, color: _C.green)),
+                    style: GoogleFonts.plusJakartaSans(fontSize: 12.5, fontWeight: FontWeight.w700, color: _C.green)),
               ],
             ),
           ),
@@ -396,7 +398,7 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
             const Icon(Icons.local_offer_outlined, color: _C.label, size: 44),
             const SizedBox(height: 12),
             Text('Aucune promotion en cours',
-                style: GoogleFonts.dmSans(fontSize: 14, color: _C.sub)),
+                style: GoogleFonts.plusJakartaSans(fontSize: 14, color: _C.sub)),
           ]),
         ),
       );
@@ -419,21 +421,21 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(promo.titre,
-                        style: GoogleFonts.sora(fontSize: 17, fontWeight: FontWeight.w800, color: _C.gold)),
+                        style: GoogleFonts.plusJakartaSans(fontSize: 17, fontWeight: FontWeight.w800, color: _C.gold)),
                     if ((promo.produitNom ?? '').isNotEmpty) ...[
                       const SizedBox(height: 4),
                       Text(promo.produitNom!,
-                          style: GoogleFonts.dmSans(fontSize: 13, color: _C.white.withOpacity(0.9))),
+                          style: GoogleFonts.plusJakartaSans(fontSize: 13, color: _C.white.withOpacity(0.9))),
                     ],
                     const SizedBox(height: 6),
                     Text('${promo.prixPromo.toStringAsFixed(0)} FCFA',
-                        style: GoogleFonts.sora(fontSize: 15, fontWeight: FontWeight.w800, color: _C.white)),
+                        style: GoogleFonts.plusJakartaSans(fontSize: 15, fontWeight: FontWeight.w800, color: _C.white)),
                     const SizedBox(height: 12),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                       decoration: BoxDecoration(color: _C.gold, borderRadius: BorderRadius.circular(11)),
                       child: Text("Profiter de l'offre",
-                          style: GoogleFonts.sora(fontSize: 12.5, fontWeight: FontWeight.w700, color: _C.navyDk)),
+                          style: GoogleFonts.plusJakartaSans(fontSize: 12.5, fontWeight: FontWeight.w700, color: _C.navyDk)),
                     ),
                   ],
                 ),
@@ -457,7 +459,7 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
           Row(
             children: [
               Text(_effTotal > 0 ? _effNote.toStringAsFixed(1) : '—',
-                  style: GoogleFonts.sora(fontSize: 34, fontWeight: FontWeight.w800, color: _C.black)),
+                  style: GoogleFonts.plusJakartaSans(fontSize: 34, fontWeight: FontWeight.w800, color: _C.black)),
               const SizedBox(width: 12),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -468,7 +470,7 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
                   ))),
                   const SizedBox(height: 2),
                   Text('$_effTotal avis',
-                      style: GoogleFonts.dmSans(fontSize: 13, color: _C.sub)),
+                      style: GoogleFonts.plusJakartaSans(fontSize: 13, color: _C.sub)),
                 ],
               ),
               const Spacer(),
@@ -478,7 +480,7 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                   decoration: BoxDecoration(color: _C.green, borderRadius: BorderRadius.circular(12)),
                   child: Text('Donner mon avis',
-                      style: GoogleFonts.sora(fontSize: 12.5, fontWeight: FontWeight.w700, color: _C.white)),
+                      style: GoogleFonts.plusJakartaSans(fontSize: 12.5, fontWeight: FontWeight.w700, color: _C.white)),
                 ),
               ),
             ],
@@ -489,7 +491,7 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
               padding: const EdgeInsets.symmetric(vertical: 20),
               child: Center(
                 child: Text('Aucun avis pour le moment. Soyez le premier !',
-                    style: GoogleFonts.dmSans(fontSize: 14, color: _C.sub)),
+                    style: GoogleFonts.plusJakartaSans(fontSize: 14, color: _C.sub)),
               ),
             )
           else
@@ -524,7 +526,7 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
             const SizedBox(width: 10),
             Expanded(
               child: Text(nom.isEmpty ? 'Client' : nom,
-                  style: GoogleFonts.sora(fontSize: 13.5, fontWeight: FontWeight.w700, color: _C.black)),
+                  style: GoogleFonts.plusJakartaSans(fontSize: 13.5, fontWeight: FontWeight.w700, color: _C.black)),
             ),
             Row(children: List.generate(5, (i) => Icon(
               i < note ? Icons.star_rounded : Icons.star_border_rounded,
@@ -534,7 +536,7 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
           if (commentaire.isNotEmpty) ...[
             const SizedBox(height: 8),
             Text(commentaire,
-                style: GoogleFonts.dmSans(fontSize: 13, height: 1.4, color: _C.sub)),
+                style: GoogleFonts.plusJakartaSans(fontSize: 13, height: 1.4, color: _C.sub)),
           ],
         ],
       ),
@@ -548,7 +550,7 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setLocal) => AlertDialog(
-          title: Text('Votre avis', style: GoogleFonts.sora(fontWeight: FontWeight.w700)),
+          title: Text('Votre avis', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w700)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -605,8 +607,8 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(title, style: GoogleFonts.sora(fontSize: 15, fontWeight: FontWeight.w700, color: _C.black)),
-          Text('Voir tout', style: GoogleFonts.dmSans(fontSize: 12.5, fontWeight: FontWeight.w600, color: _C.green)),
+          Text(title, style: GoogleFonts.plusJakartaSans(fontSize: 15, fontWeight: FontWeight.w700, color: _C.black)),
+          Text('Voir tout', style: GoogleFonts.plusJakartaSans(fontSize: 12.5, fontWeight: FontWeight.w600, color: _C.green)),
         ],
       ),
     );

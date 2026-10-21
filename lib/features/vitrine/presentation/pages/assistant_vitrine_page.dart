@@ -9,6 +9,7 @@ import '../bloc/vitrine_bloc.dart';
 import '../bloc/vitrine_event.dart';
 import '../bloc/vitrine_state.dart';
 import 'vitrine_prete_page.dart';
+import '../widgets/etapes_contenus_vitrine.dart';
 
 class _C {
   static const navy      = Color(0xFF0D1B3D);
@@ -23,14 +24,15 @@ class _C {
 /// Les mises en page, avec ce à quoi chacune convient. La liste doit rester
 /// alignée sur MODELES_VITRINE côté serveur.
 const _modeles = [
-  ('classique', 'Classique', 'Bannière, rayons, puis les produits.'),
-  ('galerie', 'Galerie', 'De grandes images en premier.'),
-  ('catalogue', 'Catalogue', 'Une liste dense, rapide à parcourir.'),
+  ('classique', 'Classique', 'Des cartes produits équilibrées.'),
+  ('galerie', 'Galerie', 'Des cartes avec de grandes photos.'),
+  ('catalogue', 'Catalogue', 'Une liste compacte, rapide à parcourir.'),
 ];
 
 /// L'assistant de création du site.
 ///
-/// Cinq étapes, une question par écran. Un vendeur remplit ça debout dans sa
+/// Cinq étapes, une question par écran : activité, logo, style, avantages,
+/// textes. Un vendeur remplit ça debout dans sa
 /// boutique, entre deux clients : un formulaire de vingt champs sur un seul
 /// écran serait abandonné à la moitié.
 ///
@@ -52,7 +54,7 @@ class AssistantVitrinePage extends StatefulWidget {
 }
 
 class _AssistantVitrinePageState extends State<AssistantVitrinePage> {
-  static const _nombreEtapes = 4;
+  static const _nombreEtapes = 5;
   int _etape = 0;
 
   // ── Réponses ────────────────────────────────────────────────────────
@@ -71,6 +73,11 @@ class _AssistantVitrinePageState extends State<AssistantVitrinePage> {
 
   bool _commande = true;
   bool _paiementLivraison = true;
+
+  // Les avantages affichés sur le site. Les icônes des catégories déjà
+  // choisies sont conservées telles quelles.
+  final List<AvantageBrouillon> _avantages = [];
+  Map<String, dynamic> _icones = const {};
 
   // Ce que l'analyse a trouvé — affiché tel quel au vendeur.
   AnalyseLogo? _analyse;
@@ -94,8 +101,27 @@ class _AssistantVitrinePageState extends State<AssistantVitrinePage> {
       _annonce.text = v.annonce ?? '';
       _commande = v.commande;
       _paiementLivraison = v.paiementLivraison;
+
+      final blocs = v.blocs;
+      for (final a in (blocs['avantages'] as List? ?? const []).whereType<Map>()) {
+        _avantages.add(AvantageBrouillon(
+          icone: '${a['icone'] ?? 'etoile'}',
+          titre: '${a['titre'] ?? ''}',
+          texte: '${a['texte'] ?? ''}',
+        ));
+      }
+      if (blocs['icones'] is Map) _icones = Map<String, dynamic>.from(blocs['icones'] as Map);
     }
   }
+
+  /// Les contenus à envoyer avec le site.
+  Map<String, dynamic> _blocsAEnvoyer() => {
+        'icones': _icones,
+        'avantages': _avantages
+            .where((a) => a.titre.text.trim().isNotEmpty)
+            .map((a) => {'icone': a.icone, 'titre': a.titre.text.trim(), 'texte': a.texte.text.trim()})
+            .toList(),
+      };
 
   @override
   void dispose() {
@@ -104,6 +130,9 @@ class _AssistantVitrinePageState extends State<AssistantVitrinePage> {
     _apropos.dispose();
     _horaires.dispose();
     _annonce.dispose();
+    for (final a in _avantages) {
+      a.dispose();
+    }
     super.dispose();
   }
 
@@ -149,6 +178,7 @@ class _AssistantVitrinePageState extends State<AssistantVitrinePage> {
           annonce: _annonce.text.trim(),
           commande: _commande,
           paiementLivraison: _paiementLivraison,
+          blocs: _blocsAEnvoyer(),
         ));
   }
 
@@ -294,6 +324,8 @@ class _AssistantVitrinePageState extends State<AssistantVitrinePage> {
         return _etapeLogo(state);
       case 2:
         return _etapeStyle();
+      case 3:
+        return EtapeAvantages(avantages: _avantages, onChange: () => setState(() {}));
       default:
         return _etapeTextes();
     }

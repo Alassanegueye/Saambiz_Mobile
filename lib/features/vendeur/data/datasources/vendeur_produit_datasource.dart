@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import '../../../home/data/models/produit_model.dart';
 import '../models/categorie_model.dart';
@@ -52,6 +54,7 @@ class VendeurProduitDataSource {
     required int quantite,
     required String categorieId,
     String? imagePath,
+    Map<String, dynamic>? attributs,
   }) async {
     final form = FormData.fromMap({
       'nom': nom,
@@ -59,6 +62,8 @@ class VendeurProduitDataSource {
       'prix': prix,
       'quantite': quantite,
       'categorieId': categorieId,
+      // Caractéristiques de la catégorie, en JSON (formulaire multipart).
+      if (attributs != null) 'attributs': jsonEncode(attributs),
       if (imagePath != null)
         'image': await MultipartFile.fromFile(imagePath),
     });
@@ -73,8 +78,10 @@ class VendeurProduitDataSource {
     int? quantite,
     String? categorieId,
     String? imagePath,
+    Map<String, dynamic>? attributs,
   }) async {
     final form = FormData.fromMap({
+      if (attributs != null) 'attributs': jsonEncode(attributs),
       if (nom != null) 'nom': nom,
       if (description != null) 'description': description,
       if (prix != null) 'prix': prix,

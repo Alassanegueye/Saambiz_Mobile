@@ -7,6 +7,7 @@ import 'package:saambiz/features/auth/presentation/pages/app_bootstrap.dart';
 import 'package:saambiz/injection_container.dart' as di;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:saambiz/core/connection/auth_interceptor.dart';
 
@@ -78,6 +79,21 @@ class MyApp extends StatelessWidget {
         theme: AppTheme.light(),
         home: const AppBootstrap(),
         onGenerateRoute: AppRouter.onGenerateRoute,
+        // Barre d'état par défaut : fond transparent, icônes sombres (heure,
+        // réseau, batterie lisibles sur les écrans blancs). Sans ce réglage,
+        // les icônes blanches laissées par un écran bleu (connexion,
+        // inscription) devenaient invisibles sur l'accueil. Les écrans à
+        // en-tête bleu posent leur propre réglage, qui l'emporte.
+        builder: (context, child) => AnnotatedRegion<SystemUiOverlayStyle>(
+          value: const SystemUiOverlayStyle(
+            statusBarColor: Colors.transparent,
+            statusBarIconBrightness: Brightness.dark,
+            statusBarBrightness: Brightness.light,
+            systemNavigationBarColor: Colors.white,
+            systemNavigationBarIconBrightness: Brightness.dark,
+          ),
+          child: child ?? const SizedBox.shrink(),
+        ),
       ),
     );
   }

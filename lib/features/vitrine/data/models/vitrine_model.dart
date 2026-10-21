@@ -54,6 +54,7 @@ class VitrineModel extends Vitrine {
     super.paiementLivraison,
     super.vues,
     super.logoEnregistre,
+    super.blocs,
   });
 
   /// Attend la charge utile de `/vendeur/ma-vitrine`, qui enveloppe les
@@ -87,6 +88,7 @@ class VitrineModel extends Vitrine {
       logoEnregistre: racine.containsKey('logoEnregistre')
           ? racine['logoEnregistre'] == true
           : null,
+      blocs: v['blocs'] is Map ? Map<String, dynamic>.from(v['blocs'] as Map) : const {},
     );
   }
 }

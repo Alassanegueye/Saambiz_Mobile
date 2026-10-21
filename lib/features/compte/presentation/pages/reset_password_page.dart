@@ -8,11 +8,11 @@ import '../bloc/compte_event.dart';
 import '../bloc/compte_state.dart';
 
 class _C {
-  static const green = Color(0xFF1B3A6B);
-  static const black = Color(0xFF1A1A1A);
+  static const green = Color(0xFF0D1B3D);
+  static const black = Color(0xFF0D1B3D);
   static const white = Color(0xFFFFFFFF);
-  static const bg = Color(0xFFF5F7F2);
-  static const border = Color(0xFFE3EAD0);
+  static const bg = Color(0xFFF5F7FB);
+  static const border = Color(0xFFE3E8F0);
 }
 
 /// POST /account/reset-password

@@ -3,38 +3,38 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:saambiz/core/routes/app_router.dart';
 
-// ─── Palette SaamBiz ───────────────────────────────────────────────────────────
-class _C {
-  static const gold = Color(0xFFD4A72C);
-  static const white = Color(0xFFFFFFFF);
-}
+import '../../../../core/theme/app_color.dart';
 
-/// Un écran d'onboarding : son visuel, et le bleu marine sur lequel il se
-/// termine.
-///
-/// Les trois visuels ne sont pas au même format et ne finissent pas sur
-/// exactement le même bleu. Calés sur la largeur (aucun texte tronqué), ils
-/// laissent donc sous eux une hauteur variable : c'est cette couleur, relevée
-/// sur la dernière ligne de chaque image, qui la remplit. L'écran se lit alors
-/// comme un seul visuel plein écran, sans démarcation.
+/// Fond des illustrations : blanc à peine cassé, repris tel quel pour que
+/// l'image se fonde dans l'écran sans démarcation.
+const Color _fond = Color(0xFFFEFEFE);
+
+/// Un écran d'onboarding : son illustration, son titre et son texte.
 class _Slide {
   final String image;
-  final Color fond;
-  const _Slide(this.image, this.fond);
-
-  /// Encre des boutons or : le même bleu marine sur les trois écrans, pour
-  /// que le bouton ne change pas de teinte d'une page à l'autre.
-  static const Color encreBouton = Color(0xFF04223D);
+  final String titre;
+  final String texte;
+  const _Slide(this.image, this.titre, this.texte);
 }
 
-// Versions rognées de 1.png / 2.png / 3.png (sources dans design/onboarding) :
-// les points de progression et le bouton « Commencer » gravés dans les visuels
-// ont été coupés, c'est le code qui les dessine — états animés et vraie zone
-// tactile.
+// Illustrations 3D (sources : saambiz_3d_0X_*.png), recadrées sur la partie
+// illustrée et fondues dans le blanc en bas : le texte se pose dessous.
 const List<_Slide> _slides = [
-  _Slide('assets/images/onb1.jpg', Color(0xFF031F37)),
-  _Slide('assets/images/onb2.jpg', Color(0xFF011226)),
-  _Slide('assets/images/onb3.jpg', Color(0xFF02213D)),
+  _Slide(
+    'assets/images/onb1.webp',
+    'Créez votre boutique en quelques minutes',
+    'Ajoutez vos produits, vos prix et vos photos directement depuis votre téléphone.',
+  ),
+  _Slide(
+    'assets/images/onb2.webp',
+    'Gérez vos ventes et vos promotions',
+    'Suivez vos commandes et vos livraisons, et lancez des offres pour vos abonnés.',
+  ),
+  _Slide(
+    'assets/images/onb3.webp',
+    'Votre boutique a son propre site web',
+    'Partagez votre lien sur WhatsApp : vos clients commandent sans rien installer.',
+  ),
 ];
 
 class OnboardingPage extends StatefulWidget {
@@ -47,6 +47,16 @@ class OnboardingPage extends StatefulWidget {
 class _OnboardingPageState extends State<OnboardingPage> {
   final PageController _controller = PageController();
   int _index = 0;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Les trois illustrations sont chargées d'avance : pas d'écran vide au
+    // premier balayage.
+    for (final s in _slides) {
+      precacheImage(AssetImage(s.image), context);
+    }
+  }
 
   @override
   void dispose() {
@@ -75,87 +85,56 @@ class _OnboardingPageState extends State<OnboardingPage> {
   @override
   Widget build(BuildContext context) {
     final isLast = _index == _slides.length - 1;
-    final fond = _slides[_index].fond;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      // Le visuel monte jusque sous la barre d'état, et son haut est clair :
-      // il faut des icônes système sombres pour rester lisible.
+      // Écran clair : icônes système sombres.
       value: const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
         statusBarIconBrightness: Brightness.dark,
         statusBarBrightness: Brightness.light,
       ),
       child: Scaffold(
-        // Le fond suit le visuel courant, en fondu pendant le balayage.
-        backgroundColor: fond,
-        body: AnimatedContainer(
-          duration: const Duration(milliseconds: 320),
-          color: fond,
-          child: Stack(
+        backgroundColor: _fond,
+        body: SafeArea(
+          child: Column(
             children: [
-              // Chaque page peint son propre fond : pendant le balayage, on voit
-              // celui de la page qui arrive, pas celui de la précédente.
-              PageView.builder(
-                controller: _controller,
-                itemCount: _slides.length,
-                onPageChanged: (i) => setState(() => _index = i),
-                itemBuilder: (_, i) => Container(
-                  color: _slides[i].fond,
-                  child: Align(
-                    alignment: Alignment.topCenter,
-                    child: Image.asset(
-                      _slides[i].image,
-                      // Calé sur la largeur : aucun recadrage horizontal, donc
-                      // aucun texte tronqué. La hauteur restante est comblée par
-                      // le fond du visuel, dans la continuité de son bandeau.
-                      fit: BoxFit.fitWidth,
-                      width: double.infinity,
-                      alignment: Alignment.topCenter,
+              // « Passer » en haut à droite (masqué sur la dernière étape)
+              SizedBox(
+                height: 48,
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: AnimatedOpacity(
+                    duration: const Duration(milliseconds: 200),
+                    opacity: isLast ? 0 : 1,
+                    child: TextButton(
+                      onPressed: isLast ? null : _finish,
+                      child: Text(
+                        'Passer',
+                        style: GoogleFonts.plusJakartaSans(
+                          color: AppColor.kGrayscale40,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                        ),
+                      ),
                     ),
                   ),
                 ),
               ),
 
-              // Bouton « Passer » (masqué sur la dernière étape)
-              if (!isLast)
-                Positioned(
-                  top: MediaQuery.of(context).padding.top + 6,
-                  right: 12,
-                  child: TextButton(
-                    onPressed: _finish,
-                    child: Text(
-                      'Passer',
-                      style: GoogleFonts.dmSans(
-                        color: _C.white,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ),
+              // Illustration + texte : défilent ensemble au balayage.
+              Expanded(
+                child: PageView.builder(
+                  controller: _controller,
+                  itemCount: _slides.length,
+                  onPageChanged: (i) => setState(() => _index = i),
+                  itemBuilder: (_, i) => _PageSlide(slide: _slides[i]),
                 ),
+              ),
 
-              // Barre navy en bas : masque les points gravés + points animés + bouton
-              Positioned(
-                left: 0,
-                right: 0,
-                bottom: 0,
-                child: Container(
-                  padding: EdgeInsets.fromLTRB(
-                    24,
-                    34,
-                    24,
-                    MediaQuery.of(context).padding.bottom + 20,
-                  ),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [fond.withOpacity(0), fond, fond],
-                      stops: const [0.0, 0.55, 1.0],
-                    ),
-                  ),
-                  child: isLast ? _buildLastBar() : _buildStepBar(),
-                ),
+              // Points de progression + bouton
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 8, 24, 20),
+                child: isLast ? _buildLastBar() : _buildStepBar(),
               ),
             ],
           ),
@@ -170,33 +149,25 @@ class _OnboardingPageState extends State<OnboardingPage> {
       children: [
         _buildDots(),
         const Spacer(),
-        GestureDetector(
-          onTap: _next,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 13),
-            decoration: BoxDecoration(
-              color: _C.gold,
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'Suivant',
-                  style: GoogleFonts.sora(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w800,
-                    color: _Slide.encreBouton,
-                  ),
-                ),
-                const SizedBox(width: 6),
-                const Icon(
-                  Icons.arrow_forward_rounded,
-                  color: _Slide.encreBouton,
-                  size: 20,
-                ),
-              ],
-            ),
+        ElevatedButton(
+          onPressed: _next,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColor.kPrimary,
+            foregroundColor: AppColor.kWhite,
+            elevation: 0,
+            padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Suivant',
+                style: GoogleFonts.plusJakartaSans(fontSize: 15, fontWeight: FontWeight.w700),
+              ),
+              const SizedBox(width: 6),
+              const Icon(Icons.arrow_forward_rounded, size: 19),
+            ],
           ),
         ),
       ],
@@ -212,23 +183,18 @@ class _OnboardingPageState extends State<OnboardingPage> {
         const SizedBox(height: 18),
         SizedBox(
           width: double.infinity,
+          height: 52,
           child: ElevatedButton(
             onPressed: _finish,
             style: ElevatedButton.styleFrom(
-              backgroundColor: _C.gold,
-              foregroundColor: _Slide.encreBouton,
+              backgroundColor: AppColor.kSecondary,
+              foregroundColor: AppColor.kPrimary,
               elevation: 0,
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
             ),
             child: Text(
               'Commencer',
-              style: GoogleFonts.sora(
-                fontSize: 16,
-                fontWeight: FontWeight.w800,
-              ),
+              style: GoogleFonts.plusJakartaSans(fontSize: 16, fontWeight: FontWeight.w700),
             ),
           ),
         ),
@@ -245,14 +211,64 @@ class _OnboardingPageState extends State<OnboardingPage> {
         return AnimatedContainer(
           duration: const Duration(milliseconds: 260),
           margin: const EdgeInsets.symmetric(horizontal: 4),
-          width: active ? 24 : 9,
-          height: 9,
+          width: active ? 24 : 8,
+          height: 8,
           decoration: BoxDecoration(
-            color: active ? _C.gold : _C.white.withOpacity(0.35),
-            borderRadius: BorderRadius.circular(5),
+            color: active ? AppColor.kPrimary : AppColor.kGrayscale20,
+            borderRadius: BorderRadius.circular(4),
           ),
         );
       }),
+    );
+  }
+}
+
+/// Une page : l'illustration prend la place disponible (sans être rognée),
+/// le titre et le texte se posent dessous, dans le blanc de l'image.
+class _PageSlide extends StatelessWidget {
+  final _Slide slide;
+  const _PageSlide({required this.slide});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Expanded(
+          child: Image.asset(
+            slide.image,
+            fit: BoxFit.contain,
+            width: double.infinity,
+            alignment: Alignment.bottomCenter,
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(28, 8, 28, 12),
+          child: Column(
+            children: [
+              Text(
+                slide.titre,
+                textAlign: TextAlign.center,
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w700,
+                  height: 1.25,
+                  color: AppColor.kPrimary,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                slide.texte,
+                textAlign: TextAlign.center,
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 15,
+                  height: 1.55,
+                  color: AppColor.kGrayscale40,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

@@ -10,14 +10,16 @@ import '../bloc/messagerie_bloc.dart';
 import '../bloc/messagerie_event.dart';
 import '../bloc/messagerie_state.dart';
 import 'chat_page.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:saambiz/core/utils/image_url.dart';
 
 class _C {
-  static const green = Color(0xFF1B3A6B);
-  static const black = Color(0xFF1A1A1A);
+  static const green = Color(0xFF0D1B3D);
+  static const black = Color(0xFF0D1B3D);
   static const white = Color(0xFFFFFFFF);
-  static const bg = Color(0xFFF5F7F2);
-  static const sub = Color(0xFF7A8473);
-  static const border = Color(0xFFE3EAD0);
+  static const bg = Color(0xFFF5F7FB);
+  static const sub = Color(0xFF5B6C8A);
+  static const border = Color(0xFFE3E8F0);
 }
 
 /// Liste des conversations (GET /messages/conversations), rafraîchie en
@@ -99,7 +101,7 @@ class _ConversationsViewState extends State<_ConversationsView> {
                     leading: CircleAvatar(
                       backgroundColor: _C.green.withOpacity(0.15),
                       backgroundImage: (c.interlocuteurPhoto ?? '').isNotEmpty
-                          ? NetworkImage(c.interlocuteurPhoto!)
+                          ? CachedNetworkImageProvider(imageOptimisee(c.interlocuteurPhoto!))
                           : null,
                       child: (c.interlocuteurPhoto ?? '').isEmpty
                           ? Text(

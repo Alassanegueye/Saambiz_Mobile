@@ -13,6 +13,7 @@ class CreerBoutiqueRequested extends BoutiqueEvent {
   final String localisation;
   final String telephone;
   final String? categorie;
+  final List<String>? categories;
   final String? slogan;
   final String? logoPath;
 
@@ -22,13 +23,14 @@ class CreerBoutiqueRequested extends BoutiqueEvent {
     required this.localisation,
     required this.telephone,
     this.categorie,
+    this.categories,
     this.slogan,
     this.logoPath,
   });
 
   @override
   List<Object?> get props =>
-      [nom, description, localisation, telephone, categorie, slogan, logoPath];
+      [nom, description, localisation, telephone, categorie, categories, slogan, logoPath];
 }
 
 class ModifierBoutiqueRequested extends BoutiqueEvent {
@@ -37,6 +39,7 @@ class ModifierBoutiqueRequested extends BoutiqueEvent {
   final String? localisation;
   final String? telephone;
   final String? categorie;
+  final List<String>? categories;
   final String? slogan;
   final String? logoPath;
 
@@ -46,13 +49,14 @@ class ModifierBoutiqueRequested extends BoutiqueEvent {
     this.localisation,
     this.telephone,
     this.categorie,
+    this.categories,
     this.slogan,
     this.logoPath,
   });
 
   @override
   List<Object?> get props =>
-      [nom, description, localisation, telephone, categorie, slogan, logoPath];
+      [nom, description, localisation, telephone, categorie, categories, slogan, logoPath];
 }
 
 class PauseBoutiqueRequested extends BoutiqueEvent {}

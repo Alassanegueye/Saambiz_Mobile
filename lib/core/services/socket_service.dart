@@ -1,7 +1,8 @@
 import 'dart:async';
 
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
+
+import '../config/env.dart';
 
 import '../utils/app_logger.dart';
 import 'token_service.dart';
@@ -45,7 +46,10 @@ class SocketService {
 
   /// Origine du serveur socket.io (racine, sans le suffixe de chemin de l'API).
   String _socketOrigin() {
-    final baseUrl = dotenv.maybeGet('API_BASE_URL')?.trim() ?? '';
+    // Même adresse que le client HTTP. Ce service lisait `dotenv` en direct :
+    // il pouvait donc viser un serveur différent de celui des appels API dès
+    // que le --dart-define et le .env divergeaient.
+    final baseUrl = Env.apiBaseUrlEffective.trim();
     final uri = Uri.tryParse(baseUrl);
     if (uri == null) return baseUrl;
     return uri.replace(path: '', query: '').toString();

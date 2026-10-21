@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-/// Le site web public de la boutique : `saambiz.sn/b/<slug>`.
+/// Le site web public de la boutique : `saambiz.com/b/<slug>`.
 ///
 /// À ne pas confondre avec l'affichage de la boutique DANS l'application, qui
 /// est le même pour toutes : un client qui parcourt SaamBiz doit reconnaître
@@ -39,6 +39,10 @@ class Vitrine extends Equatable {
   /// et l'écran d'arrivée le signale pour qu'il le reprenne.
   final bool? logoEnregistre;
 
+  /// Contenus composés par le vendeur : { icones: {categorieId: cle},
+  /// avantages: [{icone, titre, texte}] }.
+  final Map<String, dynamic> blocs;
+
   const Vitrine({
     required this.slug,
     required this.url,
@@ -58,13 +62,14 @@ class Vitrine extends Equatable {
     this.paiementLivraison = true,
     this.vues = 0,
     this.logoEnregistre,
+    this.blocs = const {},
   });
 
   @override
   List<Object?> get props => [
         slug, url, active, configuree, modele, accent, apropos, annonce,
         horaires, secteur, activite, logoForme, reseaux, sections, commande,
-        paiementLivraison, vues, logoEnregistre,
+        paiementLivraison, vues, logoEnregistre, blocs,
       ];
 }
 

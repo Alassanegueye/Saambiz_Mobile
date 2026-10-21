@@ -15,21 +15,23 @@ import '../../../../vendeur/domain/usecases/get_vendeur_dashboard.dart';
 import '../../../../commande/data/datasources/commande_remote_datasource.dart';
 import '../../../../commande/data/models/commande_model.dart';
 import '../../../../notifications/presentation/pages/notifications_page.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:saambiz/core/utils/image_url.dart';
 
 
 class _C {
-  static const green       = Color(0xFF1B3A6B); // navy (héritage de nom)
-  static const navyDk      = Color(0xFF0F2547);
-  static const gold        = Color(0xFFD4A72C);
+  static const green       = Color(0xFF0D1B3D); // navy (héritage de nom)
+  static const navyDk      = Color(0xFF060F26);
+  static const gold        = Color(0xFFF2B705);
   static const greenLight  = Color(0xFFE8EEF7);
-  static const black       = Color(0xFF1A1A1A);
+  static const black       = Color(0xFF0D1B3D);
   static const white       = Color(0xFFFFFFFF);
   static const success     = Color(0xFF1E9E62);
   static const bg          = Color(0xFFF7F8FA);
-  static const surface     = Color(0xFFF7F9F5);
-  static const border      = Color(0xFFF0F4EC);
-  static const label       = Color(0xFF9EAA94);
-  static const sub         = Color(0xFF7A8473);
+  static const surface     = Color(0xFFF7F9FC);
+  static const border      = Color(0xFFE8EDF7);
+  static const label       = Color(0xFF93A1B8);
+  static const sub         = Color(0xFF5B6C8A);
   static const orange      = Color(0xFFFF5722);
   static const amber       = Color(0xFFFF9800);
   static const whatsapp    = Color(0xFF25D366);
@@ -287,8 +289,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 ),
                 clipBehavior: Clip.antiAlias,
                 child: hasLogo
-                    ? Image.network(_boutiques.first.logo!, fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) =>
+                    ? CachedNetworkImage(imageUrl: imageOptimisee(_boutiques.first.logo!), fit: BoxFit.cover,
+                        errorWidget: (_, __, ___) =>
                             const Icon(Icons.storefront_rounded, color: _C.green, size: 26))
                     : const Icon(Icons.storefront_rounded, color: _C.green, size: 26),
               ),
@@ -299,7 +301,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   children: [
                     Text(boutiqueNom,
                         maxLines: 1, overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.sora(fontSize: 17, fontWeight: FontWeight.w800, color: _C.white)),
+                        style: GoogleFonts.plusJakartaSans(fontSize: 17, fontWeight: FontWeight.w800, color: _C.white)),
                     const SizedBox(height: 3),
                     GestureDetector(
                       onTap: () {
@@ -307,7 +309,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       },
                       child: Row(mainAxisSize: MainAxisSize.min, children: [
                         Text('Voir ma boutique',
-                            style: GoogleFonts.dmSans(fontSize: 13, color: _C.gold, fontWeight: FontWeight.w600)),
+                            style: GoogleFonts.plusJakartaSans(fontSize: 13, color: _C.gold, fontWeight: FontWeight.w600)),
                         const Icon(Icons.chevron_right_rounded, color: _C.gold, size: 18),
                       ]),
                     ),
@@ -340,7 +342,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                         child: Text(
                           _notifNonLues > 99 ? '99+' : '$_notifNonLues',
                           textAlign: TextAlign.center,
-                          style: GoogleFonts.dmSans(fontSize: 10, fontWeight: FontWeight.w800, color: Colors.white),
+                          style: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.w800, color: Colors.white),
                         ),
                       ),
                     ),
@@ -361,7 +363,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text('Tableau de bord',
-              style: GoogleFonts.sora(fontSize: 18, fontWeight: FontWeight.w800, color: _C.black)),
+              style: GoogleFonts.plusJakartaSans(fontSize: 18, fontWeight: FontWeight.w800, color: _C.black)),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
             decoration: BoxDecoration(
@@ -371,7 +373,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             ),
             child: Row(mainAxisSize: MainAxisSize.min, children: [
               Text("Aujourd'hui",
-                  style: GoogleFonts.dmSans(fontSize: 12.5, fontWeight: FontWeight.w600, color: _C.sub)),
+                  style: GoogleFonts.plusJakartaSans(fontSize: 12.5, fontWeight: FontWeight.w600, color: _C.sub)),
               const SizedBox(width: 4),
               const Icon(Icons.keyboard_arrow_down_rounded, size: 18, color: _C.sub),
             ]),
@@ -414,7 +416,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: GoogleFonts.dmSans(fontSize: 13, color: _C.sub, fontWeight: FontWeight.w500)),
+          Text(label, style: GoogleFonts.plusJakartaSans(fontSize: 13, color: _C.sub, fontWeight: FontWeight.w500)),
           const SizedBox(height: 10),
           Row(
             crossAxisAlignment: CrossAxisAlignment.baseline,
@@ -423,11 +425,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               Flexible(
                 child: Text(value,
                     maxLines: 1, overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.sora(fontSize: 22, fontWeight: FontWeight.w800, color: _C.black)),
+                    style: GoogleFonts.plusJakartaSans(fontSize: 22, fontWeight: FontWeight.w800, color: _C.black)),
               ),
               if (unit != null) ...[
                 const SizedBox(width: 4),
-                Text(unit, style: GoogleFonts.dmSans(fontSize: 11, color: _C.sub)),
+                Text(unit, style: GoogleFonts.plusJakartaSans(fontSize: 11, color: _C.sub)),
               ],
             ],
           ),
@@ -436,7 +438,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             Row(children: [
               const Icon(Icons.arrow_upward_rounded, size: 13, color: _C.success),
               const SizedBox(width: 2),
-              Text(delta, style: GoogleFonts.dmSans(fontSize: 12, fontWeight: FontWeight.w700, color: _C.success)),
+              Text(delta, style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.w700, color: _C.success)),
             ]),
           ],
         ],
@@ -455,9 +457,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text('Commandes récentes',
-                  style: GoogleFonts.sora(fontSize: 16, fontWeight: FontWeight.w700, color: _C.black)),
+                  style: GoogleFonts.plusJakartaSans(fontSize: 16, fontWeight: FontWeight.w700, color: _C.black)),
               Text('Voir tout',
-                  style: GoogleFonts.dmSans(fontSize: 12.5, fontWeight: FontWeight.w600, color: _C.green)),
+                  style: GoogleFonts.plusJakartaSans(fontSize: 12.5, fontWeight: FontWeight.w600, color: _C.green)),
             ],
           ),
           const SizedBox(height: 12),
@@ -472,7 +474,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               ),
               child: Text('Aucune commande récente',
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.dmSans(fontSize: 13, color: _C.label)),
+                  style: GoogleFonts.plusJakartaSans(fontSize: 13, color: _C.label)),
             )
           else
             ..._recentOrders.map((o) {
@@ -502,29 +504,29 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                         children: [
                           Row(children: [
                             Text('#${o.referenceCommande}',
-                                style: GoogleFonts.sora(fontSize: 13.5, fontWeight: FontWeight.w700, color: _C.black)),
+                                style: GoogleFonts.plusJakartaSans(fontSize: 13.5, fontWeight: FontWeight.w700, color: _C.black)),
                             const SizedBox(width: 8),
                             Text('${_fmtNombre(o.montantTotal)} FCFA',
-                                style: GoogleFonts.sora(fontSize: 13, fontWeight: FontWeight.w700, color: _C.green)),
+                                style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.w700, color: _C.green)),
                           ]),
                           const SizedBox(height: 3),
                           Row(children: [
                             Flexible(
                               child: Text(o.acheteurNom ?? 'Client',
                                   maxLines: 1, overflow: TextOverflow.ellipsis,
-                                  style: GoogleFonts.dmSans(fontSize: 12, color: _C.sub)),
+                                  style: GoogleFonts.plusJakartaSans(fontSize: 12, color: _C.sub)),
                             ),
                             const SizedBox(width: 6),
-                            Text('•', style: GoogleFonts.dmSans(fontSize: 12, color: _C.label)),
+                            Text('•', style: GoogleFonts.plusJakartaSans(fontSize: 12, color: _C.label)),
                             const SizedBox(width: 6),
                             Text(st.label,
-                                style: GoogleFonts.dmSans(fontSize: 12, fontWeight: FontWeight.w600, color: st.color)),
+                                style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.w600, color: st.color)),
                           ]),
                         ],
                       ),
                     ),
                     Text(_timeAgo(o.createdAt),
-                        style: GoogleFonts.dmSans(fontSize: 10.5, color: _C.label)),
+                        style: GoogleFonts.plusJakartaSans(fontSize: 10.5, color: _C.label)),
                   ],
                 ),
               );
@@ -544,7 +546,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           onPressed: () {},
           icon: const Icon(Icons.add_rounded, size: 20),
           label: Text('Nouveau produit',
-              style: GoogleFonts.sora(fontSize: 15, fontWeight: FontWeight.w700)),
+              style: GoogleFonts.plusJakartaSans(fontSize: 15, fontWeight: FontWeight.w700)),
           style: ElevatedButton.styleFrom(
             backgroundColor: _C.green,
             foregroundColor: _C.white,
@@ -608,7 +610,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                               return Center(
                                 child: Text(
                                   initiales,
-                                  style: GoogleFonts.sora(
+                                  style: GoogleFonts.plusJakartaSans(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w800,
                                     color: _C.green,
@@ -620,7 +622,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                               : Center(
                             child: Text(
                               initiales,
-                              style: GoogleFonts.sora(
+                              style: GoogleFonts.plusJakartaSans(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w800,
                                 color: _C.green,
@@ -635,13 +637,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text('$prenom ${widget.user?.nom ?? ''}',
-                                style: GoogleFonts.sora(fontSize: 18, fontWeight: FontWeight.w800, color: _C.white, letterSpacing: -0.4)),
+                                style: GoogleFonts.plusJakartaSans(fontSize: 18, fontWeight: FontWeight.w800, color: _C.white, letterSpacing: -0.4)),
                             const SizedBox(height: 4),
                             Row(children: [
                               Icon(Icons.email_outlined, size: 12, color: _C.green.withOpacity(0.7)),
                               const SizedBox(width: 4),
                               Text(widget.user?.email ?? 'email@exemple.com',
-                                  style: GoogleFonts.sora(fontSize: 11, fontWeight: FontWeight.w500,
+                                  style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.w500,
                                       color: _C.white.withOpacity(0.6), letterSpacing: -0.2)),
                             ]),
                           ],
@@ -679,23 +681,23 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(color: _C.green.withOpacity(0.15), borderRadius: BorderRadius.circular(8)),
-                      child: Text('OFFRE SPÉCIALE', style: GoogleFonts.dmSans(fontSize: 10, fontWeight: FontWeight.w700, color: _C.green, letterSpacing: 0.5)),
+                      child: Text('OFFRE SPÉCIALE', style: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.w700, color: _C.green, letterSpacing: 0.5)),
                     ),
                     const SizedBox(height: 8),
                     RichText(text: TextSpan(children: [
-                      TextSpan(text: 'Livraison ',  style: GoogleFonts.sora(fontSize: 15, fontWeight: FontWeight.w800, color: _C.white)),
-                      TextSpan(text: 'offerte\n',   style: GoogleFonts.sora(fontSize: 15, fontWeight: FontWeight.w800, color: _C.green)),
-                      TextSpan(text: 'ce week-end !', style: GoogleFonts.sora(fontSize: 15, fontWeight: FontWeight.w800, color: _C.white)),
+                      TextSpan(text: 'Livraison ',  style: GoogleFonts.plusJakartaSans(fontSize: 15, fontWeight: FontWeight.w800, color: _C.white)),
+                      TextSpan(text: 'offerte\n',   style: GoogleFonts.plusJakartaSans(fontSize: 15, fontWeight: FontWeight.w800, color: _C.green)),
+                      TextSpan(text: 'ce week-end !', style: GoogleFonts.plusJakartaSans(fontSize: 15, fontWeight: FontWeight.w800, color: _C.white)),
                     ])),
                     const SizedBox(height: 4),
-                    Text('Sur toutes vos commandes', style: GoogleFonts.dmSans(fontSize: 11, color: _C.label)),
+                    Text('Sur toutes vos commandes', style: GoogleFonts.plusJakartaSans(fontSize: 11, color: _C.label)),
                   ],
                 ),
               ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                 decoration: BoxDecoration(color: _C.green, borderRadius: BorderRadius.circular(12)),
-                child: Text('En profiter', style: GoogleFonts.dmSans(fontSize: 12, fontWeight: FontWeight.w700, color: _C.white)),
+                child: Text('En profiter', style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.w700, color: _C.white)),
               ),
             ],
           ),
@@ -730,8 +732,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               decoration: BoxDecoration(color: color.withOpacity(0.10), borderRadius: BorderRadius.circular(10)),
               child: Icon(icon, size: 17, color: color)),
           const SizedBox(height: 6),
-          Text(value, style: GoogleFonts.sora(fontSize: 18, fontWeight: FontWeight.w800, color: _C.black)),
-          Text(label,  style: GoogleFonts.dmSans(fontSize: 10, color: _C.label, fontWeight: FontWeight.w500)),
+          Text(value, style: GoogleFonts.plusJakartaSans(fontSize: 18, fontWeight: FontWeight.w800, color: _C.black)),
+          Text(label,  style: GoogleFonts.plusJakartaSans(fontSize: 10, color: _C.label, fontWeight: FontWeight.w500)),
         ],
       ),
     );
@@ -744,8 +746,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(title, style: GoogleFonts.sora(fontSize: 15, fontWeight: FontWeight.w700, color: _C.black)),
-          Text('Voir tout', style: GoogleFonts.dmSans(fontSize: 12, fontWeight: FontWeight.w600, color: _C.green)),
+          Text(title, style: GoogleFonts.plusJakartaSans(fontSize: 15, fontWeight: FontWeight.w700, color: _C.black)),
+          Text('Voir tout', style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.w600, color: _C.green)),
         ],
       ),
     );
@@ -766,14 +768,14 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           children: [
             const Icon(Icons.error_outline_rounded, color: _C.orange, size: 40),
             const SizedBox(height: 8),
-            Text('Erreur: $_boutiquesError', style: GoogleFonts.dmSans(color: _C.orange), textAlign: TextAlign.center),
+            Text('Erreur: $_boutiquesError', style: GoogleFonts.plusJakartaSans(color: _C.orange), textAlign: TextAlign.center),
             const SizedBox(height: 12),
             GestureDetector(
               onTap: _fetchBoutiques,
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                 decoration: BoxDecoration(color: _C.black, borderRadius: BorderRadius.circular(12)),
-                child: Text('Réessayer', style: GoogleFonts.dmSans(color: _C.white, fontWeight: FontWeight.w600)),
+                child: Text('Réessayer', style: GoogleFonts.plusJakartaSans(color: _C.white, fontWeight: FontWeight.w600)),
               ),
             ),
           ],
@@ -783,7 +785,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     if (_boutiques.isEmpty) {
       return Padding(
         padding: const EdgeInsets.all(32),
-        child: Center(child: Text('Aucune boutique disponible', style: GoogleFonts.dmSans(color: _C.label))),
+        child: Center(child: Text('Aucune boutique disponible', style: GoogleFonts.plusJakartaSans(color: _C.label))),
       );
     }
 
@@ -816,7 +818,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 color: _C.greenLight,
                 borderRadius: BorderRadius.circular(12),
                 image: hasLogo
-                    ? DecorationImage(image: NetworkImage(boutique.logo!), fit: BoxFit.cover)
+                    ? DecorationImage(image: CachedNetworkImageProvider(imageOptimisee(boutique.logo!)), fit: BoxFit.cover)
                     : null,
               ),
               child: hasLogo ? null : const Icon(Icons.storefront_rounded, color: _C.green, size: 22),
@@ -827,16 +829,16 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(boutique.nom,
-                      style: GoogleFonts.sora(fontSize: 13, fontWeight: FontWeight.w700, color: _C.black)),
+                      style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.w700, color: _C.black)),
                   Text(sousTitre,
-                      style: GoogleFonts.dmSans(fontSize: 11, color: _C.label),
+                      style: GoogleFonts.plusJakartaSans(fontSize: 11, color: _C.label),
                       maxLines: 1, overflow: TextOverflow.ellipsis),
                   if (horaires.isNotEmpty) ...[
                     const SizedBox(height: 2),
                     Row(children: [
                       const Icon(Icons.access_time_rounded, size: 10, color: _C.green),
                       const SizedBox(width: 3),
-                      Text(horaires, style: GoogleFonts.dmSans(fontSize: 10, color: _C.green)),
+                      Text(horaires, style: GoogleFonts.plusJakartaSans(fontSize: 10, color: _C.green)),
                     ]),
                   ],
                 ],
@@ -846,7 +848,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(color: _C.greenLight, borderRadius: BorderRadius.circular(10)),
               child: Text(boutique.vendeurNomComplet,
-                  style: GoogleFonts.dmSans(fontSize: 10, fontWeight: FontWeight.w600, color: _C.sub),
+                  style: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.w600, color: _C.sub),
                   maxLines: 1, overflow: TextOverflow.ellipsis),
             ),
             const SizedBox(width: 8),
@@ -889,7 +891,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             final produits = state.produits;
             if (produits.isEmpty) {
               return Center(child: Padding(padding: const EdgeInsets.all(32),
-                  child: Text('Aucun produit disponible', style: GoogleFonts.dmSans(color: _C.label))));
+                  child: Text('Aucun produit disponible', style: GoogleFonts.plusJakartaSans(color: _C.label))));
             }
             return GridView.builder(
               shrinkWrap: true,
@@ -904,14 +906,14 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 child: Column(children: [
                   const Icon(Icons.error_outline_rounded, color: _C.orange, size: 40),
                   const SizedBox(height: 8),
-                  Text('Erreur: ${state.message}', style: GoogleFonts.dmSans(color: _C.orange), textAlign: TextAlign.center),
+                  Text('Erreur: ${state.message}', style: GoogleFonts.plusJakartaSans(color: _C.orange), textAlign: TextAlign.center),
                   const SizedBox(height: 12),
                   GestureDetector(
                     onTap: () => _produitBloc?.add(LoadProduits()),
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                       decoration: BoxDecoration(color: _C.black, borderRadius: BorderRadius.circular(12)),
-                      child: Text('Réessayer', style: GoogleFonts.dmSans(color: _C.white, fontWeight: FontWeight.w600)),
+                      child: Text('Réessayer', style: GoogleFonts.plusJakartaSans(color: _C.white, fontWeight: FontWeight.w600)),
                     ),
                   ),
                 ])));
@@ -935,7 +937,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 color: _C.surface,
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(17)),
                 image: produit.image.isNotEmpty
-                    ? DecorationImage(image: NetworkImage(produit.image), fit: BoxFit.cover)
+                    ? DecorationImage(image: CachedNetworkImageProvider(imageOptimisee(produit.image)), fit: BoxFit.cover)
                     : null,
               ),
               child: Stack(children: [
@@ -952,17 +954,17 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(produit.nom, style: GoogleFonts.sora(fontSize: 12, fontWeight: FontWeight.w700, color: _C.black),
+                Text(produit.nom, style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.w700, color: _C.black),
                     maxLines: 1, overflow: TextOverflow.ellipsis),
                 const SizedBox(height: 2),
-                Text(produit.ville, style: GoogleFonts.dmSans(fontSize: 10, color: _C.label)),
+                Text(produit.ville, style: GoogleFonts.plusJakartaSans(fontSize: 10, color: _C.label)),
                 const SizedBox(height: 8),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     RichText(text: TextSpan(children: [
-                      TextSpan(text: produit.prix, style: GoogleFonts.sora(fontSize: 13, fontWeight: FontWeight.w800, color: _C.black)),
-                      TextSpan(text: ' F',         style: GoogleFonts.dmSans(fontSize: 10, color: _C.label)),
+                      TextSpan(text: produit.prix, style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.w800, color: _C.black)),
+                      TextSpan(text: ' F',         style: GoogleFonts.plusJakartaSans(fontSize: 10, color: _C.label)),
                     ])),
                     Container(width: 28, height: 28,
                         decoration: BoxDecoration(color: _C.black, borderRadius: BorderRadius.circular(8)),
@@ -1045,7 +1047,7 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
             SnackBar(
               content: Text(
                 'Impossible d\'ouvrir WhatsApp. Veuillez vérifier que l\'application est installée.',
-                style: GoogleFonts.dmSans(color: _C.white),
+                style: GoogleFonts.plusJakartaSans(color: _C.white),
               ),
               backgroundColor: _C.orange,
               behavior: SnackBarBehavior.floating,
@@ -1059,7 +1061,7 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
           SnackBar(
             content: Text(
               'Erreur: ${e.toString()}',
-              style: GoogleFonts.dmSans(color: _C.white),
+              style: GoogleFonts.plusJakartaSans(color: _C.white),
             ),
             backgroundColor: _C.orange,
             behavior: SnackBarBehavior.floating,
@@ -1102,7 +1104,7 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
                     decoration: BoxDecoration(
                       color: _C.greenLight, borderRadius: BorderRadius.circular(14),
                       image: hasLogo
-                          ? DecorationImage(image: NetworkImage(widget.boutique.logo!), fit: BoxFit.cover)
+                          ? DecorationImage(image: CachedNetworkImageProvider(imageOptimisee(widget.boutique.logo!)), fit: BoxFit.cover)
                           : null,
                     ),
                     child: hasLogo ? null : const Icon(Icons.storefront_rounded, color: _C.green, size: 26),
@@ -1113,20 +1115,20 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(widget.boutique.nom,
-                            style: GoogleFonts.sora(fontSize: 16, fontWeight: FontWeight.w800, color: _C.black)),
+                            style: GoogleFonts.plusJakartaSans(fontSize: 16, fontWeight: FontWeight.w800, color: _C.black)),
                         if (widget.boutique.localisation.isNotEmpty)
                           Row(children: [
                             const Icon(Icons.location_on_outlined, size: 12, color: _C.green),
                             const SizedBox(width: 3),
                             Text(widget.boutique.localisation,
-                                style: GoogleFonts.dmSans(fontSize: 11, color: _C.label)),
+                                style: GoogleFonts.plusJakartaSans(fontSize: 11, color: _C.label)),
                           ]),
                         if (widget.boutique.horaires.isNotEmpty)
                           Row(children: [
                             const Icon(Icons.access_time_rounded, size: 12, color: _C.green),
                             const SizedBox(width: 3),
                             Text(widget.boutique.horaires,
-                                style: GoogleFonts.dmSans(fontSize: 11, color: _C.green)),
+                                style: GoogleFonts.plusJakartaSans(fontSize: 11, color: _C.green)),
                           ]),
                         const SizedBox(height: 4),
                         if (widget.boutique.vendeurNomComplet.isNotEmpty || widget.boutique.vendeurNumero.isNotEmpty)
@@ -1134,7 +1136,7 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
                             const Icon(Icons.person_outline, size: 12, color: _C.green),
                             const SizedBox(width: 3),
                             Text('${widget.boutique.vendeurNomComplet} (${widget.boutique.vendeurNumero})',
-                                style: GoogleFonts.dmSans(fontSize: 11, color: _C.label)),
+                                style: GoogleFonts.plusJakartaSans(fontSize: 11, color: _C.label)),
                           ]),
                       ],
                     ),
@@ -1161,12 +1163,12 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
                 padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
                 child: Row(children: [
                   Text('${_produits.length} produit${_produits.length > 1 ? 's' : ''}',
-                      style: GoogleFonts.sora(fontSize: 13, fontWeight: FontWeight.w700, color: _C.black)),
+                      style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.w700, color: _C.black)),
                   const Spacer(),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(color: _C.greenLight, borderRadius: BorderRadius.circular(8)),
-                    child: Text('En stock', style: GoogleFonts.dmSans(fontSize: 11, fontWeight: FontWeight.w600, color: _C.green)),
+                    child: Text('En stock', style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.w600, color: _C.green)),
                   ),
                 ]),
               ),
@@ -1203,14 +1205,14 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
         const Icon(Icons.error_outline_rounded, color: _C.orange, size: 40),
         const SizedBox(height: 8),
         Padding(padding: const EdgeInsets.symmetric(horizontal: 32),
-            child: Text(_error!, style: GoogleFonts.dmSans(color: _C.orange), textAlign: TextAlign.center)),
+            child: Text(_error!, style: GoogleFonts.plusJakartaSans(color: _C.orange), textAlign: TextAlign.center)),
         const SizedBox(height: 16),
         GestureDetector(
           onTap: () { setState(() { _loading = true; _error = null; }); _loadProduits(); },
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             decoration: BoxDecoration(color: _C.black, borderRadius: BorderRadius.circular(12)),
-            child: Text('Réessayer', style: GoogleFonts.dmSans(color: _C.white, fontWeight: FontWeight.w600)),
+            child: Text('Réessayer', style: GoogleFonts.plusJakartaSans(color: _C.white, fontWeight: FontWeight.w600)),
           ),
         ),
       ]),
@@ -1223,7 +1225,7 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
         const Icon(Icons.inventory_2_outlined, color: _C.label, size: 48),
         const SizedBox(height: 12),
         Text('Aucun produit dans cette boutique',
-            style: GoogleFonts.dmSans(fontSize: 14, color: _C.label)),
+            style: GoogleFonts.plusJakartaSans(fontSize: 14, color: _C.label)),
       ]),
     );
   }
@@ -1243,7 +1245,7 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
                 color: _C.surface,
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(17)),
                 image: produit.image.isNotEmpty
-                    ? DecorationImage(image: NetworkImage(produit.image), fit: BoxFit.cover)
+                    ? DecorationImage(image: CachedNetworkImageProvider(imageOptimisee(produit.image)), fit: BoxFit.cover)
                     : null,
               ),
               child: Stack(children: [
@@ -1260,17 +1262,17 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(produit.nom, style: GoogleFonts.sora(fontSize: 12, fontWeight: FontWeight.w700, color: _C.black),
+                Text(produit.nom, style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.w700, color: _C.black),
                     maxLines: 1, overflow: TextOverflow.ellipsis),
                 const SizedBox(height: 2),
-                Text(produit.ville, style: GoogleFonts.dmSans(fontSize: 10, color: _C.label)),
+                Text(produit.ville, style: GoogleFonts.plusJakartaSans(fontSize: 10, color: _C.label)),
                 const SizedBox(height: 8),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     RichText(text: TextSpan(children: [
-                      TextSpan(text: produit.prix, style: GoogleFonts.sora(fontSize: 13, fontWeight: FontWeight.w800, color: _C.black)),
-                      TextSpan(text: ' F',         style: GoogleFonts.dmSans(fontSize: 10, color: _C.label)),
+                      TextSpan(text: produit.prix, style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.w800, color: _C.black)),
+                      TextSpan(text: ' F',         style: GoogleFonts.plusJakartaSans(fontSize: 10, color: _C.label)),
                     ])),
                     // ── Bouton WhatsApp ──────────────────────────────────
                     GestureDetector(

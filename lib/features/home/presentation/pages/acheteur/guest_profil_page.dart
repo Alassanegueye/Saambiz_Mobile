@@ -2,215 +2,158 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:saambiz/core/routes/app_router.dart';
 
-// ─── Palette SaamBiz ───────────────────────────────────────────────────────────
-class _C {
-  static const navy    = Color(0xFF1B3A6B);
-  static const navyDk  = Color(0xFF0F2547);
-  static const gold    = Color(0xFFD4A72C);
-  static const white   = Color(0xFFFFFFFF);
-  static const bg      = Color(0xFFF5F7F2);
-  static const black   = Color(0xFF1A1A1A);
-  static const sub     = Color(0xFF7A8473);
-  static const border  = Color(0xFFE6EAF0);
-}
+import '../../../../../core/constants/infos_app.dart';
+import '../../../../../core/theme/app_color.dart';
+import '../../../../../core/utils/url_externe.dart';
+import '../../../../../core/widgets/app_app_bar.dart';
+import '../../../../../core/widgets/barre_navigation_verre.dart' show kEspaceBarreBas;
+import '../../../../../core/widgets/profil_kit.dart';
+import '../../../../compte/presentation/pages/aide_page.dart';
+import '../../../../notifications/presentation/pages/notifications_page.dart';
 
-/// Page profil affichée pour un visiteur NON connecté (mode invité).
-/// Elle diffère volontairement du profil d'un client connecté : au lieu des
-/// informations personnelles, elle invite à se connecter ou à créer un compte.
-class GuestProfilPage extends StatelessWidget {
+/// Onglet « Compte » d'un visiteur sans compte — même écran que Yobante
+/// Boutique : carte bleue de bienvenue (connexion / inscription), puis
+/// notifications et aide.
+class GuestProfilPage extends StatefulWidget {
   const GuestProfilPage({super.key});
 
   @override
+  State<GuestProfilPage> createState() => _GuestProfilPageState();
+}
+
+class _GuestProfilPageState extends State<GuestProfilPage> with SingleTickerProviderStateMixin {
+  late final AnimationController _fadeCtrl =
+      AnimationController(vsync: this, duration: const Duration(milliseconds: 450))..forward();
+  late final Animation<double> _fadeAnim = CurvedAnimation(parent: _fadeCtrl, curve: Curves.easeOut);
+
+  @override
+  void dispose() {
+    _fadeCtrl.dispose();
+    super.dispose();
+  }
+
+  void _ouvrir(Widget page) => Navigator.of(context).push(MaterialPageRoute(builder: (_) => page));
+
+  @override
   Widget build(BuildContext context) {
-    final canPop = Navigator.of(context).canPop();
-
     return Scaffold(
-      backgroundColor: _C.bg,
-      body: Column(
-        children: [
-          // En-tête navy avec bouton retour
-          Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [_C.navy, _C.navyDk],
-              ),
-            ),
-            child: SafeArea(
-              bottom: false,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(12, 8, 18, 28),
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        if (canPop)
-                          IconButton(
-                            onPressed: () => Navigator.of(context).pop(),
-                            icon: const Icon(Icons.arrow_back_ios_new_rounded,
-                                color: _C.white, size: 18),
-                          )
-                        else
-                          const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            'Profil',
-                            style: GoogleFonts.sora(
-                              fontSize: 17,
-                              fontWeight: FontWeight.w700,
-                              color: _C.white,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                    // Avatar invité
-                    Container(
-                      width: 88,
-                      height: 88,
-                      decoration: BoxDecoration(
-                        color: _C.white.withOpacity(0.12),
-                        shape: BoxShape.circle,
-                        border: Border.all(color: _C.gold.withOpacity(0.6), width: 2),
-                      ),
-                      child: const Icon(Icons.person_outline_rounded,
-                          color: _C.white, size: 44),
-                    ),
-                    const SizedBox(height: 14),
-                    Text(
-                      'Vous naviguez en invité',
-                      style: GoogleFonts.sora(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w800,
-                        color: _C.white,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      'Connectez-vous pour commander,\nsuivre vos achats et gérer votre compte.',
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.dmSans(
-                        fontSize: 13.5,
-                        height: 1.5,
-                        color: _C.white.withOpacity(0.8),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-
-          // Actions
-          Padding(
-            padding: const EdgeInsets.fromLTRB(22, 24, 22, 0),
-            child: Column(
-              children: [
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    onPressed: () =>
-                        Navigator.of(context).pushNamed(AppRouter.loginRoute),
-                    icon: const Icon(Icons.login_rounded, size: 18),
-                    label: Text('Se connecter',
-                        style: GoogleFonts.sora(
-                            fontSize: 15, fontWeight: FontWeight.w700)),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: _C.gold,
-                      foregroundColor: _C.navy,
-                      elevation: 0,
-                      padding: const EdgeInsets.symmetric(vertical: 15),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(13)),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton.icon(
-                    onPressed: () =>
-                        Navigator.of(context).pushNamed(AppRouter.profileChoiceRoute),
-                    icon: const Icon(Icons.person_add_alt_1_rounded, size: 18),
-                    label: Text('Créer un compte',
-                        style: GoogleFonts.sora(
-                            fontSize: 15, fontWeight: FontWeight.w700)),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: _C.navy,
-                      side: const BorderSide(color: _C.navy, width: 1.5),
-                      padding: const EdgeInsets.symmetric(vertical: 15),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(13)),
-                    ),
-                  ),
+      backgroundColor: AppColor.kBackground,
+      appBar: const AppAppBar(title: 'Compte', implyLeading: false),
+      body: FadeTransition(
+        opacity: _fadeAnim,
+        child: ListView(
+          physics: const BouncingScrollPhysics(),
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, kEspaceBarreBas),
+          children: [
+            _carteBienvenue(),
+            const SizedBox(height: 24),
+            SectionProfil(
+              titre: 'Notifications',
+              entrees: [
+                LigneProfil(
+                  icone: Icons.notifications_none_rounded,
+                  libelle: 'Notifications',
+                  sousTitre: 'Suivi de vos commandes et alertes',
+                  onTap: () => _ouvrir(const NotificationsPage()),
                 ),
               ],
             ),
-          ),
-
-          const SizedBox(height: 28),
-
-          // Aperçu des fonctionnalités réservées aux membres
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 22),
-              children: [
-                _lockedTile(context, Icons.receipt_long_outlined, 'Mes commandes',
-                    'Suivez vos achats en temps réel'),
-                _lockedTile(context, Icons.favorite_border_rounded, 'Mes favoris',
-                    'Retrouvez vos boutiques préférées'),
-                _lockedTile(context, Icons.notifications_none_rounded, 'Notifications',
-                    'Restez informé des nouveautés'),
-                _lockedTile(context, Icons.settings_outlined, 'Paramètres du compte',
-                    'Gérez vos informations personnelles'),
+            const SizedBox(height: 16),
+            SectionProfil(
+              titre: 'Aide & Support',
+              entrees: [
+                LigneProfil(
+                  icone: Icons.help_outline_rounded,
+                  libelle: 'Centre d\'aide',
+                  sousTitre: 'Questions fréquentes',
+                  onTap: () => _ouvrir(const AidePage()),
+                ),
+                LigneProfil(
+                  icone: Icons.support_agent_outlined,
+                  libelle: 'Nous contacter',
+                  sousTitre: 'Service client',
+                  onTap: () => _ouvrir(const AidePage(contactSeulement: true)),
+                ),
+                LigneProfil(
+                  icone: Icons.star_border_rounded,
+                  libelle: 'Noter l\'application',
+                  sousTitre: 'Votre avis compte',
+                  onTap: () => UrlExterne.lancer(InfosApp.lienPlayStore),
+                ),
               ],
             ),
-          ),
-        ],
+            const SizedBox(height: 16),
+            const VersionApp(),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _lockedTile(
-      BuildContext context, IconData icon, String title, String subtitle) {
+  /// Carte bleue de bienvenue : pictogramme, présentation, connexion ou
+  /// inscription.
+  Widget _carteBienvenue() {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: _C.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: _C.border),
-      ),
-      child: Row(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(color: AppColor.kPrimary, borderRadius: BorderRadius.circular(22)),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: 42,
-            height: 42,
-            decoration: BoxDecoration(
-              color: _C.navy.withOpacity(0.08),
-              borderRadius: BorderRadius.circular(11),
-            ),
-            child: Icon(icon, color: _C.navy, size: 20),
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(color: AppColor.kWhite, borderRadius: BorderRadius.circular(14)),
+            child: Image.asset('assets/images/picto_navy.png', width: 32, height: 32),
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title,
-                    style: GoogleFonts.sora(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                        color: _C.black)),
-                const SizedBox(height: 2),
-                Text(subtitle,
-                    style: GoogleFonts.dmSans(fontSize: 12, color: _C.sub)),
-              ],
+          const SizedBox(height: 14),
+          Text(
+            'Bienvenue sur SaamBiz',
+            style: GoogleFonts.plusJakartaSans(fontSize: 19, fontWeight: FontWeight.w700, color: AppColor.kWhite),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Connectez-vous pour suivre vos commandes, retrouver vos favoris et finaliser votre panier.',
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 13,
+              height: 1.4,
+              color: AppColor.kWhite.withValues(alpha: 0.8),
             ),
           ),
-          const Icon(Icons.lock_outline_rounded, size: 16, color: _C.sub),
+          const SizedBox(height: 18),
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () => Navigator.of(context).pushNamed(AppRouter.loginRoute),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColor.kSecondary,
+                    foregroundColor: AppColor.kPrimary,
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    minimumSize: const Size.fromHeight(50),
+                  ),
+                  child: const FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text('Se connecter', maxLines: 1, softWrap: false),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: () => Navigator.of(context).pushNamed(AppRouter.profileChoiceRoute),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColor.kWhite,
+                    side: BorderSide(color: AppColor.kWhite.withValues(alpha: 0.6)),
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    minimumSize: const Size.fromHeight(50),
+                  ),
+                  child: const FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text('Créer un compte', maxLines: 1, softWrap: false),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );

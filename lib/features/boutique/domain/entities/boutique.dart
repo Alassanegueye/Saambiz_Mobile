@@ -10,6 +10,9 @@ class Boutique extends Equatable {
   final String? logo;
   final bool enPause;
 
+  /// Slugs des catégories (1 à 3), la principale en premier.
+  final List<String> categories;
+
   const Boutique({
     required this.id,
     required this.nom,
@@ -18,6 +21,7 @@ class Boutique extends Equatable {
     this.telephone,
     this.logo,
     this.enPause = false,
+    this.categories = const [],
   });
 
   @override
@@ -29,5 +33,6 @@ class Boutique extends Equatable {
         telephone,
         logo,
         enPause,
+        categories,
       ];
 }

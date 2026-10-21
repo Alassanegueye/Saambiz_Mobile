@@ -37,6 +37,7 @@ class BoutiqueRepositoryImpl implements BoutiqueRepository {
     required String description,
     required String localisation,
     required String telephone,
+    List<String>? categories,
     String? logoPath,
   }) async {
     try {
@@ -45,6 +46,7 @@ class BoutiqueRepositoryImpl implements BoutiqueRepository {
         description: description,
         localisation: localisation,
         telephone: telephone,
+        categories: categories,
         logoPath: logoPath,
       ));
     } catch (e) {
@@ -58,6 +60,7 @@ class BoutiqueRepositoryImpl implements BoutiqueRepository {
     String? description,
     String? localisation,
     String? telephone,
+    List<String>? categories,
     String? logoPath,
   }) async {
     try {
@@ -66,6 +69,7 @@ class BoutiqueRepositoryImpl implements BoutiqueRepository {
         description: description,
         localisation: localisation,
         telephone: telephone,
+        categories: categories,
         logoPath: logoPath,
       ));
     } catch (e) {

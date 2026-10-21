@@ -94,6 +94,7 @@ class VitrineBloc extends Bloc<VitrineEvent, VitrineState> {
       annonce: event.annonce,
       commande: event.commande,
       paiementLivraison: event.paiementLivraison,
+      blocs: event.blocs,
     );
     r.fold(
       (f) => emit(VitrineErreur(f.errorMessage)),

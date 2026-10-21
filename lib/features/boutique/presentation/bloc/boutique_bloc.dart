@@ -52,6 +52,7 @@ class BoutiqueBloc extends Bloc<BoutiqueEvent, BoutiqueState> {
       description: event.description,
       localisation: event.localisation,
       telephone: event.telephone,
+      categories: event.categories,
       logoPath: event.logoPath,
     );
     result.fold((f) => _emitFailure(f, emit), (b) => emit(BoutiqueLoaded(b)));
@@ -65,6 +66,7 @@ class BoutiqueBloc extends Bloc<BoutiqueEvent, BoutiqueState> {
       description: event.description,
       localisation: event.localisation,
       telephone: event.telephone,
+      categories: event.categories,
       logoPath: event.logoPath,
     );
     result.fold((f) => _emitFailure(f, emit), (b) => emit(BoutiqueLoaded(b)));

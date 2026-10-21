@@ -6,15 +6,16 @@ import '../../../../injection_container.dart';
 import '../../../home/data/models/produit_model.dart';
 import '../bloc/vendeur_produit_bloc.dart';
 import 'produit_form_page.dart';
+import 'package:saambiz/core/utils/image_url.dart';
 
 class _C {
-  static const green   = Color(0xFF1B3A6B);
-  static const navyDk  = Color(0xFF0F2547);
-  static const gold    = Color(0xFFD4A72C);
-  static const black   = Color(0xFF1A1A1A);
+  static const green   = Color(0xFF0D1B3D);
+  static const navyDk  = Color(0xFF060F26);
+  static const gold    = Color(0xFFF2B705);
+  static const black   = Color(0xFF0D1B3D);
   static const white   = Color(0xFFFFFFFF);
   static const bg      = Color(0xFFF7F8FA);
-  static const sub     = Color(0xFF7A8473);
+  static const sub     = Color(0xFF5B6C8A);
   static const border  = Color(0xFFE6EAF0);
   static const success = Color(0xFF1E9E62);
   static const danger  = Color(0xFFD64533);
@@ -134,7 +135,7 @@ class _MesProduitsViewState extends State<_MesProduitsView> {
             const SizedBox(width: 12),
           Expanded(
             child: Text('Mes produits',
-                style: GoogleFonts.sora(fontSize: 17, fontWeight: FontWeight.w800, color: _C.black)),
+                style: GoogleFonts.plusJakartaSans(fontSize: 17, fontWeight: FontWeight.w800, color: _C.black)),
           ),
           Container(
             width: 42, height: 42,
@@ -176,7 +177,7 @@ class _MesProduitsViewState extends State<_MesProduitsView> {
                 child: Text(
                   tabs[i],
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.dmSans(
+                  style: GoogleFonts.plusJakartaSans(
                     fontSize: 13,
                     fontWeight: active ? FontWeight.w700 : FontWeight.w500,
                     color: active ? _C.green : _C.sub,
@@ -206,7 +207,7 @@ class _MesProduitsViewState extends State<_MesProduitsView> {
             borderRadius: BorderRadius.circular(12),
             child: p.image.isNotEmpty
                 ? CachedNetworkImage(
-                    imageUrl: p.image,
+                    imageUrl: imageOptimisee(p.image),
                     width: 58, height: 58, fit: BoxFit.cover,
                     errorWidget: (_, __, ___) => _imgFallback(),
                   )
@@ -219,10 +220,10 @@ class _MesProduitsViewState extends State<_MesProduitsView> {
               children: [
                 Text(p.nom,
                     maxLines: 1, overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.sora(fontSize: 14, fontWeight: FontWeight.w700, color: _C.black)),
+                    style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.w700, color: _C.black)),
                 const SizedBox(height: 3),
                 Text('${p.prix} FCFA',
-                    style: GoogleFonts.dmSans(fontSize: 13, fontWeight: FontWeight.w600, color: _C.sub)),
+                    style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.w600, color: _C.sub)),
                 const SizedBox(height: 4),
                 Row(children: [
                   Container(
@@ -234,7 +235,7 @@ class _MesProduitsViewState extends State<_MesProduitsView> {
                   ),
                   const SizedBox(width: 5),
                   Text(enLigne ? 'En ligne' : 'Hors ligne',
-                      style: GoogleFonts.dmSans(
+                      style: GoogleFonts.plusJakartaSans(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
                           color: enLigne ? _C.success : _C.danger)),
@@ -278,7 +279,7 @@ class _MesProduitsViewState extends State<_MesProduitsView> {
           onPressed: () => _ouvrirForm(context),
           icon: const Icon(Icons.add_rounded, size: 20),
           label: Text('Ajouter un produit',
-              style: GoogleFonts.sora(fontSize: 15, fontWeight: FontWeight.w700)),
+              style: GoogleFonts.plusJakartaSans(fontSize: 15, fontWeight: FontWeight.w700)),
           style: ElevatedButton.styleFrom(
             backgroundColor: _C.green,
             foregroundColor: _C.white,
@@ -297,7 +298,7 @@ class _MesProduitsViewState extends State<_MesProduitsView> {
         const Icon(Icons.inventory_2_outlined, color: _C.sub, size: 46),
         const SizedBox(height: 12),
         Text('Aucun produit ici',
-            style: GoogleFonts.dmSans(fontSize: 14, color: _C.sub)),
+            style: GoogleFonts.plusJakartaSans(fontSize: 14, color: _C.sub)),
       ]),
     );
   }
@@ -312,12 +313,12 @@ class _MesProduitsViewState extends State<_MesProduitsView> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 32),
             child: Text(message, textAlign: TextAlign.center,
-                style: GoogleFonts.dmSans(color: _C.sub)),
+                style: GoogleFonts.plusJakartaSans(color: _C.sub)),
           ),
           const SizedBox(height: 12),
           TextButton(
             onPressed: () => context.read<VendeurProduitBloc>().add(LoadMesProduits()),
-            child: Text('Réessayer', style: GoogleFonts.dmSans(color: _C.green, fontWeight: FontWeight.w700)),
+            child: Text('Réessayer', style: GoogleFonts.plusJakartaSans(color: _C.green, fontWeight: FontWeight.w700)),
           ),
         ],
       ),
