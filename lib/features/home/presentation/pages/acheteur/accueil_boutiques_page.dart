@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:saambiz/core/widgets/logo_boutique.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:saambiz/core/utils/image_url.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -643,10 +644,7 @@ class _VisuelParDefaut extends StatelessWidget {
   const _VisuelParDefaut();
 
   @override
-  Widget build(BuildContext context) => Container(
-        color: AppColor.kSurface,
-        child: const Icon(Icons.storefront_outlined, color: AppColor.kGrayscale40),
-      );
+  Widget build(BuildContext context) => const LogoBoutiqueParDefaut();
 }
 
 /// Bloc attendu sur l'accueil : clé de la section côté serveur, titre par

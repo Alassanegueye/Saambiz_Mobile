@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:saambiz/core/widgets/logo_boutique.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
@@ -152,11 +153,10 @@ class _FavorisView extends StatelessWidget {
     );
   }
 
-  Widget _fallback() => Container(
+  Widget _fallback() => const SizedBox(
         width: 56,
         height: 56,
-        color: _C.bg,
-        child: const Icon(Icons.storefront_outlined, color: _C.sub),
+        child: LogoBoutiqueParDefaut(),
       );
 }
 

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:dio/dio.dart';
+import '../../../../../core/widgets/logo_boutique.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -15,6 +17,7 @@ import '../../../../vendeur/domain/usecases/get_vendeur_dashboard.dart';
 import '../../../../commande/data/datasources/commande_remote_datasource.dart';
 import '../../../../commande/data/models/commande_model.dart';
 import '../../../../notifications/presentation/pages/notifications_page.dart';
+import '../../../../abonnes/abonnes_page.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:saambiz/core/utils/image_url.dart';
 
@@ -291,8 +294,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 child: hasLogo
                     ? CachedNetworkImage(imageUrl: imageOptimisee(_boutiques.first.logo!), fit: BoxFit.cover,
                         errorWidget: (_, __, ___) =>
-                            const Icon(Icons.storefront_rounded, color: _C.green, size: 26))
-                    : const Icon(Icons.storefront_rounded, color: _C.green, size: 26),
+                            const LogoBoutiqueParDefaut())
+                    : const LogoBoutiqueParDefaut(),
               ),
               const SizedBox(width: 14),
               Expanded(
@@ -398,7 +401,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           Row(children: [
             Expanded(child: _statCard('Visites', _visites, null, null)),
             const SizedBox(width: 12),
-            Expanded(child: _statCard('Clients', _clients, null, null)),
+            // Le nombre d'abonnés ouvre la liste des clients abonnés.
+            Expanded(
+              child: GestureDetector(
+                onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AbonnesPage())),
+                child: _statCard('Abonnés', _clients, null, null),
+              ),
+            ),
           ]),
         ],
       ),
@@ -821,7 +830,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     ? DecorationImage(image: CachedNetworkImageProvider(imageOptimisee(boutique.logo!)), fit: BoxFit.cover)
                     : null,
               ),
-              child: hasLogo ? null : const Icon(Icons.storefront_rounded, color: _C.green, size: 22),
+              child: hasLogo ? null : const LogoBoutiqueParDefaut(rayon: 12),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -1005,11 +1014,15 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
   List<ProduitModel> _produits = [];
   bool               _loading  = true;
   String?            _error;
+  int?               _nbAbonnes;
 
   @override
   void initState() {
     super.initState();
     _loadProduits();
+    AbonnesService.charger().then((l) {
+      if (mounted) setState(() => _nbAbonnes = l.length);
+    }).catchError((_) {});
   }
 
   Future<void> _loadProduits() async {
@@ -1020,8 +1033,25 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
     try {
       final list = await widget.dataSource!.getProduitsByBoutique(widget.boutique.id);
       if (mounted) setState(() { _produits = list; _loading = false; });
+    } on DioException catch (e) {
+      // 404 = boutique sans produit : on affiche la boutique avec une liste vide.
+      if (e.response?.statusCode == 404) {
+        if (mounted) setState(() { _produits = []; _loading = false; });
+        return;
+      }
+      final pasDeReseau = e.type == DioExceptionType.connectionError ||
+          e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout;
+      if (mounted) {
+        setState(() {
+          _error = pasDeReseau
+              ? 'Connexion impossible. Vérifiez votre connexion internet.'
+              : 'Impossible de charger les produits de la boutique.';
+          _loading = false;
+        });
+      }
     } catch (e) {
-      if (mounted) setState(() { _error = e.toString(); _loading = false; });
+      if (mounted) setState(() { _error = 'Impossible de charger les produits de la boutique.'; _loading = false; });
     }
   }
 
@@ -1107,7 +1137,7 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
                           ? DecorationImage(image: CachedNetworkImageProvider(imageOptimisee(widget.boutique.logo!)), fit: BoxFit.cover)
                           : null,
                     ),
-                    child: hasLogo ? null : const Icon(Icons.storefront_rounded, color: _C.green, size: 26),
+                    child: hasLogo ? null : const LogoBoutiqueParDefaut(rayon: 14),
                   ),
                   const SizedBox(width: 14),
                   Expanded(
@@ -1164,6 +1194,24 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
                 child: Row(children: [
                   Text('${_produits.length} produit${_produits.length > 1 ? 's' : ''}',
                       style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.w700, color: _C.black)),
+                  const SizedBox(width: 10),
+                  // Nombre d'abonnés : ouvre la liste des clients abonnés.
+                  if (_nbAbonnes != null)
+                    InkWell(
+                      borderRadius: BorderRadius.circular(8),
+                      onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AbonnesPage())),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(color: _C.bg, borderRadius: BorderRadius.circular(8), border: Border.all(color: _C.border)),
+                        child: Row(mainAxisSize: MainAxisSize.min, children: [
+                          const Icon(Icons.people_alt_outlined, size: 14, color: _C.green),
+                          const SizedBox(width: 4),
+                          Text('$_nbAbonnes abonné${_nbAbonnes! > 1 ? 's' : ''}',
+                              style: GoogleFonts.plusJakartaSans(fontSize: 11.5, fontWeight: FontWeight.w700, color: _C.green)),
+                          const Icon(Icons.chevron_right_rounded, size: 16, color: _C.green),
+                        ]),
+                      ),
+                    ),
                   const Spacer(),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),

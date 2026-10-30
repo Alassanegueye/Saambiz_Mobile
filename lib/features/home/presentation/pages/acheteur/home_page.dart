@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:dio/dio.dart';
+import '../../../../../core/widgets/logo_boutique.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -514,8 +516,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               child: (b.logo != null && b.logo!.isNotEmpty)
                   ? CachedNetworkImage(imageUrl: imageOptimisee(b.logo!), fit: BoxFit.cover,
                       errorWidget: (_, __, ___) =>
-                          const Icon(Icons.storefront_rounded, color: _C.green, size: 26))
-                  : const Icon(Icons.storefront_rounded, color: _C.green, size: 26),
+                          const LogoBoutiqueParDefaut())
+                  : const LogoBoutiqueParDefaut(),
             ),
             const SizedBox(height: 10),
             Text(b.nom, maxLines: 1, overflow: TextOverflow.ellipsis,
@@ -830,7 +832,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     ? DecorationImage(image: CachedNetworkImageProvider(imageOptimisee(boutique.logo!)), fit: BoxFit.cover)
                     : null,
               ),
-              child: hasLogo ? null : const Icon(Icons.storefront_rounded, color: _C.green, size: 22),
+              child: hasLogo ? null : const LogoBoutiqueParDefaut(rayon: 12),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -1029,8 +1031,25 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
     try {
       final list = await widget.dataSource!.getProduitsByBoutique(widget.boutique.id);
       if (mounted) setState(() { _produits = list; _loading = false; });
+    } on DioException catch (e) {
+      // 404 = boutique sans produit : on affiche la boutique avec une liste vide.
+      if (e.response?.statusCode == 404) {
+        if (mounted) setState(() { _produits = []; _loading = false; });
+        return;
+      }
+      final pasDeReseau = e.type == DioExceptionType.connectionError ||
+          e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout;
+      if (mounted) {
+        setState(() {
+          _error = pasDeReseau
+              ? 'Connexion impossible. Vérifiez votre connexion internet.'
+              : 'Impossible de charger les produits de la boutique.';
+          _loading = false;
+        });
+      }
     } catch (e) {
-      if (mounted) setState(() { _error = e.toString(); _loading = false; });
+      if (mounted) setState(() { _error = 'Impossible de charger les produits de la boutique.'; _loading = false; });
     }
   }
 
@@ -1116,7 +1135,7 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
                           ? DecorationImage(image: CachedNetworkImageProvider(imageOptimisee(widget.boutique.logo!)), fit: BoxFit.cover)
                           : null,
                     ),
-                    child: hasLogo ? null : const Icon(Icons.storefront_rounded, color: _C.green, size: 26),
+                    child: hasLogo ? null : const LogoBoutiqueParDefaut(rayon: 14),
                   ),
                   const SizedBox(width: 14),
                   Expanded(

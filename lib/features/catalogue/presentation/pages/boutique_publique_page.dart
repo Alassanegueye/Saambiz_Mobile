@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:saambiz/core/widgets/logo_boutique.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:saambiz/core/utils/image_url.dart';
 
@@ -58,6 +59,7 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
   bool _suite = false;
   String? _erreur;
   bool _suivi = false;
+  bool _cloche = false;
 
   @override
   void initState() {
@@ -103,7 +105,12 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
     if (!await sl<TokenService>().isAuthenticated) return;
     try {
       final s = await sl<FavorisRemoteDataSource>().statutSuivi(widget.boutiqueId);
-      if (mounted) setState(() => _suivi = s['suivi'] == true);
+      if (mounted) {
+        setState(() {
+          _suivi = s['suivi'] == true;
+          _cloche = s['clocheActive'] == true;
+        });
+      }
     } catch (_) {}
   }
 
@@ -157,13 +164,36 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
       return;
     }
     final avant = _suivi;
-    setState(() => _suivi = !avant);
+    setState(() {
+      _suivi = !avant;
+      if (avant) _cloche = false;
+    });
     try {
       final ds = sl<FavorisRemoteDataSource>();
       avant ? await ds.supprimer(widget.boutiqueId) : await ds.ajouter(widget.boutiqueId);
-      _message(avant ? 'Vous ne suivez plus cette boutique.' : 'Vous suivez cette boutique : ses nouveautés arriveront sur votre accueil.');
+      _message(avant
+          ? 'Vous ne suivez plus cette boutique.'
+          : 'Vous suivez cette boutique. Activez la cloche 🔔 pour recevoir ses promotions et nouveautés.');
     } catch (_) {
       if (mounted) setState(() => _suivi = avant);
+      _message('Action impossible pour le moment.');
+    }
+  }
+
+  /// Cloche : seuls les abonnés qui l'activent reçoivent les notifications
+  /// de la boutique (promotions, nouveautés, messages).
+  Future<void> _basculerCloche() async {
+    final avant = _cloche;
+    setState(() => _cloche = !avant);
+    try {
+      final actif = await sl<FavorisRemoteDataSource>().toggleCloche(widget.boutiqueId, !avant);
+      if (!mounted) return;
+      setState(() => _cloche = actif);
+      _message(actif
+          ? 'Notifications activées : vous serez prévenu des promotions et nouveautés.'
+          : 'Notifications désactivées pour cette boutique.');
+    } catch (_) {
+      if (mounted) setState(() => _cloche = avant);
       _message('Action impossible pour le moment.');
     }
   }
@@ -323,9 +353,9 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
                     ? CachedNetworkImage(
                         imageUrl: imageOptimisee(logo, largeur: 256),
                         fit: BoxFit.cover,
-                        errorWidget: (_, __, ___) => Icon(Icons.storefront_outlined, size: 34, color: _accent),
+                        errorWidget: (_, __, ___) => const LogoBoutiqueParDefaut(),
                       )
-                    : Icon(Icons.storefront_outlined, size: 34, color: _accent),
+                    : const LogoBoutiqueParDefaut(),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -358,8 +388,9 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
             ],
           ),
           const SizedBox(height: 16),
-          SizedBox(
-            width: double.infinity,
+          Row(children: [
+            Expanded(
+              child: SizedBox(
             height: 46,
             child: OutlinedButton.icon(
               onPressed: _basculerSuivi,
@@ -372,7 +403,30 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
                 shape: const StadiumBorder(),
               ),
             ),
-          ),
+              ),
+            ),
+            // La cloche n'apparaît qu'une fois la boutique suivie.
+            if (_suivi) ...[
+              const SizedBox(width: 10),
+              Material(
+                color: _cloche ? _accent : AppColor.kWhite,
+                shape: StadiumBorder(side: BorderSide(color: _accent, width: 1.5)),
+                child: InkWell(
+                  customBorder: const StadiumBorder(),
+                  onTap: _basculerCloche,
+                  child: SizedBox(
+                    width: 56,
+                    height: 46,
+                    child: Icon(
+                      _cloche ? Icons.notifications_active_rounded : Icons.notifications_off_outlined,
+                      color: _cloche ? AppColor.kWhite : _accent,
+                      semanticLabel: _cloche ? 'Désactiver les notifications' : 'Activer les notifications',
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ]),
           if (telephone.isNotEmpty || whatsapp.isNotEmpty) ...[
             const SizedBox(height: 12),
             Row(children: [

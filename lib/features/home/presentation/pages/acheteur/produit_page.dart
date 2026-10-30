@@ -195,15 +195,16 @@ class _ProduitPageState extends State<ProduitPage> {
   // Ajoute un produit au panier local (règle : un seul vendeur par panier)
   Future<void> _ajouterAuPanier(ProduitModel p) async {
     final panier = sl<PanierService>();
+    final item = PanierItem(
+      produitId: p.id,
+      nom: p.nom,
+      prix: double.tryParse(p.prix) ?? 0,
+      image: p.image,
+      vendeurId: p.vendeurId,
+      vendeurNom: p.vendeurNom,
+    );
     try {
-      await panier.ajouter(PanierItem(
-        produitId: p.id,
-        nom: p.nom,
-        prix: double.tryParse(p.prix) ?? 0,
-        image: p.image,
-        vendeurId: p.vendeurId,
-        vendeurNom: p.vendeurNom,
-      ));
+      await panier.ajouter(item);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text('${p.nom} ajouté au panier'),
@@ -216,10 +217,21 @@ class _ProduitPageState extends State<ProduitPage> {
         ),
       ));
     } on PanierVendeurDifferentException catch (e) {
+      // Une commande = une boutique : on propose de vider l'ancien panier.
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.message), backgroundColor: Colors.orange),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(e.message),
+        backgroundColor: Colors.orange,
+        duration: const Duration(seconds: 6),
+        action: SnackBarAction(
+          label: 'Vider et ajouter',
+          textColor: Colors.white,
+          onPressed: () async {
+            await panier.vider();
+            await panier.ajouter(item);
+          },
+        ),
+      ));
     }
   }
 

@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:saambiz/core/widgets/logo_boutique.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:saambiz/core/utils/image_url.dart';
 
@@ -351,8 +352,5 @@ class _LogoParDefaut extends StatelessWidget {
   const _LogoParDefaut();
 
   @override
-  Widget build(BuildContext context) => Container(
-        color: const Color(0xFFEDF1F9),
-        child: const Icon(Icons.storefront_outlined, color: _C.textLight),
-      );
+  Widget build(BuildContext context) => const LogoBoutiqueParDefaut();
 }

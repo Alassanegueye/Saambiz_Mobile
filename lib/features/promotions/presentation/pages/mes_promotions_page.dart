@@ -6,6 +6,7 @@ import '../../../../injection_container.dart';
 import '../bloc/promotions_bloc.dart';
 import '../bloc/promotions_event.dart';
 import '../bloc/promotions_state.dart';
+import 'nouvelle_campagne_page.dart';
 import 'promotion_form_page.dart';
 
 class _C {
@@ -41,6 +42,51 @@ class _MesPromotionsView extends StatelessWidget {
     if (res == true) bloc.add(LoadMesPromotions());
   }
 
+  Future<void> _nouvelleCampagne(BuildContext context, TypeCampagne type) async {
+    final bloc = context.read<PromotionsBloc>();
+    final res = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(builder: (_) => NouvelleCampagnePage(type: type)),
+    );
+    if (res == true) bloc.add(LoadMesPromotions());
+  }
+
+  Widget _boutonsCreation(BuildContext context) {
+    return Container(
+      color: _C.white,
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+      child: Row(children: [
+        Expanded(
+          child: ElevatedButton.icon(
+            onPressed: () => _nouvelleCampagne(context, TypeCampagne.promotion),
+            icon: const Icon(Icons.local_offer_outlined, size: 18),
+            label: const Text('Ajouter une promotion'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: _C.green,
+              foregroundColor: _C.white,
+              elevation: 0,
+              padding: const EdgeInsets.symmetric(vertical: 13),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: OutlinedButton.icon(
+            onPressed: () => _nouvelleCampagne(context, TypeCampagne.information),
+            icon: const Icon(Icons.campaign_outlined, size: 18),
+            label: const Text('Informer mes clients'),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: _C.green,
+              side: const BorderSide(color: _C.green),
+              padding: const EdgeInsets.symmetric(vertical: 13),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+          ),
+        ),
+      ]),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -51,14 +97,13 @@ class _MesPromotionsView extends StatelessWidget {
         foregroundColor: _C.black,
         title: const Text('Mes promotions'),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: _C.green,
-        foregroundColor: _C.white,
-        onPressed: () => _ouvrirForm(context),
-        icon: const Icon(Icons.add),
-        label: const Text('Créer'),
-      ),
-      body: BlocConsumer<PromotionsBloc, PromotionsState>(
+      body: Column(
+        children: [
+          // Créer une promotion (remise sur des produits) ou informer ses
+          // clients (boutique ouverte, nouveautés, message libre).
+          _boutonsCreation(context),
+          Expanded(
+            child: BlocConsumer<PromotionsBloc, PromotionsState>(
         listener: (context, state) {
           if (state is PromotionsError) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -137,6 +182,9 @@ class _MesPromotionsView extends StatelessWidget {
           }
           return const SizedBox.shrink();
         },
+            ),
+          ),
+        ],
       ),
     );
   }

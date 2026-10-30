@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:saambiz/core/widgets/logo_boutique.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:saambiz/core/utils/image_url.dart';
 
@@ -458,9 +459,9 @@ class _ProduitDetailPageState extends State<ProduitDetailPage> {
                     ? CachedNetworkImage(
                         imageUrl: imageOptimisee(b.logo!, largeur: 200),
                         fit: BoxFit.cover,
-                        errorWidget: (_, __, ___) => const PastilleIcone(Icons.storefront_outlined, taille: 48),
+                        errorWidget: (_, __, ___) => const LogoBoutiqueParDefaut(),
                       )
-                    : const PastilleIcone(Icons.storefront_outlined, taille: 48),
+                    : const LogoBoutiqueParDefaut(),
               ),
             ),
             const SizedBox(width: 12),
