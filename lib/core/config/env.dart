@@ -21,7 +21,7 @@ import 'package:flutter/foundation.dart';
 /// Compilation de production :
 /// ```
 /// flutter build apk --release \
-///   --dart-define=API_BASE_URL=https://saambiz-back-uj2z.onrender.com/saambiz/v1 \
+///   --dart-define=API_BASE_URL=https://api.saambiz.com/saambiz/v1 \
 ///   --dart-define=ENVIRONNEMENT=prod \
 ///   --dart-define=EMPREINTES_CERTIFICAT=sha256/AAAA…,sha256/BBBB…
 /// ```
@@ -43,9 +43,14 @@ class Env {
   /// l'adresse IP du poste de développement par `--dart-define`.
   static const String apiBaseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    // Adresse de l'API en ligne (Render) : un build lancé sans --dart-define
-    // ni .env vise la production plutôt qu'un émulateur.
-    defaultValue: 'https://saambiz-back-uj2z.onrender.com/saambiz/v1',
+    // Adresse de l'API en ligne : un build lancé sans --dart-define ni .env
+    // vise la production plutôt qu'un émulateur.
+    //
+    // L'API tourne sur le VPS, derrière Nginx et Let's Encrypt. L'ancienne
+    // adresse Render reste joignable avec sa PROPRE base de données : un build
+    // qui la viserait encore enverrait les inscriptions dans un jeu de données
+    // que l'administration ne voit pas, sans qu'aucune erreur ne le signale.
+    defaultValue: 'https://api.saambiz.com/saambiz/v1',
   );
 
   /// Vrai si `API_BASE_URL` a réellement été passée par `--dart-define`.

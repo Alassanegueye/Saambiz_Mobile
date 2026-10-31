@@ -536,7 +536,18 @@ void _validateEnvVariables() {
   }
 
   _log('✅ Toutes les variables d\'environnement sont configurées');
-  _log('🌐 API Base URL: ${dotenv.get('API_BASE_URL')}');
+
+  // L'adresse RÉELLEMENT utilisée par Dio, et non celle du .env.
+  //
+  // Cette ligne affichait `dotenv.get('API_BASE_URL')`, alors que le client
+  // HTTP lit `Env.apiBaseUrlEffective` — et le `--dart-define` l'emporte sur
+  // le .env quand il est fourni (voir Env.resoudreApiBaseUrl). Un lancement de
+  // production annonçait donc « http://10.0.2.2:5000 » tout en appelant l'API
+  // réelle : on cherche alors un problème de configuration qui n'existe pas.
+  //
+  // La provenance est indiquée, parce que c'est la question suivante.
+  _log('🌐 API Base URL: ${Env.apiBaseUrlEffective}'
+      '${Env.apiBaseUrlCompilee ? ' (--dart-define)' : ' (.env)'}');
   _log('🔑 Auth Login Path: ${dotenv.get('AUTH_LOGIN_PATH')}');
   _log('📝 Auth Register Path: ${dotenv.get('AUTH_REGISTER_PATH')}');
 }
