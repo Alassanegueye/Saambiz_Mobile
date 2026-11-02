@@ -53,15 +53,19 @@ class EmptyState extends StatelessWidget {
           textAlign: TextAlign.center,
         ),
         if (subtitle.isNotEmpty) ...[
-        const SizedBox(height: 6),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Text(
-            subtitle,
-            style: const TextStyle(fontSize: 13, color: AppColor.kGrayscale40, height: 1.5),
-            textAlign: TextAlign.center,
+          const SizedBox(height: 6),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Text(
+              subtitle,
+              style: const TextStyle(
+                fontSize: 13,
+                color: AppColor.kGrayscale40,
+                height: 1.5,
+              ),
+              textAlign: TextAlign.center,
+            ),
           ),
-        ),
         ],
         if (onAction != null && actionLabel != null) ...[
           const SizedBox(height: 28),
@@ -104,10 +108,12 @@ class EmptyState extends StatelessWidget {
       children: [
         const SizedBox(height: 80),
         Center(
-          child: Padding(padding: const EdgeInsets.symmetric(horizontal: 32), child: content),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32),
+            child: content,
+          ),
         ),
       ],
     );
   }
 }
-

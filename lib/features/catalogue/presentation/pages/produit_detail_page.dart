@@ -58,7 +58,9 @@ class _ProduitDetailPageState extends State<ProduitDetailPage> {
   /// reste affichée pendant le chargement.
   Future<void> _charger() async {
     try {
-      final res = await CatalogueRemoteDataSource(sl<Dio>()).detail(widget.produit.id);
+      final res = await CatalogueRemoteDataSource(
+        sl<Dio>(),
+      ).detail(widget.produit.id);
       if (!mounted) return;
       setState(() {
         p = res.produit;
@@ -70,21 +72,31 @@ class _ProduitDetailPageState extends State<ProduitDetailPage> {
     }
   }
 
-  bool get _optionsCompletes => p.options.every((o) => _choix.containsKey(o.libelle));
+  bool get _optionsCompletes =>
+      p.options.every((o) => _choix.containsKey(o.libelle));
 
   Future<void> _ajouter() async {
     if (!_optionsCompletes) {
       setState(() => _choixManquant = true);
-      final manquante = p.options.firstWhere((o) => !_choix.containsKey(o.libelle));
+      final manquante = p.options.firstWhere(
+        (o) => !_choix.containsKey(o.libelle),
+      );
       ScaffoldMessenger.of(context)
         ..clearSnackBars()
-        ..showSnackBar(SnackBar(
-          content: Text('Choisissez : ${manquante.libelle.toLowerCase()}'),
-          behavior: SnackBarBehavior.floating,
-        ));
+        ..showSnackBar(
+          SnackBar(
+            content: Text('Choisissez : ${manquante.libelle.toLowerCase()}'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
       return;
     }
-    await ajouterAuPanier(context, p, quantite: _quantite, options: Map.of(_choix));
+    await ajouterAuPanier(
+      context,
+      p,
+      quantite: _quantite,
+      options: Map.of(_choix),
+    );
   }
 
   Future<void> _whatsapp() async {
@@ -94,7 +106,9 @@ class _ProduitDetailPageState extends State<ProduitDetailPage> {
       return;
     }
     final numero = tel.length == 9 ? '221$tel' : tel;
-    final texte = Uri.encodeComponent('Bonjour, je suis intéressé(e) par « ${p.nom} » vu sur SaamBiz.');
+    final texte = Uri.encodeComponent(
+      'Bonjour, je suis intéressé(e) par « ${p.nom} » vu sur SaamBiz.',
+    );
     final ok = await UrlExterne.lancer('https://wa.me/$numero?text=$texte');
     if (!ok) _message('WhatsApp n\'est pas disponible sur cet appareil.');
   }
@@ -103,7 +117,9 @@ class _ProduitDetailPageState extends State<ProduitDetailPage> {
     if (!mounted) return;
     ScaffoldMessenger.of(context)
       ..clearSnackBars()
-      ..showSnackBar(SnackBar(content: Text(texte), behavior: SnackBarBehavior.floating));
+      ..showSnackBar(
+        SnackBar(content: Text(texte), behavior: SnackBarBehavior.floating),
+      );
   }
 
   @override
@@ -120,7 +136,7 @@ class _ProduitDetailPageState extends State<ProduitDetailPage> {
           p.nom,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: GoogleFonts.plusJakartaSans(fontSize: 16, fontWeight: FontWeight.w700),
+          style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w700),
         ),
         actions: const [BoutonPanier(), SizedBox(width: 6)],
       ),
@@ -143,7 +159,7 @@ class _ProduitDetailPageState extends State<ProduitDetailPage> {
     );
   }
 
-  // ── Galerie ────────────────────────────────────────────────────────────────
+  // Galerie
   Widget _blocGalerie() {
     final images = p.visuels;
     return Container(
@@ -156,7 +172,13 @@ class _ProduitDetailPageState extends State<ProduitDetailPage> {
       child: Stack(
         children: [
           if (images.isEmpty)
-            const Center(child: Icon(Icons.image_outlined, size: 56, color: AppColor.kGrayscale30))
+            const Center(
+              child: Icon(
+                Icons.image_outlined,
+                size: 56,
+                color: AppColor.kGrayscale30,
+              ),
+            )
           else
             PageView.builder(
               controller: _galerie,
@@ -168,8 +190,10 @@ class _ProduitDetailPageState extends State<ProduitDetailPage> {
                   memCacheWidth: 1080,
                   imageUrl: imageOptimisee(images[i]),
                   fit: BoxFit.contain,
-                  errorWidget: (_, __, ___) =>
-                      const Icon(Icons.image_outlined, color: AppColor.kGrayscale30),
+                  errorWidget: (_, __, ___) => const Icon(
+                    Icons.image_outlined,
+                    color: AppColor.kGrayscale30,
+                  ),
                 ),
               ),
             ),
@@ -200,7 +224,7 @@ class _ProduitDetailPageState extends State<ProduitDetailPage> {
     );
   }
 
-  // ── Nom, prix, promotion, options, quantité ──────────────────────────────
+  // Nom, prix, promotion, options, quantité
   Widget _blocPrincipal() {
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
@@ -215,7 +239,7 @@ class _ProduitDetailPageState extends State<ProduitDetailPage> {
               Expanded(
                 child: Text(
                   p.nom,
-                  style: GoogleFonts.plusJakartaSans(
+                  style: GoogleFonts.inter(
                     fontSize: 19,
                     fontWeight: FontWeight.w700,
                     color: AppColor.kGrayscaleDark100,
@@ -240,14 +264,18 @@ class _ProduitDetailPageState extends State<ProduitDetailPage> {
             children: [
               Text(
                 formaterPrix(p.prixPaye),
-                style: GoogleFonts.plusJakartaSans(fontSize: 24, fontWeight: FontWeight.w800, color: AppColor.kPrimary),
+                style: GoogleFonts.inter(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w800,
+                  color: AppColor.kPrimary,
+                ),
               ),
               if (p.prixBarre != null)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 3),
                   child: Text(
                     formaterPrix(p.prixBarre!),
-                    style: GoogleFonts.plusJakartaSans(
+                    style: GoogleFonts.inter(
                       fontSize: 14,
                       color: AppColor.kGrayscale40,
                       decoration: TextDecoration.lineThrough,
@@ -270,11 +298,14 @@ class _ProduitDetailPageState extends State<ProduitDetailPage> {
                   if (_choix[option.libelle] != null)
                     TextSpan(
                       text: '  ${_choix[option.libelle]}',
-                      style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w500, color: AppColor.kGrayscale40),
+                      style: GoogleFonts.inter(
+                        fontWeight: FontWeight.w500,
+                        color: AppColor.kGrayscale40,
+                      ),
                     ),
                 ],
               ),
-              style: GoogleFonts.plusJakartaSans(
+              style: GoogleFonts.inter(
                 fontSize: 13.5,
                 fontWeight: FontWeight.w700,
                 color: _choixManquant && !_choix.containsKey(option.libelle)
@@ -304,10 +335,17 @@ class _ProduitDetailPageState extends State<ProduitDetailPage> {
             const SizedBox(height: 14),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
-              decoration: BoxDecoration(color: AppColor.kPrimaryLight, borderRadius: BorderRadius.circular(20)),
+              decoration: BoxDecoration(
+                color: AppColor.kPrimaryLight,
+                borderRadius: BorderRadius.circular(20),
+              ),
               child: Text(
                 p.categorie!.nom,
-                style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.w600, color: AppColor.kPrimary),
+                style: GoogleFonts.inter(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: AppColor.kPrimary,
+                ),
               ),
             ),
           ],
@@ -327,12 +365,15 @@ class _ProduitDetailPageState extends State<ProduitDetailPage> {
         decoration: BoxDecoration(
           color: choisie ? AppColor.kPrimary : AppColor.kWhite,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: choisie ? AppColor.kPrimary : AppColor.kLine, width: 1.3),
+          border: Border.all(
+            color: choisie ? AppColor.kPrimary : AppColor.kLine,
+            width: 1.3,
+          ),
         ),
         child: Text(
           texte,
           textAlign: TextAlign.center,
-          style: GoogleFonts.plusJakartaSans(
+          style: GoogleFonts.inter(
             fontSize: 13,
             fontWeight: FontWeight.w600,
             color: choisie ? AppColor.kWhite : AppColor.kGrayscaleDark100,
@@ -344,33 +385,50 @@ class _ProduitDetailPageState extends State<ProduitDetailPage> {
 
   Widget _selecteurQuantite() {
     Widget bouton(IconData icone, VoidCallback? action) => Material(
-          color: action == null ? AppColor.kLine : AppColor.kPrimaryLight,
-          shape: const CircleBorder(),
-          child: InkWell(
-            customBorder: const CircleBorder(),
-            onTap: action,
-            child: SizedBox(
-              width: 36,
-              height: 36,
-              child: Icon(icone, size: 18, color: action == null ? AppColor.kGrayscale30 : AppColor.kPrimary),
-            ),
+      color: action == null ? AppColor.kLine : AppColor.kPrimaryLight,
+      shape: const CircleBorder(),
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: action,
+        child: SizedBox(
+          width: 36,
+          height: 36,
+          child: Icon(
+            icone,
+            size: 18,
+            color: action == null ? AppColor.kGrayscale30 : AppColor.kPrimary,
           ),
-        );
+        ),
+      ),
+    );
 
     return Row(
       children: [
-        Text('Quantité',
-            style: GoogleFonts.plusJakartaSans(
-                fontSize: 13.5, fontWeight: FontWeight.w600, color: AppColor.kGrayscaleDark100)),
+        Text(
+          'Quantité',
+          style: GoogleFonts.inter(
+            fontSize: 13.5,
+            fontWeight: FontWeight.w600,
+            color: AppColor.kGrayscaleDark100,
+          ),
+        ),
         const SizedBox(width: 10),
-        bouton(Icons.remove_rounded, _quantite > 1 ? () => setState(() => _quantite--) : null),
+        bouton(
+          Icons.remove_rounded,
+          _quantite > 1 ? () => setState(() => _quantite--) : null,
+        ),
         SizedBox(
           width: 44,
-          child: Text('$_quantite',
-              textAlign: TextAlign.center,
-              style: GoogleFonts.plusJakartaSans(fontSize: 15, fontWeight: FontWeight.w700)),
+          child: Text(
+            '$_quantite',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w700),
+          ),
         ),
-        bouton(Icons.add_rounded, _quantite < _quantiteMax ? () => setState(() => _quantite++) : null),
+        bouton(
+          Icons.add_rounded,
+          _quantite < _quantiteMax ? () => setState(() => _quantite++) : null,
+        ),
         const SizedBox(width: 10),
         Expanded(
           child: FittedBox(
@@ -378,7 +436,11 @@ class _ProduitDetailPageState extends State<ProduitDetailPage> {
             alignment: Alignment.centerRight,
             child: Text(
               formaterPrix(p.prixPaye * _quantite),
-              style: GoogleFonts.plusJakartaSans(fontSize: 15, fontWeight: FontWeight.w700, color: AppColor.kPrimary),
+              style: GoogleFonts.inter(
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+                color: AppColor.kPrimary,
+              ),
             ),
           ),
         ),
@@ -408,8 +470,11 @@ class _ProduitDetailPageState extends State<ProduitDetailPage> {
                     child: Text(
                       c.valeur,
                       textAlign: TextAlign.right,
-                      style: GoogleFonts.plusJakartaSans(
-                          fontSize: 13, fontWeight: FontWeight.w600, color: AppColor.kGrayscaleDark100),
+                      style: GoogleFonts.inter(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: AppColor.kGrayscaleDark100,
+                      ),
                     ),
                   ),
                 ],
@@ -431,8 +496,14 @@ class _ProduitDetailPageState extends State<ProduitDetailPage> {
         children: [
           Text('Description', style: titreSection(15.5)),
           const SizedBox(height: 10),
-          Text(p.description,
-              style: GoogleFonts.plusJakartaSans(fontSize: 13.5, color: AppColor.kGrayscale40, height: 1.6)),
+          Text(
+            p.description,
+            style: GoogleFonts.inter(
+              fontSize: 13.5,
+              color: AppColor.kGrayscale40,
+              height: 1.6,
+            ),
+          ),
         ],
       ),
     );
@@ -441,9 +512,11 @@ class _ProduitDetailPageState extends State<ProduitDetailPage> {
   Widget _blocBoutique() {
     final b = p.boutique!;
     return InkWell(
-      onTap: () => Navigator.of(context).push(MaterialPageRoute(
-        builder: (_) => BoutiquePubliquePage(boutiqueId: b.id, apercu: b),
-      )),
+      onTap: () => Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => BoutiquePubliquePage(boutiqueId: b.id, apercu: b),
+        ),
+      ),
       child: Container(
         margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
         padding: const EdgeInsets.all(14),
@@ -459,7 +532,8 @@ class _ProduitDetailPageState extends State<ProduitDetailPage> {
                     ? CachedNetworkImage(
                         imageUrl: imageOptimisee(b.logo!, largeur: 200),
                         fit: BoxFit.cover,
-                        errorWidget: (_, __, ___) => const LogoBoutiqueParDefaut(),
+                        errorWidget: (_, __, ___) =>
+                            const LogoBoutiqueParDefaut(),
                       )
                     : const LogoBoutiqueParDefaut(),
               ),
@@ -472,14 +546,23 @@ class _ProduitDetailPageState extends State<ProduitDetailPage> {
                   Row(
                     children: [
                       Flexible(
-                        child: Text(b.nom,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.plusJakartaSans(fontSize: 14.5, fontWeight: FontWeight.w700)),
+                        child: Text(
+                          b.nom,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.inter(
+                            fontSize: 14.5,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
                       ),
                       if (b.verifiee) ...[
                         const SizedBox(width: 5),
-                        const Icon(Icons.verified_rounded, size: 16, color: AppColor.kSucces),
+                        const Icon(
+                          Icons.verified_rounded,
+                          size: 16,
+                          color: AppColor.kSucces,
+                        ),
                       ],
                     ],
                   ),
@@ -488,8 +571,14 @@ class _ProduitDetailPageState extends State<ProduitDetailPage> {
                 ],
               ),
             ),
-            Text('Voir la boutique',
-                style: GoogleFonts.plusJakartaSans(fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColor.kPrimary)),
+            Text(
+              'Voir la boutique',
+              style: GoogleFonts.inter(
+                fontSize: 12.5,
+                fontWeight: FontWeight.w700,
+                color: AppColor.kPrimary,
+              ),
+            ),
             const Icon(Icons.chevron_right_rounded, color: AppColor.kPrimary),
           ],
         ),
@@ -501,7 +590,12 @@ class _ProduitDetailPageState extends State<ProduitDetailPage> {
     if (_similairesEnCours) {
       return const Padding(
         padding: EdgeInsets.symmetric(vertical: 30),
-        child: Center(child: CircularProgressIndicator(color: AppColor.kPrimary, strokeWidth: 2.5)),
+        child: Center(
+          child: CircularProgressIndicator(
+            color: AppColor.kPrimary,
+            strokeWidth: 2.5,
+          ),
+        ),
       );
     }
     if (_similaires.isEmpty) return const SizedBox.shrink();
@@ -513,7 +607,10 @@ class _ProduitDetailPageState extends State<ProduitDetailPage> {
         children: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: EnteteSection('Produits similaires', sousTitre: p.categorie?.nom),
+            child: EnteteSection(
+              'Produits similaires',
+              sousTitre: p.categorie?.nom,
+            ),
           ),
           const SizedBox(height: 12),
           SizedBox(
@@ -523,7 +620,10 @@ class _ProduitDetailPageState extends State<ProduitDetailPage> {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               itemCount: _similaires.length,
               separatorBuilder: (_, __) => const SizedBox(width: 12),
-              itemBuilder: (_, i) => SizedBox(width: largeur, child: ProduitCard(produit: _similaires[i])),
+              itemBuilder: (_, i) => SizedBox(
+                width: largeur,
+                child: ProduitCard(produit: _similaires[i]),
+              ),
             ),
           ),
         ],
@@ -537,7 +637,11 @@ class _ProduitDetailPageState extends State<ProduitDetailPage> {
       decoration: BoxDecoration(
         color: AppColor.kWhite,
         boxShadow: [
-          BoxShadow(color: AppColor.kPrimary.withValues(alpha: 0.08), blurRadius: 18, offset: const Offset(0, -4)),
+          BoxShadow(
+            color: AppColor.kPrimary.withValues(alpha: 0.08),
+            blurRadius: 18,
+            offset: const Offset(0, -4),
+          ),
         ],
       ),
       child: SafeArea(
@@ -554,8 +658,15 @@ class _ProduitDetailPageState extends State<ProduitDetailPage> {
                   child: Container(
                     width: 52,
                     height: 52,
-                    decoration: BoxDecoration(color: AppColor.kWhatsapp, borderRadius: BorderRadius.circular(14)),
-                    child: const Icon(Icons.chat_rounded, color: AppColor.kWhite, size: 22),
+                    decoration: BoxDecoration(
+                      color: AppColor.kWhatsapp,
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: const Icon(
+                      Icons.chat_rounded,
+                      color: AppColor.kWhite,
+                      size: 22,
+                    ),
                   ),
                 ),
               ),
@@ -570,9 +681,12 @@ class _ProduitDetailPageState extends State<ProduitDetailPage> {
                       !p.disponible
                           ? 'Indisponible'
                           : p.enRupture
-                              ? 'Rupture de stock'
-                              : 'Ajouter au panier',
-                      style: GoogleFonts.plusJakartaSans(fontSize: 15, fontWeight: FontWeight.w700),
+                          ? 'Rupture de stock'
+                          : 'Ajouter au panier',
+                      style: GoogleFonts.inter(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColor.kPrimary,
@@ -580,7 +694,9 @@ class _ProduitDetailPageState extends State<ProduitDetailPage> {
                       disabledBackgroundColor: AppColor.kLine,
                       disabledForegroundColor: AppColor.kGrayscale30,
                       elevation: 0,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
                     ),
                   ),
                 ),

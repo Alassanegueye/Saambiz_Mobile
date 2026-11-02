@@ -27,8 +27,14 @@ class CreerPromotion extends PromotionsEvent {
   });
 
   @override
-  List<Object?> get props =>
-      [titre, description, prixPromo, dateDebut, dateFin, produitId];
+  List<Object?> get props => [
+    titre,
+    description,
+    prixPromo,
+    dateDebut,
+    dateFin,
+    produitId,
+  ];
 }
 
 class ModifierPromotion extends PromotionsEvent {
@@ -49,7 +55,14 @@ class ModifierPromotion extends PromotionsEvent {
   });
 
   @override
-  List<Object?> get props => [id, titre, description, prixPromo, dateDebut, dateFin];
+  List<Object?> get props => [
+    id,
+    titre,
+    description,
+    prixPromo,
+    dateDebut,
+    dateFin,
+  ];
 }
 
 class SupprimerPromotion extends PromotionsEvent {

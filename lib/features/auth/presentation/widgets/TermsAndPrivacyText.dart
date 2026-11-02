@@ -55,12 +55,12 @@ class _TermsAndPrivacyTextState extends State<TermsAndPrivacyText> {
 
   @override
   Widget build(BuildContext context) {
-    final styleParDefaut = GoogleFonts.plusJakartaSans(
+    final styleParDefaut = GoogleFonts.inter(
       color: AppColor.kGrayscale40,
       fontWeight: FontWeight.w500,
       fontSize: 14,
     );
-    final styleLien = GoogleFonts.plusJakartaSans(
+    final styleLien = GoogleFonts.inter(
       color: widget.couleurTermes ?? AppColor.kGrayscaleDark100,
       fontWeight: FontWeight.w600,
       fontSize: 14,

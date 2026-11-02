@@ -5,15 +5,15 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../domain/entities/vitrine.dart';
 
 class _C {
-  static const navy      = Color(0xFF0D1B3D);
+  static const navy = Color(0xFF01154B);
   static const navyLight = Color(0xFFE8EDF7);
-  static const gold      = Color(0xFFF2B705);
-  static const bg        = Color(0xFFF7F9FC);
-  static const white     = Color(0xFFFFFFFF);
-  static const border    = Color(0xFFE2E7F0);
-  static const text      = Color(0xFF0D1B3D);
-  static const muted     = Color(0xFF5B6C8A);
-  static const success   = Color(0xFF15803D);
+  static const gold = Color(0xFFFBB900);
+  static const bg = Color(0xFFF7F9FC);
+  static const white = Color(0xFFFFFFFF);
+  static const border = Color(0xFFE2E7F0);
+  static const text = Color(0xFF01154B);
+  static const muted = Color(0xFF5B6C8A);
+  static const success = Color(0xFF15803D);
   static const successBg = Color(0xFFE9F8EE);
 }
 
@@ -21,7 +21,7 @@ class _C {
 ///
 /// L'écran d'arrivée de l'assistant. Trois choses à faire, dans cet ordre :
 /// annoncer, donner l'adresse, et proposer de la voir. Le vendeur vient de
-/// répondre à quatre questions — il veut voir le résultat, pas relire des
+/// répondre à quatre questions, il veut voir le résultat, pas relire des
 /// réglages.
 ///
 /// La modification vient après, et elle est explicitement offerte : « vous
@@ -52,10 +52,17 @@ class VitrinePretePage extends StatelessWidget {
             children: [
               Center(
                 child: Container(
-                  width: 82, height: 82,
+                  width: 82,
+                  height: 82,
                   decoration: const BoxDecoration(
-                    color: _C.successBg, shape: BoxShape.circle),
-                  child: const Icon(Icons.check_rounded, size: 44, color: _C.success),
+                    color: _C.successBg,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.check_rounded,
+                    size: 44,
+                    color: _C.success,
+                  ),
                 ),
               ),
 
@@ -67,8 +74,11 @@ class VitrinePretePage extends StatelessWidget {
                     : 'Votre site est à jour',
                 textAlign: TextAlign.center,
                 style: const TextStyle(
-                    fontSize: 24, fontWeight: FontWeight.w800,
-                    color: _C.text, height: 1.25),
+                  fontSize: 24,
+                  fontWeight: FontWeight.w800,
+                  color: _C.text,
+                  height: 1.25,
+                ),
               ),
 
               const SizedBox(height: 10),
@@ -76,10 +86,14 @@ class VitrinePretePage extends StatelessWidget {
               Text(
                 premiereCreation
                     ? 'Il est en ligne. Consultez-le, et modifiez tout ce qui '
-                      'ne vous convient pas — rien n\'est figé.'
+                          'ne vous convient pas. Rien n\'est figé.'
                     : 'Vos modifications sont visibles par vos clients.',
                 textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 14, color: _C.muted, height: 1.55),
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: _C.muted,
+                  height: 1.55,
+                ),
               ),
 
               // Le logo n'est pas parti : le site existe, mais il lui manque
@@ -96,18 +110,22 @@ class VitrinePretePage extends StatelessWidget {
                   child: const Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(Icons.info_outline_rounded,
-                          color: Color(0xFFB0850B), size: 18),
+                      Icon(
+                        Icons.info_outline_rounded,
+                        color: Color(0xFFB0850B),
+                        size: 18,
+                      ),
                       SizedBox(width: 10),
                       Expanded(
                         child: Text(
                           'Votre logo n\'a pas pu être enregistré. Votre site '
-                          'affiche l\'initiale de votre boutique en attendant — '
-                          'reprenez-le depuis « Ma boutique ».',
+                          'affiche l\'initiale de votre boutique en attendant. Vous pouvez le '
+                          'reprendre depuis « Ma boutique ».',
                           style: TextStyle(
-                              fontSize: 12.6,
-                              color: Color(0xFF8A6503),
-                              height: 1.5),
+                            fontSize: 12.6,
+                            color: Color(0xFF8A6503),
+                            height: 1.5,
+                          ),
                         ),
                       ),
                     ],
@@ -117,7 +135,7 @@ class VitrinePretePage extends StatelessWidget {
 
               const SizedBox(height: 26),
 
-              // ── L'adresse ──────────────────────────────────────────────
+              // L'adresse
               Container(
                 padding: const EdgeInsets.all(18),
                 decoration: BoxDecoration(
@@ -127,14 +145,19 @@ class VitrinePretePage extends StatelessWidget {
                 ),
                 child: Column(
                   children: [
-                    const Text('L\'adresse de votre site',
-                        style: TextStyle(fontSize: 12.5, color: _C.muted)),
+                    const Text(
+                      'L\'adresse de votre site',
+                      style: TextStyle(fontSize: 12.5, color: _C.muted),
+                    ),
                     const SizedBox(height: 7),
                     SelectableText(
                       vitrine.url,
                       textAlign: TextAlign.center,
                       style: const TextStyle(
-                          fontSize: 15.5, fontWeight: FontWeight.w700, color: _C.navy),
+                        fontSize: 15.5,
+                        fontWeight: FontWeight.w700,
+                        color: _C.navy,
+                      ),
                     ),
                     const SizedBox(height: 15),
                     Row(
@@ -146,20 +169,29 @@ class VitrinePretePage extends StatelessWidget {
                               side: const BorderSide(color: _C.border),
                               padding: const EdgeInsets.symmetric(vertical: 12),
                               shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10)),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
                             ),
                             onPressed: () async {
-                              await Clipboard.setData(ClipboardData(text: vitrine.url));
+                              await Clipboard.setData(
+                                ClipboardData(text: vitrine.url),
+                              );
                               if (context.mounted) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Adresse copiée.')),
+                                  const SnackBar(
+                                    content: Text('Adresse copiée.'),
+                                  ),
                                 );
                               }
                             },
                             icon: const Icon(Icons.copy_rounded, size: 16),
-                            label: const Text('Copier',
-                                style: TextStyle(
-                                    fontSize: 13.5, fontWeight: FontWeight.w600)),
+                            label: const Text(
+                              'Copier',
+                              style: TextStyle(
+                                fontSize: 13.5,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                           ),
                         ),
                         const SizedBox(width: 9),
@@ -170,13 +202,18 @@ class VitrinePretePage extends StatelessWidget {
                               side: const BorderSide(color: _C.border),
                               padding: const EdgeInsets.symmetric(vertical: 12),
                               shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10)),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
                             ),
                             onPressed: () => _partager(context, vitrine.url),
                             icon: const Icon(Icons.share_rounded, size: 16),
-                            label: const Text('Partager',
-                                style: TextStyle(
-                                    fontSize: 13.5, fontWeight: FontWeight.w600)),
+                            label: const Text(
+                              'Partager',
+                              style: TextStyle(
+                                fontSize: 13.5,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                           ),
                         ),
                       ],
@@ -192,11 +229,14 @@ class VitrinePretePage extends StatelessWidget {
                   backgroundColor: _C.navy,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
                 onPressed: () => _ouvrir(vitrine.url),
-                child: const Text('Voir mon site',
-                    style: TextStyle(fontSize: 15.5, fontWeight: FontWeight.w700)),
+                child: const Text(
+                  'Voir mon site',
+                  style: TextStyle(fontSize: 15.5, fontWeight: FontWeight.w700),
+                ),
               ),
 
               const SizedBox(height: 10),
@@ -209,13 +249,15 @@ class VitrinePretePage extends StatelessWidget {
                 // Retour à l'écran « Mon site », qui recharge l'état et
                 // propose la modification.
                 onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Modifier mon site',
-                    style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w600)),
+                child: const Text(
+                  'Modifier mon site',
+                  style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w600),
+                ),
               ),
 
               const SizedBox(height: 22),
 
-              // ── La suite ──────────────────────────────────────────────
+              // La suite
               Container(
                 padding: const EdgeInsets.all(17),
                 decoration: BoxDecoration(
@@ -229,17 +271,22 @@ class VitrinePretePage extends StatelessWidget {
                       children: [
                         Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 9, vertical: 3),
+                            horizontal: 9,
+                            vertical: 3,
+                          ),
                           decoration: BoxDecoration(
                             color: _C.gold,
                             borderRadius: BorderRadius.circular(999),
                           ),
-                          child: const Text('GRATUIT',
-                              style: TextStyle(
-                                  fontSize: 10.5,
-                                  fontWeight: FontWeight.w800,
-                                  color: _C.navy,
-                                  letterSpacing: 0.7)),
+                          child: const Text(
+                            'GRATUIT',
+                            style: TextStyle(
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.w800,
+                              color: _C.navy,
+                              letterSpacing: 0.7,
+                            ),
+                          ),
                         ),
                       ],
                     ),
@@ -248,8 +295,11 @@ class VitrinePretePage extends StatelessWidget {
                       'Votre site ne vous coûte rien : aucun abonnement, '
                       'aucune commission sur vos ventes.',
                       style: TextStyle(
-                          fontSize: 13, color: _C.navy, height: 1.55,
-                          fontWeight: FontWeight.w600),
+                        fontSize: 13,
+                        color: _C.navy,
+                        height: 1.55,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                     const SizedBox(height: 13),
                     const _Conseil(
@@ -258,12 +308,14 @@ class VitrinePretePage extends StatelessWidget {
                     ),
                     const _Conseil(
                       icone: Icons.qr_code_2_rounded,
-                      texte: 'Imprimez le QR code depuis votre tableau de bord '
+                      texte:
+                          'Imprimez le QR code depuis votre tableau de bord '
                           'et collez-le dans votre boutique.',
                     ),
                     const _Conseil(
                       icone: Icons.inventory_2_outlined,
-                      texte: 'Ajoutez vos produits : un site sans catalogue ne '
+                      texte:
+                          'Ajoutez vos produits : un site sans catalogue ne '
                           'vend rien.',
                       dernier: true,
                     ),
@@ -299,9 +351,14 @@ class _Conseil extends StatelessWidget {
           Icon(icone, size: 16, color: _C.navy),
           const SizedBox(width: 10),
           Expanded(
-            child: Text(texte,
-                style: const TextStyle(
-                    fontSize: 12.6, color: _C.navy, height: 1.5)),
+            child: Text(
+              texte,
+              style: const TextStyle(
+                fontSize: 12.6,
+                color: _C.navy,
+                height: 1.5,
+              ),
+            ),
           ),
         ],
       ),
@@ -327,7 +384,9 @@ Future<void> _partager(BuildContext context, String url) async {
     await Clipboard.setData(ClipboardData(text: url));
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Adresse copiée : collez-la où vous voulez.')),
+        const SnackBar(
+          content: Text('Adresse copiée : collez-la où vous voulez.'),
+        ),
       );
     }
   }

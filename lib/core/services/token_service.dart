@@ -4,7 +4,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 class TokenService {
   final FlutterSecureStorage secureStorage;
   final StreamController<bool> _authController =
-  StreamController<bool>.broadcast();
+      StreamController<bool>.broadcast();
 
   TokenService({required this.secureStorage});
 

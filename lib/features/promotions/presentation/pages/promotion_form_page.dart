@@ -11,10 +11,10 @@ import '../bloc/promotions_event.dart';
 import '../bloc/promotions_state.dart';
 
 class _C {
-  static const green = Color(0xFF0D1B3D);
-  static const black = Color(0xFF0D1B3D);
+  static const green = Color(0xFF01154B);
+  static const black = Color(0xFF01154B);
   static const white = Color(0xFFFFFFFF);
-  static const bg = Color(0xFFF5F7FB);
+  static const bg = Color(0xFFF4F5F8);
   static const sub = Color(0xFF5B6C8A);
   static const border = Color(0xFFE3E8F0);
 }
@@ -43,11 +43,17 @@ class _PromotionFormView extends StatefulWidget {
 
 class _PromotionFormViewState extends State<_PromotionFormView> {
   final _formKey = GlobalKey<FormState>();
-  late final _titreCtrl = TextEditingController(text: widget.promotion?.titre ?? '');
-  late final _descCtrl =
-      TextEditingController(text: widget.promotion?.description ?? '');
+  late final _titreCtrl = TextEditingController(
+    text: widget.promotion?.titre ?? '',
+  );
+  late final _descCtrl = TextEditingController(
+    text: widget.promotion?.description ?? '',
+  );
   late final _prixCtrl = TextEditingController(
-      text: widget.promotion != null ? widget.promotion!.prixPromo.toString() : '');
+    text: widget.promotion != null
+        ? widget.promotion!.prixPromo.toString()
+        : '',
+  );
   DateTime _dateDebut = DateTime.now();
   DateTime _dateFin = DateTime.now().add(const Duration(days: 7));
   String? _produitId;
@@ -59,8 +65,10 @@ class _PromotionFormViewState extends State<_PromotionFormView> {
   @override
   void initState() {
     super.initState();
-    if (widget.promotion?.dateDebut != null) _dateDebut = widget.promotion!.dateDebut!;
-    if (widget.promotion?.dateFin != null) _dateFin = widget.promotion!.dateFin!;
+    if (widget.promotion?.dateDebut != null)
+      _dateDebut = widget.promotion!.dateDebut!;
+    if (widget.promotion?.dateFin != null)
+      _dateFin = widget.promotion!.dateFin!;
     _produitId = widget.promotion?.produitId;
     _chargerProduits();
   }
@@ -106,9 +114,9 @@ class _PromotionFormViewState extends State<_PromotionFormView> {
   void _soumettre() {
     if (!_formKey.currentState!.validate()) return;
     if (!_isEdit && (_produitId == null || _produitId!.isEmpty)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Choisissez un produit')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Choisissez un produit')));
       return;
     }
     final bloc = context.read<PromotionsBloc>();
@@ -116,23 +124,27 @@ class _PromotionFormViewState extends State<_PromotionFormView> {
     final isoFin = DateFormat('yyyy-MM-dd').format(_dateFin);
     final prix = num.tryParse(_prixCtrl.text.trim()) ?? 0;
     if (_isEdit) {
-      bloc.add(ModifierPromotion(
-        widget.promotion!.id,
-        titre: _titreCtrl.text.trim(),
-        description: _descCtrl.text.trim(),
-        prixPromo: prix,
-        dateDebut: isoDebut,
-        dateFin: isoFin,
-      ));
+      bloc.add(
+        ModifierPromotion(
+          widget.promotion!.id,
+          titre: _titreCtrl.text.trim(),
+          description: _descCtrl.text.trim(),
+          prixPromo: prix,
+          dateDebut: isoDebut,
+          dateFin: isoFin,
+        ),
+      );
     } else {
-      bloc.add(CreerPromotion(
-        titre: _titreCtrl.text.trim(),
-        description: _descCtrl.text.trim(),
-        prixPromo: prix,
-        dateDebut: isoDebut,
-        dateFin: isoFin,
-        produitId: _produitId!,
-      ));
+      bloc.add(
+        CreerPromotion(
+          titre: _titreCtrl.text.trim(),
+          description: _descCtrl.text.trim(),
+          prixPromo: prix,
+          dateDebut: isoDebut,
+          dateFin: isoFin,
+          produitId: _produitId!,
+        ),
+      );
     }
   }
 
@@ -150,7 +162,10 @@ class _PromotionFormViewState extends State<_PromotionFormView> {
         listener: (context, state) {
           if (state is PromotionsError) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message), backgroundColor: Colors.red),
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.red,
+              ),
             );
           } else if (state is PromotionsLoaded) {
             Navigator.of(context).pop(true);
@@ -169,10 +184,16 @@ class _PromotionFormViewState extends State<_PromotionFormView> {
                       : DropdownButtonFormField<String>(
                           initialValue: _produitId,
                           isExpanded: true,
-                          decoration: const InputDecoration(labelText: 'Produit'),
+                          decoration: const InputDecoration(
+                            labelText: 'Produit',
+                          ),
                           items: _produits
-                              .map((p) =>
-                                  DropdownMenuItem(value: p.id, child: Text(p.nom)))
+                              .map(
+                                (p) => DropdownMenuItem(
+                                  value: p.id,
+                                  child: Text(p.nom),
+                                ),
+                              )
                               .toList(),
                           onChanged: (v) => setState(() => _produitId = v),
                         ),
@@ -182,8 +203,11 @@ class _PromotionFormViewState extends State<_PromotionFormView> {
                 const SizedBox(height: 12),
                 _input(_descCtrl, 'Description', maxLines: 3),
                 const SizedBox(height: 12),
-                _input(_prixCtrl, 'Prix promo (FCFA)',
-                    keyboard: TextInputType.number),
+                _input(
+                  _prixCtrl,
+                  'Prix promo (FCFA)',
+                  keyboard: TextInputType.number,
+                ),
                 const SizedBox(height: 12),
                 Row(
                   children: [
@@ -191,15 +215,17 @@ class _PromotionFormViewState extends State<_PromotionFormView> {
                       child: OutlinedButton(
                         onPressed: () => _choisirDate(debut: true),
                         child: Text(
-                            'Début : ${DateFormat('dd/MM/yyyy').format(_dateDebut)}'),
+                          'Début : ${DateFormat('dd/MM/yyyy').format(_dateDebut)}',
+                        ),
                       ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: OutlinedButton(
                         onPressed: () => _choisirDate(debut: false),
-                        child:
-                            Text('Fin : ${DateFormat('dd/MM/yyyy').format(_dateFin)}'),
+                        child: Text(
+                          'Fin : ${DateFormat('dd/MM/yyyy').format(_dateFin)}',
+                        ),
                       ),
                     ),
                   ],
@@ -212,16 +238,22 @@ class _PromotionFormViewState extends State<_PromotionFormView> {
                     foregroundColor: _C.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14)),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
                   ),
                   child: loading
                       ? const SizedBox(
                           height: 20,
                           width: 20,
                           child: CircularProgressIndicator(
-                              strokeWidth: 2, color: Colors.white))
-                      : Text(_isEdit ? 'Enregistrer' : 'Créer la promotion',
-                          style: const TextStyle(fontWeight: FontWeight.w700)),
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : Text(
+                          _isEdit ? 'Enregistrer' : 'Créer la promotion',
+                          style: const TextStyle(fontWeight: FontWeight.w700),
+                        ),
                 ),
               ],
             ),
@@ -231,13 +263,18 @@ class _PromotionFormViewState extends State<_PromotionFormView> {
     );
   }
 
-  Widget _input(TextEditingController c, String label,
-      {TextInputType? keyboard, int maxLines = 1}) {
+  Widget _input(
+    TextEditingController c,
+    String label, {
+    TextInputType? keyboard,
+    int maxLines = 1,
+  }) {
     return TextFormField(
       controller: c,
       keyboardType: keyboard,
       maxLines: maxLines,
-      validator: (v) => (v == null || v.trim().isEmpty) ? '$label requis' : null,
+      validator: (v) =>
+          (v == null || v.trim().isEmpty) ? '$label requis' : null,
       decoration: InputDecoration(labelText: label),
     );
   }

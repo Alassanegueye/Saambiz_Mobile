@@ -17,7 +17,12 @@ class CompteARebours extends StatefulWidget {
   final bool compact;
   final VoidCallback? onTermine;
 
-  const CompteARebours({super.key, required this.fin, this.compact = false, this.onTermine});
+  const CompteARebours({
+    super.key,
+    required this.fin,
+    this.compact = false,
+    this.onTermine,
+  });
 
   @override
   State<CompteARebours> createState() => _CompteAReboursState();
@@ -68,10 +73,15 @@ class _CompteAReboursState extends State<CompteARebours> {
     final s = _restant.inSeconds % 60;
 
     if (widget.compact) {
-      final texte = j > 0 ? '${j}j ${_deux(h)}h ${_deux(m)}m' : '${_deux(h)}:${_deux(m)}:${_deux(s)}';
+      final texte = j > 0
+          ? '${j}j ${_deux(h)}h ${_deux(m)}m'
+          : '${_deux(h)}:${_deux(m)}:${_deux(s)}';
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-        decoration: BoxDecoration(color: kPromoEncre, borderRadius: BorderRadius.circular(20)),
+        decoration: BoxDecoration(
+          color: kPromoEncre,
+          borderRadius: BorderRadius.circular(20),
+        ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -79,7 +89,7 @@ class _CompteAReboursState extends State<CompteARebours> {
             const SizedBox(width: 3),
             Text(
               texte,
-              style: GoogleFonts.plusJakartaSans(
+              style: GoogleFonts.inter(
                 fontSize: 9.5,
                 fontWeight: FontWeight.w800,
                 color: Colors.white,
@@ -92,31 +102,43 @@ class _CompteAReboursState extends State<CompteARebours> {
     }
 
     Widget caseTemps(String valeur, String unite) => Container(
-          padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
-          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(9)),
-          child: Text.rich(
-            TextSpan(children: [
-              TextSpan(
-                text: valeur,
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w800,
-                  color: kPromoEncre,
-                  fontFeatures: const [FontFeature.tabularFigures()],
-                ),
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(9),
+      ),
+      child: Text.rich(
+        TextSpan(
+          children: [
+            TextSpan(
+              text: valeur,
+              style: GoogleFonts.inter(
+                fontSize: 15,
+                fontWeight: FontWeight.w800,
+                color: kPromoEncre,
+                fontFeatures: const [FontFeature.tabularFigures()],
               ),
-              TextSpan(
-                text: unite,
-                style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.w600, color: kPromoEncre),
+            ),
+            TextSpan(
+              text: unite,
+              style: GoogleFonts.inter(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: kPromoEncre,
               ),
-            ]),
-          ),
-        );
+            ),
+          ],
+        ),
+      ),
+    );
 
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(color: kPromoFond, borderRadius: BorderRadius.circular(14)),
+      decoration: BoxDecoration(
+        color: kPromoFond,
+        borderRadius: BorderRadius.circular(14),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -126,7 +148,11 @@ class _CompteAReboursState extends State<CompteARebours> {
               const SizedBox(width: 6),
               Text(
                 'Fin de la promotion dans',
-                style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.w700, color: kPromoEncre),
+                style: GoogleFonts.inter(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: kPromoEncre,
+                ),
               ),
             ],
           ),

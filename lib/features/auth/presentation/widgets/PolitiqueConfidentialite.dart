@@ -14,10 +14,7 @@ class PolitiqueConfidentialite extends StatelessWidget {
         foregroundColor: Colors.black,
         title: Text(
           'Politique de confidentialité',
-          style: GoogleFonts.plusJakartaSans(
-            fontWeight: FontWeight.w700,
-            fontSize: 18,
-          ),
+          style: GoogleFonts.inter(fontWeight: FontWeight.w700, fontSize: 18),
         ),
         centerTitle: true,
       ),
@@ -39,53 +36,53 @@ class PolitiqueConfidentialite extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _title('Politique de confidentialité – SIGNS'),
+              _title('Politique de confidentialité : SIGNS'),
 
               _paragraph(
-                  'SIGNS s’engage à protéger les données personnelles de ses utilisateurs '
-                      'conformément à la loi n° 2008-12 du 25 janvier 2008 relative à la protection '
-                      'des données à caractère personnel au Sénégal.'
+                'SIGNS s’engage à protéger les données personnelles de ses utilisateurs '
+                'conformément à la loi n° 2008-12 du 25 janvier 2008 relative à la protection '
+                'des données à caractère personnel au Sénégal.',
               ),
 
               _section('1. Données collectées'),
               _paragraph(
-                  'SIGNS collecte uniquement les données strictement nécessaires au '
-                      'fonctionnement du service, notamment : données d’identification et de '
-                      'contact, informations liées à l’utilisation de l’application, factures et '
-                      'contrats générés par l’utilisateur.'
+                'SIGNS collecte uniquement les données strictement nécessaires au '
+                'fonctionnement du service, notamment : données d’identification et de '
+                'contact, informations liées à l’utilisation de l’application, factures et '
+                'contrats générés par l’utilisateur.',
               ),
 
               _section('2. Finalité du traitement'),
               _paragraph(
-                  'Les données sont utilisées pour la création, la gestion, la consultation '
-                      'et le stockage des documents, l’amélioration du service, le support '
-                      'utilisateur, la prévention des fraudes et le respect des obligations légales.'
+                'Les données sont utilisées pour la création, la gestion, la consultation '
+                'et le stockage des documents, l’amélioration du service, le support '
+                'utilisateur, la prévention des fraudes et le respect des obligations légales.',
               ),
 
               _section('3. Partage des données'),
               _paragraph(
-                  'SIGNS ne vend ni ne loue aucune donnée personnelle. Les données peuvent être '
-                      'transmises uniquement à des prestataires techniques nécessaires au '
-                      'fonctionnement du service ou aux autorités compétentes si la loi l’exige.'
+                'SIGNS ne vend ni ne loue aucune donnée personnelle. Les données peuvent être '
+                'transmises uniquement à des prestataires techniques nécessaires au '
+                'fonctionnement du service ou aux autorités compétentes si la loi l’exige.',
               ),
 
               _section('4. Sécurité'),
               _paragraph(
-                  'SIGNS met en œuvre des mesures techniques et organisationnelles appropriées '
-                      'afin de protéger les données personnelles contre tout accès non autorisé.'
+                'SIGNS met en œuvre des mesures techniques et organisationnelles appropriées '
+                'afin de protéger les données personnelles contre tout accès non autorisé.',
               ),
 
               _section('5. Conservation'),
               _paragraph(
-                  'Les données sont conservées uniquement pendant la durée nécessaire à la '
-                      'fourniture du service ou au respect des obligations légales.'
+                'Les données sont conservées uniquement pendant la durée nécessaire à la '
+                'fourniture du service ou au respect des obligations légales.',
               ),
 
               _section('6. Droits de l’utilisateur'),
               _paragraph(
-                  'Conformément à la législation sénégalaise, l’utilisateur dispose d’un droit '
-                      'd’accès, de rectification, de suppression et d’opposition concernant ses '
-                      'données personnelles.'
+                'Conformément à la législation sénégalaise, l’utilisateur dispose d’un droit '
+                'd’accès, de rectification, de suppression et d’opposition concernant ses '
+                'données personnelles.',
               ),
 
               const SizedBox(height: 24),
@@ -93,10 +90,7 @@ class PolitiqueConfidentialite extends StatelessWidget {
               Center(
                 child: Text(
                   'Dernière mise à jour : 2026',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 12,
-                    color: Colors.grey,
-                  ),
+                  style: GoogleFonts.inter(fontSize: 12, color: Colors.grey),
                 ),
               ),
             ],
@@ -111,10 +105,7 @@ class PolitiqueConfidentialite extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 16),
       child: Text(
         text,
-        style: GoogleFonts.plusJakartaSans(
-          fontSize: 20,
-          fontWeight: FontWeight.w800,
-        ),
+        style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w800),
       ),
     );
   }
@@ -124,7 +115,7 @@ class PolitiqueConfidentialite extends StatelessWidget {
       padding: const EdgeInsets.only(top: 20, bottom: 8),
       child: Text(
         text,
-        style: GoogleFonts.plusJakartaSans(
+        style: GoogleFonts.inter(
           fontSize: 16,
           fontWeight: FontWeight.w700,
           color: Colors.black87,
@@ -137,7 +128,7 @@ class PolitiqueConfidentialite extends StatelessWidget {
     return Text(
       text,
       textAlign: TextAlign.justify,
-      style: GoogleFonts.plusJakartaSans(
+      style: GoogleFonts.inter(
         fontSize: 14,
         height: 1.6,
         color: Colors.black54,

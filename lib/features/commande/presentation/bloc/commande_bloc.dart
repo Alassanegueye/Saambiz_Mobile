@@ -21,14 +21,17 @@ class CommandeBloc extends Bloc<CommandeEvent, CommandeState> {
   String _msg(Object e) {
     if (e is DioException) {
       final data = e.response?.data;
-      if (data is Map && data['message'] != null) return data['message'].toString();
+      if (data is Map && data['message'] != null)
+        return data['message'].toString();
       return e.message ?? 'Erreur réseau';
     }
     return e.toString();
   }
 
   Future<void> _onLoadMesCommandes(
-      LoadMesCommandes event, Emitter<CommandeState> emit) async {
+    LoadMesCommandes event,
+    Emitter<CommandeState> emit,
+  ) async {
     emit(CommandeLoading());
     try {
       final list = await repository.mesCommandes(statut: event.statut);
@@ -39,7 +42,9 @@ class CommandeBloc extends Bloc<CommandeEvent, CommandeState> {
   }
 
   Future<void> _onLoadCommandesVendeur(
-      LoadCommandesVendeur event, Emitter<CommandeState> emit) async {
+    LoadCommandesVendeur event,
+    Emitter<CommandeState> emit,
+  ) async {
     emit(CommandeLoading());
     try {
       final list = await repository.commandesVendeur(statut: event.statut);
@@ -50,7 +55,9 @@ class CommandeBloc extends Bloc<CommandeEvent, CommandeState> {
   }
 
   Future<void> _onCreerCommande(
-      CreerCommande event, Emitter<CommandeState> emit) async {
+    CreerCommande event,
+    Emitter<CommandeState> emit,
+  ) async {
     emit(CommandeLoading());
     try {
       final commande = await repository.creerCommande(
@@ -68,7 +75,9 @@ class CommandeBloc extends Bloc<CommandeEvent, CommandeState> {
   }
 
   Future<void> _onPayerCommande(
-      PayerCommande event, Emitter<CommandeState> emit) async {
+    PayerCommande event,
+    Emitter<CommandeState> emit,
+  ) async {
     emit(CommandeLoading());
     try {
       final url = await repository.payer(
@@ -83,7 +92,9 @@ class CommandeBloc extends Bloc<CommandeEvent, CommandeState> {
   }
 
   Future<void> _onAnnulerCommande(
-      AnnulerCommande event, Emitter<CommandeState> emit) async {
+    AnnulerCommande event,
+    Emitter<CommandeState> emit,
+  ) async {
     emit(CommandeLoading());
     try {
       final commande = await repository.annuler(event.commandeId);
@@ -94,10 +105,15 @@ class CommandeBloc extends Bloc<CommandeEvent, CommandeState> {
   }
 
   Future<void> _onChangerStatut(
-      ChangerStatutCommande event, Emitter<CommandeState> emit) async {
+    ChangerStatutCommande event,
+    Emitter<CommandeState> emit,
+  ) async {
     emit(CommandeLoading());
     try {
-      final commande = await repository.changerStatut(event.commandeId, event.statut);
+      final commande = await repository.changerStatut(
+        event.commandeId,
+        event.statut,
+      );
       emit(CommandeMiseAJour(commande));
     } catch (e) {
       emit(CommandeError(_msg(e)));
@@ -105,7 +121,9 @@ class CommandeBloc extends Bloc<CommandeEvent, CommandeState> {
   }
 
   Future<void> _onDemanderRetour(
-      DemanderRetourCommande event, Emitter<CommandeState> emit) async {
+    DemanderRetourCommande event,
+    Emitter<CommandeState> emit,
+  ) async {
     emit(CommandeLoading());
     try {
       await repository.demandeRetour(event.commandeId, raison: event.raison);

@@ -31,8 +31,8 @@ class SelecteurCategories extends StatefulWidget {
 }
 
 class _SelecteurCategoriesState extends State<SelecteurCategories> {
-  static const _navy = Color(0xFF0D1B3D);
-  static const _gold = Color(0xFFF2B705);
+  static const _navy = Color(0xFF01154B);
+  static const _gold = Color(0xFFFBB900);
   // Sélection : même langage que le choix du profil (fond bleuté, bord marine).
   static const _tint = Color(0xFFEEF3FC);
   static const _border = Color(0xFFE2E7F0);
@@ -78,9 +78,13 @@ class _SelecteurCategoriesState extends State<SelecteurCategories> {
       } else {
         ScaffoldMessenger.of(context)
           ..hideCurrentSnackBar()
-          ..showSnackBar(SnackBar(
-            content: Text('${widget.maximum} catégories au maximum. Retirez-en une d\'abord.'),
-          ));
+          ..showSnackBar(
+            SnackBar(
+              content: Text(
+                '${widget.maximum} catégories au maximum. Retirez-en une d\'abord.',
+              ),
+            ),
+          );
         return;
       }
     });
@@ -94,24 +98,29 @@ class _SelecteurCategoriesState extends State<SelecteurCategories> {
       children: [
         Text(
           'Catégories de la boutique',
-          style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.w600, color: _navy),
+          style: GoogleFonts.inter(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: _navy,
+          ),
         ),
         const SizedBox(height: 4),
         Text(
           'Choisissez 1 à ${widget.maximum} catégories. La première est la principale.',
-          style: GoogleFonts.plusJakartaSans(fontSize: 12, color: _textLight),
+          style: GoogleFonts.inter(fontSize: 12, color: _textLight),
         ),
         const SizedBox(height: 10),
         Wrap(
           spacing: 8,
           runSpacing: 8,
-          children: [
-            for (final c in _categories) _puce(c),
-          ],
+          children: [for (final c in _categories) _puce(c)],
         ),
         if (widget.erreur != null) ...[
           const SizedBox(height: 8),
-          Text(widget.erreur!, style: GoogleFonts.plusJakartaSans(fontSize: 12, color: _erreur)),
+          Text(
+            widget.erreur!,
+            style: GoogleFonts.inter(fontSize: 12, color: _erreur),
+          ),
         ],
       ],
     );
@@ -132,7 +141,10 @@ class _SelecteurCategoriesState extends State<SelecteurCategories> {
           decoration: BoxDecoration(
             color: choisie ? _tint : Colors.white,
             borderRadius: BorderRadius.circular(999),
-            border: Border.all(color: choisie ? _navy : _border, width: choisie ? 1.6 : 1.2),
+            border: Border.all(
+              color: choisie ? _navy : _border,
+              width: choisie ? 1.6 : 1.2,
+            ),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -145,7 +157,11 @@ class _SelecteurCategoriesState extends State<SelecteurCategories> {
               const SizedBox(width: 6),
               Text(
                 c.nom,
-                style: GoogleFonts.plusJakartaSans(fontSize: 12.5, fontWeight: FontWeight.w600, color: _navy),
+                style: GoogleFonts.inter(
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w600,
+                  color: _navy,
+                ),
               ),
             ],
           ),

@@ -5,7 +5,7 @@ import '../../domain/usecases/get_mes_produits.dart';
 import '../../domain/usecases/supprimer_produit.dart';
 import '../../domain/usecases/toggle_disponibilite_produit.dart';
 
-// ───── Events ─────
+// Events
 abstract class VendeurProduitEvent extends Equatable {
   @override
   List<Object?> get props => [];
@@ -27,7 +27,7 @@ class ToggleDispoProduit extends VendeurProduitEvent {
   List<Object?> get props => [id];
 }
 
-// ───── States ─────
+// States
 abstract class VendeurProduitState extends Equatable {
   @override
   List<Object?> get props => [];
@@ -49,8 +49,9 @@ class VendeurProduitError extends VendeurProduitState {
   List<Object?> get props => [message];
 }
 
-// ───── Bloc ─────
-class VendeurProduitBloc extends Bloc<VendeurProduitEvent, VendeurProduitState> {
+// Bloc
+class VendeurProduitBloc
+    extends Bloc<VendeurProduitEvent, VendeurProduitState> {
   final GetMesProduits getMesProduits;
   final SupprimerProduitUsecase supprimerProduit;
   final ToggleDisponibiliteProduitUsecase toggleDisponibilite;
@@ -73,12 +74,18 @@ class VendeurProduitBloc extends Bloc<VendeurProduitEvent, VendeurProduitState> 
     );
   }
 
-  Future<void> _onLoad(LoadMesProduits event, Emitter<VendeurProduitState> emit) async {
+  Future<void> _onLoad(
+    LoadMesProduits event,
+    Emitter<VendeurProduitState> emit,
+  ) async {
     emit(VendeurProduitLoading());
     await _reloadOrError(emit);
   }
 
-  Future<void> _onSupprimer(SupprimerProduit event, Emitter<VendeurProduitState> emit) async {
+  Future<void> _onSupprimer(
+    SupprimerProduit event,
+    Emitter<VendeurProduitState> emit,
+  ) async {
     final result = await supprimerProduit(event.id);
     await result.fold(
       (failure) async => emit(VendeurProduitError(failure.errorMessage)),
@@ -86,7 +93,10 @@ class VendeurProduitBloc extends Bloc<VendeurProduitEvent, VendeurProduitState> 
     );
   }
 
-  Future<void> _onToggle(ToggleDispoProduit event, Emitter<VendeurProduitState> emit) async {
+  Future<void> _onToggle(
+    ToggleDispoProduit event,
+    Emitter<VendeurProduitState> emit,
+  ) async {
     final result = await toggleDisponibilite(event.id);
     await result.fold(
       (failure) async => emit(VendeurProduitError(failure.errorMessage)),

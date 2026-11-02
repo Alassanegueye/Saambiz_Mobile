@@ -9,13 +9,17 @@ abstract class VitrineEvent extends Equatable {
 /// Ouverture de l'écran « Mon site web » : état du site + secteurs.
 class ChargerVitrine extends VitrineEvent {}
 
-/// Le vendeur a choisi un logo — on l'analyse et on compose une proposition.
+/// Le vendeur a choisi un logo, on l'analyse et on compose une proposition.
 class AnalyserLogoDemande extends VitrineEvent {
   final String logoPath;
   final String? secteur;
   final String? activite;
 
-  const AnalyserLogoDemande({required this.logoPath, this.secteur, this.activite});
+  const AnalyserLogoDemande({
+    required this.logoPath,
+    this.secteur,
+    this.activite,
+  });
 
   @override
   List<Object?> get props => [logoPath, secteur, activite];
@@ -53,9 +57,19 @@ class GenererVitrineDemande extends VitrineEvent {
 
   @override
   List<Object?> get props => [
-        logoPath, secteur, activite, modele, accent, slogan, apropos,
-        horaires, annonce, commande, paiementLivraison, blocs,
-      ];
+    logoPath,
+    secteur,
+    activite,
+    modele,
+    accent,
+    slogan,
+    apropos,
+    horaires,
+    annonce,
+    commande,
+    paiementLivraison,
+    blocs,
+  ];
 }
 
 /// Retouche d'un site déjà créé.

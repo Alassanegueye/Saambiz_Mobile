@@ -16,10 +16,9 @@ class AnalyserLogo {
     required String logoPath,
     String? secteur,
     String? activite,
-  }) =>
-      repository.analyserLogo(
-        logoPath: logoPath,
-        secteur: secteur,
-        activite: activite,
-      );
+  }) => repository.analyserLogo(
+    logoPath: logoPath,
+    secteur: secteur,
+    activite: activite,
+  );
 }

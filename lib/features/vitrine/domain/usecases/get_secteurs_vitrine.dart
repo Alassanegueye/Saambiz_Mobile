@@ -9,5 +9,6 @@ class GetSecteursVitrine {
   final VitrineRepository repository;
   GetSecteursVitrine(this.repository);
 
-  Future<Either<Failure, List<SecteurVitrine>>> call() => repository.getSecteurs();
+  Future<Either<Failure, List<SecteurVitrine>>> call() =>
+      repository.getSecteurs();
 }

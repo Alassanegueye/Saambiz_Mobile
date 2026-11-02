@@ -23,7 +23,13 @@ class ProduitsPage extends StatefulWidget {
   final String? recherche;
   final bool promotions;
 
-  const ProduitsPage({super.key, required this.titre, this.categorie, this.recherche, this.promotions = false});
+  const ProduitsPage({
+    super.key,
+    required this.titre,
+    this.categorie,
+    this.recherche,
+    this.promotions = false,
+  });
 
   @override
   State<ProduitsPage> createState() => _ProduitsPageState();
@@ -39,7 +45,9 @@ class _ProduitsPageState extends State<ProduitsPage> {
 
   final _ds = CatalogueRemoteDataSource(sl<Dio>());
   final _scroll = ScrollController();
-  late final _rechercheCtrl = TextEditingController(text: widget.recherche ?? '');
+  late final _rechercheCtrl = TextEditingController(
+    text: widget.recherche ?? '',
+  );
 
   final List<ProduitCatalogue> _produits = [];
   late String _tri = widget.promotions ? 'promos' : 'recents';
@@ -55,7 +63,8 @@ class _ProduitsPageState extends State<ProduitsPage> {
   void initState() {
     super.initState();
     _scroll.addListener(() {
-      if (_scroll.position.pixels > _scroll.position.maxScrollExtent - 400) _chargerSuite();
+      if (_scroll.position.pixels > _scroll.position.maxScrollExtent - 400)
+        _chargerSuite();
     });
     _charger();
   }
@@ -68,12 +77,12 @@ class _ProduitsPageState extends State<ProduitsPage> {
   }
 
   Future<PageProduits> _requete(int page) => _ds.produits(
-        categorie: widget.categorie?.slug,
-        recherche: _recherche,
-        promo: widget.promotions,
-        tri: _tri,
-        page: page,
-      );
+    categorie: widget.categorie?.slug,
+    recherche: _recherche,
+    promo: widget.promotions,
+    tri: _tri,
+    page: page,
+  );
 
   Future<void> _charger() async {
     setState(() {
@@ -95,7 +104,8 @@ class _ProduitsPageState extends State<ProduitsPage> {
     } catch (_) {
       if (mounted) {
         setState(() {
-          _erreur = 'Impossible de charger les produits. Vérifiez votre connexion.';
+          _erreur =
+              'Impossible de charger les produits. Vérifiez votre connexion.';
           _chargement = false;
         });
       }
@@ -141,7 +151,11 @@ class _ProduitsPageState extends State<ProduitsPage> {
               PastilleIcone(iconeCategorie(c.icone), taille: 34),
               const SizedBox(width: 10),
             ] else if (widget.promotions) ...[
-              const PastilleIcone(Icons.local_offer_outlined, accent: true, taille: 34),
+              const PastilleIcone(
+                Icons.local_offer_outlined,
+                accent: true,
+                taille: 34,
+              ),
               const SizedBox(width: 10),
             ],
             Expanded(
@@ -149,12 +163,20 @@ class _ProduitsPageState extends State<ProduitsPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(widget.titre,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.plusJakartaSans(fontSize: 16, fontWeight: FontWeight.w700)),
+                  Text(
+                    widget.titre,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.inter(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                   if (!_chargement)
-                    Text('$_total produit${_total > 1 ? 's' : ''}', style: texteDiscret(11.5)),
+                    Text(
+                      '$_total produit${_total > 1 ? 's' : ''}',
+                      style: texteDiscret(11.5),
+                    ),
                 ],
               ),
             ),
@@ -175,7 +197,12 @@ class _ProduitsPageState extends State<ProduitsPage> {
               child: _suite
                   ? const Padding(
                       padding: EdgeInsets.all(20),
-                      child: Center(child: CircularProgressIndicator(color: AppColor.kPrimary, strokeWidth: 2)),
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          color: AppColor.kPrimary,
+                          strokeWidth: 2,
+                        ),
+                      ),
                     )
                   : const SizedBox(height: 24),
             ),
@@ -196,7 +223,9 @@ class _ProduitsPageState extends State<ProduitsPage> {
           if (!widget.promotions)
             ChampRecherche(
               controleur: _rechercheCtrl,
-              indication: c != null ? 'Rechercher dans ${c.nom}' : 'Rechercher un produit…',
+              indication: c != null
+                  ? 'Rechercher dans ${c.nom}'
+                  : 'Rechercher un produit…',
               onSubmitted: (v) {
                 _recherche = v;
                 _charger();
@@ -234,9 +263,11 @@ class _ProduitsPageState extends State<ProduitsPage> {
                     libelle: 'Voir les boutiques',
                     icone: Icons.storefront_outlined,
                     active: false,
-                    onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                      builder: (_) => CategorieBoutiquesPage(categorie: c),
-                    )),
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => CategorieBoutiquesPage(categorie: c),
+                      ),
+                    ),
                   ),
               ],
             ),
@@ -252,7 +283,12 @@ class _ProduitsPageState extends State<ProduitsPage> {
         SliverToBoxAdapter(
           child: Padding(
             padding: EdgeInsets.symmetric(vertical: 80),
-            child: Center(child: CircularProgressIndicator(color: AppColor.kPrimary, strokeWidth: 2.5)),
+            child: Center(
+              child: CircularProgressIndicator(
+                color: AppColor.kPrimary,
+                strokeWidth: 2.5,
+              ),
+            ),
           ),
         ),
       ];
@@ -260,7 +296,13 @@ class _ProduitsPageState extends State<ProduitsPage> {
     if (_erreur != null) {
       return [
         SliverToBoxAdapter(
-          child: EtatVide(icone: Icons.wifi_off_rounded, titre: 'Oups', message: _erreur, action: 'Réessayer', onAction: _charger),
+          child: EtatVide(
+            icone: Icons.wifi_off_rounded,
+            titre: 'Oups',
+            message: _erreur,
+            action: 'Réessayer',
+            onAction: _charger,
+          ),
         ),
       ];
     }
@@ -268,17 +310,19 @@ class _ProduitsPageState extends State<ProduitsPage> {
       return [
         SliverToBoxAdapter(
           child: EtatVide(
-            icone: widget.promotions ? Icons.local_offer_outlined : Icons.inventory_2_outlined,
+            icone: widget.promotions
+                ? Icons.local_offer_outlined
+                : Icons.inventory_2_outlined,
             titre: widget.promotions
                 ? 'Pas de promotion en ce moment'
                 : _recherche.isNotEmpty
-                    ? 'Aucun résultat pour « $_recherche »'
-                    : 'Bientôt des produits ici',
+                ? 'Aucun résultat pour « $_recherche »'
+                : 'Bientôt des produits ici',
             message: widget.promotions
                 ? 'Revenez vite : les vendeurs lancent régulièrement de nouvelles offres.'
                 : _recherche.isNotEmpty
-                    ? 'Essayez un autre mot, plus court ou plus général.'
-                    : 'Les vendeurs de cette catégorie ajoutent leurs produits. Revenez très vite !',
+                ? 'Essayez un autre mot, plus court ou plus général.'
+                : 'Les vendeurs de cette catégorie ajoutent leurs produits. Revenez très vite !',
           ),
         ),
       ];

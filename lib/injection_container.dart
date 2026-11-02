@@ -132,14 +132,12 @@ Future<void> init() async {
   sl.registerLazySingleton(() => sharedPreferences);
 
   // SecureStorage
-  sl.registerLazySingleton(() => const FlutterSecureStorage(
-    aOptions: AndroidOptions(
-      encryptedSharedPreferences: true,
+  sl.registerLazySingleton(
+    () => const FlutterSecureStorage(
+      aOptions: AndroidOptions(encryptedSharedPreferences: true),
+      iOptions: IOSOptions(accessibility: KeychainAccessibility.first_unlock),
     ),
-    iOptions: IOSOptions(
-      accessibility: KeychainAccessibility.first_unlock,
-    ),
-  ));
+  );
 
   //================================================
   // CORE SERVICES
@@ -169,9 +167,7 @@ Future<void> init() async {
         receiveTimeout: Env.timeoutReception,
         sendTimeout: Env.timeoutEnvoi,
         contentType: 'application/json',
-        headers: {
-          'Accept': 'application/json',
-        },
+        headers: {'Accept': 'application/json'},
       ),
     );
 
@@ -203,7 +199,8 @@ Future<void> init() async {
           // jeton. Y joindre un jeton périmé traîné d'une session précédente
           // ferait échouer l'inscription sur un 401 incompréhensible.
           final path = options.path.split('?')[0].trim();
-          final isAuthEndpoint = path.endsWith('/auth/login') ||
+          final isAuthEndpoint =
+              path.endsWith('/auth/login') ||
               path.endsWith('/auth/register') ||
               path.endsWith('/auth/inscription/envoyer-code') ||
               path.endsWith('/auth/inscription/verifier-code');
@@ -224,7 +221,9 @@ Future<void> init() async {
           return handler.next(options);
         },
         onResponse: (response, handler) {
-          _log('✅ [RESPONSE] ${response.statusCode} ${response.requestOptions.path}');
+          _log(
+            '✅ [RESPONSE] ${response.statusCode} ${response.requestOptions.path}',
+          );
           if (response.data != null && response.data is Map) {
             _log('📥 Data: ${response.data}');
           }
@@ -251,21 +250,19 @@ Future<void> init() async {
 
   // Data Sources
   sl.registerLazySingleton<AuthRemoteDataSource>(
-        () => AuthRemoteDataSourceImpl(dio: sl()),
+    () => AuthRemoteDataSourceImpl(dio: sl()),
   );
 
   // Repository
   sl.registerLazySingleton<AuthRepository>(
-        () => AuthRepositoryImpl(remoteDataSource: sl()),
+    () => AuthRepositoryImpl(remoteDataSource: sl()),
   );
 
   // Use Cases
   sl.registerLazySingleton(() => LoginUser(sl()));
 
   // BLoC
-  sl.registerFactory(() => AuthBloc(
-    loginUser: sl(),
-  ));
+  sl.registerFactory(() => AuthBloc(loginUser: sl()));
 
   //================================================
   // FEATURES - HOME (PRODUITS / BOUTIQUES)
@@ -273,7 +270,7 @@ Future<void> init() async {
 
   // Data Source (réutilise le Dio partagé configuré avec API_BASE_URL + intercepteur token)
   sl.registerLazySingleton<ProduitRemoteDataSource>(
-        () => ProduitRemoteDataSourceImpl(sl()),
+    () => ProduitRemoteDataSourceImpl(sl()),
   );
 
   // Repository
@@ -291,7 +288,7 @@ Future<void> init() async {
 
   // Data Source (Dio partagé)
   sl.registerLazySingleton<CommandeRemoteDataSource>(
-        () => CommandeRemoteDataSourceImpl(sl()),
+    () => CommandeRemoteDataSourceImpl(sl()),
   );
 
   // Repository
@@ -307,7 +304,7 @@ Future<void> init() async {
   sl.registerLazySingleton(() => VendeurProduitDataSource(sl()));
 
   sl.registerLazySingleton<VendeurProduitRepository>(
-        () => VendeurProduitRepositoryImpl(dataSource: sl()),
+    () => VendeurProduitRepositoryImpl(dataSource: sl()),
   );
 
   sl.registerLazySingleton(() => GetMesProduits(sl()));
@@ -321,22 +318,24 @@ Future<void> init() async {
   sl.registerLazySingleton(() => SupprimerImageProduitUsecase(sl()));
   sl.registerLazySingleton(() => GetVendeurDashboard(sl()));
 
-  sl.registerFactory(() => VendeurProduitBloc(
-    getMesProduits: sl(),
-    supprimerProduit: sl(),
-    toggleDisponibilite: sl(),
-  ));
+  sl.registerFactory(
+    () => VendeurProduitBloc(
+      getMesProduits: sl(),
+      supprimerProduit: sl(),
+      toggleDisponibilite: sl(),
+    ),
+  );
 
   //================================================
   // FEATURES - COMPTE (profil utilisateur connecté)
   //================================================
 
   sl.registerLazySingleton<CompteRemoteDataSource>(
-        () => CompteRemoteDataSourceImpl(sl()),
+    () => CompteRemoteDataSourceImpl(sl()),
   );
 
   sl.registerLazySingleton<CompteRepository>(
-        () => CompteRepositoryImpl(remoteDataSource: sl()),
+    () => CompteRepositoryImpl(remoteDataSource: sl()),
   );
 
   sl.registerLazySingleton(() => GetMe(sl()));
@@ -346,25 +345,27 @@ Future<void> init() async {
   sl.registerLazySingleton(() => ResetPassword(sl()));
   sl.registerLazySingleton(() => DeleteAccount(sl()));
 
-  sl.registerFactory(() => CompteBloc(
-    getMe: sl(),
-    modifierProfil: sl(),
-    changePassword: sl(),
-    forgotPassword: sl(),
-    resetPassword: sl(),
-    deleteAccount: sl(),
-  ));
+  sl.registerFactory(
+    () => CompteBloc(
+      getMe: sl(),
+      modifierProfil: sl(),
+      changePassword: sl(),
+      forgotPassword: sl(),
+      resetPassword: sl(),
+      deleteAccount: sl(),
+    ),
+  );
 
   //================================================
   // FEATURES - BOUTIQUE (vendeur)
   //================================================
 
   sl.registerLazySingleton<BoutiqueRemoteDataSource>(
-        () => BoutiqueRemoteDataSourceImpl(sl()),
+    () => BoutiqueRemoteDataSourceImpl(sl()),
   );
 
   sl.registerLazySingleton<BoutiqueRepository>(
-        () => BoutiqueRepositoryImpl(remoteDataSource: sl()),
+    () => BoutiqueRepositoryImpl(remoteDataSource: sl()),
   );
 
   sl.registerLazySingleton(() => GetMaBoutique(sl()));
@@ -373,13 +374,15 @@ Future<void> init() async {
   sl.registerLazySingleton(() => PauseBoutique(sl()));
   sl.registerLazySingleton(() => ReactiverBoutique(sl()));
 
-  sl.registerFactory(() => BoutiqueBloc(
-    getMaBoutique: sl(),
-    creerBoutique: sl(),
-    modifierBoutique: sl(),
-    pauseBoutique: sl(),
-    reactiverBoutique: sl(),
-  ));
+  sl.registerFactory(
+    () => BoutiqueBloc(
+      getMaBoutique: sl(),
+      creerBoutique: sl(),
+      modifierBoutique: sl(),
+      pauseBoutique: sl(),
+      reactiverBoutique: sl(),
+    ),
+  );
 
   //================================================
   // FEATURES - VITRINE : LE SITE WEB DE LA BOUTIQUE (vendeur)
@@ -389,11 +392,11 @@ Future<void> init() async {
   // retrouve d'un coup d'œil. Le site web, lui, porte ses couleurs.
 
   sl.registerLazySingleton<VitrineRemoteDataSource>(
-        () => VitrineRemoteDataSourceImpl(sl()),
+    () => VitrineRemoteDataSourceImpl(sl()),
   );
 
   sl.registerLazySingleton<VitrineRepository>(
-        () => VitrineRepositoryImpl(remoteDataSource: sl()),
+    () => VitrineRepositoryImpl(remoteDataSource: sl()),
   );
 
   sl.registerLazySingleton(() => GetMaVitrine(sl()));
@@ -402,24 +405,26 @@ Future<void> init() async {
   sl.registerLazySingleton(() => GenererVitrine(sl()));
   sl.registerLazySingleton(() => ModifierVitrine(sl()));
 
-  sl.registerFactory(() => VitrineBloc(
-    getMaVitrine: sl(),
-    getSecteurs: sl(),
-    analyserLogo: sl(),
-    genererVitrine: sl(),
-    modifierVitrine: sl(),
-  ));
+  sl.registerFactory(
+    () => VitrineBloc(
+      getMaVitrine: sl(),
+      getSecteurs: sl(),
+      analyserLogo: sl(),
+      genererVitrine: sl(),
+      modifierVitrine: sl(),
+    ),
+  );
 
   //================================================
   // FEATURES - ABONNEMENT + PAIEMENT (vendeur)
   //================================================
 
   sl.registerLazySingleton<AbonnementRemoteDataSource>(
-        () => AbonnementRemoteDataSourceImpl(sl()),
+    () => AbonnementRemoteDataSourceImpl(sl()),
   );
 
   sl.registerLazySingleton<AbonnementRepository>(
-        () => AbonnementRepositoryImpl(remoteDataSource: sl()),
+    () => AbonnementRepositoryImpl(remoteDataSource: sl()),
   );
 
   sl.registerLazySingleton(() => GetMonAbonnement(sl()));
@@ -428,23 +433,27 @@ Future<void> init() async {
   sl.registerLazySingleton(() => Payer(sl()));
   sl.registerLazySingleton(() => GetPaiement(sl()));
 
-  sl.registerFactory(() => AbonnementBloc(
-    getMonAbonnement: sl(),
-    initierRenouvellement: sl(),
-    getHistoriquePaiements: sl(),
-    payer: sl(),
-  ));
+  sl.registerFactory(
+    () => AbonnementBloc(
+      getMonAbonnement: sl(),
+      initierRenouvellement: sl(),
+      getHistoriquePaiements: sl(),
+      payer: sl(),
+    ),
+  );
 
   //================================================
   // FEATURES - FAVORIS (acheteur)
   //================================================
 
   sl.registerLazySingleton<FavorisRemoteDataSource>(
-        () => FavorisRemoteDataSourceImpl(sl()),
+    () => FavorisRemoteDataSourceImpl(sl()),
   );
   // Le contrat est enregistré, pas l'implémentation : le bloc et les cas
   // d'usage ne connaissent que l'interface du domaine.
-  sl.registerLazySingleton<FavorisRepository>(() => FavorisRepositoryImpl(sl()));
+  sl.registerLazySingleton<FavorisRepository>(
+    () => FavorisRepositoryImpl(sl()),
+  );
 
   sl.registerLazySingleton(() => GetBoutiquesSuivies(sl()));
   sl.registerLazySingleton(() => SuivreBoutique(sl()));
@@ -452,19 +461,21 @@ Future<void> init() async {
   sl.registerLazySingleton(() => BasculerCloche(sl()));
   sl.registerLazySingleton(() => GetStatutSuivi(sl()));
 
-  sl.registerFactory(() => FavorisBloc(
-        getBoutiquesSuivies: sl(),
-        suivreBoutique: sl(),
-        nePlusSuivreBoutique: sl(),
-        basculerCloche: sl(),
-      ));
+  sl.registerFactory(
+    () => FavorisBloc(
+      getBoutiquesSuivies: sl(),
+      suivreBoutique: sl(),
+      nePlusSuivreBoutique: sl(),
+      basculerCloche: sl(),
+    ),
+  );
 
   //================================================
   // FEATURES - MESSAGERIE (temps réel via socket + REST)
   //================================================
 
   sl.registerLazySingleton<MessagerieRemoteDataSource>(
-        () => MessagerieRemoteDataSourceImpl(sl()),
+    () => MessagerieRemoteDataSourceImpl(sl()),
   );
   sl.registerLazySingleton(() => MessagerieRepository(sl()));
   sl.registerFactory(() => MessagerieBloc(sl()));
@@ -474,7 +485,7 @@ Future<void> init() async {
   //================================================
 
   sl.registerLazySingleton<NotificationsRemoteDataSource>(
-        () => NotificationsRemoteDataSourceImpl(sl()),
+    () => NotificationsRemoteDataSourceImpl(sl()),
   );
   sl.registerLazySingleton(() => NotificationsRepository(sl()));
   sl.registerFactory(() => NotificationsBloc(sl()));
@@ -484,7 +495,7 @@ Future<void> init() async {
   //================================================
 
   sl.registerLazySingleton<PromotionsRemoteDataSource>(
-        () => PromotionsRemoteDataSourceImpl(sl()),
+    () => PromotionsRemoteDataSourceImpl(sl()),
   );
   sl.registerLazySingleton(() => PromotionsRepository(sl()));
   sl.registerFactory(() => PromotionsBloc(sl()));
@@ -494,7 +505,7 @@ Future<void> init() async {
   //================================================
 
   sl.registerLazySingleton<SignalementsRemoteDataSource>(
-        () => SignalementsRemoteDataSourceImpl(sl()),
+    () => SignalementsRemoteDataSourceImpl(sl()),
   );
   sl.registerLazySingleton(() => SignalementsRepository(sl()));
   sl.registerFactory(() => SignalementsBloc(sl()));
@@ -530,8 +541,8 @@ void _validateEnvVariables() {
   if (missingVariables.isNotEmpty) {
     throw StateError(
       'Les variables d\'environnement suivantes sont manquantes dans votre fichier .env:\n'
-          '${missingVariables.join('\n')}\n\n'
-          'Assurez-vous qu\'elles sont définies avant de lancer l\'application.',
+      '${missingVariables.join('\n')}\n\n'
+      'Assurez-vous qu\'elles sont définies avant de lancer l\'application.',
     );
   }
 
@@ -540,14 +551,16 @@ void _validateEnvVariables() {
   // L'adresse RÉELLEMENT utilisée par Dio, et non celle du .env.
   //
   // Cette ligne affichait `dotenv.get('API_BASE_URL')`, alors que le client
-  // HTTP lit `Env.apiBaseUrlEffective` — et le `--dart-define` l'emporte sur
+  // HTTP lit `Env.apiBaseUrlEffective`, et le `--dart-define` l'emporte sur
   // le .env quand il est fourni (voir Env.resoudreApiBaseUrl). Un lancement de
   // production annonçait donc « http://10.0.2.2:5000 » tout en appelant l'API
   // réelle : on cherche alors un problème de configuration qui n'existe pas.
   //
   // La provenance est indiquée, parce que c'est la question suivante.
-  _log('🌐 API Base URL: ${Env.apiBaseUrlEffective}'
-      '${Env.apiBaseUrlCompilee ? ' (--dart-define)' : ' (.env)'}');
+  _log(
+    '🌐 API Base URL: ${Env.apiBaseUrlEffective}'
+    '${Env.apiBaseUrlCompilee ? ' (--dart-define)' : ' (.env)'}',
+  );
   _log('🔑 Auth Login Path: ${dotenv.get('AUTH_LOGIN_PATH')}');
   _log('📝 Auth Register Path: ${dotenv.get('AUTH_REGISTER_PATH')}');
 }

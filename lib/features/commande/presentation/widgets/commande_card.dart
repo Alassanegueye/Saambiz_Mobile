@@ -6,8 +6,8 @@ import 'package:saambiz/core/utils/image_url.dart';
 import '../../../../core/theme/app_color.dart';
 import '../../data/models/commande_model.dart';
 
-/// Couleur d'un statut de commande, selon la charte (reprise de Yobante
-/// Boutique) : or foncé quand une action est attendue, bleu pour une étape en
+/// Couleur d’un statut de commande, selon la charte SaamBiz :
+/// or foncé quand une action est attendue, bleu pour une étape en
 /// cours, vert pour la livraison, rouge pour une annulation.
 Color couleurStatutCommande(String statut) {
   switch (statut) {
@@ -47,8 +47,21 @@ IconData iconeStatutCommande(String statut) {
 }
 
 String _date(DateTime? d) {
-  if (d == null) return '—';
-  const mois = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
+  if (d == null) return 'Date inconnue';
+  const mois = [
+    'janv.',
+    'févr.',
+    'mars',
+    'avr.',
+    'mai',
+    'juin',
+    'juil.',
+    'août',
+    'sept.',
+    'oct.',
+    'nov.',
+    'déc.',
+  ];
   final l = d.toLocal();
   return '${l.day} ${mois[l.month - 1]} ${l.year}';
 }
@@ -75,8 +88,7 @@ class _BadgeStatut extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
         color: couleur,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [BoxShadow(color: couleur.withValues(alpha: 0.4), blurRadius: 6, offset: const Offset(0, 2))],
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -84,12 +96,19 @@ class _BadgeStatut extends StatelessWidget {
           Container(
             width: 6,
             height: 6,
-            decoration: const BoxDecoration(color: AppColor.kWhite, shape: BoxShape.circle),
+            decoration: const BoxDecoration(
+              color: AppColor.kWhite,
+              shape: BoxShape.circle,
+            ),
           ),
           const SizedBox(width: 6),
           Text(
             kStatutCommandeLabels[statut] ?? statut,
-            style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.w700, color: AppColor.kWhite),
+            style: GoogleFonts.inter(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              color: AppColor.kWhite,
+            ),
           ),
         ],
       ),
@@ -97,7 +116,7 @@ class _BadgeStatut extends StatelessWidget {
   }
 }
 
-/// Carte d'une commande, dans le style de Yobante Boutique : photo du
+/// Carte d’une commande : photo du
 /// premier article avec le statut en surimpression, puis référence, date,
 /// total et état du paiement.
 class CommandeCard extends StatelessWidget {
@@ -108,14 +127,16 @@ class CommandeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final nbArticles = commande.lignes.fold<int>(0, (s, l) => s + l.quantite);
-    final premiereImage = commande.lignes.isNotEmpty ? commande.lignes.first.imageProduit : null;
+    final premiereImage = commande.lignes.isNotEmpty
+        ? commande.lignes.first.imageProduit
+        : null;
     final aUneImage = premiereImage != null && premiereImage.isNotEmpty;
     final paye = commande.statutPaiement == 'paye';
     final libellePaiement = paye
         ? 'Payé'
         : commande.statutPaiement == 'rembourse'
-            ? 'Remboursé'
-            : 'En attente';
+        ? 'Remboursé'
+        : 'En attente';
     final interlocuteur = commande.vendeurNom;
 
     return GestureDetector(
@@ -123,17 +144,16 @@ class CommandeCard extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           color: AppColor.kWhite,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 12, offset: const Offset(0, 3)),
-          ],
+          borderRadius: BorderRadius.circular(12),
         ),
         child: Column(
           children: [
             // Photo du premier article, statut en haut à droite.
             if (aUneImage)
               ClipRRect(
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(12),
+                ),
                 child: Stack(
                   children: [
                     CachedNetworkImage(
@@ -149,30 +169,50 @@ class CommandeCard extends StatelessWidget {
                         height: 160,
                         color: AppColor.kBackground,
                         child: const Center(
-                          child: SizedBox(width: 30, height: 30, child: CircularProgressIndicator(strokeWidth: 2)),
+                          child: SizedBox(
+                            width: 30,
+                            height: 30,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
                         ),
                       ),
                       errorWidget: (_, __, ___) => Container(
                         height: 160,
                         color: AppColor.kBackground,
-                        child: const Icon(Icons.image_not_supported, color: AppColor.kGrayscale40, size: 32),
+                        child: const Icon(
+                          Icons.image_not_supported,
+                          color: AppColor.kGrayscale40,
+                          size: 32,
+                        ),
                       ),
                     ),
-                    Positioned(top: 12, right: 12, child: _BadgeStatut(commande.statut)),
+                    Positioned(
+                      top: 12,
+                      right: 12,
+                      child: _BadgeStatut(commande.statut),
+                    ),
                     if (nbArticles > 1)
                       Positioned(
                         bottom: 10,
                         left: 10,
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 5,
+                          ),
                           decoration: BoxDecoration(
-                            color: AppColor.kGrayscaleDark100.withValues(alpha: 0.7),
+                            color: AppColor.kGrayscaleDark100.withValues(
+                              alpha: 0.7,
+                            ),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
                             '+${nbArticles - 1}',
-                            style: GoogleFonts.plusJakartaSans(
-                                fontSize: 12, fontWeight: FontWeight.w700, color: AppColor.kWhite),
+                            style: GoogleFonts.inter(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              color: AppColor.kWhite,
+                            ),
                           ),
                         ),
                       ),
@@ -184,7 +224,7 @@ class CommandeCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Référence, date (et boutique) — nombre d'articles.
+                  // Référence, date (et boutique), nombre d'articles.
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -194,18 +234,26 @@ class CommandeCard extends StatelessWidget {
                           children: [
                             Text(
                               '#${commande.referenceCommande}',
-                              style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 14, fontWeight: FontWeight.w700, color: AppColor.kGrayscaleDark100),
+                              style: GoogleFonts.inter(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700,
+                                color: AppColor.kGrayscaleDark100,
+                              ),
                             ),
                             const SizedBox(height: 3),
                             Text(
                               [
                                 _date(commande.createdAt),
-                                if (interlocuteur != null && interlocuteur.isNotEmpty) interlocuteur,
-                              ].join(' · '),
+                                if (interlocuteur != null &&
+                                    interlocuteur.isNotEmpty)
+                                  interlocuteur,
+                              ].join(', '),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: GoogleFonts.plusJakartaSans(fontSize: 12, color: AppColor.kGrayscale40),
+                              style: GoogleFonts.inter(
+                                fontSize: 12,
+                                color: AppColor.kGrayscale40,
+                              ),
                             ),
                           ],
                         ),
@@ -215,15 +263,21 @@ class CommandeCard extends StatelessWidget {
                         _BadgeStatut(commande.statut)
                       else
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 6,
+                          ),
                           decoration: BoxDecoration(
                             color: AppColor.kBackground,
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
                             '$nbArticles article${nbArticles > 1 ? 's' : ''}',
-                            style: GoogleFonts.plusJakartaSans(
-                                fontSize: 11, fontWeight: FontWeight.w600, color: AppColor.kGrayscale40),
+                            style: GoogleFonts.inter(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: AppColor.kGrayscale40,
+                            ),
                           ),
                         ),
                     ],
@@ -232,11 +286,20 @@ class CommandeCard extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('Total', style: GoogleFonts.plusJakartaSans(fontSize: 12, color: AppColor.kGrayscale40)),
+                      Text(
+                        'Total',
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          color: AppColor.kGrayscale40,
+                        ),
+                      ),
                       Text(
                         _montant(commande.montantTotal),
-                        style: GoogleFonts.plusJakartaSans(
-                            fontSize: 14, fontWeight: FontWeight.w700, color: AppColor.kPrimary),
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          color: AppColor.kPrimary,
+                        ),
                       ),
                     ],
                   ),
@@ -244,19 +307,32 @@ class CommandeCard extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('Paiement', style: GoogleFonts.plusJakartaSans(fontSize: 12, color: AppColor.kGrayscale40)),
+                      Text(
+                        'Paiement',
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          color: AppColor.kGrayscale40,
+                        ),
+                      ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
-                          color: paye ? AppColor.kSuccesLight : AppColor.kSecondaryLight,
+                          color: paye
+                              ? AppColor.kSuccesLight
+                              : AppColor.kSecondaryLight,
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(
                           libellePaiement,
-                          style: GoogleFonts.plusJakartaSans(
+                          style: GoogleFonts.inter(
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
-                            color: paye ? AppColor.kSucces : AppColor.kSecondaryDark,
+                            color: paye
+                                ? AppColor.kSucces
+                                : AppColor.kSecondaryDark,
                           ),
                         ),
                       ),

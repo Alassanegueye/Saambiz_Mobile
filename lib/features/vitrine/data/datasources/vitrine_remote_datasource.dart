@@ -17,7 +17,7 @@ abstract class VitrineRemoteDataSource {
     String? activite,
   });
 
-  /// Crée le site et le publie — dernière étape de l'assistant.
+  /// Crée le site et le publie, dernière étape de l'assistant.
   Future<VitrineModel> genererVitrine({
     String? logoPath,
     required String secteur,

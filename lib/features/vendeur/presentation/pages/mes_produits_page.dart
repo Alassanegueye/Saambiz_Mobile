@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../../catalogue/presentation/widgets/produit_card.dart'
+    show formaterPrix;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -9,16 +11,16 @@ import 'produit_form_page.dart';
 import 'package:saambiz/core/utils/image_url.dart';
 
 class _C {
-  static const green   = Color(0xFF0D1B3D);
-  static const navyDk  = Color(0xFF060F26);
-  static const gold    = Color(0xFFF2B705);
-  static const black   = Color(0xFF0D1B3D);
-  static const white   = Color(0xFFFFFFFF);
-  static const bg      = Color(0xFFF7F8FA);
-  static const sub     = Color(0xFF5B6C8A);
-  static const border  = Color(0xFFE6EAF0);
+  static const green = Color(0xFF01154B);
+  static const navyDk = Color(0xFF060F26);
+  static const gold = Color(0xFFFBB900);
+  static const black = Color(0xFF01154B);
+  static const white = Color(0xFFFFFFFF);
+  static const bg = Color(0xFFF4F5F8);
+  static const sub = Color(0xFF5B6C8A);
+  static const border = Color(0xFFE6EAF0);
   static const success = Color(0xFF1E9E62);
-  static const danger  = Color(0xFFD64533);
+  static const danger = Color(0xFFD64533);
   static const greenLight = Color(0xFFE8EEF7);
 }
 
@@ -43,6 +45,8 @@ class _MesProduitsView extends StatefulWidget {
 
 class _MesProduitsViewState extends State<_MesProduitsView> {
   int _tab = 0; // 0 = Tous, 1 = En ligne, 2 = Hors ligne
+  bool _rechercheOuverte = false;
+  String _recherche = '';
 
   // Un produit est "en ligne" s'il a du stock disponible.
   bool _enLigne(ProduitModel p) => p.quantite > 0;
@@ -69,13 +73,18 @@ class _MesProduitsViewState extends State<_MesProduitsView> {
                 listener: (context, state) {
                   if (state is VendeurProduitError) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(state.message), backgroundColor: _C.danger),
+                      SnackBar(
+                        content: Text(state.message),
+                        backgroundColor: _C.danger,
+                      ),
                     );
                   }
                 },
                 builder: (context, state) {
                   if (state is VendeurProduitLoading) {
-                    return const Center(child: CircularProgressIndicator(color: _C.green));
+                    return const Center(
+                      child: CircularProgressIndicator(color: _C.green),
+                    );
                   }
                   if (state is VendeurProduitError) {
                     return _buildError(context, state.message);
@@ -84,11 +93,26 @@ class _MesProduitsViewState extends State<_MesProduitsView> {
                     final all = state.produits;
                     final enLigne = all.where(_enLigne).toList();
                     final horsLigne = all.where((p) => !_enLigne(p)).toList();
-                    final shown = _tab == 1 ? enLigne : _tab == 2 ? horsLigne : all;
+                    final q = _recherche.trim().toLowerCase();
+                    final shown =
+                        (_tab == 1
+                                ? enLigne
+                                : _tab == 2
+                                ? horsLigne
+                                : all)
+                            .where(
+                              (p) =>
+                                  q.isEmpty || p.nom.toLowerCase().contains(q),
+                            )
+                            .toList();
 
                     return Column(
                       children: [
-                        _buildTabs(all.length, enLigne.length, horsLigne.length),
+                        _buildTabs(
+                          all.length,
+                          enLigne.length,
+                          horsLigne.length,
+                        ),
                         Expanded(
                           child: shown.isEmpty
                               ? _buildEmpty()
@@ -98,10 +122,17 @@ class _MesProduitsViewState extends State<_MesProduitsView> {
                                       .read<VendeurProduitBloc>()
                                       .add(LoadMesProduits()),
                                   child: ListView.separated(
-                                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+                                    padding: const EdgeInsets.fromLTRB(
+                                      20,
+                                      16,
+                                      20,
+                                      20,
+                                    ),
                                     itemCount: shown.length,
-                                    separatorBuilder: (_, __) => const SizedBox(height: 12),
-                                    itemBuilder: (_, i) => _buildCard(context, shown[i]),
+                                    separatorBuilder: (_, __) =>
+                                        const SizedBox(height: 8),
+                                    itemBuilder: (_, i) =>
+                                        _buildCard(context, shown[i]),
                                   ),
                                 ),
                         ),
@@ -119,7 +150,7 @@ class _MesProduitsViewState extends State<_MesProduitsView> {
     );
   }
 
-  // ── Barre du haut : titre + recherche ─────────────────────────────────────
+  // Barre du haut : titre + recherche
   Widget _buildTopBar(BuildContext context) {
     return Container(
       color: _C.white,
@@ -129,25 +160,55 @@ class _MesProduitsViewState extends State<_MesProduitsView> {
           if (Navigator.of(context).canPop())
             IconButton(
               onPressed: () => Navigator.of(context).pop(),
-              icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18, color: _C.black),
+              icon: const Icon(
+                Icons.arrow_back_ios_new_rounded,
+                size: 18,
+                color: _C.black,
+              ),
             )
           else
             const SizedBox(width: 12),
           Expanded(
-            child: Text('Mes produits',
-                style: GoogleFonts.plusJakartaSans(fontSize: 17, fontWeight: FontWeight.w800, color: _C.black)),
+            child: _rechercheOuverte
+                ? TextField(
+                    autofocus: true,
+                    onChanged: (v) => setState(() => _recherche = v),
+                    style: GoogleFonts.inter(fontSize: 15, color: _C.black),
+                    decoration: const InputDecoration(
+                      hintText: 'Rechercher un produit',
+                      isDense: true,
+                      filled: false,
+                      border: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                    ),
+                  )
+                : Text(
+                    'Mes produits',
+                    style: GoogleFonts.inter(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: _C.black,
+                    ),
+                  ),
           ),
-          Container(
-            width: 42, height: 42,
-            decoration: BoxDecoration(color: _C.bg, borderRadius: BorderRadius.circular(12)),
-            child: const Icon(Icons.search_rounded, color: _C.green, size: 21),
+          IconButton(
+            tooltip: _rechercheOuverte ? 'Fermer la recherche' : 'Rechercher',
+            onPressed: () => setState(() {
+              _rechercheOuverte = !_rechercheOuverte;
+              if (!_rechercheOuverte) _recherche = '';
+            }),
+            icon: Icon(
+              _rechercheOuverte ? Icons.close_rounded : Icons.search_rounded,
+              color: _C.black,
+            ),
           ),
         ],
       ),
     );
   }
 
-  // ── Onglets Tous / En ligne / Hors ligne ──────────────────────────────────
+  // Onglets Tous / En ligne / Hors ligne
   Widget _buildTabs(int total, int enLigne, int horsLigne) {
     final tabs = [
       'Tous ($total)',
@@ -177,7 +238,7 @@ class _MesProduitsViewState extends State<_MesProduitsView> {
                 child: Text(
                   tabs[i],
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.plusJakartaSans(
+                  style: GoogleFonts.inter(
                     fontSize: 13,
                     fontWeight: active ? FontWeight.w700 : FontWeight.w500,
                     color: active ? _C.green : _C.sub,
@@ -191,14 +252,14 @@ class _MesProduitsViewState extends State<_MesProduitsView> {
     );
   }
 
-  // ── Carte produit ─────────────────────────────────────────────────────────
+  // Carte produit
   Widget _buildCard(BuildContext context, ProduitModel p) {
     final enLigne = _enLigne(p);
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: _C.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(color: _C.border),
       ),
       child: Row(
@@ -208,7 +269,9 @@ class _MesProduitsViewState extends State<_MesProduitsView> {
             child: p.image.isNotEmpty
                 ? CachedNetworkImage(
                     imageUrl: imageOptimisee(p.image),
-                    width: 58, height: 58, fit: BoxFit.cover,
+                    width: 58,
+                    height: 58,
+                    fit: BoxFit.cover,
                     errorWidget: (_, __, ___) => _imgFallback(),
                   )
                 : _imgFallback(),
@@ -218,35 +281,43 @@ class _MesProduitsViewState extends State<_MesProduitsView> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(p.nom,
-                    maxLines: 1, overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.w700, color: _C.black)),
-                const SizedBox(height: 3),
-                Text('${p.prix} FCFA',
-                    style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.w600, color: _C.sub)),
-                const SizedBox(height: 4),
-                Row(children: [
-                  Container(
-                    width: 7, height: 7,
-                    decoration: BoxDecoration(
-                      color: enLigne ? _C.success : _C.danger,
-                      shape: BoxShape.circle,
-                    ),
+                Text(
+                  p.nom,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.inter(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: _C.black,
                   ),
-                  const SizedBox(width: 5),
-                  Text(enLigne ? 'En ligne' : 'Hors ligne',
-                      style: GoogleFonts.plusJakartaSans(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: enLigne ? _C.success : _C.danger)),
-                ]),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  formaterPrix(double.tryParse(p.prix) ?? 0),
+                  style: GoogleFonts.inter(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: _C.sub,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  enLigne ? 'En ligne' : 'Hors ligne',
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: enLigne ? _C.success : _C.sub,
+                  ),
+                ),
               ],
             ),
           ),
           Switch.adaptive(
             value: enLigne,
             activeColor: _C.green,
-            onChanged: (_) => context.read<VendeurProduitBloc>().add(ToggleDispoProduit(p.id)),
+            onChanged: (_) => context.read<VendeurProduitBloc>().add(
+              ToggleDispoProduit(p.id),
+            ),
           ),
           PopupMenuButton<String>(
             icon: const Icon(Icons.more_vert_rounded, color: _C.sub, size: 20),
@@ -268,24 +339,36 @@ class _MesProduitsViewState extends State<_MesProduitsView> {
     );
   }
 
-  // ── Bouton « Ajouter un produit » ─────────────────────────────────────────
+  // Bouton « Ajouter un produit »
   Widget _buildAddButton(BuildContext context) {
     return Container(
       color: _C.white,
-      padding: EdgeInsets.fromLTRB(20, 12, 20, 12 + MediaQuery.of(context).padding.bottom),
+      padding: EdgeInsets.fromLTRB(
+        20,
+        12,
+        20,
+        12 + MediaQuery.of(context).padding.bottom,
+      ),
       child: SizedBox(
         width: double.infinity,
         child: ElevatedButton.icon(
           onPressed: () => _ouvrirForm(context),
           icon: const Icon(Icons.add_rounded, size: 20),
-          label: Text('Ajouter un produit',
-              style: GoogleFonts.plusJakartaSans(fontSize: 15, fontWeight: FontWeight.w700)),
+          label: Text(
+            'Ajouter un produit',
+            style: GoogleFonts.inter(
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
           style: ElevatedButton.styleFrom(
             backgroundColor: _C.green,
             foregroundColor: _C.white,
             elevation: 0,
             padding: const EdgeInsets.symmetric(vertical: 16),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
           ),
         ),
       ),
@@ -294,12 +377,17 @@ class _MesProduitsViewState extends State<_MesProduitsView> {
 
   Widget _buildEmpty() {
     return Center(
-      child: Column(mainAxisSize: MainAxisSize.min, children: [
-        const Icon(Icons.inventory_2_outlined, color: _C.sub, size: 46),
-        const SizedBox(height: 12),
-        Text('Aucun produit ici',
-            style: GoogleFonts.plusJakartaSans(fontSize: 14, color: _C.sub)),
-      ]),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.inventory_2_outlined, color: _C.sub, size: 46),
+          const SizedBox(height: 12),
+          Text(
+            'Aucun produit ici',
+            style: GoogleFonts.inter(fontSize: 14, color: _C.sub),
+          ),
+        ],
+      ),
     );
   }
 
@@ -312,27 +400,44 @@ class _MesProduitsViewState extends State<_MesProduitsView> {
           const SizedBox(height: 8),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 32),
-            child: Text(message, textAlign: TextAlign.center,
-                style: GoogleFonts.plusJakartaSans(color: _C.sub)),
+            child: Text(
+              message,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.inter(color: _C.sub),
+            ),
           ),
           const SizedBox(height: 12),
           TextButton(
-            onPressed: () => context.read<VendeurProduitBloc>().add(LoadMesProduits()),
-            child: Text('Réessayer', style: GoogleFonts.plusJakartaSans(color: _C.green, fontWeight: FontWeight.w700)),
+            onPressed: () =>
+                context.read<VendeurProduitBloc>().add(LoadMesProduits()),
+            child: Text(
+              'Réessayer',
+              style: GoogleFonts.inter(
+                color: _C.green,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
           ),
         ],
       ),
     );
   }
 
-  void _confirmerSuppression(BuildContext context, VendeurProduitBloc bloc, String id) {
+  void _confirmerSuppression(
+    BuildContext context,
+    VendeurProduitBloc bloc,
+    String id,
+  ) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Supprimer ce produit ?'),
         content: const Text('Cette action est irréversible.'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Annuler')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Annuler'),
+          ),
           TextButton(
             onPressed: () {
               Navigator.pop(ctx);
@@ -346,7 +451,9 @@ class _MesProduitsViewState extends State<_MesProduitsView> {
   }
 
   Widget _imgFallback() => Container(
-        width: 58, height: 58, color: _C.greenLight,
-        child: const Icon(Icons.image_not_supported_outlined, color: _C.sub),
-      );
+    width: 58,
+    height: 58,
+    color: _C.greenLight,
+    child: const Icon(Icons.image_not_supported_outlined, color: _C.sub),
+  );
 }

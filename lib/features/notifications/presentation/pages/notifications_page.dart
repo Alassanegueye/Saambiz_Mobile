@@ -11,10 +11,10 @@ import '../bloc/notifications_event.dart';
 import '../bloc/notifications_state.dart';
 
 class _C {
-  static const green = Color(0xFF0D1B3D);
-  static const black = Color(0xFF0D1B3D);
+  static const green = Color(0xFF01154B);
+  static const black = Color(0xFF01154B);
   static const white = Color(0xFFFFFFFF);
-  static const bg = Color(0xFFF5F7FB);
+  static const bg = Color(0xFFF4F5F8);
   static const sub = Color(0xFF5B6C8A);
   static const border = Color(0xFFE3E8F0);
 }
@@ -80,7 +80,10 @@ class _NotificationsViewState extends State<_NotificationsView> {
         listener: (context, state) {
           if (state is NotificationsError) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message), backgroundColor: Colors.red),
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.red,
+              ),
             );
           }
         },
@@ -91,8 +94,10 @@ class _NotificationsViewState extends State<_NotificationsView> {
           if (state is NotificationsLoaded) {
             if (state.notifications.isEmpty) {
               return const Center(
-                child: Text('Aucune notification pour le moment',
-                    style: TextStyle(color: _C.sub)),
+                child: Text(
+                  'Aucune notification pour le moment',
+                  style: TextStyle(color: _C.sub),
+                ),
               );
             }
             return RefreshIndicator(
@@ -106,20 +111,28 @@ class _NotificationsViewState extends State<_NotificationsView> {
                   final n = state.notifications[i];
                   return ListTile(
                     leading: CircleAvatar(
-                      backgroundColor:
-                          (n.lue ? _C.sub : _C.green).withOpacity(0.12),
-                      child: Icon(Icons.notifications_outlined,
-                          color: n.lue ? _C.sub : _C.green),
+                      backgroundColor: (n.lue ? _C.sub : _C.green).withOpacity(
+                        0.12,
+                      ),
+                      child: Icon(
+                        Icons.notifications_outlined,
+                        color: n.lue ? _C.sub : _C.green,
+                      ),
                     ),
-                    title: Text(n.titre,
-                        style: TextStyle(
-                            fontWeight: n.lue ? FontWeight.w500 : FontWeight.w800)),
+                    title: Text(
+                      n.titre,
+                      style: TextStyle(
+                        fontWeight: n.lue ? FontWeight.w500 : FontWeight.w800,
+                      ),
+                    ),
                     subtitle: Text(n.message),
-                    trailing: Text(DateFormat('dd/MM HH:mm').format(n.date),
-                        style: const TextStyle(fontSize: 11, color: _C.sub)),
-                    onTap: () => context
-                        .read<NotificationsBloc>()
-                        .add(MarquerNotificationLue(n.id)),
+                    trailing: Text(
+                      DateFormat('dd/MM HH:mm').format(n.date),
+                      style: const TextStyle(fontSize: 11, color: _C.sub),
+                    ),
+                    onTap: () => context.read<NotificationsBloc>().add(
+                      MarquerNotificationLue(n.id),
+                    ),
                   );
                 },
               ),

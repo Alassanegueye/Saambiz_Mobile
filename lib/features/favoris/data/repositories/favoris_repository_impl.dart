@@ -62,22 +62,29 @@ class FavorisRepositoryImpl implements FavorisRepository {
   Future<Either<Failure, List<BoutiqueSuivie>>> mesBoutiquesSuivies() async {
     try {
       final modeles = await remote.mesFavoris();
-      return Right(modeles
-          .map((m) => BoutiqueSuivie(
+      return Right(
+        modeles
+            .map(
+              (m) => BoutiqueSuivie(
                 id: m.id,
                 nom: m.nom,
                 logo: m.logo,
                 localisation: m.localisation,
                 clocheActive: m.clocheActive,
-              ))
-          .toList());
+              ),
+            )
+            .toList(),
+      );
     } catch (e) {
       return Left(_panne(e));
     }
   }
 
   @override
-  Future<Either<Failure, bool>> basculerCloche(String boutiqueId, bool active) async {
+  Future<Either<Failure, bool>> basculerCloche(
+    String boutiqueId,
+    bool active,
+  ) async {
     try {
       return Right(await remote.toggleCloche(boutiqueId, active));
     } catch (e) {
@@ -89,11 +96,13 @@ class FavorisRepositoryImpl implements FavorisRepository {
   Future<Either<Failure, SuiviBoutique>> statutSuivi(String boutiqueId) async {
     try {
       final brut = await remote.statutSuivi(boutiqueId);
-      return Right(SuiviBoutique(
-        boutiqueId: boutiqueId,
-        suivi: brut['suivi'] ?? false,
-        clocheActive: brut['clocheActive'] ?? false,
-      ));
+      return Right(
+        SuiviBoutique(
+          boutiqueId: boutiqueId,
+          suivi: brut['suivi'] ?? false,
+          clocheActive: brut['clocheActive'] ?? false,
+        ),
+      );
     } catch (e) {
       return Left(_panne(e));
     }

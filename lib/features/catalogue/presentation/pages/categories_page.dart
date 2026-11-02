@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/theme/app_color.dart';
+import '../../../../core/widgets/animations.dart';
 import '../../../../core/widgets/app_app_bar.dart';
-import '../../../../core/widgets/barre_navigation_verre.dart' show kEspaceBarreBas;
+import '../../../../core/widgets/barre_navigation_verre.dart'
+    show kEspaceBarreBas;
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/ui_kit.dart';
 import '../../../../injection_container.dart';
@@ -12,9 +14,9 @@ import '../../../categories/data/categorie.dart';
 import '../../../categories/presentation/icones_categories.dart';
 import 'produits_page.dart';
 
-/// Onglet « Catégories » — même écran que Yobante Boutique : titre centré,
-/// champ de recherche, puis la liste des catégories en lignes (pastille
-/// d'icône, nom, chevron). « Promotions » ouvre les promotions en cours.
+/// Onglet « Catégories » : champ de recherche, puis les catégories en
+/// grille de tuiles (icône, nom). « Promotions » ouvre les promotions en
+/// cours.
 class CategoriesPage extends StatefulWidget {
   const CategoriesPage({super.key});
 
@@ -40,7 +42,9 @@ class _CategoriesPageState extends State<CategoriesPage> {
   }
 
   Future<void> _charger({bool forcer = false}) async {
-    final liste = await CategoriesRemoteDataSource(sl<Dio>()).lister(forcer: forcer);
+    final liste = await CategoriesRemoteDataSource(
+      sl<Dio>(),
+    ).lister(forcer: forcer);
     if (!mounted) return;
     setState(() {
       _categories = liste;
@@ -50,12 +54,16 @@ class _CategoriesPageState extends State<CategoriesPage> {
 
   void _rechercher(String texte) {
     if (texte.trim().isEmpty) return;
-    Navigator.of(context).push(MaterialPageRoute(
-      builder: (_) => ProduitsPage(titre: 'Résultats', recherche: texte.trim()),
-    ));
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) =>
+            ProduitsPage(titre: 'Résultats', recherche: texte.trim()),
+      ),
+    );
   }
 
-  void _ouvrir(Widget page) => Navigator.of(context).push(MaterialPageRoute(builder: (_) => page));
+  void _ouvrir(Widget page) =>
+      Navigator.of(context).push(MaterialPageRoute(builder: (_) => page));
 
   @override
   Widget build(BuildContext context) {
@@ -80,7 +88,20 @@ class _CategoriesPageState extends State<CategoriesPage> {
 
   Widget _corps() {
     if (_chargement) {
-      return const Center(child: CircularProgressIndicator(strokeWidth: 2.5));
+      return Reflet(
+        child: GridView.builder(
+          physics: const NeverScrollableScrollPhysics(),
+          padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            mainAxisSpacing: 12,
+            crossAxisSpacing: 12,
+            childAspectRatio: 1.45,
+          ),
+          itemCount: 8,
+          itemBuilder: (_, __) => const Os(hauteur: double.infinity, rayon: 12),
+        ),
+      );
     }
     if (_categories.isEmpty) {
       return EmptyState(
@@ -94,67 +115,109 @@ class _CategoriesPageState extends State<CategoriesPage> {
     return RefreshIndicator(
       color: AppColor.kPrimary,
       onRefresh: () => _charger(forcer: true),
-      child: ListView(
+      child: CustomScrollView(
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, kEspaceBarreBas),
         physics: const AlwaysScrollableScrollPhysics(),
-        children: [
-          const EnteteSection('Nos catégories'),
-          const SizedBox(height: 10),
-          _ligne(
-            nom: 'Promotions',
-            icone: Icons.local_offer_outlined,
-            onTap: () => _ouvrir(const ProduitsPage(titre: 'Promotions', promotions: true)),
-          ),
-          const SizedBox(height: 8),
-          for (final c in _categories) ...[
-            _ligne(
-              nom: c.nom,
-              icone: iconeCategorie(c.icone),
-              onTap: () => _ouvrir(ProduitsPage(titre: c.nom, categorie: c)),
+        slivers: [
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, kEspaceBarreBas),
+            sliver: SliverGrid(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                mainAxisSpacing: 12,
+                crossAxisSpacing: 12,
+                childAspectRatio: 1.45,
+              ),
+              delegate: SliverChildListDelegate([
+                _tuile(
+                  rang: 0,
+                  nom: 'Promotions',
+                  icone: Icons.local_offer_outlined,
+                  onTap: () => _ouvrir(
+                    const ProduitsPage(titre: 'Promotions', promotions: true),
+                  ),
+                ),
+                for (final (i, c) in _categories.indexed)
+                  _tuile(
+                    rang: i + 1,
+                    nom: c.nom,
+                    icone: iconeCategorie(c.icone),
+                    onTap: () =>
+                        _ouvrir(ProduitsPage(titre: c.nom, categorie: c)),
+                  ),
+              ]),
             ),
-            const SizedBox(height: 8),
-          ],
+          ),
         ],
       ),
     );
   }
 
-  /// Ligne d'une catégorie : pastille d'icône, nom, flèche.
-  Widget _ligne({required String nom, required IconData icone, required VoidCallback onTap}) {
+  /// Tuile d'une catégorie : icône en haut, nom en bas. [mise] : tuile dorée mise en avant (promotions).
+  Widget _tuile({
+    required int rang,
+    required String nom,
+    required IconData icone,
+    required VoidCallback onTap,
+    bool mise = false,
+  }) {
+    return Apparition(
+      rang: rang,
+      child: Pressable(
+        child: _contenuTuile(nom: nom, icone: icone, onTap: onTap, mise: mise),
+      ),
+    );
+  }
+
+  Widget _contenuTuile({
+    required String nom,
+    required IconData icone,
+    required VoidCallback onTap,
+    bool mise = false,
+  }) {
     return Material(
-      color: AppColor.kWhite,
-      borderRadius: BorderRadius.circular(14),
+      color: mise ? AppColor.kSecondary : AppColor.kWhite,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: mise ? AppColor.kSecondary : AppColor.kLine),
+      ),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
-        borderRadius: BorderRadius.circular(14),
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-          child: Row(
+          padding: const EdgeInsets.all(14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: AppColor.kPrimaryLight,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(icone, color: AppColor.kPrimary, size: 22),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  nom.trim(),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 14.5,
-                    fontWeight: FontWeight.w600,
-                    color: AppColor.kGrayscaleDark100,
+              Row(
+                children: [
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: mise ? AppColor.kPrimary : AppColor.kSecondaryLight,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Icon(
+                      icone,
+                      color: mise ? AppColor.kSecondary : AppColor.kPrimary,
+                      size: 22,
+                    ),
                   ),
+                ],
+              ),
+              const Spacer(),
+              Text(
+                nom.trim(),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.inter(
+                  fontSize: 15,
+                  height: 1.2,
+                  fontWeight: FontWeight.w700,
+                  color: AppColor.kGrayscaleDark100,
                 ),
               ),
-              const Icon(Icons.chevron_right_rounded, color: AppColor.kGrayscale40),
             ],
           ),
         ),

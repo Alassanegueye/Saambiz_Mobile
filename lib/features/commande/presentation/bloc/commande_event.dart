@@ -40,8 +40,14 @@ class CreerCommande extends CommandeEvent {
   });
 
   @override
-  List<Object?> get props =>
-      [items, modeLivraison, modePaiement, adresseLivraison, numeroTelephone, note];
+  List<Object?> get props => [
+    items,
+    modeLivraison,
+    modePaiement,
+    adresseLivraison,
+    numeroTelephone,
+    note,
+  ];
 }
 
 /// Acheteur : payer une commande en ligne

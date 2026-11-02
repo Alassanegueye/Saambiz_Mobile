@@ -15,7 +15,9 @@ class BoutonPanier extends StatelessWidget {
     final panier = sl<PanierService>();
     return IconButton(
       tooltip: 'Mon panier',
-      onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const PanierPage())),
+      onPressed: () => Navigator.of(
+        context,
+      ).push(MaterialPageRoute(builder: (_) => const PanierPage())),
       icon: ListenableBuilder(
         listenable: panier,
         builder: (_, __) {

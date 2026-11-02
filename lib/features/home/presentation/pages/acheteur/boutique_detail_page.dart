@@ -10,15 +10,15 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:saambiz/core/utils/image_url.dart';
 
 class _C {
-  static const green   = Color(0xFF0D1B3D);
-  static const navyDk  = Color(0xFF060F26);
-  static const gold    = Color(0xFFF2B705);
-  static const black   = Color(0xFF0D1B3D);
-  static const white   = Color(0xFFFFFFFF);
-  static const bg      = Color(0xFFF7F8FA);
-  static const sub     = Color(0xFF5B6C8A);
-  static const label   = Color(0xFF93A1B8);
-  static const border  = Color(0xFFE6EAF0);
+  static const green = Color(0xFF01154B);
+  static const navyDk = Color(0xFF060F26);
+  static const gold = Color(0xFFFBB900);
+  static const black = Color(0xFF01154B);
+  static const white = Color(0xFFFFFFFF);
+  static const bg = Color(0xFFF4F5F8);
+  static const sub = Color(0xFF5B6C8A);
+  static const label = Color(0xFF93A1B8);
+  static const border = Color(0xFFE6EAF0);
   static const greenLight = Color(0xFFE8EEF7);
   static const surface = Color(0xFFF2F4F7);
 }
@@ -27,7 +27,11 @@ class BoutiqueDetailPage extends StatefulWidget {
   final BoutiqueModel boutique;
   final ProduitRemoteDataSource? dataSource;
 
-  const BoutiqueDetailPage({super.key, required this.boutique, this.dataSource});
+  const BoutiqueDetailPage({
+    super.key,
+    required this.boutique,
+    this.dataSource,
+  });
 
   @override
   State<BoutiqueDetailPage> createState() => _BoutiqueDetailPageState();
@@ -47,8 +51,8 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
   double _avisMoyenne = 0;
   int _avisTotal = 0;
 
-  double get _effNote  => _avisTotal > 0 ? _avisMoyenne : b.note;
-  int    get _effTotal => _avisTotal > 0 ? _avisTotal : b.nombreAvis;
+  double get _effNote => _avisTotal > 0 ? _avisMoyenne : b.note;
+  int get _effTotal => _avisTotal > 0 ? _avisTotal : b.nombreAvis;
 
   @override
   void initState() {
@@ -58,26 +62,46 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
 
   Future<void> _load() async {
     if (widget.dataSource == null) {
-      setState(() { _loading = false; _error = 'Source de données indisponible'; });
+      setState(() {
+        _loading = false;
+        _error = 'Source de données indisponible';
+      });
       return;
     }
     try {
-      final list = await widget.dataSource!.getProduitsByBoutique(widget.boutique.id);
-      if (mounted) setState(() { _produits = list; _loading = false; });
+      final list = await widget.dataSource!.getProduitsByBoutique(
+        widget.boutique.id,
+      );
+      if (mounted)
+        setState(() {
+          _produits = list;
+          _loading = false;
+        });
 
       // Promotions actives filtrées sur les produits de cette boutique
       try {
-        final promos = await sl<PromotionsRemoteDataSource>().promotionsActives();
+        final promos = await sl<PromotionsRemoteDataSource>()
+            .promotionsActives();
         final ids = list.map((p) => p.id).toSet();
         if (mounted) {
-          setState(() => _promos = promos.where((pr) => ids.contains(pr.produitId)).toList());
+          setState(
+            () => _promos = promos
+                .where((pr) => ids.contains(pr.produitId))
+                .toList(),
+          );
         }
-      } catch (_) {/* non bloquant */}
+      } catch (_) {
+        /* non bloquant */
+      }
 
       // Avis de la boutique
       await _loadAvis();
     } catch (e) {
-      if (mounted) setState(() { _error = e.toString(); _loading = false; });
+      if (mounted)
+        setState(() {
+          _error = e.toString();
+          _loading = false;
+        });
     }
   }
 
@@ -87,11 +111,17 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
       final data = await widget.dataSource!.getAvisBoutique(widget.boutique.id);
       if (!mounted) return;
       setState(() {
-        _avisMoyenne = (data['moyenne'] is num) ? (data['moyenne'] as num).toDouble() : 0;
-        _avisTotal   = (data['total'] is num) ? (data['total'] as num).toInt() : 0;
-        _avis        = (data['avis'] is List) ? data['avis'] as List : [];
+        _avisMoyenne = (data['moyenne'] is num)
+            ? (data['moyenne'] as num).toDouble()
+            : 0;
+        _avisTotal = (data['total'] is num)
+            ? (data['total'] as num).toInt()
+            : 0;
+        _avis = (data['avis'] is List) ? data['avis'] as List : [];
       });
-    } catch (_) {/* non bloquant */}
+    } catch (_) {
+      /* non bloquant */
+    }
   }
 
   BoutiqueModel get b => widget.boutique;
@@ -112,7 +142,7 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
     );
   }
 
-  // ── En-tête (cover + infos boutique) ──────────────────────────────────────
+  // En-tête (cover + infos boutique)
   Widget _buildHeader() {
     final hasLogo = b.logo != null && b.logo!.isNotEmpty;
     return Column(
@@ -132,8 +162,14 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
                 ),
               ),
               child: (hasLogo)
-                  ? Opacity(opacity: 0.25, child: CachedNetworkImage(imageUrl: imageOptimisee(b.logo!), fit: BoxFit.cover,
-                      errorWidget: (_, __, ___) => const SizedBox()))
+                  ? Opacity(
+                      opacity: 0.25,
+                      child: CachedNetworkImage(
+                        imageUrl: imageOptimisee(b.logo!),
+                        fit: BoxFit.cover,
+                        errorWidget: (_, __, ___) => const SizedBox(),
+                      ),
+                    )
                   : null,
             ),
             SafeArea(
@@ -142,10 +178,20 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 child: Row(
                   children: [
-                    _circleBtn(Icons.arrow_back_ios_new_rounded, () => Navigator.of(context).pop()),
+                    _circleBtn(
+                      Icons.arrow_back_ios_new_rounded,
+                      () => Navigator.of(context).pop(),
+                    ),
                     Expanded(
-                      child: Text('Boutique', textAlign: TextAlign.center,
-                          style: GoogleFonts.plusJakartaSans(fontSize: 16, fontWeight: FontWeight.w700, color: _C.white)),
+                      child: Text(
+                        'Boutique',
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.inter(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: _C.white,
+                        ),
+                      ),
                     ),
                     _circleBtn(Icons.share_outlined, () {}),
                     const SizedBox(width: 6),
@@ -156,20 +202,39 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
             ),
             // Logo rond à cheval
             Positioned(
-              bottom: -44, left: 20,
+              bottom: -44,
+              left: 20,
               child: Container(
-                width: 88, height: 88,
+                width: 88,
+                height: 88,
                 decoration: BoxDecoration(
                   color: _C.white,
                   shape: BoxShape.circle,
                   border: Border.all(color: _C.white, width: 4),
-                  boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.15), blurRadius: 12, offset: const Offset(0, 4))],
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.15),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
                 clipBehavior: Clip.antiAlias,
                 child: hasLogo
-                    ? CachedNetworkImage(imageUrl: imageOptimisee(b.logo!), fit: BoxFit.cover,
-                        errorWidget: (_, __, ___) => const Icon(Icons.storefront_rounded, color: _C.green, size: 36))
-                    : const Icon(Icons.storefront_rounded, color: _C.green, size: 36),
+                    ? CachedNetworkImage(
+                        imageUrl: imageOptimisee(b.logo!),
+                        fit: BoxFit.cover,
+                        errorWidget: (_, __, ___) => const Icon(
+                          Icons.storefront_rounded,
+                          color: _C.green,
+                          size: 36,
+                        ),
+                      )
+                    : const Icon(
+                        Icons.storefront_rounded,
+                        color: _C.green,
+                        size: 36,
+                      ),
               ),
             ),
           ],
@@ -182,70 +247,129 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(b.nom,
-                  style: GoogleFonts.plusJakartaSans(fontSize: 20, fontWeight: FontWeight.w800, color: _C.black)),
+              Text(
+                b.nom,
+                style: GoogleFonts.inter(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w800,
+                  color: _C.black,
+                ),
+              ),
               const SizedBox(height: 6),
-              Row(children: [
-                if (_effTotal > 0) ...[
-                  const Icon(Icons.star_rounded, color: _C.gold, size: 17),
-                  const SizedBox(width: 3),
-                  Text(_effNote.toStringAsFixed(1),
-                      style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.w700, color: _C.black)),
-                  const SizedBox(width: 4),
-                  Text('($_effTotal avis)', style: GoogleFonts.plusJakartaSans(fontSize: 13, color: _C.sub)),
-                ] else ...[
-                  const Icon(Icons.star_border_rounded, color: _C.label, size: 17),
-                  const SizedBox(width: 3),
-                  Text('Nouveau', style: GoogleFonts.plusJakartaSans(fontSize: 13, color: _C.sub)),
+              Row(
+                children: [
+                  if (_effTotal > 0) ...[
+                    const Icon(Icons.star_rounded, color: _C.gold, size: 17),
+                    const SizedBox(width: 3),
+                    Text(
+                      _effNote.toStringAsFixed(1),
+                      style: GoogleFonts.inter(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: _C.black,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      '($_effTotal avis)',
+                      style: GoogleFonts.inter(fontSize: 13, color: _C.sub),
+                    ),
+                  ] else ...[
+                    const Icon(
+                      Icons.star_border_rounded,
+                      color: _C.label,
+                      size: 17,
+                    ),
+                    const SizedBox(width: 3),
+                    Text(
+                      'Nouveau',
+                      style: GoogleFonts.inter(fontSize: 13, color: _C.sub),
+                    ),
+                  ],
+                  if (b.localisation.isNotEmpty) ...[
+                    const SizedBox(width: 6),
+                    Text(
+                      '•',
+                      style: GoogleFonts.inter(fontSize: 13, color: _C.label),
+                    ),
+                    const SizedBox(width: 6),
+                    Flexible(
+                      child: Text(
+                        b.localisation,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.inter(fontSize: 13, color: _C.sub),
+                      ),
+                    ),
+                  ],
                 ],
-                if (b.localisation.isNotEmpty) ...[
-                  const SizedBox(width: 6),
-                  Text('•', style: GoogleFonts.plusJakartaSans(fontSize: 13, color: _C.label)),
-                  const SizedBox(width: 6),
-                  Flexible(
-                    child: Text(b.localisation,
-                        maxLines: 1, overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.plusJakartaSans(fontSize: 13, color: _C.sub)),
-                  ),
-                ],
-              ]),
+              ),
               if (b.description.isNotEmpty) ...[
                 const SizedBox(height: 8),
-                Text(b.description,
-                    style: GoogleFonts.plusJakartaSans(fontSize: 13.5, height: 1.4, color: _C.sub)),
+                Text(
+                  b.description,
+                  style: GoogleFonts.inter(
+                    fontSize: 13.5,
+                    height: 1.4,
+                    color: _C.sub,
+                  ),
+                ),
               ],
               const SizedBox(height: 16),
-              Row(children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () {},
-                    icon: const Icon(Icons.chat_bubble_outline_rounded, size: 17),
-                    label: Text('Message', style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.w700)),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: _C.green,
-                      side: const BorderSide(color: _C.border, width: 1.5),
-                      padding: const EdgeInsets.symmetric(vertical: 13),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(13)),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () {},
+                      icon: const Icon(
+                        Icons.chat_bubble_outline_rounded,
+                        size: 17,
+                      ),
+                      label: Text(
+                        'Message',
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: _C.green,
+                        side: const BorderSide(color: _C.border, width: 1.5),
+                        padding: const EdgeInsets.symmetric(vertical: 13),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(13),
+                        ),
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: () => setState(() => _suivi = !_suivi),
-                    icon: Icon(_suivi ? Icons.check_rounded : Icons.add_rounded, size: 18),
-                    label: Text(_suivi ? 'Suivi' : 'Suivre',
-                        style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.w700)),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: _C.green,
-                      foregroundColor: _C.white,
-                      elevation: 0,
-                      padding: const EdgeInsets.symmetric(vertical: 13),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(13)),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () => setState(() => _suivi = !_suivi),
+                      icon: Icon(
+                        _suivi ? Icons.check_rounded : Icons.add_rounded,
+                        size: 18,
+                      ),
+                      label: Text(
+                        _suivi ? 'Suivi' : 'Suivre',
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: _C.green,
+                        foregroundColor: _C.white,
+                        elevation: 0,
+                        padding: const EdgeInsets.symmetric(vertical: 13),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(13),
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ]),
+                ],
+              ),
             ],
           ),
         ),
@@ -257,14 +381,18 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 38, height: 38,
-        decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), shape: BoxShape.circle),
+        width: 38,
+        height: 38,
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.2),
+          shape: BoxShape.circle,
+        ),
         child: Icon(icon, color: _C.white, size: 18),
       ),
     );
   }
 
-  // ── Onglets ───────────────────────────────────────────────────────────────
+  // Onglets
   Widget _buildTabs() {
     const tabs = ['Produits', 'Promotions', 'Avis'];
     return Padding(
@@ -280,14 +408,21 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 decoration: BoxDecoration(
                   border: Border(
-                    bottom: BorderSide(color: active ? _C.green : _C.border, width: active ? 2.5 : 1),
+                    bottom: BorderSide(
+                      color: active ? _C.green : _C.border,
+                      width: active ? 2.5 : 1,
+                    ),
                   ),
                 ),
-                child: Text(tabs[i], textAlign: TextAlign.center,
-                    style: GoogleFonts.plusJakartaSans(
-                        fontSize: 14,
-                        fontWeight: active ? FontWeight.w700 : FontWeight.w500,
-                        color: active ? _C.green : _C.sub)),
+                child: Text(
+                  tabs[i],
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.inter(
+                    fontSize: 14,
+                    fontWeight: active ? FontWeight.w700 : FontWeight.w500,
+                    color: active ? _C.green : _C.sub,
+                  ),
+                ),
               ),
             ),
           );
@@ -307,18 +442,22 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
     }
   }
 
-  // ── Onglet Produits ───────────────────────────────────────────────────────
+  // Onglet Produits
   Widget _buildProduits() {
     if (_loading) {
       return const Padding(
         padding: EdgeInsets.all(40),
-        child: Center(child: CircularProgressIndicator(color: _C.green, strokeWidth: 2.5)),
+        child: Center(
+          child: CircularProgressIndicator(color: _C.green, strokeWidth: 2.5),
+        ),
       );
     }
     if (_error != null) {
       return Padding(
         padding: const EdgeInsets.all(28),
-        child: Center(child: Text(_error!, style: GoogleFonts.plusJakartaSans(color: _C.sub))),
+        child: Center(
+          child: Text(_error!, style: GoogleFonts.inter(color: _C.sub)),
+        ),
       );
     }
     return Column(
@@ -328,7 +467,10 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
         if (_produits.isEmpty)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-            child: Text('Aucun produit disponible', style: GoogleFonts.plusJakartaSans(color: _C.label)),
+            child: Text(
+              'Aucun produit disponible',
+              style: GoogleFonts.inter(color: _C.label),
+            ),
           )
         else
           Padding(
@@ -337,7 +479,11 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2, crossAxisSpacing: 12, mainAxisSpacing: 12, childAspectRatio: 0.78),
+                crossAxisCount: 2,
+                crossAxisSpacing: 12,
+                mainAxisSpacing: 12,
+                childAspectRatio: 0.78,
+              ),
               itemCount: _produits.length,
               itemBuilder: (_, i) => _productCard(_produits[i]),
             ),
@@ -349,7 +495,10 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
   Widget _productCard(ProduitModel p) {
     return Container(
       decoration: BoxDecoration(
-        color: _C.white, borderRadius: BorderRadius.circular(16), border: Border.all(color: _C.border)),
+        color: _C.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: _C.border),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -357,9 +506,16 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
             child: Container(
               decoration: BoxDecoration(
                 color: _C.surface,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(15)),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(15),
+                ),
                 image: p.image.isNotEmpty
-                    ? DecorationImage(image: CachedNetworkImageProvider(imageOptimisee(p.image)), fit: BoxFit.cover)
+                    ? DecorationImage(
+                        image: CachedNetworkImageProvider(
+                          imageOptimisee(p.image),
+                        ),
+                        fit: BoxFit.cover,
+                      )
                     : null,
               ),
             ),
@@ -369,11 +525,25 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(p.nom, maxLines: 1, overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.w700, color: _C.black)),
+                Text(
+                  p.nom,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.inter(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: _C.black,
+                  ),
+                ),
                 const SizedBox(height: 4),
-                Text('${p.prix} FCFA',
-                    style: GoogleFonts.plusJakartaSans(fontSize: 12.5, fontWeight: FontWeight.w700, color: _C.green)),
+                Text(
+                  '${p.prix} FCFA',
+                  style: GoogleFonts.inter(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w700,
+                    color: _C.green,
+                  ),
+                ),
               ],
             ),
           ),
@@ -382,24 +552,30 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
     );
   }
 
-  // ── Onglet Promotions (données réelles) ───────────────────────────────────
+  // Onglet Promotions (données réelles)
   Widget _buildPromotions() {
     if (_loading) {
       return const Padding(
         padding: EdgeInsets.all(40),
-        child: Center(child: CircularProgressIndicator(color: _C.green, strokeWidth: 2.5)),
+        child: Center(
+          child: CircularProgressIndicator(color: _C.green, strokeWidth: 2.5),
+        ),
       );
     }
     if (_promos.isEmpty) {
       return Padding(
         padding: const EdgeInsets.fromLTRB(20, 30, 20, 20),
         child: Center(
-          child: Column(children: [
-            const Icon(Icons.local_offer_outlined, color: _C.label, size: 44),
-            const SizedBox(height: 12),
-            Text('Aucune promotion en cours',
-                style: GoogleFonts.plusJakartaSans(fontSize: 14, color: _C.sub)),
-          ]),
+          child: Column(
+            children: [
+              const Icon(Icons.local_offer_outlined, color: _C.label, size: 44),
+              const SizedBox(height: 12),
+              Text(
+                'Aucune promotion en cours',
+                style: GoogleFonts.inter(fontSize: 14, color: _C.sub),
+              ),
+            ],
+          ),
         ),
       );
     }
@@ -407,48 +583,83 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _sectionHeader('Promotions en cours'),
-        ..._promos.map((promo) => Container(
-          margin: const EdgeInsets.fromLTRB(20, 4, 20, 12),
-          padding: const EdgeInsets.all(18),
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(colors: [_C.green, _C.navyDk]),
-            borderRadius: BorderRadius.circular(18),
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(promo.titre,
-                        style: GoogleFonts.plusJakartaSans(fontSize: 17, fontWeight: FontWeight.w800, color: _C.gold)),
-                    if ((promo.produitNom ?? '').isNotEmpty) ...[
-                      const SizedBox(height: 4),
-                      Text(promo.produitNom!,
-                          style: GoogleFonts.plusJakartaSans(fontSize: 13, color: _C.white.withOpacity(0.9))),
+        ..._promos.map(
+          (promo) => Container(
+            margin: const EdgeInsets.fromLTRB(20, 4, 20, 12),
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(colors: [_C.green, _C.navyDk]),
+              borderRadius: BorderRadius.circular(18),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        promo.titre,
+                        style: GoogleFonts.inter(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w800,
+                          color: _C.gold,
+                        ),
+                      ),
+                      if ((promo.produitNom ?? '').isNotEmpty) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          promo.produitNom!,
+                          style: GoogleFonts.inter(
+                            fontSize: 13,
+                            color: _C.white.withOpacity(0.9),
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: 6),
+                      Text(
+                        '${promo.prixPromo.toStringAsFixed(0)} FCFA',
+                        style: GoogleFonts.inter(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w800,
+                          color: _C.white,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: _C.gold,
+                          borderRadius: BorderRadius.circular(11),
+                        ),
+                        child: Text(
+                          "Profiter de l'offre",
+                          style: GoogleFonts.inter(
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.w700,
+                            color: _C.navyDk,
+                          ),
+                        ),
+                      ),
                     ],
-                    const SizedBox(height: 6),
-                    Text('${promo.prixPromo.toStringAsFixed(0)} FCFA',
-                        style: GoogleFonts.plusJakartaSans(fontSize: 15, fontWeight: FontWeight.w800, color: _C.white)),
-                    const SizedBox(height: 12),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                      decoration: BoxDecoration(color: _C.gold, borderRadius: BorderRadius.circular(11)),
-                      child: Text("Profiter de l'offre",
-                          style: GoogleFonts.plusJakartaSans(fontSize: 12.5, fontWeight: FontWeight.w700, color: _C.navyDk)),
-                    ),
-                  ],
+                  ),
                 ),
-              ),
-              const Icon(Icons.local_offer_rounded, color: Colors.white24, size: 60),
-            ],
+                const Icon(
+                  Icons.local_offer_rounded,
+                  color: Colors.white24,
+                  size: 60,
+                ),
+              ],
+            ),
           ),
-        )),
+        ),
       ],
     );
   }
 
-  // ── Onglet Avis (données réelles) ─────────────────────────────────────────
+  // Onglet Avis (données réelles)
   Widget _buildAvis() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
@@ -458,29 +669,57 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
           // Résumé note moyenne
           Row(
             children: [
-              Text(_effTotal > 0 ? _effNote.toStringAsFixed(1) : '—',
-                  style: GoogleFonts.plusJakartaSans(fontSize: 34, fontWeight: FontWeight.w800, color: _C.black)),
+              Text(
+                _effTotal > 0 ? _effNote.toStringAsFixed(1) : '0',
+                style: GoogleFonts.inter(
+                  fontSize: 34,
+                  fontWeight: FontWeight.w800,
+                  color: _C.black,
+                ),
+              ),
               const SizedBox(width: 12),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(children: List.generate(5, (i) => Icon(
-                    i < _effNote.round() ? Icons.star_rounded : Icons.star_border_rounded,
-                    color: _C.gold, size: 18,
-                  ))),
+                  Row(
+                    children: List.generate(
+                      5,
+                      (i) => Icon(
+                        i < _effNote.round()
+                            ? Icons.star_rounded
+                            : Icons.star_border_rounded,
+                        color: _C.gold,
+                        size: 18,
+                      ),
+                    ),
+                  ),
                   const SizedBox(height: 2),
-                  Text('$_effTotal avis',
-                      style: GoogleFonts.plusJakartaSans(fontSize: 13, color: _C.sub)),
+                  Text(
+                    '$_effTotal avis',
+                    style: GoogleFonts.inter(fontSize: 13, color: _C.sub),
+                  ),
                 ],
               ),
               const Spacer(),
               GestureDetector(
                 onTap: _ouvrirFormAvis,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                  decoration: BoxDecoration(color: _C.green, borderRadius: BorderRadius.circular(12)),
-                  child: Text('Donner mon avis',
-                      style: GoogleFonts.plusJakartaSans(fontSize: 12.5, fontWeight: FontWeight.w700, color: _C.white)),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 10,
+                  ),
+                  decoration: BoxDecoration(
+                    color: _C.green,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    'Donner mon avis',
+                    style: GoogleFonts.inter(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w700,
+                      color: _C.white,
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -490,8 +729,10 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 20),
               child: Center(
-                child: Text('Aucun avis pour le moment. Soyez le premier !',
-                    style: GoogleFonts.plusJakartaSans(fontSize: 14, color: _C.sub)),
+                child: Text(
+                  'Aucun avis pour le moment. Soyez le premier !',
+                  style: GoogleFonts.inter(fontSize: 14, color: _C.sub),
+                ),
               ),
             )
           else
@@ -517,26 +758,54 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(children: [
-            Container(
-              width: 34, height: 34,
-              decoration: const BoxDecoration(color: _C.greenLight, shape: BoxShape.circle),
-              child: const Icon(Icons.person_rounded, color: _C.green, size: 18),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(nom.isEmpty ? 'Client' : nom,
-                  style: GoogleFonts.plusJakartaSans(fontSize: 13.5, fontWeight: FontWeight.w700, color: _C.black)),
-            ),
-            Row(children: List.generate(5, (i) => Icon(
-              i < note ? Icons.star_rounded : Icons.star_border_rounded,
-              color: _C.gold, size: 14,
-            ))),
-          ]),
+          Row(
+            children: [
+              Container(
+                width: 34,
+                height: 34,
+                decoration: const BoxDecoration(
+                  color: _C.greenLight,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.person_rounded,
+                  color: _C.green,
+                  size: 18,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  nom.isEmpty ? 'Client' : nom,
+                  style: GoogleFonts.inter(
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w700,
+                    color: _C.black,
+                  ),
+                ),
+              ),
+              Row(
+                children: List.generate(
+                  5,
+                  (i) => Icon(
+                    i < note ? Icons.star_rounded : Icons.star_border_rounded,
+                    color: _C.gold,
+                    size: 14,
+                  ),
+                ),
+              ),
+            ],
+          ),
           if (commentaire.isNotEmpty) ...[
             const SizedBox(height: 8),
-            Text(commentaire,
-                style: GoogleFonts.plusJakartaSans(fontSize: 13, height: 1.4, color: _C.sub)),
+            Text(
+              commentaire,
+              style: GoogleFonts.inter(
+                fontSize: 13,
+                height: 1.4,
+                color: _C.sub,
+              ),
+            ),
           ],
         ],
       ),
@@ -550,17 +819,26 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setLocal) => AlertDialog(
-          title: Text('Votre avis', style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w700)),
+          title: Text(
+            'Votre avis',
+            style: GoogleFonts.inter(fontWeight: FontWeight.w700),
+          ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(5, (i) => IconButton(
-                  onPressed: () => setLocal(() => note = i + 1),
-                  icon: Icon(i < note ? Icons.star_rounded : Icons.star_border_rounded,
-                      color: _C.gold, size: 30),
-                )),
+                children: List.generate(
+                  5,
+                  (i) => IconButton(
+                    onPressed: () => setLocal(() => note = i + 1),
+                    icon: Icon(
+                      i < note ? Icons.star_rounded : Icons.star_border_rounded,
+                      color: _C.gold,
+                      size: 30,
+                    ),
+                  ),
+                ),
               ),
               TextField(
                 controller: ctrl,
@@ -573,9 +851,15 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
             ],
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Annuler')),
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Annuler'),
+            ),
             ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: _C.green, foregroundColor: _C.white),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: _C.green,
+                foregroundColor: _C.white,
+              ),
               onPressed: () => Navigator.pop(ctx, true),
               child: const Text('Publier'),
             ),
@@ -585,7 +869,11 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
     );
     if (ok != true || widget.dataSource == null) return;
     try {
-      await widget.dataSource!.laisserAvis(widget.boutique.id, note, ctrl.text.trim());
+      await widget.dataSource!.laisserAvis(
+        widget.boutique.id,
+        note,
+        ctrl.text.trim(),
+      );
       await _loadAvis();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -607,8 +895,22 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(title, style: GoogleFonts.plusJakartaSans(fontSize: 15, fontWeight: FontWeight.w700, color: _C.black)),
-          Text('Voir tout', style: GoogleFonts.plusJakartaSans(fontSize: 12.5, fontWeight: FontWeight.w600, color: _C.green)),
+          Text(
+            title,
+            style: GoogleFonts.inter(
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+              color: _C.black,
+            ),
+          ),
+          Text(
+            'Voir tout',
+            style: GoogleFonts.inter(
+              fontSize: 12.5,
+              fontWeight: FontWeight.w600,
+              color: _C.green,
+            ),
+          ),
         ],
       ),
     );

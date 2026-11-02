@@ -11,12 +11,9 @@ class LoginUser {
   /// identifiant = email OU téléphone
   /// motDePasse = mot de passe utilisateur
   Future<Either<Failure, User>> call(
-      String identifiant,
-      String motDePasse,
-      ) async {
-    return await repository.login(
-      identifiant,
-      motDePasse,
-    );
+    String identifiant,
+    String motDePasse,
+  ) async {
+    return await repository.login(identifiant, motDePasse);
   }
 }

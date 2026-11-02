@@ -13,8 +13,8 @@ import '../../data/categorie.dart';
 import '../icones_categories.dart';
 
 class _C {
-  static const navy = Color(0xFF0D1B3D);
-  static const gold = Color(0xFFF2B705);
+  static const navy = Color(0xFF01154B);
+  static const gold = Color(0xFFFBB900);
   static const bg = Color(0xFFF7F9FC);
   static const white = Color(0xFFFFFFFF);
   static const border = Color(0xFFE2E7F0);
@@ -24,7 +24,7 @@ class _C {
   static const navySoft = Color(0xFFE8EDF7);
 }
 
-/// Boutiques d'une catégorie — ouverte depuis la rangée de catégories de
+/// Boutiques d'une catégorie, ouverte depuis la rangée de catégories de
 /// l'accueil. Les plus proches d'abord quand la position est connue.
 class CategorieBoutiquesPage extends StatefulWidget {
   final Categorie categorie;
@@ -86,7 +86,8 @@ class _CategorieBoutiquesPageState extends State<CategorieBoutiquesPage> {
     } catch (_) {
       if (!mounted) return;
       setState(() {
-        _erreur = 'Impossible de charger les boutiques. Vérifiez votre connexion.';
+        _erreur =
+            'Impossible de charger les boutiques. Vérifiez votre connexion.';
         _chargement = false;
       });
     }
@@ -129,7 +130,11 @@ class _CategorieBoutiquesPageState extends State<CategorieBoutiquesPage> {
         titleSpacing: 0,
         title: Text(
           c.nom,
-          style: GoogleFonts.plusJakartaSans(fontSize: 17, fontWeight: FontWeight.w700, color: _C.navy),
+          style: GoogleFonts.inter(
+            fontSize: 17,
+            fontWeight: FontWeight.w700,
+            color: _C.navy,
+          ),
         ),
       ),
       body: RefreshIndicator(
@@ -151,8 +156,11 @@ class _CategorieBoutiquesPageState extends State<CategorieBoutiquesPage> {
           const SizedBox(height: 100),
           const Icon(Icons.wifi_off_rounded, size: 44, color: _C.textLight),
           const SizedBox(height: 16),
-          Text(_erreur!, textAlign: TextAlign.center,
-              style: GoogleFonts.plusJakartaSans(fontSize: 14, color: _C.textMid)),
+          Text(
+            _erreur!,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.inter(fontSize: 14, color: _C.textMid),
+          ),
           const SizedBox(height: 20),
           Center(
             child: FilledButton(
@@ -177,7 +185,12 @@ class _CategorieBoutiquesPageState extends State<CategorieBoutiquesPage> {
           return _chargementSuite
               ? const Padding(
                   padding: EdgeInsets.all(16),
-                  child: Center(child: CircularProgressIndicator(color: _C.navy, strokeWidth: 2)),
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      color: _C.navy,
+                      strokeWidth: 2,
+                    ),
+                  ),
                 )
               : const SizedBox.shrink();
         }
@@ -193,7 +206,10 @@ class _CategorieBoutiquesPageState extends State<CategorieBoutiquesPage> {
         Container(
           width: 48,
           height: 48,
-          decoration: BoxDecoration(color: _C.navySoft, borderRadius: BorderRadius.circular(14)),
+          decoration: BoxDecoration(
+            color: _C.navySoft,
+            borderRadius: BorderRadius.circular(14),
+          ),
           child: Icon(iconeCategorie(c.icone), color: _C.navy, size: 24),
         ),
         const SizedBox(width: 12),
@@ -202,16 +218,27 @@ class _CategorieBoutiquesPageState extends State<CategorieBoutiquesPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                _total > 1 ? '$_total boutiques' : (_total == 1 ? '1 boutique' : 'Aucune boutique'),
-                style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.w700, color: _C.navy),
+                _total > 1
+                    ? '$_total boutiques'
+                    : (_total == 1 ? '1 boutique' : 'Aucune boutique'),
+                style: GoogleFonts.inter(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: _C.navy,
+                ),
               ),
               if ((c.description ?? '').isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.only(top: 2),
-                  child: Text(c.description!,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.plusJakartaSans(fontSize: 12.5, color: _C.textMid)),
+                  child: Text(
+                    c.description!,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.inter(
+                      fontSize: 12.5,
+                      color: _C.textMid,
+                    ),
+                  ),
                 ),
             ],
           ),
@@ -230,13 +257,13 @@ class _CategorieBoutiquesPageState extends State<CategorieBoutiquesPage> {
           Text(
             'Pas encore de boutique dans cette catégorie.',
             textAlign: TextAlign.center,
-            style: GoogleFonts.plusJakartaSans(fontSize: 14, color: _C.textMid),
+            style: GoogleFonts.inter(fontSize: 14, color: _C.textMid),
           ),
           const SizedBox(height: 4),
           Text(
             'Revenez bientôt : de nouvelles boutiques ouvrent chaque semaine.',
             textAlign: TextAlign.center,
-            style: GoogleFonts.plusJakartaSans(fontSize: 12.5, color: _C.textLight),
+            style: GoogleFonts.inter(fontSize: 12.5, color: _C.textLight),
           ),
         ],
       ),
@@ -260,12 +287,14 @@ class _LigneBoutique extends StatelessWidget {
       borderRadius: BorderRadius.circular(16),
       onTap: () {
         if (donnees['id'] == null) return;
-        Navigator.of(context).push(MaterialPageRoute(
-          builder: (_) => BoutiquePubliquePage(
-            boutiqueId: donnees['id'].toString(),
-            apercu: BoutiqueResume.fromJson(donnees),
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => BoutiquePubliquePage(
+              boutiqueId: donnees['id'].toString(),
+              apercu: BoutiqueResume.fromJson(donnees),
+            ),
           ),
-        ));
+        );
       },
       child: Container(
         padding: const EdgeInsets.all(12),
@@ -302,37 +331,57 @@ class _LigneBoutique extends StatelessWidget {
                           donnees['nom']?.toString() ?? 'Boutique',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.w600, color: _C.navy),
+                          style: GoogleFonts.inter(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: _C.navy,
+                          ),
                         ),
                       ),
                       if (verifiee) ...[
                         const SizedBox(width: 5),
-                        const Icon(Icons.verified_rounded, size: 15, color: _C.green),
+                        const Icon(
+                          Icons.verified_rounded,
+                          size: 15,
+                          color: _C.green,
+                        ),
                       ],
                     ],
                   ),
                   if (slogan != null && slogan.isNotEmpty)
                     Padding(
                       padding: const EdgeInsets.only(top: 2),
-                      child: Text(slogan,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.plusJakartaSans(fontSize: 12, color: _C.textMid)),
+                      child: Text(
+                        slogan,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          color: _C.textMid,
+                        ),
+                      ),
                     ),
                   const SizedBox(height: 4),
                   Row(
                     children: [
-                      const Icon(Icons.place_outlined, size: 13, color: _C.textLight),
+                      const Icon(
+                        Icons.place_outlined,
+                        size: 13,
+                        color: _C.textLight,
+                      ),
                       const SizedBox(width: 3),
                       Flexible(
                         child: Text(
                           [
                             donnees['localisation']?.toString(),
                             if (distance != null) '$distance km',
-                          ].where((e) => e != null && e.isNotEmpty).join(' · '),
+                          ].where((e) => e != null && e.isNotEmpty).join(', '),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.plusJakartaSans(fontSize: 11.5, color: _C.textLight),
+                          style: GoogleFonts.inter(
+                            fontSize: 11.5,
+                            color: _C.textLight,
+                          ),
                         ),
                       ),
                     ],

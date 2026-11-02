@@ -13,7 +13,9 @@ class SignalementsBloc extends Bloc<SignalementsEvent, SignalementsState> {
   }
 
   Future<void> _onCreer(
-      CreerSignalement event, Emitter<SignalementsState> emit) async {
+    CreerSignalement event,
+    Emitter<SignalementsState> emit,
+  ) async {
     emit(SignalementsLoading());
     final result = await repository.creerSignalement(
       type: event.type,
@@ -28,7 +30,9 @@ class SignalementsBloc extends Bloc<SignalementsEvent, SignalementsState> {
   }
 
   Future<void> _onLoad(
-      LoadMesSignalements event, Emitter<SignalementsState> emit) async {
+    LoadMesSignalements event,
+    Emitter<SignalementsState> emit,
+  ) async {
     emit(SignalementsLoading());
     final result = await repository.mesSignalements();
     result.fold(

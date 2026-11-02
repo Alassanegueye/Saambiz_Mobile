@@ -5,8 +5,8 @@ import 'package:google_fonts/google_fonts.dart';
 class SecondaryButton extends StatefulWidget {
   final VoidCallback onTap;
   final String text;
-  final String? iconPath; 
-  final Widget? iconWidget; 
+  final String? iconPath;
+  final Widget? iconWidget;
   final double width;
   final double height;
   final double borderRadius;
@@ -39,10 +39,8 @@ class _SecondaryButtonState extends State<SecondaryButton>
 
   @override
   void initState() {
-    _controller = AnimationController(
-      vsync: this,
-      duration: _animationDuration,
-    )..addListener(() {
+    _controller = AnimationController(vsync: this, duration: _animationDuration)
+      ..addListener(() {
         setState(() {});
       });
     super.initState();
@@ -95,13 +93,10 @@ class _SecondaryButtonState extends State<SecondaryButton>
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (icon != null) ...[
-                icon,
-                const SizedBox(width: 12),
-              ],
+              if (icon != null) ...[icon, const SizedBox(width: 12)],
               Text(
                 widget.text,
-                style: GoogleFonts.plusJakartaSans(
+                style: GoogleFonts.inter(
                   fontSize: widget.fontSize ?? 14,
                   fontWeight: FontWeight.w600,
                   color: widget.textColor,

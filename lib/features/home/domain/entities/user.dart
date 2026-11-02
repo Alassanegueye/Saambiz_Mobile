@@ -16,7 +16,7 @@ class User extends Equatable {
     required this.email,
     required this.mot_de_passe,
     required this.adresse,
-    required this.telephone
+    required this.telephone,
   });
 
   Map<String, dynamic> toJson() => {
@@ -26,9 +26,9 @@ class User extends Equatable {
     'email': email,
     'mot_de_passe': mot_de_passe,
     'adresse': adresse,
-    'telephone': telephone
+    'telephone': telephone,
   };
 
   @override
-  List<Object?> get props => [id, nom, prenom, email, telephone ];
+  List<Object?> get props => [id, nom, prenom, email, telephone];
 }

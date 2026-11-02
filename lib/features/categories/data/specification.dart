@@ -28,32 +28,42 @@ class SpecificationProduit {
     this.aide,
   });
 
-  factory SpecificationProduit.fromJson(Map<String, dynamic> json) => SpecificationProduit(
+  factory SpecificationProduit.fromJson(Map<String, dynamic> json) =>
+      SpecificationProduit(
         cle: json['cle']?.toString() ?? '',
         libelle: json['libelle']?.toString() ?? '',
         type: json['type']?.toString() ?? 'texte',
-        options: (json['options'] as List? ?? []).map((e) => e.toString()).toList(),
+        options: (json['options'] as List? ?? [])
+            .map((e) => e.toString())
+            .toList(),
         libre: json['libre'] == true,
         obligatoire: json['obligatoire'] == true,
         unite: json['unite']?.toString(),
         aide: json['aide']?.toString(),
       );
 
-  static List<SpecificationProduit> liste(dynamic brut) => (brut is List ? brut : const [])
-      .whereType<Map>()
-      .map((e) => SpecificationProduit.fromJson(Map<String, dynamic>.from(e)))
-      .where((s) => s.cle.isNotEmpty && s.libelle.isNotEmpty)
-      .toList();
+  static List<SpecificationProduit> liste(dynamic brut) =>
+      (brut is List ? brut : const [])
+          .whereType<Map>()
+          .map(
+            (e) => SpecificationProduit.fromJson(Map<String, dynamic>.from(e)),
+          )
+          .where((s) => s.cle.isNotEmpty && s.libelle.isNotEmpty)
+          .toList();
 
   bool get multiple => type == 'variantes' || type == 'liste';
 
   /// Valeur vide au sens du formulaire (rien coché, rien saisi).
   static bool estVide(dynamic v) =>
-      v == null || (v is String && v.trim().isEmpty) || (v is List && v.isEmpty);
+      v == null ||
+      (v is String && v.trim().isEmpty) ||
+      (v is List && v.isEmpty);
 
   /// Messages des champs obligatoires non remplis, par clé.
   static Map<String, String> verifier(
-      List<SpecificationProduit> specs, Map<String, dynamic> valeurs) {
+    List<SpecificationProduit> specs,
+    Map<String, dynamic> valeurs,
+  ) {
     final erreurs = <String, String>{};
     for (final s in specs) {
       if (s.obligatoire && s.type != 'oui_non' && estVide(valeurs[s.cle])) {

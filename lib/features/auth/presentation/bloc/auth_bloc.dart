@@ -9,9 +9,7 @@ import 'auth_state.dart';
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final LoginUser loginUser;
 
-  AuthBloc({
-    required this.loginUser,
-  }) : super(AuthInitial()) {
+  AuthBloc({required this.loginUser}) : super(AuthInitial()) {
     on<LoginRequested>(_onLoginRequested);
     on<LogoutRequested>(_onLogoutRequested);
     on<ResetAuthState>((event, emit) {
@@ -20,9 +18,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 
   Future<void> _onLoginRequested(
-      LoginRequested event,
-      Emitter<AuthState> emit,
-      ) async {
+    LoginRequested event,
+    Emitter<AuthState> emit,
+  ) async {
     emit(AuthLoading());
 
     final identifiant = event.email ?? event.telephone;
@@ -32,21 +30,18 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       return;
     }
 
-    final result = await loginUser(
-      identifiant,
-      event.mot_de_passe,
-    );
+    final result = await loginUser(identifiant, event.mot_de_passe);
 
     result.fold(
-          (failure) => emit(AuthFailure(message: failure.errorMessage)),
-          (user) => emit(AuthSuccess(user: user)),
+      (failure) => emit(AuthFailure(message: failure.errorMessage)),
+      (user) => emit(AuthSuccess(user: user)),
     );
   }
 
   Future<void> _onLogoutRequested(
-      LogoutRequested event,
-      Emitter<AuthState> emit,
-      ) async {
+    LogoutRequested event,
+    Emitter<AuthState> emit,
+  ) async {
     emit(AuthLoading());
 
     try {
@@ -60,6 +55,4 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(AuthFailure(message: 'Erreur lors de la déconnexion : $e'));
     }
   }
-
-
 }

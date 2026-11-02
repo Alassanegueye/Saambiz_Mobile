@@ -54,8 +54,8 @@ class _CreerBoutiquePageState extends State<CreerBoutiquePage> {
   String? _erreurNom(String nom) => nom.length < 2
       ? 'Donnez un nom à votre boutique.'
       : !RegExp(r'^\p{L}', unicode: true).hasMatch(nom)
-          ? 'Le nom de la boutique doit commencer par une lettre.'
-          : null;
+      ? 'Le nom de la boutique doit commencer par une lettre.'
+      : null;
 
   void _continuer() {
     FocusScope.of(context).unfocus();
@@ -64,8 +64,11 @@ class _CreerBoutiquePageState extends State<CreerBoutiquePage> {
       if (_nomError != null) return;
     }
     if (_page == 1) {
-      setState(() => _categoriesError =
-          _categories.isEmpty ? 'Choisissez au moins une catégorie.' : null);
+      setState(
+        () => _categoriesError = _categories.isEmpty
+            ? 'Choisissez au moins une catégorie.'
+            : null,
+      );
       if (_categoriesError != null) return;
     }
     if (_page < 2) {
@@ -99,8 +102,9 @@ class _CreerBoutiquePageState extends State<CreerBoutiquePage> {
     final nom = _nomCtrl.text.trim();
     setState(() {
       _nomError = _erreurNom(nom);
-      _categoriesError =
-          _categories.isEmpty ? 'Choisissez au moins une catégorie.' : null;
+      _categoriesError = _categories.isEmpty
+          ? 'Choisissez au moins une catégorie.'
+          : null;
     });
     if (_nomError != null || _categoriesError != null) return;
 
@@ -152,7 +156,11 @@ class _CreerBoutiquePageState extends State<CreerBoutiquePage> {
       child: SbPageAuth(
         etape: 5,
         vendeur: true,
-        icone: const [Icons.storefront_outlined, Icons.category_outlined, Icons.location_on_outlined][_page],
+        icone: const [
+          Icons.storefront_outlined,
+          Icons.category_outlined,
+          Icons.location_on_outlined,
+        ][_page],
         titre: _titres[_page].$1,
         sousTitre: _titres[_page].$2,
         onRetour: _retour,
@@ -161,7 +169,11 @@ class _CreerBoutiquePageState extends State<CreerBoutiquePage> {
             padding: const EdgeInsets.only(bottom: 14),
             child: Text(
               'Page ${_page + 1} sur 3',
-              style: GoogleFonts.plusJakartaSans(fontSize: 12.5, fontWeight: FontWeight.w600, color: Sb.textMid),
+              style: GoogleFonts.inter(
+                fontSize: 12.5,
+                fontWeight: FontWeight.w600,
+                color: Sb.textMid,
+              ),
             ),
           ),
           SbErrorBanner(_error),
@@ -245,13 +257,16 @@ class _Dropdown extends StatelessWidget {
             Icons.keyboard_arrow_down_rounded,
             color: Sb.textMid,
           ),
-          style: GoogleFonts.plusJakartaSans(fontSize: 15, color: Sb.text),
+          style: GoogleFonts.inter(fontSize: 15, color: Sb.text),
           decoration: InputDecoration(
             filled: true,
             fillColor: Sb.surface,
             isDense: true,
             prefixIcon: Icon(icon, size: 20, color: Sb.navy),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 14,
+              vertical: 16,
+            ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
               borderSide: const BorderSide(color: Sb.border),

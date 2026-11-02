@@ -7,10 +7,10 @@ import '../bloc/compte_event.dart';
 import '../bloc/compte_state.dart';
 
 class _C {
-  static const green = Color(0xFF0D1B3D);
-  static const black = Color(0xFF0D1B3D);
+  static const green = Color(0xFF01154B);
+  static const black = Color(0xFF01154B);
   static const white = Color(0xFFFFFFFF);
-  static const bg = Color(0xFFF5F7FB);
+  static const bg = Color(0xFFF4F5F8);
   static const border = Color(0xFFE3E8F0);
 }
 
@@ -49,10 +49,12 @@ class _ChangePasswordViewState extends State<_ChangePasswordView> {
 
   void _soumettre() {
     if (!_formKey.currentState!.validate()) return;
-    context.read<CompteBloc>().add(ChangePasswordRequested(
-          ancienMotDePasse: _ancienCtrl.text,
-          nouveauMotDePasse: _nouveauCtrl.text,
-        ));
+    context.read<CompteBloc>().add(
+      ChangePasswordRequested(
+        ancienMotDePasse: _ancienCtrl.text,
+        nouveauMotDePasse: _nouveauCtrl.text,
+      ),
+    );
   }
 
   @override
@@ -69,7 +71,10 @@ class _ChangePasswordViewState extends State<_ChangePasswordView> {
         listener: (context, state) {
           if (state is CompteError) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message), backgroundColor: Colors.red),
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.red,
+              ),
             );
           } else if (state is CompteActionSucces ||
               state is CompteMessageSucces) {
@@ -80,7 +85,8 @@ class _ChangePasswordViewState extends State<_ChangePasswordView> {
           }
         },
         builder: (context, state) {
-          final loading = state is CompteActionEnCours || state is CompteLoading;
+          final loading =
+              state is CompteActionEnCours || state is CompteLoading;
           return Form(
             key: _formKey,
             child: ListView(
@@ -105,16 +111,22 @@ class _ChangePasswordViewState extends State<_ChangePasswordView> {
                     foregroundColor: _C.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14)),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
                   ),
                   child: loading
                       ? const SizedBox(
                           height: 20,
                           width: 20,
                           child: CircularProgressIndicator(
-                              strokeWidth: 2, color: Colors.white))
-                      : const Text('Confirmer',
-                          style: TextStyle(fontWeight: FontWeight.w700)),
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Text(
+                          'Confirmer',
+                          style: TextStyle(fontWeight: FontWeight.w700),
+                        ),
                 ),
               ],
             ),
@@ -124,18 +136,25 @@ class _ChangePasswordViewState extends State<_ChangePasswordView> {
     );
   }
 
-  Widget _input(TextEditingController c, String label,
-      {String? Function(String?)? validator}) {
+  Widget _input(
+    TextEditingController c,
+    String label, {
+    String? Function(String?)? validator,
+  }) {
     return TextFormField(
       controller: c,
       obscureText: true,
-      validator: validator ??
+      validator:
+          validator ??
           (v) => (v == null || v.trim().isEmpty) ? '$label requis' : null,
       decoration: InputDecoration(
         labelText: label,
         filled: true,
         fillColor: _C.white,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 14,
+          vertical: 14,
+        ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: _C.border),

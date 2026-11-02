@@ -3,8 +3,8 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../theme/app_color.dart';
 
-/// En-tête unifié des écrans SaamBiz : fond de l'écran, titre et icônes au
-/// bleu de la marque, ombre légère seulement au défilement.
+/// En-tête unifié des écrans SaamBiz : fond ivoire de l'écran, grand titre
+/// aligné à gauche, ombre légère seulement au défilement.
 class AppAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String? title;
   final Widget? titleWidget;
@@ -18,7 +18,7 @@ class AppAppBar extends StatelessWidget implements PreferredSizeWidget {
     super.key,
     this.title,
     this.titleWidget,
-    this.centerTitle = true,
+    this.centerTitle = false,
     this.actions,
     this.leading,
     this.bottom,
@@ -47,16 +47,18 @@ class AppAppBar extends StatelessWidget implements PreferredSizeWidget {
       leading: leading,
       automaticallyImplyLeading: implyLeading,
       titleSpacing: leading != null ? 0 : null,
-      title: titleWidget ??
+      title:
+          titleWidget ??
           (title == null
               ? null
               : Text(
                   title!,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w700,
+                  style: GoogleFonts.inter(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.3,
                     color: AppColor.kPrimary,
                   ),
                 )),

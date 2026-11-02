@@ -13,7 +13,7 @@ const String kLocalisationDemandeeKey = 'localisation_demandee';
 /// Position du client, pour lui proposer les boutiques proches.
 ///
 /// Tout est facultatif : un refus n'empêche rien, l'accueil se contente
-/// alors des centres d'intérêt. C'est pourquoi aucune méthode ne lève —
+/// alors des centres d'intérêt. C'est pourquoi aucune méthode ne lève
 /// elles retournent `null` et l'appelant continue.
 class LocalisationService {
   const LocalisationService();
@@ -53,7 +53,9 @@ class LocalisationService {
       await prefs.setDouble(kLatitudeKey, latitude);
       await prefs.setDouble(kLongitudeKey, longitude);
       await prefs.setBool(kLocalisationDemandeeKey, true);
-    } catch (_) {/* non bloquant */}
+    } catch (_) {
+      /* non bloquant */
+    }
   }
 
   /// Position retenue au dernier passage, sans redemander l'autorisation.
@@ -82,6 +84,8 @@ class LocalisationService {
   Future<void> marquerDemandee() async {
     try {
       await sl<SharedPreferences>().setBool(kLocalisationDemandeeKey, true);
-    } catch (_) {/* non bloquant */}
+    } catch (_) {
+      /* non bloquant */
+    }
   }
 }

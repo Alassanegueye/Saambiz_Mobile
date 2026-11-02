@@ -5,7 +5,7 @@ import '../../../../core/errors/failure.dart';
 import '../../../home/domain/entities/notification_model.dart';
 import '../datasources/notifications_remote_datasource.dart';
 
-/// Repository notifications — try/catch → Either<Failure, T> au-dessus du datasource.
+/// Repository notifications, try/catch → Either<Failure, T> au-dessus du datasource.
 class NotificationsRepository {
   final NotificationsRemoteDataSource remote;
   NotificationsRepository(this.remote);
@@ -13,7 +13,8 @@ class NotificationsRepository {
   String _msg(Object e) {
     if (e is DioException) {
       final data = e.response?.data;
-      if (data is Map && data['message'] != null) return data['message'].toString();
+      if (data is Map && data['message'] != null)
+        return data['message'].toString();
       return e.message ?? 'Erreur réseau';
     }
     return e.toString();
@@ -53,8 +54,10 @@ class NotificationsRepository {
     }
   }
 
-  Future<Either<Failure, void>> registerDeviceToken(
-      {required String token, required String platform}) async {
+  Future<Either<Failure, void>> registerDeviceToken({
+    required String token,
+    required String platform,
+  }) async {
     try {
       await remote.registerDeviceToken(token: token, platform: platform);
       return const Right(null);

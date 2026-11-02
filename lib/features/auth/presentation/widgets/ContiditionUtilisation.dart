@@ -14,10 +14,7 @@ class ConditionUtilisation extends StatelessWidget {
         foregroundColor: Colors.black,
         title: Text(
           'Conditions d’utilisation',
-          style: GoogleFonts.plusJakartaSans(
-            fontWeight: FontWeight.w700,
-            fontSize: 18,
-          ),
+          style: GoogleFonts.inter(fontWeight: FontWeight.w700, fontSize: 18),
         ),
         centerTitle: true,
       ),
@@ -39,73 +36,73 @@ class ConditionUtilisation extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _title('Conditions Générales d’Utilisation (CGU) – SIGNS'),
+              _title('Conditions Générales d’Utilisation (CGU) : SIGNS'),
 
-              _section('Article 1 – Objet'),
+              _section('Article 1 : Objet'),
               _paragraph(
-                  'Les présentes CGU régissent l’utilisation de l’application SIGNS. '
-                      'L’application permet aux utilisateurs de créer des factures et des contrats, '
-                      'et de sécuriser les contrats via des signatures bilatérales. Les factures '
-                      'sont considérées comme des documents commerciaux.'
+                'Les présentes CGU régissent l’utilisation de l’application SIGNS. '
+                'L’application permet aux utilisateurs de créer des factures et des contrats, '
+                'et de sécuriser les contrats via des signatures bilatérales. Les factures '
+                'sont considérées comme des documents commerciaux.',
               ),
 
-              _section('Article 2 – Acceptation'),
+              _section('Article 2 : Acceptation'),
               _paragraph(
-                  'L’accès et l’utilisation de SIGNS impliquent l’acceptation pleine et entière '
-                      'des présentes CGU. Si l’utilisateur n’accepte pas ces conditions, il ne doit '
-                      'pas utiliser l’application.'
+                'L’accès et l’utilisation de SIGNS impliquent l’acceptation pleine et entière '
+                'des présentes CGU. Si l’utilisateur n’accepte pas ces conditions, il ne doit '
+                'pas utiliser l’application.',
               ),
 
-              _section('Article 3 – Responsabilité de l’utilisateur'),
+              _section('Article 3 : Responsabilité de l’utilisateur'),
               _bullet('du contenu des documents qu’il crée'),
               _bullet('de la conformité légale des contrats ou factures'),
               _bullet('de la transmission des documents à des tiers'),
               _paragraph(
-                  'SIGNS agit uniquement comme un outil technique et ne peut être tenu '
-                      'responsable du contenu des documents ni des relations juridiques entre '
-                      'les parties.'
+                'SIGNS agit uniquement comme un outil technique et ne peut être tenu '
+                'responsable du contenu des documents ni des relations juridiques entre '
+                'les parties.',
               ),
 
-              _section('Article 4 – Compte utilisateur'),
+              _section('Article 4 : Compte utilisateur'),
               _paragraph(
-                  'L’utilisateur doit fournir des informations exactes et à jour. '
-                      'Il est responsable de la confidentialité et de la sécurité de ses identifiants.'
+                'L’utilisateur doit fournir des informations exactes et à jour. '
+                'Il est responsable de la confidentialité et de la sécurité de ses identifiants.',
               ),
 
-              _section('Article 5 – Données personnelles'),
+              _section('Article 5 : Données personnelles'),
               _paragraph(
-                  'Les données collectées sont traitées conformément à la politique de '
-                      'confidentialité et à la législation sénégalaise en vigueur.'
+                'Les données collectées sont traitées conformément à la politique de '
+                'confidentialité et à la législation sénégalaise en vigueur.',
               ),
 
-              _section('Article 6 – Sécurisation des contrats'),
+              _section('Article 6 : Sécurisation des contrats'),
               _paragraph(
-                  'Seuls les contrats créés et signés via l’application sont considérés '
-                      'comme sécurisés. Les factures restent des documents commerciaux.'
+                'Seuls les contrats créés et signés via l’application sont considérés '
+                'comme sécurisés. Les factures restent des documents commerciaux.',
               ),
 
-              _section('Article 7 – Propriété intellectuelle'),
+              _section('Article 7 : Propriété intellectuelle'),
               _paragraph(
-                  'L’application SIGNS, son logo, son contenu et son code sont protégés '
-                      'par le droit de la propriété intellectuelle.'
+                'L’application SIGNS, son logo, son contenu et son code sont protégés '
+                'par le droit de la propriété intellectuelle.',
               ),
 
-              _section('Article 8 – Modification des CGU'),
+              _section('Article 8 : Modification des CGU'),
               _paragraph(
-                  'SIGNS se réserve le droit de modifier les présentes CGU à tout moment. '
-                      'Les utilisateurs seront informés de toute modification importante.'
+                'SIGNS se réserve le droit de modifier les présentes CGU à tout moment. '
+                'Les utilisateurs seront informés de toute modification importante.',
               ),
 
-              _section('Article 9 – Résiliation'),
+              _section('Article 9 : Résiliation'),
               _paragraph(
-                  'SIGNS peut suspendre ou résilier un compte utilisateur en cas de violation '
-                      'des CGU ou de comportement frauduleux.'
+                'SIGNS peut suspendre ou résilier un compte utilisateur en cas de violation '
+                'des CGU ou de comportement frauduleux.',
               ),
 
-              _section('Article 10 – Loi applicable'),
+              _section('Article 10 : Loi applicable'),
               _paragraph(
-                  'Les présentes CGU sont régies par la loi sénégalaise. '
-                      'Tout litige sera soumis aux tribunaux sénégalais compétents.'
+                'Les présentes CGU sont régies par la loi sénégalaise. '
+                'Tout litige sera soumis aux tribunaux sénégalais compétents.',
               ),
 
               const SizedBox(height: 24),
@@ -113,10 +110,7 @@ class ConditionUtilisation extends StatelessWidget {
               Center(
                 child: Text(
                   'Dernière mise à jour : 2026',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 12,
-                    color: Colors.grey,
-                  ),
+                  style: GoogleFonts.inter(fontSize: 12, color: Colors.grey),
                 ),
               ),
             ],
@@ -131,10 +125,7 @@ class ConditionUtilisation extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 16),
       child: Text(
         text,
-        style: GoogleFonts.plusJakartaSans(
-          fontSize: 20,
-          fontWeight: FontWeight.w800,
-        ),
+        style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w800),
       ),
     );
   }
@@ -144,10 +135,7 @@ class ConditionUtilisation extends StatelessWidget {
       padding: const EdgeInsets.only(top: 20, bottom: 8),
       child: Text(
         text,
-        style: GoogleFonts.plusJakartaSans(
-          fontSize: 16,
-          fontWeight: FontWeight.w700,
-        ),
+        style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w700),
       ),
     );
   }
@@ -158,7 +146,7 @@ class ConditionUtilisation extends StatelessWidget {
       child: Text(
         text,
         textAlign: TextAlign.justify,
-        style: GoogleFonts.plusJakartaSans(
+        style: GoogleFonts.inter(
           fontSize: 14,
           height: 1.6,
           color: Colors.black54,
@@ -177,7 +165,7 @@ class ConditionUtilisation extends StatelessWidget {
           Expanded(
             child: Text(
               text,
-              style: GoogleFonts.plusJakartaSans(
+              style: GoogleFonts.inter(
                 fontSize: 14,
                 height: 1.5,
                 color: Colors.black54,

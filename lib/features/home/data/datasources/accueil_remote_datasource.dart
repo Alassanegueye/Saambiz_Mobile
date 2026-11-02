@@ -4,7 +4,7 @@ import '../../../../core/utils/app_logger.dart';
 import '../../../categories/data/categorie.dart';
 
 /// Une bande de l'accueil : « Sélectionné pour vous », « Près de chez vous »…
-/// Le backend décide des sections, de leur ordre et de leur libellé — c'est lui
+/// Le backend décide des sections, de leur ordre et de leur libellé, c'est lui
 /// qui connaît les affinités du client. L'application se contente d'afficher.
 class AccueilSection {
   final String cle;
@@ -22,15 +22,15 @@ class AccueilSection {
   });
 
   factory AccueilSection.fromJson(Map<String, dynamic> json) => AccueilSection(
-        cle: json['cle']?.toString() ?? '',
-        titre: json['titre']?.toString() ?? '',
-        sousTitre: json['sousTitre']?.toString(),
-        type: json['type']?.toString() ?? 'boutiques',
-        elements: (json['elements'] as List? ?? [])
-            .whereType<Map>()
-            .map((e) => Map<String, dynamic>.from(e))
-            .toList(),
-      );
+    cle: json['cle']?.toString() ?? '',
+    titre: json['titre']?.toString() ?? '',
+    sousTitre: json['sousTitre']?.toString(),
+    type: json['type']?.toString() ?? 'boutiques',
+    elements: (json['elements'] as List? ?? [])
+        .whereType<Map>()
+        .map((e) => Map<String, dynamic>.from(e))
+        .toList(),
+  );
 }
 
 class AccueilPersonnalise {
@@ -71,7 +71,7 @@ class AccueilPersonnalise {
   bool get estVide => sections.isEmpty && categories.isEmpty;
 }
 
-/// Accueil personnalisé — la seule route de l'application ouverte aux invités.
+/// Accueil personnalisé, la seule route de l'application ouverte aux invités.
 class AccueilRemoteDataSource {
   final Dio dio;
   const AccueilRemoteDataSource(this.dio);
@@ -119,7 +119,11 @@ class AccueilRemoteDataSource {
         },
       );
       final json = Map<String, dynamic>.from(res.data as Map);
-      return AccueilSection.fromJson({...json, 'cle': cle, 'titre': json['titre'] ?? ''});
+      return AccueilSection.fromJson({
+        ...json,
+        'cle': cle,
+        'titre': json['titre'] ?? '',
+      });
     } on DioException catch (e) {
       logDebug('❌ section $cle: ${e.response?.statusCode} ${e.response?.data}');
       rethrow;
@@ -127,7 +131,7 @@ class AccueilRemoteDataSource {
   }
 
   /// Enregistre côté serveur les centres d'intérêt et/ou la position.
-  /// Réservé aux clients connectés — un invité garde tout sur son téléphone.
+  /// Réservé aux clients connectés, un invité garde tout sur son téléphone.
   Future<void> majPreferences({
     List<String>? interets,
     double? latitude,
@@ -135,12 +139,15 @@ class AccueilRemoteDataSource {
     String? ville,
   }) async {
     try {
-      await dio.put('/acheteurs/preferences', data: {
-        if (interets != null) 'interets': interets,
-        if (latitude != null) 'latitude': latitude,
-        if (longitude != null) 'longitude': longitude,
-        if (ville != null) 'ville': ville,
-      });
+      await dio.put(
+        '/acheteurs/preferences',
+        data: {
+          if (interets != null) 'interets': interets,
+          if (latitude != null) 'latitude': latitude,
+          if (longitude != null) 'longitude': longitude,
+          if (ville != null) 'ville': ville,
+        },
+      );
     } on DioException catch (e) {
       // Non bloquant : la personnalisation se fera au prochain passage.
       logDebug('⚠️ préférences non enregistrées: ${e.response?.statusCode}');

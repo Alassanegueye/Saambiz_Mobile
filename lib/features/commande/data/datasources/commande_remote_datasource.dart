@@ -8,11 +8,15 @@ abstract class CommandeRemoteDataSource {
   Future<CommandeModel> getCommande(String id);
   Future<CommandeModel> annuler(String id);
   // Retourne l'URL de paiement (ou null pour Wave/à compléter)
-  Future<String?> payer(String id, {required String methode, String? numeroTelephone});
+  Future<String?> payer(
+    String id, {
+    required String methode,
+    String? numeroTelephone,
+  });
   // Vendeur
   Future<List<CommandeModel>> commandesVendeur({String? statut});
   Future<CommandeModel> changerStatut(String id, String statut);
-  // Retour (acheteur) — uniquement si la commande est au statut 'livree'
+  // Retour (acheteur), uniquement si la commande est au statut 'livree'
   Future<void> demandeRetour(String id, {required String raison});
 }
 
@@ -44,8 +48,10 @@ class CommandeRemoteDataSourceImpl implements CommandeRemoteDataSource {
 
   @override
   Future<List<CommandeModel>> mesCommandes({String? statut}) async {
-    final res = await dio.get(CommandeEndpoints.commandes,
-        queryParameters: statut != null ? {'statut': statut} : null);
+    final res = await dio.get(
+      CommandeEndpoints.commandes,
+      queryParameters: statut != null ? {'statut': statut} : null,
+    );
     return _parseListe(res.data);
   }
 
@@ -62,12 +68,18 @@ class CommandeRemoteDataSourceImpl implements CommandeRemoteDataSource {
   }
 
   @override
-  Future<String?> payer(String id,
-      {required String methode, String? numeroTelephone}) async {
-    final res = await dio.post(CommandeEndpoints.payer(id), data: {
-      'methode': methode,
-      if (numeroTelephone != null) 'numeroTelephone': numeroTelephone,
-    });
+  Future<String?> payer(
+    String id, {
+    required String methode,
+    String? numeroTelephone,
+  }) async {
+    final res = await dio.post(
+      CommandeEndpoints.payer(id),
+      data: {
+        'methode': methode,
+        if (numeroTelephone != null) 'numeroTelephone': numeroTelephone,
+      },
+    );
     final data = res.data;
     if (data is Map && data['paymentUrl'] != null) {
       return data['paymentUrl'].toString();
@@ -77,19 +89,27 @@ class CommandeRemoteDataSourceImpl implements CommandeRemoteDataSource {
 
   @override
   Future<List<CommandeModel>> commandesVendeur({String? statut}) async {
-    final res = await dio.get(CommandeEndpoints.commandesVendeur,
-        queryParameters: statut != null ? {'statut': statut} : null);
+    final res = await dio.get(
+      CommandeEndpoints.commandesVendeur,
+      queryParameters: statut != null ? {'statut': statut} : null,
+    );
     return _parseListe(res.data);
   }
 
   @override
   Future<CommandeModel> changerStatut(String id, String statut) async {
-    final res = await dio.patch(CommandeEndpoints.statut(id), data: {'statut': statut});
+    final res = await dio.patch(
+      CommandeEndpoints.statut(id),
+      data: {'statut': statut},
+    );
     return _parseUne(res.data);
   }
 
   @override
   Future<void> demandeRetour(String id, {required String raison}) async {
-    await dio.post(CommandeEndpoints.demandeRetour(id), data: {'raison': raison});
+    await dio.post(
+      CommandeEndpoints.demandeRetour(id),
+      data: {'raison': raison},
+    );
   }
 }

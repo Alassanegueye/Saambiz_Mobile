@@ -58,9 +58,6 @@ class AuthResponseModel {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'token': token,
-      'utilisateur': user.toJson(),
-    };
+    return {'token': token, 'utilisateur': user.toJson()};
   }
 }

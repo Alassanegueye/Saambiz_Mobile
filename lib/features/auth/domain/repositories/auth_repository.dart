@@ -7,8 +7,5 @@ import '../entities/user.dart';
 /// L'inscription passe par `SignupRemoteDataSource` : elle se fait en deux
 /// temps, l'adresse étant vérifiée par code avant que le compte n'existe.
 abstract class AuthRepository {
-  Future<Either<Failure, User>> login(
-      String identifiant,
-      String motDePasse,
-      );
+  Future<Either<Failure, User>> login(String identifiant, String motDePasse);
 }

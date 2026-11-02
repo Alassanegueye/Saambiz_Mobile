@@ -13,21 +13,27 @@ class BoutiqueRepositoryImpl implements BoutiqueRepository {
   String _errorMessage(Object e) {
     if (e is DioException) {
       final data = e.response?.data;
-      if (data is Map && data['message'] != null) return data['message'].toString();
+      if (data is Map && data['message'] != null)
+        return data['message'].toString();
       return e.message ?? 'Une erreur est survenue';
     }
     return e.toString();
   }
 
-  int? _statusCode(Object e) => e is DioException ? e.response?.statusCode : null;
+  int? _statusCode(Object e) =>
+      e is DioException ? e.response?.statusCode : null;
 
   @override
   Future<Either<Failure, Boutique>> getMaBoutique() async {
     try {
       return Right(await remoteDataSource.getMaBoutique());
     } catch (e) {
-      return Left(ServerFailure(
-          errorMessage: _errorMessage(e), statusCode: _statusCode(e)));
+      return Left(
+        ServerFailure(
+          errorMessage: _errorMessage(e),
+          statusCode: _statusCode(e),
+        ),
+      );
     }
   }
 
@@ -41,14 +47,16 @@ class BoutiqueRepositoryImpl implements BoutiqueRepository {
     String? logoPath,
   }) async {
     try {
-      return Right(await remoteDataSource.creerBoutique(
-        nom: nom,
-        description: description,
-        localisation: localisation,
-        telephone: telephone,
-        categories: categories,
-        logoPath: logoPath,
-      ));
+      return Right(
+        await remoteDataSource.creerBoutique(
+          nom: nom,
+          description: description,
+          localisation: localisation,
+          telephone: telephone,
+          categories: categories,
+          logoPath: logoPath,
+        ),
+      );
     } catch (e) {
       return Left(ServerFailure(errorMessage: _errorMessage(e)));
     }
@@ -64,14 +72,16 @@ class BoutiqueRepositoryImpl implements BoutiqueRepository {
     String? logoPath,
   }) async {
     try {
-      return Right(await remoteDataSource.modifierBoutique(
-        nom: nom,
-        description: description,
-        localisation: localisation,
-        telephone: telephone,
-        categories: categories,
-        logoPath: logoPath,
-      ));
+      return Right(
+        await remoteDataSource.modifierBoutique(
+          nom: nom,
+          description: description,
+          localisation: localisation,
+          telephone: telephone,
+          categories: categories,
+          logoPath: logoPath,
+        ),
+      );
     } catch (e) {
       return Left(ServerFailure(errorMessage: _errorMessage(e)));
     }

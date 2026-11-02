@@ -11,10 +11,10 @@ import '../../../categories/presentation/widgets/champs_specifications.dart';
 import 'package:saambiz/core/utils/image_url.dart';
 
 class _C {
-  static const green = Color(0xFF0D1B3D);
-  static const black = Color(0xFF0D1B3D);
+  static const green = Color(0xFF01154B);
+  static const black = Color(0xFF01154B);
   static const white = Color(0xFFFFFFFF);
-  static const bg = Color(0xFFF5F7FB);
+  static const bg = Color(0xFFF4F5F8);
   static const sub = Color(0xFF5B6C8A);
   static const border = Color(0xFFE3E8F0);
 }
@@ -47,12 +47,13 @@ class _ProduitFormPageState extends State<ProduitFormPage> {
     }
     return const [];
   }
+
   String? _imagePath;
   bool _loading = false;
   bool _loadingCats = true;
   String? _erreurCats;
 
-  // ── Galerie multi-images (mode édition uniquement) ────────────────────
+  // Galerie multi-images (mode édition uniquement)
   late List<ProduitImage> _imagesExistantes;
   bool _uploadingImages = false;
   String? _suppressionImageId;
@@ -111,31 +112,41 @@ class _ProduitFormPageState extends State<ProduitFormPage> {
   Future<void> _choisirImage() async {
     final picker = ImagePicker();
     final x = await picker.pickImage(
-        source: ImageSource.gallery, imageQuality: 80, maxWidth: 1200);
+      source: ImageSource.gallery,
+      imageQuality: 80,
+      maxWidth: 1200,
+    );
     if (x != null) setState(() => _imagePath = x.path);
   }
 
   Future<void> _ajouterPhotosSupplementaires() async {
     if (!_isEdit) return;
     final picker = ImagePicker();
-    final fichiers =
-        await picker.pickMultiImage(imageQuality: 80, maxWidth: 1200);
+    final fichiers = await picker.pickMultiImage(
+      imageQuality: 80,
+      maxWidth: 1200,
+    );
     if (fichiers.isEmpty) return;
     setState(() => _uploadingImages = true);
     try {
       await _ds.ajouterImages(
-          widget.produit!.id, fichiers.map((f) => f.path).toList());
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Photos ajoutées')),
+        widget.produit!.id,
+        fichiers.map((f) => f.path).toList(),
       );
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Photos ajoutées')));
       // Le produit rafraîchi n'est pas re-fetch ici (pas de usecase dédié
       // dans cet écran) : on affiche un message de succès, la liste sera
       // à jour à la prochaine ouverture / rechargement de "Mes produits".
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erreur upload : $e'), backgroundColor: Colors.red),
+        SnackBar(
+          content: Text('Erreur upload : $e'),
+          backgroundColor: Colors.red,
+        ),
       );
     } finally {
       if (mounted) setState(() => _uploadingImages = false);
@@ -164,16 +175,18 @@ class _ProduitFormPageState extends State<ProduitFormPage> {
   Future<void> _soumettre() async {
     if (!_formKey.currentState!.validate()) return;
     if (_categorieId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Choisissez une catégorie')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Choisissez une catégorie')));
       return;
     }
     final erreurs = SpecificationProduit.verifier(_specifications, _attributs);
     setState(() => _erreursSpecs = erreurs);
     if (erreurs.isNotEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Complétez les caractéristiques du produit')),
+        const SnackBar(
+          content: Text('Complétez les caractéristiques du produit'),
+        ),
       );
       return;
     }
@@ -232,28 +245,43 @@ class _ProduitFormPageState extends State<ProduitFormPage> {
           children: [
             _imagePicker(),
             const SizedBox(height: 16),
-            _input(_nomCtrl, 'Nom du produit',
-                validator: (v) =>
-                    (v == null || v.trim().isEmpty) ? 'Nom requis' : null),
+            _input(
+              _nomCtrl,
+              'Nom du produit',
+              validator: (v) =>
+                  (v == null || v.trim().isEmpty) ? 'Nom requis' : null,
+            ),
             const SizedBox(height: 12),
-            _input(_descCtrl, 'Description', maxLines: 3,
-                validator: (v) =>
-                    (v == null || v.trim().isEmpty) ? 'Description requise' : null),
+            _input(
+              _descCtrl,
+              'Description',
+              maxLines: 3,
+              validator: (v) => (v == null || v.trim().isEmpty)
+                  ? 'Description requise'
+                  : null,
+            ),
             const SizedBox(height: 12),
             Row(
               children: [
                 Expanded(
-                  child: _input(_prixCtrl, 'Prix (FCFA)',
-                      keyboard: TextInputType.number,
-                      validator: (v) =>
-                          (num.tryParse(v ?? '') == null) ? 'Prix invalide' : null),
+                  child: _input(
+                    _prixCtrl,
+                    'Prix (FCFA)',
+                    keyboard: TextInputType.number,
+                    validator: (v) => (num.tryParse(v ?? '') == null)
+                        ? 'Prix invalide'
+                        : null,
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: _input(_qteCtrl, 'Quantité',
-                      keyboard: TextInputType.number,
-                      validator: (v) =>
-                          (int.tryParse(v ?? '') == null) ? 'Qté invalide' : null),
+                  child: _input(
+                    _qteCtrl,
+                    'Quantité',
+                    keyboard: TextInputType.number,
+                    validator: (v) =>
+                        (int.tryParse(v ?? '') == null) ? 'Qté invalide' : null,
+                  ),
                 ),
               ],
             ),
@@ -286,16 +314,22 @@ class _ProduitFormPageState extends State<ProduitFormPage> {
                 foregroundColor: _C.white,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14)),
+                  borderRadius: BorderRadius.circular(14),
+                ),
               ),
               child: _loading
                   ? const SizedBox(
                       height: 20,
                       width: 20,
                       child: CircularProgressIndicator(
-                          strokeWidth: 2, color: Colors.white))
-                  : Text(_isEdit ? 'Enregistrer' : 'Publier le produit',
-                      style: const TextStyle(fontWeight: FontWeight.w700)),
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : Text(
+                      _isEdit ? 'Enregistrer' : 'Publier le produit',
+                      style: const TextStyle(fontWeight: FontWeight.w700),
+                    ),
             ),
           ],
         ),
@@ -309,7 +343,9 @@ class _ProduitFormPageState extends State<ProduitFormPage> {
       content = Image.file(File(_imagePath!), fit: BoxFit.cover);
     } else if (_isEdit && widget.produit!.image.isNotEmpty) {
       content = CachedNetworkImage(
-          imageUrl: imageOptimisee(widget.produit!.image), fit: BoxFit.cover);
+        imageUrl: imageOptimisee(widget.produit!.image),
+        fit: BoxFit.cover,
+      );
     } else {
       content = const Center(
         child: Column(
@@ -352,17 +388,24 @@ class _ProduitFormPageState extends State<ProduitFormPage> {
           Row(
             children: [
               const Expanded(
-                child: Text('Photos supplémentaires',
-                    style: TextStyle(
-                        fontWeight: FontWeight.w700, color: _C.black)),
+                child: Text(
+                  'Photos supplémentaires',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    color: _C.black,
+                  ),
+                ),
               ),
               TextButton.icon(
-                onPressed: _uploadingImages ? null : _ajouterPhotosSupplementaires,
+                onPressed: _uploadingImages
+                    ? null
+                    : _ajouterPhotosSupplementaires,
                 icon: _uploadingImages
                     ? const SizedBox(
                         height: 16,
                         width: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2))
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
                     : const Icon(Icons.add_photo_alternate_outlined, size: 18),
                 label: const Text('Ajouter'),
                 style: TextButton.styleFrom(foregroundColor: _C.green),
@@ -371,8 +414,10 @@ class _ProduitFormPageState extends State<ProduitFormPage> {
           ),
           const SizedBox(height: 8),
           if (_imagesExistantes.isEmpty)
-            const Text('Aucune photo supplémentaire pour ce produit.',
-                style: TextStyle(color: _C.sub, fontSize: 13))
+            const Text(
+              'Aucune photo supplémentaire pour ce produit.',
+              style: TextStyle(color: _C.sub, fontSize: 13),
+            )
           else
             SizedBox(
               height: 90,
@@ -397,8 +442,10 @@ class _ProduitFormPageState extends State<ProduitFormPage> {
                             width: 90,
                             height: 90,
                             color: _C.bg,
-                            child: const Icon(Icons.image_not_supported_outlined,
-                                color: _C.sub),
+                            child: const Icon(
+                              Icons.image_not_supported_outlined,
+                              color: _C.sub,
+                            ),
                           ),
                         ),
                       ),
@@ -406,7 +453,9 @@ class _ProduitFormPageState extends State<ProduitFormPage> {
                         top: -6,
                         right: -6,
                         child: GestureDetector(
-                          onTap: suppression ? null : () => _supprimerPhoto(img),
+                          onTap: suppression
+                              ? null
+                              : () => _supprimerPhoto(img),
                           child: CircleAvatar(
                             radius: 12,
                             backgroundColor: Colors.red,
@@ -415,9 +464,15 @@ class _ProduitFormPageState extends State<ProduitFormPage> {
                                     height: 12,
                                     width: 12,
                                     child: CircularProgressIndicator(
-                                        strokeWidth: 1.5, color: Colors.white))
-                                : const Icon(Icons.close,
-                                    size: 14, color: Colors.white),
+                                      strokeWidth: 1.5,
+                                      color: Colors.white,
+                                    ),
+                                  )
+                                : const Icon(
+                                    Icons.close,
+                                    size: 14,
+                                    color: Colors.white,
+                                  ),
                           ),
                         ),
                       ),
@@ -442,7 +497,10 @@ class _ProduitFormPageState extends State<ProduitFormPage> {
       return Row(
         children: [
           const Expanded(child: Text('Catégories indisponibles')),
-          TextButton(onPressed: _chargerCategories, child: const Text('Réessayer')),
+          TextButton(
+            onPressed: _chargerCategories,
+            child: const Text('Réessayer'),
+          ),
         ],
       );
     }
@@ -466,29 +524,31 @@ class _ProduitFormPageState extends State<ProduitFormPage> {
   }
 
   InputDecoration _decoration(String hint) => InputDecoration(
-        hintText: hint,
-        filled: true,
-        fillColor: _C.white,
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: _C.border),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: _C.green),
-        ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: _C.border),
-        ),
-      );
+    hintText: hint,
+    filled: true,
+    fillColor: _C.white,
+    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+    enabledBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+      borderSide: const BorderSide(color: _C.border),
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+      borderSide: const BorderSide(color: _C.green),
+    ),
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+      borderSide: const BorderSide(color: _C.border),
+    ),
+  );
 
-  Widget _input(TextEditingController c, String hint,
-      {TextInputType? keyboard,
-      int maxLines = 1,
-      String? Function(String?)? validator}) {
+  Widget _input(
+    TextEditingController c,
+    String hint, {
+    TextInputType? keyboard,
+    int maxLines = 1,
+    String? Function(String?)? validator,
+  }) {
     return TextFormField(
       controller: c,
       keyboardType: keyboard,

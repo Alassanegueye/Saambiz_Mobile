@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:dio/dio.dart';
 import '../../../../../core/widgets/logo_boutique.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -20,72 +21,89 @@ import '../../../../notifications/presentation/pages/notifications_page.dart';
 import '../../../../abonnes/abonnes_page.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:saambiz/core/utils/image_url.dart';
-
+import '../../../../../core/theme/app_color.dart';
+import '../../../../../core/widgets/ui_kit.dart';
+import '../../../../vendeur/presentation/pages/produit_form_page.dart';
+import '../../../../vitrine/presentation/pages/ma_vitrine_page.dart';
 
 class _C {
-  static const green       = Color(0xFF0D1B3D); // navy (héritage de nom)
-  static const navyDk      = Color(0xFF060F26);
-  static const gold        = Color(0xFFF2B705);
-  static const greenLight  = Color(0xFFE8EEF7);
-  static const black       = Color(0xFF0D1B3D);
-  static const white       = Color(0xFFFFFFFF);
-  static const success     = Color(0xFF1E9E62);
-  static const bg          = Color(0xFFF7F8FA);
-  static const surface     = Color(0xFFF7F9FC);
-  static const border      = Color(0xFFE8EDF7);
-  static const label       = Color(0xFF93A1B8);
-  static const sub         = Color(0xFF5B6C8A);
-  static const orange      = Color(0xFFFF5722);
-  static const amber       = Color(0xFFFF9800);
-  static const whatsapp    = Color(0xFF25D366);
+  static const green = Color(0xFF01154B); // navy (héritage de nom)
+  static const navyDk = Color(0xFF060F26);
+  static const gold = Color(0xFFFBB900);
+  static const greenLight = Color(0xFFE8EEF7);
+  static const black = Color(0xFF01154B);
+  static const white = Color(0xFFFFFFFF);
+  static const success = Color(0xFF1E9E62);
+  static const bg = Color(0xFFF4F5F8);
+  static const surface = Color(0xFFF7F9FC);
+  static const border = Color(0xFFE8EDF7);
+  static const label = Color(0xFF93A1B8);
+  static const sub = Color(0xFF5B6C8A);
+  static const orange = Color(0xFFFF5722);
+  static const amber = Color(0xFFFF9800);
+  static const whatsapp = Color(0xFF25D366);
 }
 
 class HomePage extends StatefulWidget {
   final User? user;
-  const HomePage({super.key, this.user});
+
+  /// Bascule vers un autre onglet de l'espace vendeur (1 commandes,
+  /// 3 promotions).
+  final ValueChanged<int>? ouvrirOnglet;
+  const HomePage({super.key, this.user, this.ouvrirOnglet});
 
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
-  bool _loading     = false;
-  int  _nbCommandes = 0;
-  int  _nbFavoris   = 0;
+  bool _loading = false;
+  int _nbCommandes = 0;
+  int _nbFavoris = 0;
 
-  // ── Tableau de bord (données réelles via /vendeur/dashboard) ──
-  String _ventes  = '—';
-  String _visites = '—';
-  String _clients = '—';
-  int    _commandesCount = 0;
-  int    _notifNonLues = 0; // 🔔 notifications non lues (via dashboard)
+  // Tableau de bord (données réelles via /vendeur/dashboard)
+  String _ventes = '0';
+  String _visites = '0';
+  String _clients = '0';
+  int _commandesCount = 0;
+  int _notifNonLues = 0; // 🔔 notifications non lues (via dashboard)
   List<CommandeModel> _recentOrders = [];
 
-  List<BoutiqueModel> _boutiques      = [];
-  bool                _boutiquesLoad  = false;
-  String?             _boutiquesError;
+  List<BoutiqueModel> _boutiques = [];
+  bool _boutiquesLoad = false;
+  String? _boutiquesError;
 
   late AnimationController _headerCtrl;
-  late Animation<double>   _headerFade;
-  late Animation<Offset>   _headerSlide;
+  late Animation<double> _headerFade;
+  late Animation<Offset> _headerSlide;
 
   late AnimationController _contentCtrl;
-  late Animation<double>   _contentFade;
+  late Animation<double> _contentFade;
 
   ProduitRemoteDataSource? _dataSource;
-  ProduitBloc?             _produitBloc;
+  ProduitBloc? _produitBloc;
 
   @override
   void initState() {
     super.initState();
-    _headerCtrl  = AnimationController(vsync: this, duration: const Duration(milliseconds: 800));
-    _contentCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 600));
-    _headerFade  = CurvedAnimation(parent: _headerCtrl, curve: Curves.easeOut);
-    _headerSlide = Tween<Offset>(begin: const Offset(0, -0.04), end: Offset.zero)
-        .animate(CurvedAnimation(parent: _headerCtrl, curve: Curves.easeOutCubic));
+    _headerCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    );
+    _contentCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    );
+    _headerFade = CurvedAnimation(parent: _headerCtrl, curve: Curves.easeOut);
+    _headerSlide = Tween<Offset>(
+      begin: const Offset(0, -0.04),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: _headerCtrl, curve: Curves.easeOutCubic));
     _contentFade = CurvedAnimation(parent: _contentCtrl, curve: Curves.easeOut);
     _headerCtrl.forward();
-    Future.delayed(const Duration(milliseconds: 250), () { if (mounted) _contentCtrl.forward(); });
+    Future.delayed(const Duration(milliseconds: 250), () {
+      if (mounted) _contentCtrl.forward();
+    });
     _loadStats();
     _initBloc();
   }
@@ -94,10 +112,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     try {
       // Récupérés via l'injection de dépendances (Dio partagé + API_BASE_URL du .env)
       final dataSource = sl<ProduitRemoteDataSource>();
-      final bloc       = sl<ProduitBloc>();
+      final bloc = sl<ProduitBloc>();
       bloc.add(LoadProduits());
       if (mounted) {
-        setState(() { _dataSource = dataSource; _produitBloc = bloc; });
+        setState(() {
+          _dataSource = dataSource;
+          _produitBloc = bloc;
+        });
         _fetchBoutiques();
       }
     } catch (e) {
@@ -107,12 +128,23 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   Future<void> _fetchBoutiques() async {
     if (_dataSource == null) return;
-    setState(() { _boutiquesLoad = true; _boutiquesError = null; });
+    setState(() {
+      _boutiquesLoad = true;
+      _boutiquesError = null;
+    });
     try {
       final list = await _dataSource!.getBoutiques();
-      if (mounted) setState(() { _boutiques = list; _boutiquesLoad = false; });
+      if (mounted)
+        setState(() {
+          _boutiques = list;
+          _boutiquesLoad = false;
+        });
     } catch (e) {
-      if (mounted) setState(() { _boutiquesError = e.toString(); _boutiquesLoad = false; });
+      if (mounted)
+        setState(() {
+          _boutiquesError = e.toString();
+          _boutiquesLoad = false;
+        });
     }
   }
 
@@ -133,12 +165,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         final stats = (data['stats'] as Map?) ?? const {};
         if (!mounted) return;
         setState(() {
-          _ventes         = _fmtNombre(stats['chiffreAffaires']);
+          _ventes = _fmtNombre(stats['chiffreAffaires']);
           _commandesCount = _toInt(stats['nombreCommandes']);
-          _nbCommandes    = _commandesCount;
-          _visites        = _toInt(stats['totalVues']).toString();
-          _clients        = _toInt(stats['nombreAbonnes']).toString();
-          _notifNonLues   = _toInt(data['notificationsNonLues']);
+          _nbCommandes = _commandesCount;
+          _visites = _toInt(stats['totalVues']).toString();
+          _clients = _toInt(stats['nombreAbonnes']).toString();
+          _notifNonLues = _toInt(data['notificationsNonLues']);
         });
       });
     } catch (e) {
@@ -199,57 +231,54 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   void _openNotifications() async {
-    await Navigator.of(context).push(MaterialPageRoute(
-      builder: (_) => const NotificationsPage(),
-    ));
+    await Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => const NotificationsPage()));
     _loadStats(); // rafraîchir le badge (notificationsNonLues) au retour
   }
 
-  // ── Ouvrir la bottom sheet d'une boutique ─────────────────────────────────
+  // Ouvrir la bottom sheet d'une boutique
   void _openBoutiqueSheet(BoutiqueModel boutique) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => _BoutiqueSheet(
-        boutique: boutique,
-        dataSource: _dataSource,
-      ),
+      builder: (_) =>
+          _BoutiqueSheet(boutique: boutique, dataSource: _dataSource),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: _C.bg,
-      body: RefreshIndicator(
-        onRefresh: () async {
-          _produitBloc?.add(LoadProduits());
-          await Future.wait([_loadStats(), _fetchBoutiques()]);
-        },
-        color: _C.green,
-        backgroundColor: _C.white,
-        child: CustomScrollView(
-          physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
-          slivers: [
-            SliverToBoxAdapter(
-              child: FadeTransition(
-                opacity: _headerFade,
-                child: SlideTransition(position: _headerSlide, child: _buildDashHeader()),
-              ),
-            ),
-            SliverToBoxAdapter(
-              child: FadeTransition(
-                opacity: _contentFade,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildDashTitle(),
-                    _buildStatCards(),
-                    _buildRecentOrders(),
-                    _buildNewProductButton(),
-                    const SizedBox(height: 110),
-                  ],
+    // Tableau de bord : en-tête marine (boutique et chiffres clés), actions
+    // rapides, puis les dernières commandes.
+    // En-tête marine : icônes de la barre d'état en blanc.
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light.copyWith(
+        statusBarColor: Colors.transparent,
+      ),
+      child: Scaffold(
+        backgroundColor: AppColor.kBackground,
+        body: Column(
+          children: [
+            _buildDashHeader(),
+            Expanded(
+              child: RefreshIndicator(
+                onRefresh: () async {
+                  _produitBloc?.add(LoadProduits());
+                  await Future.wait([_loadStats(), _fetchBoutiques()]);
+                },
+                color: AppColor.kPrimary,
+                child: FadeTransition(
+                  opacity: _contentFade,
+                  child: ListView(
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+                    children: [
+                      _buildActions(),
+                      const SizedBox(height: 24),
+                      _buildRecentOrders(),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -259,327 +288,385 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
   }
 
-  // ── En-tête tableau de bord (navy) ────────────────────────────────────────
+  /// En-tête : logo et nom de la boutique, lien vers la boutique, cloche.
   Widget _buildDashHeader() {
-    final boutiqueNom = _boutiques.isNotEmpty
-        ? _boutiques.first.nom
-        : 'Ma boutique';
-    final hasLogo = _boutiques.isNotEmpty &&
-        _boutiques.first.logo != null &&
-        _boutiques.first.logo!.isNotEmpty;
+    final boutique = _boutiques.isNotEmpty ? _boutiques.first : null;
+    final logo = boutique?.logo;
+    final hasLogo = logo != null && logo.isNotEmpty;
 
     return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [_C.green, _C.navyDk],
-        ),
-        borderRadius: BorderRadius.vertical(bottom: Radius.circular(26)),
-      ),
+      color: AppColor.kPrimary,
       child: SafeArea(
         bottom: false,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 16, 18, 26),
-          child: Row(
+          padding: const EdgeInsets.fromLTRB(16, 10, 6, 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Logo boutique
-              Container(
-                width: 54, height: 54,
-                decoration: BoxDecoration(
-                  color: _C.white,
-                  shape: BoxShape.circle,
-                ),
-                clipBehavior: Clip.antiAlias,
-                child: hasLogo
-                    ? CachedNetworkImage(imageUrl: imageOptimisee(_boutiques.first.logo!), fit: BoxFit.cover,
-                        errorWidget: (_, __, ___) =>
-                            const LogoBoutiqueParDefaut())
-                    : const LogoBoutiqueParDefaut(),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(boutiqueNom,
-                        maxLines: 1, overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.plusJakartaSans(fontSize: 17, fontWeight: FontWeight.w800, color: _C.white)),
-                    const SizedBox(height: 3),
-                    GestureDetector(
-                      onTap: () {
-                        if (_boutiques.isNotEmpty) _openBoutiqueSheet(_boutiques.first);
-                      },
-                      child: Row(mainAxisSize: MainAxisSize.min, children: [
-                        Text('Voir ma boutique',
-                            style: GoogleFonts.plusJakartaSans(fontSize: 13, color: _C.gold, fontWeight: FontWeight.w600)),
-                        const Icon(Icons.chevron_right_rounded, color: _C.gold, size: 18),
-                      ]),
+              Row(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: Container(
+                      width: 44,
+                      height: 44,
+                      color: AppColor.kWhite,
+                      child: hasLogo
+                          ? CachedNetworkImage(
+                              imageUrl: imageOptimisee(logo),
+                              fit: BoxFit.cover,
+                              errorWidget: (_, __, ___) =>
+                                  const LogoBoutiqueParDefaut(),
+                            )
+                          : const LogoBoutiqueParDefaut(),
                     ),
-                  ],
-                ),
-              ),
-              // Cloche cliquable + badge non-lues
-              GestureDetector(
-                onTap: _openNotifications,
-                child: Stack(clipBehavior: Clip.none, children: [
-                  Container(
-                    width: 46, height: 46,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.12),
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: const Icon(Icons.notifications_none_rounded, color: _C.white, size: 22),
                   ),
-                  if (_notifNonLues > 0)
-                    Positioned(
-                      top: -4, right: -4,
-                      child: Container(
-                        padding: const EdgeInsets.all(4),
-                        constraints: const BoxConstraints(minWidth: 20, minHeight: 20),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFD64533),
-                          shape: BoxShape.circle,
-                          border: Border.all(color: _C.navyDk, width: 2),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          boutique?.nom ?? 'Ma boutique',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.inter(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w700,
+                            color: AppColor.kWhite,
+                          ),
                         ),
-                        child: Text(
-                          _notifNonLues > 99 ? '99+' : '$_notifNonLues',
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.w800, color: Colors.white),
-                        ),
-                      ),
-                    ),
-                ]),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  // ── Titre + période ───────────────────────────────────────────────────────
-  Widget _buildDashTitle() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text('Tableau de bord',
-              style: GoogleFonts.plusJakartaSans(fontSize: 18, fontWeight: FontWeight.w800, color: _C.black)),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-            decoration: BoxDecoration(
-              color: _C.white,
-              borderRadius: BorderRadius.circular(11),
-              border: Border.all(color: _C.border),
-            ),
-            child: Row(mainAxisSize: MainAxisSize.min, children: [
-              Text("Aujourd'hui",
-                  style: GoogleFonts.plusJakartaSans(fontSize: 12.5, fontWeight: FontWeight.w600, color: _C.sub)),
-              const SizedBox(width: 4),
-              const Icon(Icons.keyboard_arrow_down_rounded, size: 18, color: _C.sub),
-            ]),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ── 4 cartes de statistiques (2×2) ────────────────────────────────────────
-  Widget _buildStatCards() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-      child: Column(
-        children: [
-          Row(children: [
-            Expanded(child: _statCard('Ventes', _ventes, 'FCFA', null)),
-            const SizedBox(width: 12),
-            Expanded(child: _statCard('Commandes', _commandesCount.toString(), null, null)),
-          ]),
-          const SizedBox(height: 12),
-          Row(children: [
-            Expanded(child: _statCard('Visites', _visites, null, null)),
-            const SizedBox(width: 12),
-            // Le nombre d'abonnés ouvre la liste des clients abonnés.
-            Expanded(
-              child: GestureDetector(
-                onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AbonnesPage())),
-                child: _statCard('Abonnés', _clients, null, null),
-              ),
-            ),
-          ]),
-        ],
-      ),
-    );
-  }
-
-  Widget _statCard(String label, String value, String? unit, String? delta) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: _C.white,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: _C.border),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(label, style: GoogleFonts.plusJakartaSans(fontSize: 13, color: _C.sub, fontWeight: FontWeight.w500)),
-          const SizedBox(height: 10),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic,
-            children: [
-              Flexible(
-                child: Text(value,
-                    maxLines: 1, overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.plusJakartaSans(fontSize: 22, fontWeight: FontWeight.w800, color: _C.black)),
-              ),
-              if (unit != null) ...[
-                const SizedBox(width: 4),
-                Text(unit, style: GoogleFonts.plusJakartaSans(fontSize: 11, color: _C.sub)),
-              ],
-            ],
-          ),
-          if (delta != null) ...[
-            const SizedBox(height: 8),
-            Row(children: [
-              const Icon(Icons.arrow_upward_rounded, size: 13, color: _C.success),
-              const SizedBox(width: 2),
-              Text(delta, style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.w700, color: _C.success)),
-            ]),
-          ],
-        ],
-      ),
-    );
-  }
-
-  // ── Commandes récentes ────────────────────────────────────────────────────
-  Widget _buildRecentOrders() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text('Commandes récentes',
-                  style: GoogleFonts.plusJakartaSans(fontSize: 16, fontWeight: FontWeight.w700, color: _C.black)),
-              Text('Voir tout',
-                  style: GoogleFonts.plusJakartaSans(fontSize: 12.5, fontWeight: FontWeight.w600, color: _C.green)),
-            ],
-          ),
-          const SizedBox(height: 12),
-          if (_recentOrders.isEmpty)
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 24),
-              decoration: BoxDecoration(
-                color: _C.white,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: _C.border),
-              ),
-              child: Text('Aucune commande récente',
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.plusJakartaSans(fontSize: 13, color: _C.label)),
-            )
-          else
-            ..._recentOrders.map((o) {
-              final st = _statutInfo(o.statut);
-              return Container(
-                margin: const EdgeInsets.only(bottom: 10),
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: _C.white,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: _C.border),
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 42, height: 42,
-                      decoration: BoxDecoration(
-                        color: _C.greenLight,
-                        borderRadius: BorderRadius.circular(11),
-                      ),
-                      child: const Icon(Icons.shopping_bag_outlined, color: _C.green, size: 20),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(children: [
-                            Text('#${o.referenceCommande}',
-                                style: GoogleFonts.plusJakartaSans(fontSize: 13.5, fontWeight: FontWeight.w700, color: _C.black)),
-                            const SizedBox(width: 8),
-                            Text('${_fmtNombre(o.montantTotal)} FCFA',
-                                style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.w700, color: _C.green)),
-                          ]),
-                          const SizedBox(height: 3),
-                          Row(children: [
-                            Flexible(
-                              child: Text(o.acheteurNom ?? 'Client',
-                                  maxLines: 1, overflow: TextOverflow.ellipsis,
-                                  style: GoogleFonts.plusJakartaSans(fontSize: 12, color: _C.sub)),
+                        if (boutique != null)
+                          GestureDetector(
+                            onTap: () => _openBoutiqueSheet(boutique),
+                            child: Text(
+                              'Voir ma boutique',
+                              style: GoogleFonts.inter(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500,
+                                color: AppColor.kSecondary,
+                              ),
                             ),
-                            const SizedBox(width: 6),
-                            Text('•', style: GoogleFonts.plusJakartaSans(fontSize: 12, color: _C.label)),
-                            const SizedBox(width: 6),
-                            Text(st.label,
-                                style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.w600, color: st.color)),
-                          ]),
-                        ],
+                          ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    tooltip: 'Notifications',
+                    onPressed: _openNotifications,
+                    icon: Badge(
+                      isLabelVisible: _notifNonLues > 0,
+                      backgroundColor: AppColor.kSecondary,
+                      textColor: AppColor.kPrimary,
+                      label: Text(
+                        _notifNonLues > 99 ? '99+' : '$_notifNonLues',
+                      ),
+                      child: const Icon(
+                        Icons.notifications_none_rounded,
+                        color: AppColor.kWhite,
                       ),
                     ),
-                    Text(_timeAgo(o.createdAt),
-                        style: GoogleFonts.plusJakartaSans(fontSize: 10.5, color: _C.label)),
-                  ],
-                ),
-              );
-            }),
-        ],
-      ),
-    );
-  }
-
-  // ── Bouton nouveau produit ────────────────────────────────────────────────
-  Widget _buildNewProductButton() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
-      child: SizedBox(
-        width: double.infinity,
-        child: ElevatedButton.icon(
-          onPressed: () {},
-          icon: const Icon(Icons.add_rounded, size: 20),
-          label: Text('Nouveau produit',
-              style: GoogleFonts.plusJakartaSans(fontSize: 15, fontWeight: FontWeight.w700)),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: _C.green,
-            foregroundColor: _C.white,
-            elevation: 0,
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              Padding(
+                padding: const EdgeInsets.only(right: 10),
+                child: _buildStatCards(),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
 
-  // ── Header ────────────────────────────────────────────────────────────────
+  /// Chiffres clés sur l'en-tête marine : le chiffre d'affaires en grand,
+  /// puis commandes, visites et abonnés sur une ligne.
+  Widget _buildStatCards() {
+    final etiquette = GoogleFonts.inter(
+      fontSize: 12.5,
+      color: AppColor.kWhite.withValues(alpha: 0.7),
+    );
+    Widget petit(String label, String valeur, {VoidCallback? onTap}) {
+      return Expanded(
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(8),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  valeur,
+                  style: GoogleFonts.inter(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: AppColor.kWhite,
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                  ),
+                ),
+                Text(label, style: etiquette),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Chiffre d’affaires', style: etiquette),
+        const SizedBox(height: 2),
+        Text.rich(
+          TextSpan(
+            text: _ventes,
+            children: [
+              TextSpan(
+                text: ' FCFA',
+                style: GoogleFonts.inter(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: AppColor.kSecondary,
+                ),
+              ),
+            ],
+          ),
+          style: GoogleFonts.inter(
+            fontSize: 30,
+            fontWeight: FontWeight.w700,
+            color: AppColor.kWhite,
+            fontFeatures: const [FontFeature.tabularFigures()],
+          ),
+        ),
+        const SizedBox(height: 14),
+        Container(height: 1, color: AppColor.kWhite.withValues(alpha: 0.12)),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            petit(
+              'Commandes',
+              '$_commandesCount',
+              onTap: () => widget.ouvrirOnglet?.call(1),
+            ),
+            petit('Visites', _visites),
+            // Le nombre d'abonnés ouvre la liste des clients abonnés.
+            petit(
+              'Abonnés',
+              _clients,
+              onTap: () => Navigator.of(
+                context,
+              ).push(MaterialPageRoute(builder: (_) => const AbonnesPage())),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  /// Actions rapides : ce qu'un vendeur fait le plus souvent.
+  Widget _buildActions() {
+    Widget action(
+      IconData icone,
+      String libelle,
+      VoidCallback onTap, {
+      bool principale = false,
+    }) {
+      return Expanded(
+        child: Material(
+          color: principale ? AppColor.kSecondary : AppColor.kWhite,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: BorderSide(
+              color: principale ? AppColor.kSecondary : AppColor.kLine,
+            ),
+          ),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(12),
+            onTap: onTap,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 6),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(icone, color: AppColor.kPrimary, size: 24),
+                  const SizedBox(height: 6),
+                  Text(
+                    libelle,
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    style: GoogleFonts.inter(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w600,
+                      color: AppColor.kGrayscaleDark100,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    void ouvrir(Widget page) =>
+        Navigator.of(context).push(MaterialPageRoute(builder: (_) => page));
+
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          action(
+            Icons.add_box_outlined,
+            'Ajouter un produit',
+            () => ouvrir(const ProduitFormPage()),
+            principale: true,
+          ),
+          const SizedBox(width: 10),
+          action(
+            Icons.local_offer_outlined,
+            'Promotions',
+            () => widget.ouvrirOnglet?.call(3),
+          ),
+          const SizedBox(width: 10),
+          action(
+            Icons.language_rounded,
+            'Mon site web',
+            () => ouvrir(const MaVitrinePage()),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Dernières commandes, en liste ; « Voir tout » ouvre l'onglet Commandes.
+  Widget _buildRecentOrders() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        EnteteSection(
+          'Dernières commandes',
+          action: 'Voir tout',
+          onAction: () => widget.ouvrirOnglet?.call(1),
+        ),
+        const SizedBox(height: 8),
+        if (_recentOrders.isEmpty)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+            decoration: decorationCarte(),
+            child: Text(
+              'Aucune commande pour le moment.',
+              textAlign: TextAlign.center,
+              style: texteDiscret(14),
+            ),
+          )
+        else
+          Container(
+            decoration: decorationCarte(),
+            child: Column(
+              children: [
+                for (var i = 0; i < _recentOrders.length; i++) ...[
+                  if (i > 0) const Divider(height: 1, indent: 16),
+                  _ligneCommande(_recentOrders[i]),
+                ],
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _ligneCommande(CommandeModel o) {
+    final st = _statutInfo(o.statut);
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  o.acheteurNom ?? 'Client',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.inter(
+                    fontSize: 14.5,
+                    fontWeight: FontWeight.w600,
+                    color: AppColor.kGrayscaleDark100,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'N° ${o.referenceCommande}, ${_timeAgo(o.createdAt)}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: texteDiscret(12.5),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                '${_fmtNombre(o.montantTotal)} FCFA',
+                style: GoogleFonts.inter(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: AppColor.kGrayscaleDark100,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                st.label,
+                style: GoogleFonts.inter(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: st.color,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Header
   Widget _buildHeader(String prenom, String initiales) {
     return Container(
       color: _C.black,
       child: Stack(
         children: [
-          Positioned(top: -50, right: -30,
-              child: Container(width: 160, height: 160,
-                  decoration: BoxDecoration(shape: BoxShape.circle, color: _C.green.withOpacity(0.07)))),
-          Positioned(bottom: -30, left: -20,
-              child: Container(width: 120, height: 120,
-                  decoration: BoxDecoration(shape: BoxShape.circle, color: _C.green.withOpacity(0.05)))),
+          Positioned(
+            top: -50,
+            right: -30,
+            child: Container(
+              width: 160,
+              height: 160,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: _C.green.withOpacity(0.07),
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: -30,
+            left: -20,
+            child: Container(
+              width: 120,
+              height: 120,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: _C.green.withOpacity(0.05),
+              ),
+            ),
+          ),
           SafeArea(
             bottom: false,
             child: Padding(
@@ -590,54 +677,67 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   Row(
                     children: [
                       Container(
-                        width: 44, height: 44,
+                        width: 44,
+                        height: 44,
                         decoration: BoxDecoration(
                           color: _C.green.withOpacity(0.15),
                           borderRadius: BorderRadius.circular(13),
-                          border: Border.all(color: _C.green.withOpacity(0.3), width: 1.5),
+                          border: Border.all(
+                            color: _C.green.withOpacity(0.3),
+                            width: 1.5,
+                          ),
                         ),
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(13),
-                          child: (widget.user?.photoProfil != null && widget.user!.photoProfil!.isNotEmpty)
+                          child:
+                              (widget.user?.photoProfil != null &&
+                                  widget.user!.photoProfil!.isNotEmpty)
                               ? Image.network(
-                            widget.user!.photoProfil!,
-                            width: 44,
-                            height: 44,
-                            fit: BoxFit.cover,
-                            loadingBuilder: (context, child, loadingProgress) {
-                              if (loadingProgress == null) return child;
-                              return Center(
-                                child: CircularProgressIndicator(
-                                  value: loadingProgress.expectedTotalBytes != null
-                                      ? loadingProgress.cumulativeBytesLoaded / (loadingProgress.expectedTotalBytes ?? 1)
-                                      : null,
-                                ),
-                              );
-                            },
-                            errorBuilder: (context, error, stackTrace) {
-                              // Si l'image ne charge pas, afficher les initiales
-                              return Center(
-                                child: Text(
-                                  initiales,
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w800,
-                                    color: _C.green,
+                                  widget.user!.photoProfil!,
+                                  width: 44,
+                                  height: 44,
+                                  fit: BoxFit.cover,
+                                  loadingBuilder: (context, child, loadingProgress) {
+                                    if (loadingProgress == null) return child;
+                                    return Center(
+                                      child: CircularProgressIndicator(
+                                        value:
+                                            loadingProgress
+                                                    .expectedTotalBytes !=
+                                                null
+                                            ? loadingProgress
+                                                      .cumulativeBytesLoaded /
+                                                  (loadingProgress
+                                                          .expectedTotalBytes ??
+                                                      1)
+                                            : null,
+                                      ),
+                                    );
+                                  },
+                                  errorBuilder: (context, error, stackTrace) {
+                                    // Si l'image ne charge pas, afficher les initiales
+                                    return Center(
+                                      child: Text(
+                                        initiales,
+                                        style: GoogleFonts.inter(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w800,
+                                          color: _C.green,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                )
+                              : Center(
+                                  child: Text(
+                                    initiales,
+                                    style: GoogleFonts.inter(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w800,
+                                      color: _C.green,
+                                    ),
                                   ),
                                 ),
-                              );
-                            },
-                          )
-                              : Center(
-                            child: Text(
-                              initiales,
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w800,
-                                color: _C.green,
-                              ),
-                            ),
-                          ),
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -645,16 +745,35 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('$prenom ${widget.user?.nom ?? ''}',
-                                style: GoogleFonts.plusJakartaSans(fontSize: 18, fontWeight: FontWeight.w800, color: _C.white, letterSpacing: -0.4)),
+                            Text(
+                              '$prenom ${widget.user?.nom ?? ''}',
+                              style: GoogleFonts.inter(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w800,
+                                color: _C.white,
+                                letterSpacing: -0.4,
+                              ),
+                            ),
                             const SizedBox(height: 4),
-                            Row(children: [
-                              Icon(Icons.email_outlined, size: 12, color: _C.green.withOpacity(0.7)),
-                              const SizedBox(width: 4),
-                              Text(widget.user?.email ?? 'email@exemple.com',
-                                  style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.w500,
-                                      color: _C.white.withOpacity(0.6), letterSpacing: -0.2)),
-                            ]),
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.email_outlined,
+                                  size: 12,
+                                  color: _C.green.withOpacity(0.7),
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  widget.user?.email ?? 'email@exemple.com',
+                                  style: GoogleFonts.inter(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w500,
+                                    color: _C.white.withOpacity(0.6),
+                                    letterSpacing: -0.2,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ],
                         ),
                       ),
@@ -670,17 +789,29 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
   }
 
-  // ── Bannière promo ────────────────────────────────────────────────────────
+  // Bannière promo
   Widget _buildPromoBanner() {
     return Container(
       margin: const EdgeInsets.fromLTRB(18, 18, 18, 0),
       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
-      decoration: BoxDecoration(color: _C.black, borderRadius: BorderRadius.circular(20)),
+      decoration: BoxDecoration(
+        color: _C.black,
+        borderRadius: BorderRadius.circular(20),
+      ),
       child: Stack(
         children: [
-          Positioned(right: -10, top: -20,
-              child: Container(width: 90, height: 90,
-                  decoration: BoxDecoration(shape: BoxShape.circle, color: _C.green.withOpacity(0.12)))),
+          Positioned(
+            right: -10,
+            top: -20,
+            child: Container(
+              width: 90,
+              height: 90,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: _C.green.withOpacity(0.12),
+              ),
+            ),
+          ),
           Row(
             children: [
               Expanded(
@@ -688,25 +819,80 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(color: _C.green.withOpacity(0.15), borderRadius: BorderRadius.circular(8)),
-                      child: Text('OFFRE SPÉCIALE', style: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.w700, color: _C.green, letterSpacing: 0.5)),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: _C.green.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        'OFFRE SPÉCIALE',
+                        style: GoogleFonts.inter(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          color: _C.green,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
                     ),
                     const SizedBox(height: 8),
-                    RichText(text: TextSpan(children: [
-                      TextSpan(text: 'Livraison ',  style: GoogleFonts.plusJakartaSans(fontSize: 15, fontWeight: FontWeight.w800, color: _C.white)),
-                      TextSpan(text: 'offerte\n',   style: GoogleFonts.plusJakartaSans(fontSize: 15, fontWeight: FontWeight.w800, color: _C.green)),
-                      TextSpan(text: 'ce week-end !', style: GoogleFonts.plusJakartaSans(fontSize: 15, fontWeight: FontWeight.w800, color: _C.white)),
-                    ])),
+                    RichText(
+                      text: TextSpan(
+                        children: [
+                          TextSpan(
+                            text: 'Livraison ',
+                            style: GoogleFonts.inter(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w800,
+                              color: _C.white,
+                            ),
+                          ),
+                          TextSpan(
+                            text: 'offerte\n',
+                            style: GoogleFonts.inter(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w800,
+                              color: _C.green,
+                            ),
+                          ),
+                          TextSpan(
+                            text: 'ce week-end !',
+                            style: GoogleFonts.inter(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w800,
+                              color: _C.white,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                     const SizedBox(height: 4),
-                    Text('Sur toutes vos commandes', style: GoogleFonts.plusJakartaSans(fontSize: 11, color: _C.label)),
+                    Text(
+                      'Sur toutes vos commandes',
+                      style: GoogleFonts.inter(fontSize: 11, color: _C.label),
+                    ),
                   ],
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                decoration: BoxDecoration(color: _C.green, borderRadius: BorderRadius.circular(12)),
-                child: Text('En profiter', style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.w700, color: _C.white)),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 10,
+                ),
+                decoration: BoxDecoration(
+                  color: _C.green,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  'En profiter',
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: _C.white,
+                  ),
+                ),
               ),
             ],
           ),
@@ -715,59 +901,125 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
   }
 
-  // ── Statistiques ──────────────────────────────────────────────────────────
+  // Statistiques
   Widget _buildStatsRow() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(18, 16, 18, 0),
       child: Row(
         children: [
-          Expanded(child: _buildStatChip(icon: Icons.receipt_long_rounded,   label: 'Commandes', value: _nbCommandes.toString(), color: _C.green)),
+          Expanded(
+            child: _buildStatChip(
+              icon: Icons.receipt_long_rounded,
+              label: 'Commandes',
+              value: _nbCommandes.toString(),
+              color: _C.green,
+            ),
+          ),
           const SizedBox(width: 10),
-          Expanded(child: _buildStatChip(icon: Icons.favorite_border_rounded, label: 'Favoris',   value: _nbFavoris.toString(),   color: const Color(0xFFE53935))),
+          Expanded(
+            child: _buildStatChip(
+              icon: Icons.favorite_border_rounded,
+              label: 'Favoris',
+              value: _nbFavoris.toString(),
+              color: const Color(0xFFE53935),
+            ),
+          ),
           const SizedBox(width: 10),
-          Expanded(child: _buildStatChip(icon: Icons.local_shipping_outlined,  label: 'En transit', value: '—',                   color: _C.amber)),
+          Expanded(
+            child: _buildStatChip(
+              icon: Icons.local_shipping_outlined,
+              label: 'En transit',
+              value: '0',
+              color: _C.amber,
+            ),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildStatChip({required IconData icon, required String label, required String value, required Color color}) {
+  Widget _buildStatChip({
+    required IconData icon,
+    required String label,
+    required String value,
+    required Color color,
+  }) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
-      decoration: BoxDecoration(color: _C.white, borderRadius: BorderRadius.circular(16), border: Border.all(color: _C.border)),
+      decoration: BoxDecoration(
+        color: _C.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: _C.border),
+      ),
       child: Column(
         children: [
-          Container(width: 34, height: 34,
-              decoration: BoxDecoration(color: color.withOpacity(0.10), borderRadius: BorderRadius.circular(10)),
-              child: Icon(icon, size: 17, color: color)),
+          Container(
+            width: 34,
+            height: 34,
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.10),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, size: 17, color: color),
+          ),
           const SizedBox(height: 6),
-          Text(value, style: GoogleFonts.plusJakartaSans(fontSize: 18, fontWeight: FontWeight.w800, color: _C.black)),
-          Text(label,  style: GoogleFonts.plusJakartaSans(fontSize: 10, color: _C.label, fontWeight: FontWeight.w500)),
+          Text(
+            value,
+            style: GoogleFonts.inter(
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
+              color: _C.black,
+            ),
+          ),
+          Text(
+            label,
+            style: GoogleFonts.inter(
+              fontSize: 10,
+              color: _C.label,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
         ],
       ),
     );
   }
 
-  // ── En-tête section ───────────────────────────────────────────────────────
+  // En-tête section
   Widget _buildSectionHeader(String title) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(18, 22, 18, 12),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(title, style: GoogleFonts.plusJakartaSans(fontSize: 15, fontWeight: FontWeight.w700, color: _C.black)),
-          Text('Voir tout', style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.w600, color: _C.green)),
+          Text(
+            title,
+            style: GoogleFonts.inter(
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+              color: _C.black,
+            ),
+          ),
+          Text(
+            'Voir tout',
+            style: GoogleFonts.inter(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: _C.green,
+            ),
+          ),
         ],
       ),
     );
   }
 
-  // ── Liste boutiques dynamique ─────────────────────────────────────────────
+  // Liste boutiques dynamique
   Widget _buildShopList() {
     if (_dataSource == null || _boutiquesLoad) {
       return const Padding(
         padding: EdgeInsets.all(32),
-        child: Center(child: CircularProgressIndicator(color: _C.green, strokeWidth: 2.5)),
+        child: Center(
+          child: CircularProgressIndicator(color: _C.green, strokeWidth: 2.5),
+        ),
       );
     }
     if (_boutiquesError != null) {
@@ -777,14 +1029,30 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           children: [
             const Icon(Icons.error_outline_rounded, color: _C.orange, size: 40),
             const SizedBox(height: 8),
-            Text('Erreur: $_boutiquesError', style: GoogleFonts.plusJakartaSans(color: _C.orange), textAlign: TextAlign.center),
+            Text(
+              'Erreur: $_boutiquesError',
+              style: GoogleFonts.inter(color: _C.orange),
+              textAlign: TextAlign.center,
+            ),
             const SizedBox(height: 12),
             GestureDetector(
               onTap: _fetchBoutiques,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                decoration: BoxDecoration(color: _C.black, borderRadius: BorderRadius.circular(12)),
-                child: Text('Réessayer', style: GoogleFonts.plusJakartaSans(color: _C.white, fontWeight: FontWeight.w600)),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 10,
+                ),
+                decoration: BoxDecoration(
+                  color: _C.black,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  'Réessayer',
+                  style: GoogleFonts.inter(
+                    color: _C.white,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ),
             ),
           ],
@@ -794,7 +1062,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     if (_boutiques.isEmpty) {
       return Padding(
         padding: const EdgeInsets.all(32),
-        child: Center(child: Text('Aucune boutique disponible', style: GoogleFonts.plusJakartaSans(color: _C.label))),
+        child: Center(
+          child: Text(
+            'Aucune boutique disponible',
+            style: GoogleFonts.inter(color: _C.label),
+          ),
+        ),
       );
     }
 
@@ -805,9 +1078,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   Widget _buildShopItem(BoutiqueModel boutique) {
-    final hasLogo   = boutique.logo != null && boutique.logo!.isNotEmpty;
-    final horaires  = boutique.horaires;
-    final sousTitre = boutique.localisation.isNotEmpty ? boutique.localisation : boutique.description;
+    final hasLogo = boutique.logo != null && boutique.logo!.isNotEmpty;
+    final horaires = boutique.horaires;
+    final sousTitre = boutique.localisation.isNotEmpty
+        ? boutique.localisation
+        : boutique.description;
 
     return GestureDetector(
       onTap: () => _openBoutiqueSheet(boutique),
@@ -822,12 +1097,18 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         child: Row(
           children: [
             Container(
-              width: 44, height: 44,
+              width: 44,
+              height: 44,
               decoration: BoxDecoration(
                 color: _C.greenLight,
                 borderRadius: BorderRadius.circular(12),
                 image: hasLogo
-                    ? DecorationImage(image: CachedNetworkImageProvider(imageOptimisee(boutique.logo!)), fit: BoxFit.cover)
+                    ? DecorationImage(
+                        image: CachedNetworkImageProvider(
+                          imageOptimisee(boutique.logo!),
+                        ),
+                        fit: BoxFit.cover,
+                      )
                     : null,
               ),
               child: hasLogo ? null : const LogoBoutiqueParDefaut(rayon: 12),
@@ -837,40 +1118,76 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(boutique.nom,
-                      style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.w700, color: _C.black)),
-                  Text(sousTitre,
-                      style: GoogleFonts.plusJakartaSans(fontSize: 11, color: _C.label),
-                      maxLines: 1, overflow: TextOverflow.ellipsis),
+                  Text(
+                    boutique.nom,
+                    style: GoogleFonts.inter(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: _C.black,
+                    ),
+                  ),
+                  Text(
+                    sousTitre,
+                    style: GoogleFonts.inter(fontSize: 11, color: _C.label),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                   if (horaires.isNotEmpty) ...[
                     const SizedBox(height: 2),
-                    Row(children: [
-                      const Icon(Icons.access_time_rounded, size: 10, color: _C.green),
-                      const SizedBox(width: 3),
-                      Text(horaires, style: GoogleFonts.plusJakartaSans(fontSize: 10, color: _C.green)),
-                    ]),
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.access_time_rounded,
+                          size: 10,
+                          color: _C.green,
+                        ),
+                        const SizedBox(width: 3),
+                        Text(
+                          horaires,
+                          style: GoogleFonts.inter(
+                            fontSize: 10,
+                            color: _C.green,
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
                 ],
               ),
             ),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(color: _C.greenLight, borderRadius: BorderRadius.circular(10)),
-              child: Text(boutique.vendeurNomComplet,
-                  style: GoogleFonts.plusJakartaSans(fontSize: 10, fontWeight: FontWeight.w600, color: _C.sub),
-                  maxLines: 1, overflow: TextOverflow.ellipsis),
+              decoration: BoxDecoration(
+                color: _C.greenLight,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text(
+                boutique.vendeurNomComplet,
+                style: GoogleFonts.inter(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
+                  color: _C.sub,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
             const SizedBox(width: 8),
-            // ── Icône ouvrir boutique ──────────────────────────────────────
+            // Icône ouvrir boutique
             GestureDetector(
               onTap: () => _openBoutiqueSheet(boutique),
               child: Container(
-                width: 32, height: 32,
+                width: 32,
+                height: 32,
                 decoration: BoxDecoration(
                   color: _C.black,
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Icon(Icons.chevron_right_rounded, color: _C.white, size: 18),
+                child: const Icon(
+                  Icons.chevron_right_rounded,
+                  color: _C.white,
+                  size: 18,
+                ),
               ),
             ),
           ],
@@ -879,12 +1196,14 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
   }
 
-  // ── Grille produits dynamique via Bloc ────────────────────────────────────
+  // Grille produits dynamique via Bloc
   Widget _buildProductGrid() {
     if (_produitBloc == null) {
       return const Padding(
         padding: EdgeInsets.all(32),
-        child: Center(child: CircularProgressIndicator(color: _C.green, strokeWidth: 2.5)),
+        child: Center(
+          child: CircularProgressIndicator(color: _C.green, strokeWidth: 2.5),
+        ),
       );
     }
 
@@ -894,38 +1213,82 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         bloc: _produitBloc,
         builder: (context, state) {
           if (state is ProduitLoading) {
-            return const Center(child: Padding(padding: EdgeInsets.all(32),
-                child: CircularProgressIndicator(color: _C.green, strokeWidth: 2.5)));
+            return const Center(
+              child: Padding(
+                padding: EdgeInsets.all(32),
+                child: CircularProgressIndicator(
+                  color: _C.green,
+                  strokeWidth: 2.5,
+                ),
+              ),
+            );
           } else if (state is ProduitLoaded) {
             final produits = state.produits;
             if (produits.isEmpty) {
-              return Center(child: Padding(padding: const EdgeInsets.all(32),
-                  child: Text('Aucun produit disponible', style: GoogleFonts.plusJakartaSans(color: _C.label))));
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(32),
+                  child: Text(
+                    'Aucun produit disponible',
+                    style: GoogleFonts.inter(color: _C.label),
+                  ),
+                ),
+              );
             }
             return GridView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2, crossAxisSpacing: 12, mainAxisSpacing: 12, childAspectRatio: 0.80),
+                crossAxisCount: 2,
+                crossAxisSpacing: 12,
+                mainAxisSpacing: 12,
+                childAspectRatio: 0.80,
+              ),
               itemCount: produits.length,
               itemBuilder: (_, i) => _buildProductCard(produits[i]),
             );
           } else if (state is ProduitError) {
-            return Center(child: Padding(padding: const EdgeInsets.all(32),
-                child: Column(children: [
-                  const Icon(Icons.error_outline_rounded, color: _C.orange, size: 40),
-                  const SizedBox(height: 8),
-                  Text('Erreur: ${state.message}', style: GoogleFonts.plusJakartaSans(color: _C.orange), textAlign: TextAlign.center),
-                  const SizedBox(height: 12),
-                  GestureDetector(
-                    onTap: () => _produitBloc?.add(LoadProduits()),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                      decoration: BoxDecoration(color: _C.black, borderRadius: BorderRadius.circular(12)),
-                      child: Text('Réessayer', style: GoogleFonts.plusJakartaSans(color: _C.white, fontWeight: FontWeight.w600)),
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(32),
+                child: Column(
+                  children: [
+                    const Icon(
+                      Icons.error_outline_rounded,
+                      color: _C.orange,
+                      size: 40,
                     ),
-                  ),
-                ])));
+                    const SizedBox(height: 8),
+                    Text(
+                      'Erreur: ${state.message}',
+                      style: GoogleFonts.inter(color: _C.orange),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 12),
+                    GestureDetector(
+                      onTap: () => _produitBloc?.add(LoadProduits()),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 10,
+                        ),
+                        decoration: BoxDecoration(
+                          color: _C.black,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          'Réessayer',
+                          style: GoogleFonts.inter(
+                            color: _C.white,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
           }
           return const SizedBox.shrink();
         },
@@ -936,7 +1299,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   Widget _buildProductCard(ProduitModel produit) {
     return Container(
       decoration: BoxDecoration(
-          color: _C.white, borderRadius: BorderRadius.circular(18), border: Border.all(color: _C.border)),
+        color: _C.white,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: _C.border),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -944,18 +1310,39 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             child: Container(
               decoration: BoxDecoration(
                 color: _C.surface,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(17)),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(17),
+                ),
                 image: produit.image.isNotEmpty
-                    ? DecorationImage(image: CachedNetworkImageProvider(imageOptimisee(produit.image)), fit: BoxFit.cover)
+                    ? DecorationImage(
+                        image: CachedNetworkImageProvider(
+                          imageOptimisee(produit.image),
+                        ),
+                        fit: BoxFit.cover,
+                      )
                     : null,
               ),
-              child: Stack(children: [
-                Positioned(top: 8, right: 8,
+              child: Stack(
+                children: [
+                  Positioned(
+                    top: 8,
+                    right: 8,
                     child: Container(
-                        width: 28, height: 28,
-                        decoration: BoxDecoration(color: Colors.white.withOpacity(0.9), shape: BoxShape.circle),
-                        child: const Icon(Icons.favorite_border_rounded, size: 14, color: _C.label))),
-              ]),
+                      width: 28,
+                      height: 28,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.9),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.favorite_border_rounded,
+                        size: 14,
+                        color: _C.label,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           Padding(
@@ -963,21 +1350,59 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(produit.nom, style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.w700, color: _C.black),
-                    maxLines: 1, overflow: TextOverflow.ellipsis),
+                Text(
+                  produit.nom,
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: _C.black,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
                 const SizedBox(height: 2),
-                Text(produit.ville, style: GoogleFonts.plusJakartaSans(fontSize: 10, color: _C.label)),
+                Text(
+                  produit.ville,
+                  style: GoogleFonts.inter(fontSize: 10, color: _C.label),
+                ),
                 const SizedBox(height: 8),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    RichText(text: TextSpan(children: [
-                      TextSpan(text: produit.prix, style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.w800, color: _C.black)),
-                      TextSpan(text: ' F',         style: GoogleFonts.plusJakartaSans(fontSize: 10, color: _C.label)),
-                    ])),
-                    Container(width: 28, height: 28,
-                        decoration: BoxDecoration(color: _C.black, borderRadius: BorderRadius.circular(8)),
-                        child: const Icon(Icons.add_rounded, color: _C.white, size: 16)),
+                    RichText(
+                      text: TextSpan(
+                        children: [
+                          TextSpan(
+                            text: produit.prix,
+                            style: GoogleFonts.inter(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w800,
+                              color: _C.black,
+                            ),
+                          ),
+                          TextSpan(
+                            text: ' F',
+                            style: GoogleFonts.inter(
+                              fontSize: 10,
+                              color: _C.label,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      width: 28,
+                      height: 28,
+                      decoration: BoxDecoration(
+                        color: _C.black,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(
+                        Icons.add_rounded,
+                        color: _C.white,
+                        size: 16,
+                      ),
+                    ),
                   ],
                 ),
               ],
@@ -988,20 +1413,20 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
   }
 
-  // ── Helpers ───────────────────────────────────────────────────────────────
+  // Helpers
   String _getInitiales(User? user) {
     if (user == null) return '?';
     final p = user.prenom?.isNotEmpty == true ? user.prenom![0] : '';
-    final n = user.nom?.isNotEmpty    == true ? user.nom![0]    : '';
+    final n = user.nom?.isNotEmpty == true ? user.nom![0] : '';
     return '$p$n'.toUpperCase();
   }
 }
 
 // ════════════════════════════════════════════════════════════════════════════
-// Bottom Sheet — Produits d'une boutique
+// Bottom Sheet, Produits d'une boutique
 // ════════════════════════════════════════════════════════════════════════════
 class _BoutiqueSheet extends StatefulWidget {
-  final BoutiqueModel            boutique;
+  final BoutiqueModel boutique;
   final ProduitRemoteDataSource? dataSource;
 
   const _BoutiqueSheet({required this.boutique, required this.dataSource});
@@ -1012,34 +1437,50 @@ class _BoutiqueSheet extends StatefulWidget {
 
 class _BoutiqueSheetState extends State<_BoutiqueSheet> {
   List<ProduitModel> _produits = [];
-  bool               _loading  = true;
-  String?            _error;
-  int?               _nbAbonnes;
+  bool _loading = true;
+  String? _error;
+  int? _nbAbonnes;
 
   @override
   void initState() {
     super.initState();
     _loadProduits();
-    AbonnesService.charger().then((l) {
-      if (mounted) setState(() => _nbAbonnes = l.length);
-    }).catchError((_) {});
+    AbonnesService.charger()
+        .then((l) {
+          if (mounted) setState(() => _nbAbonnes = l.length);
+        })
+        .catchError((_) {});
   }
 
   Future<void> _loadProduits() async {
     if (widget.dataSource == null) {
-      setState(() { _loading = false; _error = 'Source de données indisponible'; });
+      setState(() {
+        _loading = false;
+        _error = 'Source de données indisponible';
+      });
       return;
     }
     try {
-      final list = await widget.dataSource!.getProduitsByBoutique(widget.boutique.id);
-      if (mounted) setState(() { _produits = list; _loading = false; });
+      final list = await widget.dataSource!.getProduitsByBoutique(
+        widget.boutique.id,
+      );
+      if (mounted)
+        setState(() {
+          _produits = list;
+          _loading = false;
+        });
     } on DioException catch (e) {
       // 404 = boutique sans produit : on affiche la boutique avec une liste vide.
       if (e.response?.statusCode == 404) {
-        if (mounted) setState(() { _produits = []; _loading = false; });
+        if (mounted)
+          setState(() {
+            _produits = [];
+            _loading = false;
+          });
         return;
       }
-      final pasDeReseau = e.type == DioExceptionType.connectionError ||
+      final pasDeReseau =
+          e.type == DioExceptionType.connectionError ||
           e.type == DioExceptionType.connectionTimeout ||
           e.type == DioExceptionType.receiveTimeout;
       if (mounted) {
@@ -1051,11 +1492,15 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
         });
       }
     } catch (e) {
-      if (mounted) setState(() { _error = 'Impossible de charger les produits de la boutique.'; _loading = false; });
+      if (mounted)
+        setState(() {
+          _error = 'Impossible de charger les produits de la boutique.';
+          _loading = false;
+        });
     }
   }
 
-  // ── Appel WhatsApp ─────────────────────────────────────────────
+  // Appel WhatsApp
   Future<void> _contactWhatsapp(String produitId) async {
     if (widget.dataSource == null) return;
 
@@ -1077,7 +1522,7 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
             SnackBar(
               content: Text(
                 'Impossible d\'ouvrir WhatsApp. Veuillez vérifier que l\'application est installée.',
-                style: GoogleFonts.plusJakartaSans(color: _C.white),
+                style: GoogleFonts.inter(color: _C.white),
               ),
               backgroundColor: _C.orange,
               behavior: SnackBarBehavior.floating,
@@ -1091,7 +1536,7 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
           SnackBar(
             content: Text(
               'Erreur: ${e.toString()}',
-              style: GoogleFonts.plusJakartaSans(color: _C.white),
+              style: GoogleFonts.inter(color: _C.white),
             ),
             backgroundColor: _C.orange,
             behavior: SnackBarBehavior.floating,
@@ -1103,12 +1548,13 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final hasLogo = widget.boutique.logo != null && widget.boutique.logo!.isNotEmpty;
+    final hasLogo =
+        widget.boutique.logo != null && widget.boutique.logo!.isNotEmpty;
 
     return DraggableScrollableSheet(
       initialChildSize: 0.82,
-      minChildSize:     0.5,
-      maxChildSize:     0.95,
+      minChildSize: 0.5,
+      maxChildSize: 0.95,
       expand: false,
       builder: (_, controller) => Container(
         decoration: const BoxDecoration(
@@ -1117,57 +1563,111 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
         ),
         child: Column(
           children: [
-            // ── Drag handle
+            // Drag handle
             const SizedBox(height: 10),
             Container(
-                width: 36, height: 4,
-                decoration: BoxDecoration(color: _C.border, borderRadius: BorderRadius.circular(2))),
+              width: 36,
+              height: 4,
+              decoration: BoxDecoration(
+                color: _C.border,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
             const SizedBox(height: 16),
 
-            // ── En-tête boutique
+            // En-tête boutique
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Row(
                 children: [
                   Container(
-                    width: 52, height: 52,
+                    width: 52,
+                    height: 52,
                     decoration: BoxDecoration(
-                      color: _C.greenLight, borderRadius: BorderRadius.circular(14),
+                      color: _C.greenLight,
+                      borderRadius: BorderRadius.circular(14),
                       image: hasLogo
-                          ? DecorationImage(image: CachedNetworkImageProvider(imageOptimisee(widget.boutique.logo!)), fit: BoxFit.cover)
+                          ? DecorationImage(
+                              image: CachedNetworkImageProvider(
+                                imageOptimisee(widget.boutique.logo!),
+                              ),
+                              fit: BoxFit.cover,
+                            )
                           : null,
                     ),
-                    child: hasLogo ? null : const LogoBoutiqueParDefaut(rayon: 14),
+                    child: hasLogo
+                        ? null
+                        : const LogoBoutiqueParDefaut(rayon: 14),
                   ),
                   const SizedBox(width: 14),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(widget.boutique.nom,
-                            style: GoogleFonts.plusJakartaSans(fontSize: 16, fontWeight: FontWeight.w800, color: _C.black)),
+                        Text(
+                          widget.boutique.nom,
+                          style: GoogleFonts.inter(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w800,
+                            color: _C.black,
+                          ),
+                        ),
                         if (widget.boutique.localisation.isNotEmpty)
-                          Row(children: [
-                            const Icon(Icons.location_on_outlined, size: 12, color: _C.green),
-                            const SizedBox(width: 3),
-                            Text(widget.boutique.localisation,
-                                style: GoogleFonts.plusJakartaSans(fontSize: 11, color: _C.label)),
-                          ]),
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.location_on_outlined,
+                                size: 12,
+                                color: _C.green,
+                              ),
+                              const SizedBox(width: 3),
+                              Text(
+                                widget.boutique.localisation,
+                                style: GoogleFonts.inter(
+                                  fontSize: 11,
+                                  color: _C.label,
+                                ),
+                              ),
+                            ],
+                          ),
                         if (widget.boutique.horaires.isNotEmpty)
-                          Row(children: [
-                            const Icon(Icons.access_time_rounded, size: 12, color: _C.green),
-                            const SizedBox(width: 3),
-                            Text(widget.boutique.horaires,
-                                style: GoogleFonts.plusJakartaSans(fontSize: 11, color: _C.green)),
-                          ]),
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.access_time_rounded,
+                                size: 12,
+                                color: _C.green,
+                              ),
+                              const SizedBox(width: 3),
+                              Text(
+                                widget.boutique.horaires,
+                                style: GoogleFonts.inter(
+                                  fontSize: 11,
+                                  color: _C.green,
+                                ),
+                              ),
+                            ],
+                          ),
                         const SizedBox(height: 4),
-                        if (widget.boutique.vendeurNomComplet.isNotEmpty || widget.boutique.vendeurNumero.isNotEmpty)
-                          Row(children: [
-                            const Icon(Icons.person_outline, size: 12, color: _C.green),
-                            const SizedBox(width: 3),
-                            Text('${widget.boutique.vendeurNomComplet} (${widget.boutique.vendeurNumero})',
-                                style: GoogleFonts.plusJakartaSans(fontSize: 11, color: _C.label)),
-                          ]),
+                        if (widget.boutique.vendeurNomComplet.isNotEmpty ||
+                            widget.boutique.vendeurNumero.isNotEmpty)
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.person_outline,
+                                size: 12,
+                                color: _C.green,
+                              ),
+                              const SizedBox(width: 3),
+                              Text(
+                                '${widget.boutique.vendeurNomComplet} (${widget.boutique.vendeurNumero})',
+                                style: GoogleFonts.inter(
+                                  fontSize: 11,
+                                  color: _C.label,
+                                ),
+                              ),
+                            ],
+                          ),
                       ],
                     ),
                   ),
@@ -1175,9 +1675,18 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
                   GestureDetector(
                     onTap: () => Navigator.pop(context),
                     child: Container(
-                        width: 34, height: 34,
-                        decoration: BoxDecoration(color: _C.bg, borderRadius: BorderRadius.circular(10)),
-                        child: const Icon(Icons.close_rounded, size: 18, color: _C.sub)),
+                      width: 34,
+                      height: 34,
+                      decoration: BoxDecoration(
+                        color: _C.bg,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Icon(
+                        Icons.close_rounded,
+                        size: 18,
+                        color: _C.sub,
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -1187,59 +1696,117 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
             Divider(color: _C.border, thickness: 1, height: 1),
             const SizedBox(height: 4),
 
-            // ── Compteur produits
+            // Compteur produits
             if (!_loading && _error == null)
               Padding(
                 padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
-                child: Row(children: [
-                  Text('${_produits.length} produit${_produits.length > 1 ? 's' : ''}',
-                      style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.w700, color: _C.black)),
-                  const SizedBox(width: 10),
-                  // Nombre d'abonnés : ouvre la liste des clients abonnés.
-                  if (_nbAbonnes != null)
-                    InkWell(
-                      borderRadius: BorderRadius.circular(8),
-                      onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AbonnesPage())),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                        decoration: BoxDecoration(color: _C.bg, borderRadius: BorderRadius.circular(8), border: Border.all(color: _C.border)),
-                        child: Row(mainAxisSize: MainAxisSize.min, children: [
-                          const Icon(Icons.people_alt_outlined, size: 14, color: _C.green),
-                          const SizedBox(width: 4),
-                          Text('$_nbAbonnes abonné${_nbAbonnes! > 1 ? 's' : ''}',
-                              style: GoogleFonts.plusJakartaSans(fontSize: 11.5, fontWeight: FontWeight.w700, color: _C.green)),
-                          const Icon(Icons.chevron_right_rounded, size: 16, color: _C.green),
-                        ]),
+                child: Row(
+                  children: [
+                    Text(
+                      '${_produits.length} produit${_produits.length > 1 ? 's' : ''}',
+                      style: GoogleFonts.inter(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: _C.black,
                       ),
                     ),
-                  const Spacer(),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(color: _C.greenLight, borderRadius: BorderRadius.circular(8)),
-                    child: Text('En stock', style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.w600, color: _C.green)),
-                  ),
-                ]),
+                    const SizedBox(width: 10),
+                    // Nombre d'abonnés : ouvre la liste des clients abonnés.
+                    if (_nbAbonnes != null)
+                      InkWell(
+                        borderRadius: BorderRadius.circular(8),
+                        onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const AbonnesPage(),
+                          ),
+                        ),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: _C.bg,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: _C.border),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.people_alt_outlined,
+                                size: 14,
+                                color: _C.green,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                '$_nbAbonnes abonné${_nbAbonnes! > 1 ? 's' : ''}',
+                                style: GoogleFonts.inter(
+                                  fontSize: 11.5,
+                                  fontWeight: FontWeight.w700,
+                                  color: _C.green,
+                                ),
+                              ),
+                              const Icon(
+                                Icons.chevron_right_rounded,
+                                size: 16,
+                                color: _C.green,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    const Spacer(),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: _C.greenLight,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        'En stock',
+                        style: GoogleFonts.inter(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: _C.green,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
 
             const SizedBox(height: 12),
 
-            // ── Corps : grille ou états
+            // Corps : grille ou états
             Expanded(
               child: _loading
-                  ? const Center(child: CircularProgressIndicator(color: _C.green, strokeWidth: 2.5))
+                  ? const Center(
+                      child: CircularProgressIndicator(
+                        color: _C.green,
+                        strokeWidth: 2.5,
+                      ),
+                    )
                   : _error != null
                   ? _buildError()
                   : _produits.isEmpty
                   ? _buildEmpty()
                   : GridView.builder(
-                controller: controller,
-                padding: const EdgeInsets.fromLTRB(18, 0, 18, 30),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2, crossAxisSpacing: 12,
-                    mainAxisSpacing: 12, childAspectRatio: 0.75),
-                itemCount: _produits.length,
-                itemBuilder: (_, i) => _buildProductCard(_produits[i]),
-              ),
+                      controller: controller,
+                      padding: const EdgeInsets.fromLTRB(18, 0, 18, 30),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            crossAxisSpacing: 12,
+                            mainAxisSpacing: 12,
+                            childAspectRatio: 0.75,
+                          ),
+                      itemCount: _produits.length,
+                      itemBuilder: (_, i) => _buildProductCard(_produits[i]),
+                    ),
             ),
           ],
         ),
@@ -1249,40 +1816,72 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
 
   Widget _buildError() {
     return Center(
-      child: Column(mainAxisSize: MainAxisSize.min, children: [
-        const Icon(Icons.error_outline_rounded, color: _C.orange, size: 40),
-        const SizedBox(height: 8),
-        Padding(padding: const EdgeInsets.symmetric(horizontal: 32),
-            child: Text(_error!, style: GoogleFonts.plusJakartaSans(color: _C.orange), textAlign: TextAlign.center)),
-        const SizedBox(height: 16),
-        GestureDetector(
-          onTap: () { setState(() { _loading = true; _error = null; }); _loadProduits(); },
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-            decoration: BoxDecoration(color: _C.black, borderRadius: BorderRadius.circular(12)),
-            child: Text('Réessayer', style: GoogleFonts.plusJakartaSans(color: _C.white, fontWeight: FontWeight.w600)),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.error_outline_rounded, color: _C.orange, size: 40),
+          const SizedBox(height: 8),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32),
+            child: Text(
+              _error!,
+              style: GoogleFonts.inter(color: _C.orange),
+              textAlign: TextAlign.center,
+            ),
           ),
-        ),
-      ]),
+          const SizedBox(height: 16),
+          GestureDetector(
+            onTap: () {
+              setState(() {
+                _loading = true;
+                _error = null;
+              });
+              _loadProduits();
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              decoration: BoxDecoration(
+                color: _C.black,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                'Réessayer',
+                style: GoogleFonts.inter(
+                  color: _C.white,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildEmpty() {
     return Center(
-      child: Column(mainAxisSize: MainAxisSize.min, children: [
-        const Icon(Icons.inventory_2_outlined, color: _C.label, size: 48),
-        const SizedBox(height: 12),
-        Text('Aucun produit dans cette boutique',
-            style: GoogleFonts.plusJakartaSans(fontSize: 14, color: _C.label)),
-      ]),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.inventory_2_outlined, color: _C.label, size: 48),
+          const SizedBox(height: 12),
+          Text(
+            'Aucun produit dans cette boutique',
+            style: GoogleFonts.inter(fontSize: 14, color: _C.label),
+          ),
+        ],
+      ),
     );
   }
 
-  // ── Carte produit avec bouton WhatsApp ────────────────────────────────────
+  // Carte produit avec bouton WhatsApp
   Widget _buildProductCard(ProduitModel produit) {
     return Container(
       decoration: BoxDecoration(
-          color: _C.bg, borderRadius: BorderRadius.circular(18), border: Border.all(color: _C.border)),
+        color: _C.bg,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: _C.border),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1291,17 +1890,39 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
             child: Container(
               decoration: BoxDecoration(
                 color: _C.surface,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(17)),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(17),
+                ),
                 image: produit.image.isNotEmpty
-                    ? DecorationImage(image: CachedNetworkImageProvider(imageOptimisee(produit.image)), fit: BoxFit.cover)
+                    ? DecorationImage(
+                        image: CachedNetworkImageProvider(
+                          imageOptimisee(produit.image),
+                        ),
+                        fit: BoxFit.cover,
+                      )
                     : null,
               ),
-              child: Stack(children: [
-                Positioned(top: 8, right: 8,
-                    child: Container(width: 28, height: 28,
-                        decoration: BoxDecoration(color: Colors.white.withOpacity(0.9), shape: BoxShape.circle),
-                        child: const Icon(Icons.favorite_border_rounded, size: 14, color: _C.label))),
-              ]),
+              child: Stack(
+                children: [
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: Container(
+                      width: 28,
+                      height: 28,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.9),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.favorite_border_rounded,
+                        size: 14,
+                        color: _C.label,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           // Infos + boutons
@@ -1310,28 +1931,61 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(produit.nom, style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.w700, color: _C.black),
-                    maxLines: 1, overflow: TextOverflow.ellipsis),
+                Text(
+                  produit.nom,
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: _C.black,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
                 const SizedBox(height: 2),
-                Text(produit.ville, style: GoogleFonts.plusJakartaSans(fontSize: 10, color: _C.label)),
+                Text(
+                  produit.ville,
+                  style: GoogleFonts.inter(fontSize: 10, color: _C.label),
+                ),
                 const SizedBox(height: 8),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    RichText(text: TextSpan(children: [
-                      TextSpan(text: produit.prix, style: GoogleFonts.plusJakartaSans(fontSize: 13, fontWeight: FontWeight.w800, color: _C.black)),
-                      TextSpan(text: ' F',         style: GoogleFonts.plusJakartaSans(fontSize: 10, color: _C.label)),
-                    ])),
-                    // ── Bouton WhatsApp ──────────────────────────────────
+                    RichText(
+                      text: TextSpan(
+                        children: [
+                          TextSpan(
+                            text: produit.prix,
+                            style: GoogleFonts.inter(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w800,
+                              color: _C.black,
+                            ),
+                          ),
+                          TextSpan(
+                            text: ' F',
+                            style: GoogleFonts.inter(
+                              fontSize: 10,
+                              color: _C.label,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    // Bouton WhatsApp
                     GestureDetector(
                       onTap: () => _contactWhatsapp(produit.id),
                       child: Container(
-                        width: 28, height: 28,
+                        width: 28,
+                        height: 28,
                         decoration: BoxDecoration(
                           color: _C.whatsapp,
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: const Icon(Icons.chat_rounded, color: _C.white, size: 15),
+                        child: const Icon(
+                          Icons.chat_rounded,
+                          color: _C.white,
+                          size: 15,
+                        ),
                       ),
                     ),
                   ],

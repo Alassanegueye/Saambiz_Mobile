@@ -33,7 +33,7 @@ class AppRouter {
   static const String commandeDetailRoute = '/commande-detail';
   static const String forgotPasswordRoute = '/forgot-password';
 
-  // ─── Parcours d'inscription (onboarding → profil → email vérifié) ───
+  // Parcours d'inscription (onboarding → profil → email vérifié)
   static const String profileChoiceRoute = '/choix-profil';
   static const String clientSignupRoute = '/inscription-client';
   static const String vendeurSignupRoute = '/inscription-vendeur';
@@ -66,9 +66,7 @@ class AppRouter {
 
       case vendeurRoute:
         final user = settings.arguments as User?;
-        return MaterialPageRoute(
-          builder: (_) => MainVendeurPage(user: user),
-        );
+        return MaterialPageRoute(builder: (_) => MainVendeurPage(user: user));
 
       case panierRoute:
         return MaterialPageRoute(builder: (_) => const PanierPage());
@@ -111,56 +109,58 @@ class AppRouter {
           builder: (_) => EmailVerificationPage(draft: draft),
         );
 
-      case interetsRoute: {
-        // arguments : un User (nouveau compte) ou {'isGuest': true} (invité)
-        final args = settings.arguments;
-        return MaterialPageRoute(
-          builder: (_) => InteretsPage(
-            user: args is User ? args : null,
-            isGuest: args is Map && args['isGuest'] == true,
-          ),
-        );
-      }
+      case interetsRoute:
+        {
+          // arguments : un User (nouveau compte) ou {'isGuest': true} (invité)
+          final args = settings.arguments;
+          return MaterialPageRoute(
+            builder: (_) => InteretsPage(
+              user: args is User ? args : null,
+              isGuest: args is Map && args['isGuest'] == true,
+            ),
+          );
+        }
 
-      case localisationRoute: {
-        final args = (settings.arguments as Map?) ?? const {};
-        return MaterialPageRoute(
-          builder: (_) => LocalisationPage(
-            user: args['user'] as User?,
-            isGuest: args['isGuest'] == true,
-          ),
-        );
-      }
+      case localisationRoute:
+        {
+          final args = (settings.arguments as Map?) ?? const {};
+          return MaterialPageRoute(
+            builder: (_) => LocalisationPage(
+              user: args['user'] as User?,
+              isGuest: args['isGuest'] == true,
+            ),
+          );
+        }
 
       case creerBoutiqueRoute:
         return MaterialPageRoute(
           builder: (_) => CreerBoutiquePage(user: settings.arguments as User?),
         );
 
-      case boutiquePreteRoute: {
-        final args = (settings.arguments as Map?) ?? const {};
-        return MaterialPageRoute(
-          builder: (_) => BoutiquePretePage(
-            user: args['user'] as User?,
-            nomBoutique: (args['nomBoutique'] as String?) ?? 'Ma boutique',
-          ),
-        );
-      }
+      case boutiquePreteRoute:
+        {
+          final args = (settings.arguments as Map?) ?? const {};
+          return MaterialPageRoute(
+            builder: (_) => BoutiquePretePage(
+              user: args['user'] as User?,
+              nomBoutique: (args['nomBoutique'] as String?) ?? 'Ma boutique',
+            ),
+          );
+        }
 
-      case vendeurBienvenueRoute: {
-        final args = (settings.arguments as Map?) ?? const {};
-        return MaterialPageRoute(
-          builder: (_) => VendeurBienvenuePage(
-            user: args['user'] as User?,
-            nomBoutique: (args['nomBoutique'] as String?) ?? 'Ma boutique',
-          ),
-        );
-      }
+      case vendeurBienvenueRoute:
+        {
+          final args = (settings.arguments as Map?) ?? const {};
+          return MaterialPageRoute(
+            builder: (_) => VendeurBienvenuePage(
+              user: args['user'] as User?,
+              nomBoutique: (args['nomBoutique'] as String?) ?? 'Ma boutique',
+            ),
+          );
+        }
 
       default:
-        return MaterialPageRoute(
-          builder: (_) => const LoginPage(),
-        );
+        return MaterialPageRoute(builder: (_) => const LoginPage());
     }
   }
 }

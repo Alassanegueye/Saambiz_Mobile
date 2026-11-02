@@ -7,7 +7,7 @@ import '../../../../injection_container.dart';
 
 /// Écran de chargement, juste après l'écran de démarrage natif (pictogramme
 /// bleu marine sur fond blanc) : logo SaamBiz complet et fine barre de
-/// chargement, sur le même fond blanc — comme Yobante Boutique.
+/// chargement, sur le même fond blanc.
 ///
 /// Le jeton est lu pendant que le logo s'affiche : l'écran reste au moins
 /// 0,6 s (le temps de voir la marque), sans attente fixe supplémentaire.
@@ -18,7 +18,8 @@ class AppBootstrap extends StatefulWidget {
   State<AppBootstrap> createState() => _AppBootstrapState();
 }
 
-class _AppBootstrapState extends State<AppBootstrap> with SingleTickerProviderStateMixin {
+class _AppBootstrapState extends State<AppBootstrap>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _fondu = AnimationController(
     vsync: this,
     duration: const Duration(milliseconds: 350),
@@ -46,7 +47,10 @@ class _AppBootstrapState extends State<AppBootstrap> with SingleTickerProviderSt
 
   Future<void> _router() async {
     final lecture = _lireJeton();
-    await Future.wait([lecture, Future.delayed(const Duration(milliseconds: 600))]);
+    await Future.wait([
+      lecture,
+      Future.delayed(const Duration(milliseconds: 600)),
+    ]);
     final token = await lecture;
 
     if (!mounted) return;
@@ -92,7 +96,9 @@ class _AppBootstrapState extends State<AppBootstrap> with SingleTickerProviderSt
             // Barre invisible au-dessus : le logo reste exactement au centre.
             const TickerMode(
               enabled: false,
-              child: ExcludeSemantics(child: Opacity(opacity: 0, child: _Chargement())),
+              child: ExcludeSemantics(
+                child: Opacity(opacity: 0, child: _Chargement()),
+              ),
             ),
             Image.asset(
               'assets/images/logo.png',
@@ -122,7 +128,7 @@ class _Chargement extends StatelessWidget {
           borderRadius: BorderRadius.all(Radius.circular(4)),
           child: LinearProgressIndicator(
             minHeight: 4,
-            color: Color(0xFF0D1B3D),
+            color: Color(0xFF01154B),
             backgroundColor: Color(0xFFFEF3D6),
           ),
         ),

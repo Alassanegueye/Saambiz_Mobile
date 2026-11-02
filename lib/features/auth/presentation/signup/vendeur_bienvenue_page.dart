@@ -62,7 +62,11 @@ class _ActionTile extends StatelessWidget {
   final String title;
   final VoidCallback onTap;
 
-  const _ActionTile({required this.icon, required this.title, required this.onTap});
+  const _ActionTile({
+    required this.icon,
+    required this.title,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -83,14 +87,21 @@ class _ActionTile extends StatelessWidget {
               Container(
                 width: 38,
                 height: 38,
-                decoration: BoxDecoration(color: Sb.navySoft, borderRadius: BorderRadius.circular(12)),
+                decoration: BoxDecoration(
+                  color: Sb.navySoft,
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 child: Icon(icon, size: 19, color: Sb.navy),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
                   title,
-                  style: GoogleFonts.plusJakartaSans(fontSize: 14.5, fontWeight: FontWeight.w600, color: Sb.navy),
+                  style: GoogleFonts.inter(
+                    fontSize: 14.5,
+                    fontWeight: FontWeight.w600,
+                    color: Sb.navy,
+                  ),
                 ),
               ),
               const Icon(Icons.chevron_right_rounded, color: Sb.textLight),

@@ -38,7 +38,10 @@ class FavorisBloc extends Bloc<FavorisEvent, FavorisState> {
     );
   }
 
-  Future<void> _onSuivre(AjouterFavori event, Emitter<FavorisState> emit) async {
+  Future<void> _onSuivre(
+    AjouterFavori event,
+    Emitter<FavorisState> emit,
+  ) async {
     final resultat = await suivreBoutique(event.boutiqueId);
     resultat.fold(
       (panne) => emit(FavorisError(panne.errorMessage)),
@@ -47,7 +50,9 @@ class FavorisBloc extends Bloc<FavorisEvent, FavorisState> {
   }
 
   Future<void> _onNePlusSuivre(
-      SupprimerFavori event, Emitter<FavorisState> emit) async {
+    SupprimerFavori event,
+    Emitter<FavorisState> emit,
+  ) async {
     final resultat = await nePlusSuivreBoutique(event.boutiqueId);
     resultat.fold(
       (panne) => emit(FavorisError(panne.errorMessage)),
@@ -56,20 +61,29 @@ class FavorisBloc extends Bloc<FavorisEvent, FavorisState> {
   }
 
   Future<void> _onBasculerCloche(
-      ToggleClocheFavori event, Emitter<FavorisState> emit) async {
+    ToggleClocheFavori event,
+    Emitter<FavorisState> emit,
+  ) async {
     final avant = state;
 
     // Bascule optimiste : l'interrupteur suit le doigt sans attendre le
     // serveur. Sur un réseau lent, l'attente donnait l'impression que le
     // bouton ne répondait pas.
     if (avant is FavorisLoaded) {
-      emit(FavorisLoaded([
-        for (final b in avant.boutiques)
-          b.id == event.boutiqueId ? b.copyWith(clocheActive: event.active) : b,
-      ]));
+      emit(
+        FavorisLoaded([
+          for (final b in avant.boutiques)
+            b.id == event.boutiqueId
+                ? b.copyWith(clocheActive: event.active)
+                : b,
+        ]),
+      );
     }
 
-    final resultat = await basculerCloche(event.boutiqueId, active: event.active);
+    final resultat = await basculerCloche(
+      event.boutiqueId,
+      active: event.active,
+    );
 
     resultat.fold(
       (panne) {
@@ -82,10 +96,14 @@ class FavorisBloc extends Bloc<FavorisEvent, FavorisState> {
         // Le serveur peut renvoyer autre chose que ce qu'on a demandé.
         final courant = state;
         if (courant is FavorisLoaded) {
-          emit(FavorisLoaded([
-            for (final b in courant.boutiques)
-              b.id == event.boutiqueId ? b.copyWith(clocheActive: etatReel) : b,
-          ]));
+          emit(
+            FavorisLoaded([
+              for (final b in courant.boutiques)
+                b.id == event.boutiqueId
+                    ? b.copyWith(clocheActive: etatReel)
+                    : b,
+            ]),
+          );
         }
       },
     );

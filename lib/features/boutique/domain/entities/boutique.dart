@@ -26,13 +26,13 @@ class Boutique extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        nom,
-        description,
-        localisation,
-        telephone,
-        logo,
-        enPause,
-        categories,
-      ];
+    id,
+    nom,
+    description,
+    localisation,
+    telephone,
+    logo,
+    enPause,
+    categories,
+  ];
 }

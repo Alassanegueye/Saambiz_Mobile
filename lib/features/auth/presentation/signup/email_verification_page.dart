@@ -237,35 +237,50 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
             ),
             child: Row(
               children: [
-                const Icon(Icons.check_circle_outline_rounded, size: 18, color: Sb.green),
+                const Icon(
+                  Icons.check_circle_outline_rounded,
+                  size: 18,
+                  color: Sb.green,
+                ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
                     _info!,
-                    style: GoogleFonts.plusJakartaSans(fontSize: 13, color: const Color(0xFF15803D)),
+                    style: GoogleFonts.inter(
+                      fontSize: 13,
+                      color: const Color(0xFF15803D),
+                    ),
                   ),
                 ),
               ],
             ),
           ),
-        SbPrimaryButton(label: 'Vérifier', loading: _loading, onPressed: _verifier),
+        SbPrimaryButton(
+          label: 'Vérifier',
+          loading: _loading,
+          onPressed: _verifier,
+        ),
         const SizedBox(height: 14),
         Center(
           child: _resending
-              ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2.2))
+              ? const SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(strokeWidth: 2.2),
+                )
               : _secondsLeft > 0
-                  ? Text('Renvoyer dans $_secondsLeft s', style: Sb.body(13))
-                  : TextButton(
-                      onPressed: _renvoyer,
-                      child: Text(
-                        'Renvoyer le code',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 13.5,
-                          fontWeight: FontWeight.w700,
-                          color: Sb.navy,
-                        ),
-                      ),
+              ? Text('Renvoyer dans $_secondsLeft s', style: Sb.body(13))
+              : TextButton(
+                  onPressed: _renvoyer,
+                  child: Text(
+                    'Renvoyer le code',
+                    style: GoogleFonts.inter(
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w700,
+                      color: Sb.navy,
                     ),
+                  ),
+                ),
         ),
       ],
       apres: [
@@ -304,7 +319,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
           // Une seule case n'accepte qu'un chiffre, mais on laisse passer un
           // collage plus long pour le remplissage automatique du code.
           inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-          style: GoogleFonts.plusJakartaSans(
+          style: GoogleFonts.inter(
             fontSize: 21,
             fontWeight: FontWeight.w700,
             color: Sb.navy,

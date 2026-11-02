@@ -8,5 +8,6 @@ class GetPaiement {
   final AbonnementRepository repository;
   GetPaiement(this.repository);
 
-  Future<Either<Failure, Paiement>> call(String id) => repository.getPaiement(id);
+  Future<Either<Failure, Paiement>> call(String id) =>
+      repository.getPaiement(id);
 }

@@ -7,19 +7,23 @@ import '../bloc/signalements_event.dart';
 import '../bloc/signalements_state.dart';
 
 class _C {
-  static const green = Color(0xFF0D1B3D);
-  static const black = Color(0xFF0D1B3D);
+  static const green = Color(0xFF01154B);
+  static const black = Color(0xFF01154B);
   static const white = Color(0xFFFFFFFF);
-  static const bg = Color(0xFFF5F7FB);
+  static const bg = Color(0xFFF4F5F8);
   static const border = Color(0xFFE3E8F0);
 }
 
-/// Formulaire générique de signalement (POST /signalements) — utilisable
+/// Formulaire générique de signalement (POST /signalements), utilisable
 /// pour signaler un produit ou une boutique.
 class SignalerFormPage extends StatelessWidget {
   final String type; // 'produit' | 'boutique'
   final String cibleId;
-  const SignalerFormPage({super.key, required this.type, required this.cibleId});
+  const SignalerFormPage({
+    super.key,
+    required this.type,
+    required this.cibleId,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -52,12 +56,14 @@ class _SignalerFormViewState extends State<_SignalerFormView> {
 
   void _envoyer() {
     if (!_formKey.currentState!.validate()) return;
-    context.read<SignalementsBloc>().add(CreerSignalement(
-          type: widget.type,
-          raison: _raisonCtrl.text.trim(),
-          description: _descCtrl.text.trim(),
-          cibleId: widget.cibleId,
-        ));
+    context.read<SignalementsBloc>().add(
+      CreerSignalement(
+        type: widget.type,
+        raison: _raisonCtrl.text.trim(),
+        description: _descCtrl.text.trim(),
+        cibleId: widget.cibleId,
+      ),
+    );
   }
 
   @override
@@ -69,13 +75,19 @@ class _SignalerFormViewState extends State<_SignalerFormView> {
         elevation: 0.5,
         foregroundColor: _C.black,
         title: Text(
-            widget.type == 'boutique' ? 'Signaler cette boutique' : 'Signaler ce produit'),
+          widget.type == 'boutique'
+              ? 'Signaler cette boutique'
+              : 'Signaler ce produit',
+        ),
       ),
       body: BlocConsumer<SignalementsBloc, SignalementsState>(
         listener: (context, state) {
           if (state is SignalementsError) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message), backgroundColor: Colors.red),
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.red,
+              ),
             );
           } else if (state is SignalementEnvoye) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -101,8 +113,9 @@ class _SignalerFormViewState extends State<_SignalerFormView> {
                 TextFormField(
                   controller: _descCtrl,
                   maxLines: 4,
-                  validator: (v) =>
-                      (v == null || v.trim().isEmpty) ? 'Description requise' : null,
+                  validator: (v) => (v == null || v.trim().isEmpty)
+                      ? 'Description requise'
+                      : null,
                   decoration: const InputDecoration(labelText: 'Description'),
                 ),
                 const SizedBox(height: 24),
@@ -113,16 +126,22 @@ class _SignalerFormViewState extends State<_SignalerFormView> {
                     foregroundColor: _C.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14)),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
                   ),
                   child: loading
                       ? const SizedBox(
                           height: 20,
                           width: 20,
                           child: CircularProgressIndicator(
-                              strokeWidth: 2, color: Colors.white))
-                      : const Text('Envoyer le signalement',
-                          style: TextStyle(fontWeight: FontWeight.w700)),
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Text(
+                          'Envoyer le signalement',
+                          style: TextStyle(fontWeight: FontWeight.w700),
+                        ),
                 ),
               ],
             ),

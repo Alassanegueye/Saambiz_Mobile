@@ -13,10 +13,10 @@ import '../bloc/boutique_state.dart';
 import 'package:saambiz/core/utils/image_url.dart';
 
 class _C {
-  static const green = Color(0xFF0D1B3D);
-  static const black = Color(0xFF0D1B3D);
+  static const green = Color(0xFF01154B);
+  static const black = Color(0xFF01154B);
   static const white = Color(0xFFFFFFFF);
-  static const bg = Color(0xFFF5F7FB);
+  static const bg = Color(0xFFF4F5F8);
   static const sub = Color(0xFF5B6C8A);
   static const border = Color(0xFFE3E8F0);
 }
@@ -47,14 +47,19 @@ class _BoutiqueFormView extends StatefulWidget {
 class _BoutiqueFormViewState extends State<_BoutiqueFormView> {
   final _formKey = GlobalKey<FormState>();
   late final _nomCtrl = TextEditingController(text: widget.boutique?.nom ?? '');
-  late final _descCtrl =
-      TextEditingController(text: widget.boutique?.description ?? '');
-  late final _localisationCtrl =
-      TextEditingController(text: widget.boutique?.localisation ?? '');
-  late final _telephoneCtrl =
-      TextEditingController(text: widget.boutique?.telephone ?? '');
+  late final _descCtrl = TextEditingController(
+    text: widget.boutique?.description ?? '',
+  );
+  late final _localisationCtrl = TextEditingController(
+    text: widget.boutique?.localisation ?? '',
+  );
+  late final _telephoneCtrl = TextEditingController(
+    text: widget.boutique?.telephone ?? '',
+  );
   String? _logoPath;
-  late List<String> _categories = List.of(widget.boutique?.categories ?? const <String>[]);
+  late List<String> _categories = List.of(
+    widget.boutique?.categories ?? const <String>[],
+  );
   String? _erreurCategories;
 
   bool get _isEdit => widget.boutique != null;
@@ -71,34 +76,44 @@ class _BoutiqueFormViewState extends State<_BoutiqueFormView> {
   Future<void> _choisirLogo() async {
     final picker = ImagePicker();
     final x = await picker.pickImage(
-        source: ImageSource.gallery, imageQuality: 80, maxWidth: 1000);
+      source: ImageSource.gallery,
+      imageQuality: 80,
+      maxWidth: 1000,
+    );
     if (x != null) setState(() => _logoPath = x.path);
   }
 
   void _soumettre() {
     final formulaireValide = _formKey.currentState!.validate();
-    setState(() => _erreurCategories =
-        _categories.isEmpty ? 'Choisissez au moins une catégorie.' : null);
+    setState(
+      () => _erreurCategories = _categories.isEmpty
+          ? 'Choisissez au moins une catégorie.'
+          : null,
+    );
     if (!formulaireValide || _categories.isEmpty) return;
     final bloc = context.read<BoutiqueBloc>();
     if (_isEdit) {
-      bloc.add(ModifierBoutiqueRequested(
-        nom: _nomCtrl.text.trim(),
-        description: _descCtrl.text.trim(),
-        localisation: _localisationCtrl.text.trim(),
-        telephone: _telephoneCtrl.text.trim(),
-        categories: _categories,
-        logoPath: _logoPath,
-      ));
+      bloc.add(
+        ModifierBoutiqueRequested(
+          nom: _nomCtrl.text.trim(),
+          description: _descCtrl.text.trim(),
+          localisation: _localisationCtrl.text.trim(),
+          telephone: _telephoneCtrl.text.trim(),
+          categories: _categories,
+          logoPath: _logoPath,
+        ),
+      );
     } else {
-      bloc.add(CreerBoutiqueRequested(
-        nom: _nomCtrl.text.trim(),
-        description: _descCtrl.text.trim(),
-        localisation: _localisationCtrl.text.trim(),
-        telephone: _telephoneCtrl.text.trim(),
-        categories: _categories,
-        logoPath: _logoPath,
-      ));
+      bloc.add(
+        CreerBoutiqueRequested(
+          nom: _nomCtrl.text.trim(),
+          description: _descCtrl.text.trim(),
+          localisation: _localisationCtrl.text.trim(),
+          telephone: _telephoneCtrl.text.trim(),
+          categories: _categories,
+          logoPath: _logoPath,
+        ),
+      );
     }
   }
 
@@ -116,7 +131,10 @@ class _BoutiqueFormViewState extends State<_BoutiqueFormView> {
         listener: (context, state) {
           if (state is BoutiqueError) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message), backgroundColor: Colors.red),
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.red,
+              ),
             );
           } else if (state is BoutiqueLoaded) {
             Navigator.of(context).pop(state.boutique);
@@ -131,16 +149,23 @@ class _BoutiqueFormViewState extends State<_BoutiqueFormView> {
               children: [
                 _logoPicker(),
                 const SizedBox(height: 16),
-                _input(_nomCtrl, 'Nom de la boutique',
-                    verifier: (v) => RegExp(r'^\p{L}', unicode: true).hasMatch(v)
-                        ? null
-                        : 'Le nom de la boutique doit commencer par une lettre.'),
+                _input(
+                  _nomCtrl,
+                  'Nom de la boutique',
+                  verifier: (v) => RegExp(r'^\p{L}', unicode: true).hasMatch(v)
+                      ? null
+                      : 'Le nom de la boutique doit commencer par une lettre.',
+                ),
                 const SizedBox(height: 12),
                 _input(_descCtrl, 'Description', maxLines: 3),
                 const SizedBox(height: 12),
                 _input(_localisationCtrl, 'Localisation (ville)'),
                 const SizedBox(height: 12),
-                _input(_telephoneCtrl, 'Téléphone', keyboard: TextInputType.phone),
+                _input(
+                  _telephoneCtrl,
+                  'Téléphone',
+                  keyboard: TextInputType.phone,
+                ),
                 const SizedBox(height: 20),
                 SelecteurCategories(
                   initiales: _categories,
@@ -158,16 +183,22 @@ class _BoutiqueFormViewState extends State<_BoutiqueFormView> {
                     foregroundColor: _C.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14)),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
                   ),
                   child: loading
                       ? const SizedBox(
                           height: 20,
                           width: 20,
                           child: CircularProgressIndicator(
-                              strokeWidth: 2, color: Colors.white))
-                      : Text(_isEdit ? 'Enregistrer' : 'Créer la boutique',
-                          style: const TextStyle(fontWeight: FontWeight.w700)),
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : Text(
+                          _isEdit ? 'Enregistrer' : 'Créer la boutique',
+                          style: const TextStyle(fontWeight: FontWeight.w700),
+                        ),
                 ),
               ],
             ),
@@ -182,7 +213,10 @@ class _BoutiqueFormViewState extends State<_BoutiqueFormView> {
     if (_logoPath != null) {
       content = Image.file(File(_logoPath!), fit: BoxFit.cover);
     } else if (_isEdit && (widget.boutique!.logo ?? '').isNotEmpty) {
-      content = CachedNetworkImage(imageUrl: imageOptimisee(widget.boutique!.logo!), fit: BoxFit.cover);
+      content = CachedNetworkImage(
+        imageUrl: imageOptimisee(widget.boutique!.logo!),
+        fit: BoxFit.cover,
+      );
     } else {
       content = const Center(
         child: Icon(Icons.storefront_outlined, color: _C.sub, size: 32),
@@ -204,8 +238,13 @@ class _BoutiqueFormViewState extends State<_BoutiqueFormView> {
     );
   }
 
-  Widget _input(TextEditingController c, String label,
-      {TextInputType? keyboard, int maxLines = 1, String? Function(String)? verifier}) {
+  Widget _input(
+    TextEditingController c,
+    String label, {
+    TextInputType? keyboard,
+    int maxLines = 1,
+    String? Function(String)? verifier,
+  }) {
     return TextFormField(
       controller: c,
       keyboardType: keyboard,
@@ -217,7 +256,10 @@ class _BoutiqueFormViewState extends State<_BoutiqueFormView> {
         labelText: label,
         filled: true,
         fillColor: _C.white,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 14,
+          vertical: 14,
+        ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: _C.border),

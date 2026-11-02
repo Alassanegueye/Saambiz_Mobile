@@ -10,10 +10,10 @@ import '../bloc/messagerie_event.dart';
 import '../bloc/messagerie_state.dart';
 
 class _C {
-  static const green = Color(0xFF0D1B3D);
-  static const black = Color(0xFF0D1B3D);
+  static const green = Color(0xFF01154B);
+  static const black = Color(0xFF01154B);
   static const white = Color(0xFFFFFFFF);
-  static const bg = Color(0xFFF5F7FB);
+  static const bg = Color(0xFFF4F5F8);
   static const sub = Color(0xFF5B6C8A);
   static const border = Color(0xFFE3E8F0);
 }
@@ -23,13 +23,20 @@ class _C {
 class ChatPage extends StatelessWidget {
   final String interlocuteurId;
   final String interlocuteurNom;
-  const ChatPage({super.key, required this.interlocuteurId, required this.interlocuteurNom});
+  const ChatPage({
+    super.key,
+    required this.interlocuteurId,
+    required this.interlocuteurNom,
+  });
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => sl<MessagerieBloc>()..add(LoadHistorique(interlocuteurId)),
-      child: _ChatView(interlocuteurId: interlocuteurId, interlocuteurNom: interlocuteurNom),
+      child: _ChatView(
+        interlocuteurId: interlocuteurId,
+        interlocuteurNom: interlocuteurNom,
+      ),
     );
   }
 }
@@ -37,7 +44,10 @@ class ChatPage extends StatelessWidget {
 class _ChatView extends StatefulWidget {
   final String interlocuteurId;
   final String interlocuteurNom;
-  const _ChatView({required this.interlocuteurId, required this.interlocuteurNom});
+  const _ChatView({
+    required this.interlocuteurId,
+    required this.interlocuteurNom,
+  });
 
   @override
   State<_ChatView> createState() => _ChatViewState();
@@ -51,7 +61,8 @@ class _ChatViewState extends State<_ChatView> {
   void initState() {
     super.initState();
     _sub = sl<SocketService>().onNewMessage.listen((data) {
-      if (mounted) context.read<MessagerieBloc>().add(MessageRecuTempsReel(data));
+      if (mounted)
+        context.read<MessagerieBloc>().add(MessageRecuTempsReel(data));
     });
   }
 
@@ -64,10 +75,12 @@ class _ChatViewState extends State<_ChatView> {
 
   void _envoyer() {
     if (_msgCtrl.text.trim().isEmpty) return;
-    context.read<MessagerieBloc>().add(EnvoyerMessage(
-          destinataireId: widget.interlocuteurId,
-          contenu: _msgCtrl.text.trim(),
-        ));
+    context.read<MessagerieBloc>().add(
+      EnvoyerMessage(
+        destinataireId: widget.interlocuteurId,
+        contenu: _msgCtrl.text.trim(),
+      ),
+    );
     _msgCtrl.clear();
   }
 
@@ -85,13 +98,18 @@ class _ChatViewState extends State<_ChatView> {
         listener: (context, state) {
           if (state is MessagerieError) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message), backgroundColor: Colors.red),
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.red,
+              ),
             );
           }
         },
         builder: (context, state) {
           final loading = state is MessagerieLoading;
-          final messages = state is HistoriqueLoaded ? state.messages : const [];
+          final messages = state is HistoriqueLoaded
+              ? state.messages
+              : const [];
           return Column(
             children: [
               Expanded(
@@ -103,25 +121,34 @@ class _ChatViewState extends State<_ChatView> {
                         itemCount: messages.length,
                         itemBuilder: (context, i) {
                           final m = messages[messages.length - 1 - i];
-                          final mine = m.destinataireId == widget.interlocuteurId;
+                          final mine =
+                              m.destinataireId == widget.interlocuteurId;
                           return Align(
-                            alignment:
-                                mine ? Alignment.centerRight : Alignment.centerLeft,
+                            alignment: mine
+                                ? Alignment.centerRight
+                                : Alignment.centerLeft,
                             child: Container(
                               margin: const EdgeInsets.symmetric(vertical: 4),
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 14, vertical: 10),
+                                horizontal: 14,
+                                vertical: 10,
+                              ),
                               constraints: BoxConstraints(
-                                  maxWidth:
-                                      MediaQuery.of(context).size.width * 0.75),
+                                maxWidth:
+                                    MediaQuery.of(context).size.width * 0.75,
+                              ),
                               decoration: BoxDecoration(
                                 color: mine ? _C.green : _C.white,
                                 borderRadius: BorderRadius.circular(14),
-                                border: mine ? null : Border.all(color: _C.border),
+                                border: mine
+                                    ? null
+                                    : Border.all(color: _C.border),
                               ),
                               child: Text(
                                 m.contenu,
-                                style: TextStyle(color: mine ? _C.white : _C.black),
+                                style: TextStyle(
+                                  color: mine ? _C.white : _C.black,
+                                ),
                               ),
                             ),
                           );
@@ -146,7 +173,9 @@ class _ChatViewState extends State<_ChatView> {
                             filled: true,
                             fillColor: _C.bg,
                             contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 14, vertical: 10),
+                              horizontal: 14,
+                              vertical: 10,
+                            ),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(20),
                               borderSide: BorderSide.none,
@@ -158,7 +187,11 @@ class _ChatViewState extends State<_ChatView> {
                       CircleAvatar(
                         backgroundColor: _C.green,
                         child: IconButton(
-                          icon: const Icon(Icons.send, color: _C.white, size: 18),
+                          icon: const Icon(
+                            Icons.send,
+                            color: _C.white,
+                            size: 18,
+                          ),
                           onPressed: _envoyer,
                         ),
                       ),

@@ -14,7 +14,8 @@ class CompteRepositoryImpl implements CompteRepository {
   String _errorMessage(Object e) {
     if (e is DioException) {
       final data = e.response?.data;
-      if (data is Map && data['message'] != null) return data['message'].toString();
+      if (data is Map && data['message'] != null)
+        return data['message'].toString();
       return e.message ?? 'Une erreur est survenue';
     }
     return e.toString();

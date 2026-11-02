@@ -7,7 +7,8 @@ import '../../../../../core/constants/infos_app.dart';
 import '../../../../../core/theme/app_color.dart';
 import '../../../../../core/utils/url_externe.dart';
 import '../../../../../core/widgets/app_app_bar.dart';
-import '../../../../../core/widgets/barre_navigation_verre.dart' show kEspaceBarreBas;
+import '../../../../../core/widgets/barre_navigation_verre.dart'
+    show kEspaceBarreBas;
 import '../../../../../core/widgets/profil_kit.dart';
 import '../../../../../injection_container.dart';
 import '../../../../auth/presentation/bloc/auth_bloc.dart';
@@ -23,11 +24,10 @@ import '../../../../abonnement/presentation/pages/mon_abonnement_page.dart';
 import '../../../../boutique/presentation/pages/ma_boutique_page.dart';
 import '../../../../messagerie/presentation/pages/conversations_page.dart';
 import '../../../../notifications/presentation/pages/notifications_page.dart';
-import '../../../../promotions/presentation/pages/mes_promotions_page.dart';
 import '../../../../vitrine/presentation/pages/ma_vitrine_page.dart';
 
 /// Onglet « Compte » du vendeur : carte bleue d'en-tête, puis des groupes
-/// d'entrées (construction de l'application Yobante Boutique).
+/// d’entrées dans des cartes blanches.
 class ProfilPage extends StatefulWidget {
   final User? user;
   const ProfilPage({super.key, this.user});
@@ -64,9 +64,6 @@ class _ProfilPageState extends State<ProfilPage> {
     return '$p$n'.toUpperCase();
   }
 
-  String _ouVide(String? v, String defaut) =>
-      (v == null || v.trim().isEmpty) ? defaut : v;
-
   Future<void> _onEditProfil() async {
     final updated = await Navigator.of(context).push<User>(
       MaterialPageRoute(builder: (_) => EditProfilePage(user: _user)),
@@ -79,7 +76,9 @@ class _ProfilPageState extends State<ProfilPage> {
 
   void _deconnecter() {
     context.read<AuthBloc>().add(LogoutRequested());
-    Navigator.of(context).pushNamedAndRemoveUntil(AppRouter.loginRoute, (_) => false);
+    Navigator.of(
+      context,
+    ).pushNamedAndRemoveUntil(AppRouter.loginRoute, (_) => false);
   }
 
   Future<void> _onLogout() async {
@@ -115,27 +114,16 @@ class _ProfilPageState extends State<ProfilPage> {
         } else if (state is CompteAccountDeleted) {
           _deconnecter();
         } else if (state is CompteError) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.message)),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(state.message)));
         }
       },
       child: Scaffold(
         backgroundColor: AppColor.kBackground,
-        appBar: AppAppBar(
-          title: 'Compte',
-          implyLeading: false,
-          actions: [
-            IconButton(
-              tooltip: 'Modifier mon profil',
-              icon: const Icon(Icons.edit_outlined),
-              onPressed: _onEditProfil,
-            ),
-          ],
-        ),
+        appBar: AppAppBar(title: 'Compte', implyLeading: false),
         body: ListView(
           physics: const BouncingScrollPhysics(),
-          // Marge basse : la barre de navigation flotte au-dessus.
           padding: const EdgeInsets.fromLTRB(20, 8, 20, kEspaceBarreBas),
           children: [
             CarteEnteteProfil(
@@ -148,36 +136,6 @@ class _ProfilPageState extends State<ProfilPage> {
             ),
             const SizedBox(height: 24),
             SectionProfil(
-              titre: 'Informations personnelles',
-              entrees: [
-                LigneProfil(
-                  icone: Icons.person_outline_rounded,
-                  libelle: _nomComplet,
-                  sousTitre: 'Prénom & nom',
-                  onTap: _onEditProfil,
-                ),
-                LigneProfil(
-                  icone: Icons.email_outlined,
-                  libelle: _ouVide(_user?.email, 'Non renseigné'),
-                  sousTitre: 'Adresse e-mail',
-                  onTap: _onEditProfil,
-                ),
-                LigneProfil(
-                  icone: Icons.phone_outlined,
-                  libelle: _ouVide(_user?.telephone, 'Non renseigné'),
-                  sousTitre: 'Téléphone',
-                  onTap: _onEditProfil,
-                ),
-                LigneProfil(
-                  icone: Icons.location_on_outlined,
-                  libelle: _ouVide(_user?.adresse, 'Non renseignée'),
-                  sousTitre: 'Adresse',
-                  onTap: _onEditProfil,
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            SectionProfil(
               titre: 'Ma boutique',
               entrees: [
                 LigneProfil(
@@ -189,14 +147,8 @@ class _ProfilPageState extends State<ProfilPage> {
                 LigneProfil(
                   icone: Icons.public_rounded,
                   libelle: 'Mon site web',
-                  sousTitre: 'saambiz.com/b/… — votre lien à partager',
+                  sousTitre: 'Votre lien saambiz.com à partager',
                   onTap: () => _ouvrir(const MaVitrinePage()),
-                ),
-                LigneProfil(
-                  icone: Icons.local_offer_outlined,
-                  libelle: 'Mes promotions',
-                  sousTitre: 'Offres et notifications aux abonnés',
-                  onTap: () => _ouvrir(const MesPromotionsPage()),
                 ),
                 LigneProfil(
                   icone: Icons.workspace_premium_outlined,
@@ -239,24 +191,7 @@ class _ProfilPageState extends State<ProfilPage> {
             ),
             const SizedBox(height: 20),
             SectionProfil(
-              titre: 'Application',
-              entrees: [
-                const LigneProfil(
-                  icone: Icons.language_outlined,
-                  libelle: 'Langue',
-                  sousTitre: 'Français',
-                ),
-                LigneProfil(
-                  icone: Icons.info_outline_rounded,
-                  libelle: 'À propos',
-                  sousTitre: 'Version ${InfosApp.version}, conditions, confidentialité',
-                  onTap: () => _ouvrir(const AProposPage()),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            SectionProfil(
-              titre: 'Aide & support',
+              titre: 'Aide et informations',
               entrees: [
                 LigneProfil(
                   icone: Icons.help_outline_rounded,
@@ -275,6 +210,13 @@ class _ProfilPageState extends State<ProfilPage> {
                   libelle: 'Noter l\'application',
                   sousTitre: 'Votre avis compte',
                   onTap: () => UrlExterne.lancer(InfosApp.lienPlayStore),
+                ),
+                LigneProfil(
+                  icone: Icons.info_outline_rounded,
+                  libelle: 'À propos',
+                  sousTitre:
+                      'Version ${InfosApp.version}, conditions, confidentialité',
+                  onTap: () => _ouvrir(const AProposPage()),
                 ),
               ],
             ),

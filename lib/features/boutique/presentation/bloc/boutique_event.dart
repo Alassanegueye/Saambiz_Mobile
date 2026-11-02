@@ -29,8 +29,16 @@ class CreerBoutiqueRequested extends BoutiqueEvent {
   });
 
   @override
-  List<Object?> get props =>
-      [nom, description, localisation, telephone, categorie, categories, slogan, logoPath];
+  List<Object?> get props => [
+    nom,
+    description,
+    localisation,
+    telephone,
+    categorie,
+    categories,
+    slogan,
+    logoPath,
+  ];
 }
 
 class ModifierBoutiqueRequested extends BoutiqueEvent {
@@ -55,8 +63,16 @@ class ModifierBoutiqueRequested extends BoutiqueEvent {
   });
 
   @override
-  List<Object?> get props =>
-      [nom, description, localisation, telephone, categorie, categories, slogan, logoPath];
+  List<Object?> get props => [
+    nom,
+    description,
+    localisation,
+    telephone,
+    categorie,
+    categories,
+    slogan,
+    logoPath,
+  ];
 }
 
 class PauseBoutiqueRequested extends BoutiqueEvent {}

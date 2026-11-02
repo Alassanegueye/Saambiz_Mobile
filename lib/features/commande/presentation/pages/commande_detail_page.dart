@@ -10,7 +10,8 @@ import '../../data/models/commande_model.dart';
 import '../bloc/commande_bloc.dart';
 import '../bloc/commande_event.dart';
 import '../bloc/commande_state.dart';
-import '../widgets/commande_card.dart' show couleurStatutCommande, iconeStatutCommande;
+import '../widgets/commande_card.dart'
+    show couleurStatutCommande, iconeStatutCommande;
 
 /// Argument de navigation pour la page détail.
 class CommandeDetailArgs {
@@ -73,9 +74,9 @@ class _DetailViewState extends State<_DetailView> {
   bool get isVendeur => widget.args.isVendeur;
 
   Future<void> _payer() async {
-    context
-        .read<CommandeBloc>()
-        .add(PayerCommande(commande.id, methode: 'orange_money'));
+    context.read<CommandeBloc>().add(
+      PayerCommande(commande.id, methode: 'orange_money'),
+    );
   }
 
   void _annuler() {
@@ -85,7 +86,9 @@ class _DetailViewState extends State<_DetailView> {
   void _avancerStatut() {
     final suivant = _statutSuivant[commande.statut];
     if (suivant != null) {
-      context.read<CommandeBloc>().add(ChangerStatutCommande(commande.id, suivant));
+      context.read<CommandeBloc>().add(
+        ChangerStatutCommande(commande.id, suivant),
+      );
     }
   }
 
@@ -105,7 +108,9 @@ class _DetailViewState extends State<_DetailView> {
         ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(ctx), child: const Text('Annuler')),
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Annuler'),
+          ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, raisonCtrl.text.trim()),
             child: const Text('Envoyer'),
@@ -114,16 +119,20 @@ class _DetailViewState extends State<_DetailView> {
       ),
     );
     if (raison != null && raison.isNotEmpty && mounted) {
-      context.read<CommandeBloc>().add(DemanderRetourCommande(commande.id, raison));
+      context.read<CommandeBloc>().add(
+        DemanderRetourCommande(commande.id, raison),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final couleur = couleurStatutCommande(commande.statut);
-    final annulable = !isVendeur &&
+    final annulable =
+        !isVendeur &&
         ['en_attente', 'confirmee', 'en_preparation'].contains(commande.statut);
-    final payable = !isVendeur &&
+    final payable =
+        !isVendeur &&
         commande.statutPaiement == 'non_paye' &&
         commande.modePaiement == 'en_ligne' &&
         commande.statut != 'annulee';
@@ -140,9 +149,17 @@ class _DetailViewState extends State<_DetailView> {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Commande', style: GoogleFonts.plusJakartaSans(fontSize: 16, fontWeight: FontWeight.w700)),
-            Text('#${commande.referenceCommande}',
-                style: GoogleFonts.plusJakartaSans(fontSize: 11.5, color: _C.sub)),
+            Text(
+              'Commande',
+              style: GoogleFonts.inter(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            Text(
+              '#${commande.referenceCommande}',
+              style: GoogleFonts.inter(fontSize: 11.5, color: _C.sub),
+            ),
           ],
         ),
       ),
@@ -150,7 +167,10 @@ class _DetailViewState extends State<_DetailView> {
         listener: (context, state) async {
           if (state is CommandeError) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message), backgroundColor: AppColor.kErreur),
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: AppColor.kErreur,
+              ),
             );
           } else if (state is CommandeMiseAJour) {
             setState(() => commande = state.commande);
@@ -188,14 +208,20 @@ class _DetailViewState extends State<_DetailView> {
                     ),
                     child: Row(
                       children: [
-                        Icon(iconeStatutCommande(commande.statut), color: couleur),
+                        Icon(
+                          iconeStatutCommande(commande.statut),
+                          color: couleur,
+                        ),
                         const SizedBox(width: 10),
                         Expanded(
                           child: Text(
                             kStatutCommandeLabels[commande.statut] ??
                                 commande.statut,
-                            style: GoogleFonts.plusJakartaSans(
-                                color: couleur, fontWeight: FontWeight.w800, fontSize: 15),
+                            style: GoogleFonts.inter(
+                              color: couleur,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 15,
+                            ),
                           ),
                         ),
                       ],
@@ -235,50 +261,63 @@ class _DetailViewState extends State<_DetailView> {
     );
   }
 
-  Widget? _actions(
-      {required bool payable,
-      required bool annulable,
-      required String? statutSuivant,
-      required bool retournable}) {
+  Widget? _actions({
+    required bool payable,
+    required bool annulable,
+    required String? statutSuivant,
+    required bool retournable,
+  }) {
     final boutons = <Widget>[];
 
     if (payable) {
-      boutons.add(Expanded(
-        child: ElevatedButton(
-          onPressed: _payer,
-          style: ElevatedButton.styleFrom(
-              backgroundColor: _C.green, foregroundColor: _C.white),
-          child: const Text('Payer maintenant'),
+      boutons.add(
+        Expanded(
+          child: ElevatedButton(
+            onPressed: _payer,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: _C.green,
+              foregroundColor: _C.white,
+            ),
+            child: const Text('Payer maintenant'),
+          ),
         ),
-      ));
+      );
     }
     if (annulable) {
-      boutons.add(Expanded(
-        child: OutlinedButton(
-          onPressed: _annuler,
-          style: OutlinedButton.styleFrom(foregroundColor: AppColor.kErreur),
-          child: const Text('Annuler'),
+      boutons.add(
+        Expanded(
+          child: OutlinedButton(
+            onPressed: _annuler,
+            style: OutlinedButton.styleFrom(foregroundColor: AppColor.kErreur),
+            child: const Text('Annuler'),
+          ),
         ),
-      ));
+      );
     }
     if (isVendeur && statutSuivant != null) {
-      boutons.add(Expanded(
-        child: ElevatedButton(
-          onPressed: _avancerStatut,
-          style: ElevatedButton.styleFrom(
-              backgroundColor: _C.green, foregroundColor: _C.white),
-          child: Text('→ ${kStatutCommandeLabels[statutSuivant]}'),
+      boutons.add(
+        Expanded(
+          child: ElevatedButton(
+            onPressed: _avancerStatut,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: _C.green,
+              foregroundColor: _C.white,
+            ),
+            child: Text('Passer à : ${kStatutCommandeLabels[statutSuivant]}'),
+          ),
         ),
-      ));
+      );
     }
     if (retournable) {
-      boutons.add(Expanded(
-        child: OutlinedButton(
-          onPressed: _demanderRetour,
-          style: OutlinedButton.styleFrom(foregroundColor: _C.green),
-          child: const Text('Demander un retour'),
+      boutons.add(
+        Expanded(
+          child: OutlinedButton(
+            onPressed: _demanderRetour,
+            style: OutlinedButton.styleFrom(foregroundColor: _C.green),
+            child: const Text('Demander un retour'),
+          ),
         ),
-      ));
+      );
     }
 
     if (boutons.isEmpty) return null;
@@ -292,7 +331,7 @@ class _DetailViewState extends State<_DetailView> {
             for (int i = 0; i < boutons.length; i++) ...[
               boutons[i],
               if (i < boutons.length - 1) const SizedBox(width: 12),
-            ]
+            ],
           ],
         ),
       ),
@@ -318,7 +357,9 @@ class _DetailViewState extends State<_DetailView> {
                       color: fait ? _C.green : _C.bg,
                       shape: BoxShape.circle,
                       border: Border.all(
-                          color: fait ? _C.green : _C.border, width: 2),
+                        color: fait ? _C.green : _C.border,
+                        width: 2,
+                      ),
                     ),
                     child: fait
                         ? const Icon(Icons.check, size: 11, color: Colors.white)
@@ -326,9 +367,10 @@ class _DetailViewState extends State<_DetailView> {
                   ),
                   if (i < _ordreStatuts.length - 1)
                     Container(
-                        width: 2,
-                        height: 22,
-                        color: fait ? _C.green : _C.border),
+                      width: 2,
+                      height: 22,
+                      color: fait ? _C.green : _C.border,
+                    ),
                 ],
               ),
               const SizedBox(width: 12),
@@ -337,8 +379,9 @@ class _DetailViewState extends State<_DetailView> {
                 child: Text(
                   kStatutCommandeLabels[_ordreStatuts[i]] ?? _ordreStatuts[i],
                   style: TextStyle(
-                      color: fait ? _C.black : _C.sub,
-                      fontWeight: fait ? FontWeight.w700 : FontWeight.w400),
+                    color: fait ? _C.black : _C.sub,
+                    fontWeight: fait ? FontWeight.w700 : FontWeight.w400,
+                  ),
                 ),
               ),
             ],
@@ -353,7 +396,11 @@ class _DetailViewState extends State<_DetailView> {
       children: commande.lignes.map((l) {
         final defaut = Container(
           color: AppColor.kSurface,
-          child: const Icon(Icons.shopping_bag_outlined, size: 20, color: AppColor.kGrayscale30),
+          child: const Icon(
+            Icons.shopping_bag_outlined,
+            size: 20,
+            color: AppColor.kGrayscale30,
+          ),
         );
         final image = l.imageProduit;
         return Padding(
@@ -379,23 +426,37 @@ class _DetailViewState extends State<_DetailView> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(l.nomProduit,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.plusJakartaSans(
-                            color: _C.black, fontWeight: FontWeight.w600, fontSize: 13.5)),
+                    Text(
+                      l.nomProduit,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.inter(
+                        color: _C.black,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13.5,
+                      ),
+                    ),
                     // Taille, couleur, parfum… choisis par le client.
                     if (l.libelleOptions.isNotEmpty)
-                      Text(l.libelleOptions,
-                          style: GoogleFonts.plusJakartaSans(color: _C.sub, fontSize: 12)),
-                    Text('${l.prixUnitaire.toStringAsFixed(0)} FCFA × ${l.quantite}',
-                        style: GoogleFonts.plusJakartaSans(color: _C.sub, fontSize: 12)),
+                      Text(
+                        l.libelleOptions,
+                        style: GoogleFonts.inter(color: _C.sub, fontSize: 12),
+                      ),
+                    Text(
+                      '${l.prixUnitaire.toStringAsFixed(0)} FCFA × ${l.quantite}',
+                      style: GoogleFonts.inter(color: _C.sub, fontSize: 12),
+                    ),
                   ],
                 ),
               ),
               const SizedBox(width: 8),
-              Text('${l.sousTotal.toStringAsFixed(0)} FCFA',
-                  style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w700, color: _C.black)),
+              Text(
+                '${l.sousTotal.toStringAsFixed(0)} FCFA',
+                style: GoogleFonts.inter(
+                  fontWeight: FontWeight.w700,
+                  color: _C.black,
+                ),
+              ),
             ],
           ),
         );
@@ -405,25 +466,37 @@ class _DetailViewState extends State<_DetailView> {
 
   Widget _recap() {
     Widget ligne(String l, String v, {bool fort = false}) => Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(l, style: const TextStyle(color: _C.sub)),
-              Text(v,
-                  style: TextStyle(
-                      fontWeight: fort ? FontWeight.w800 : FontWeight.w600,
-                      color: fort ? _C.green : _C.black)),
-            ],
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(l, style: const TextStyle(color: _C.sub)),
+          Text(
+            v,
+            style: TextStyle(
+              fontWeight: fort ? FontWeight.w800 : FontWeight.w600,
+              color: fort ? _C.green : _C.black,
+            ),
           ),
-        );
+        ],
+      ),
+    );
     return Column(
       children: [
-        ligne('Produits', '${commande.montantProduits.toStringAsFixed(0)} FCFA'),
-        ligne('Livraison', '${commande.fraisLivraison.toStringAsFixed(0)} FCFA'),
+        ligne(
+          'Produits',
+          '${commande.montantProduits.toStringAsFixed(0)} FCFA',
+        ),
+        ligne(
+          'Livraison',
+          '${commande.fraisLivraison.toStringAsFixed(0)} FCFA',
+        ),
         const Divider(),
-        ligne('Total', '${commande.montantTotal.toStringAsFixed(0)} FCFA',
-            fort: true),
+        ligne(
+          'Total',
+          '${commande.montantTotal.toStringAsFixed(0)} FCFA',
+          fort: true,
+        ),
       ],
     );
   }
@@ -432,15 +505,20 @@ class _DetailViewState extends State<_DetailView> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _info('Mode', commande.modeLivraison == 'retrait' ? 'Retrait' : 'Livraison'),
+        _info(
+          'Mode',
+          commande.modeLivraison == 'retrait' ? 'Retrait' : 'Livraison',
+        ),
         if (commande.adresseLivraison != null &&
             commande.adresseLivraison!.isNotEmpty)
           _info('Adresse', commande.adresseLivraison!),
         if (commande.numeroTelephone != null)
           _info('Téléphone', commande.numeroTelephone!),
         _info(
-            isVendeur ? 'Client' : 'Vendeur',
-            (isVendeur ? commande.acheteurNom : commande.vendeurNom) ?? '—'),
+          isVendeur ? 'Client' : 'Vendeur',
+          (isVendeur ? commande.acheteurNom : commande.vendeurNom) ??
+              'Non renseigné',
+        ),
         if (commande.note != null && commande.note!.isNotEmpty)
           _info('Note', commande.note!),
       ],
@@ -448,15 +526,20 @@ class _DetailViewState extends State<_DetailView> {
   }
 
   Widget _info(String l, String v) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 3),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(width: 90, child: Text(l, style: const TextStyle(color: _C.sub))),
-            Expanded(child: Text(v, style: const TextStyle(color: _C.black))),
-          ],
+    padding: const EdgeInsets.symmetric(vertical: 3),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 90,
+          child: Text(l, style: const TextStyle(color: _C.sub)),
         ),
-      );
+        Expanded(
+          child: Text(v, style: const TextStyle(color: _C.black)),
+        ),
+      ],
+    ),
+  );
 
   Widget _carte(String titre, Widget child) {
     return Container(
@@ -470,9 +553,14 @@ class _DetailViewState extends State<_DetailView> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(titre,
-              style: GoogleFonts.plusJakartaSans(
-                  fontWeight: FontWeight.w800, color: _C.black, fontSize: 15)),
+          Text(
+            titre,
+            style: GoogleFonts.inter(
+              fontWeight: FontWeight.w800,
+              color: _C.black,
+              fontSize: 15,
+            ),
+          ),
           const SizedBox(height: 12),
           child,
         ],

@@ -5,7 +5,7 @@ import '../../../../core/errors/failure.dart';
 import '../datasources/promotions_remote_datasource.dart';
 import '../models/promotion_model.dart';
 
-/// Repository promotions — try/catch → Either<Failure, T> au-dessus du datasource.
+/// Repository promotions, try/catch → Either<Failure, T> au-dessus du datasource.
 class PromotionsRepository {
   final PromotionsRemoteDataSource remote;
   PromotionsRepository(this.remote);
@@ -13,7 +13,8 @@ class PromotionsRepository {
   String _msg(Object e) {
     if (e is DioException) {
       final data = e.response?.data;
-      if (data is Map && data['message'] != null) return data['message'].toString();
+      if (data is Map && data['message'] != null)
+        return data['message'].toString();
       return e.message ?? 'Erreur réseau';
     }
     return e.toString();
@@ -44,14 +45,16 @@ class PromotionsRepository {
     required String produitId,
   }) async {
     try {
-      return Right(await remote.creerPromotion(
-        titre: titre,
-        description: description,
-        prixPromo: prixPromo,
-        dateDebut: dateDebut,
-        dateFin: dateFin,
-        produitId: produitId,
-      ));
+      return Right(
+        await remote.creerPromotion(
+          titre: titre,
+          description: description,
+          prixPromo: prixPromo,
+          dateDebut: dateDebut,
+          dateFin: dateFin,
+          produitId: produitId,
+        ),
+      );
     } catch (e) {
       return Left(ServerFailure(errorMessage: _msg(e)));
     }
@@ -66,14 +69,16 @@ class PromotionsRepository {
     String? dateFin,
   }) async {
     try {
-      return Right(await remote.modifierPromotion(
-        id,
-        titre: titre,
-        description: description,
-        prixPromo: prixPromo,
-        dateDebut: dateDebut,
-        dateFin: dateFin,
-      ));
+      return Right(
+        await remote.modifierPromotion(
+          id,
+          titre: titre,
+          description: description,
+          prixPromo: prixPromo,
+          dateDebut: dateDebut,
+          dateFin: dateFin,
+        ),
+      );
     } catch (e) {
       return Left(ServerFailure(errorMessage: _msg(e)));
     }

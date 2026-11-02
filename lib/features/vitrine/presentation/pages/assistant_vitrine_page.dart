@@ -12,13 +12,13 @@ import 'vitrine_prete_page.dart';
 import '../widgets/etapes_contenus_vitrine.dart';
 
 class _C {
-  static const navy      = Color(0xFF0D1B3D);
+  static const navy = Color(0xFF01154B);
   static const navyLight = Color(0xFFE8EDF7);
-  static const bg        = Color(0xFFF7F9FC);
-  static const white     = Color(0xFFFFFFFF);
-  static const border    = Color(0xFFE2E7F0);
-  static const text      = Color(0xFF0D1B3D);
-  static const muted     = Color(0xFF5B6C8A);
+  static const bg = Color(0xFFF7F9FC);
+  static const white = Color(0xFFFFFFFF);
+  static const border = Color(0xFFE2E7F0);
+  static const text = Color(0xFF01154B);
+  static const muted = Color(0xFF5B6C8A);
 }
 
 /// Les mises en page, avec ce à quoi chacune convient. La liste doit rester
@@ -38,7 +38,7 @@ const _modeles = [
 ///
 /// Le fil conducteur est que rien n'est imposé. L'analyse du logo PROPOSE des
 /// couleurs, le secteur PROPOSE une mise en page, les textes sont pré-remplis
-/// — et chaque proposition est accompagnée de la raison qui l'a fait choisir,
+///, et chaque proposition est accompagnée de la raison qui l'a fait choisir,
 /// pour que le vendeur puisse la refuser en connaissance de cause.
 class AssistantVitrinePage extends StatefulWidget {
   final List<SecteurVitrine> secteurs;
@@ -57,7 +57,7 @@ class _AssistantVitrinePageState extends State<AssistantVitrinePage> {
   static const _nombreEtapes = 5;
   int _etape = 0;
 
-  // ── Réponses ────────────────────────────────────────────────────────
+  // Réponses
   String? _secteur;
   final _activite = TextEditingController();
   File? _logo;
@@ -79,7 +79,7 @@ class _AssistantVitrinePageState extends State<AssistantVitrinePage> {
   final List<AvantageBrouillon> _avantages = [];
   Map<String, dynamic> _icones = const {};
 
-  // Ce que l'analyse a trouvé — affiché tel quel au vendeur.
+  // Ce que l'analyse a trouvé, affiché tel quel au vendeur.
   AnalyseLogo? _analyse;
   String? _pourquoiModele;
   String? _pourquoiCouleur;
@@ -103,25 +103,35 @@ class _AssistantVitrinePageState extends State<AssistantVitrinePage> {
       _paiementLivraison = v.paiementLivraison;
 
       final blocs = v.blocs;
-      for (final a in (blocs['avantages'] as List? ?? const []).whereType<Map>()) {
-        _avantages.add(AvantageBrouillon(
-          icone: '${a['icone'] ?? 'etoile'}',
-          titre: '${a['titre'] ?? ''}',
-          texte: '${a['texte'] ?? ''}',
-        ));
+      for (final a
+          in (blocs['avantages'] as List? ?? const []).whereType<Map>()) {
+        _avantages.add(
+          AvantageBrouillon(
+            icone: '${a['icone'] ?? 'etoile'}',
+            titre: '${a['titre'] ?? ''}',
+            texte: '${a['texte'] ?? ''}',
+          ),
+        );
       }
-      if (blocs['icones'] is Map) _icones = Map<String, dynamic>.from(blocs['icones'] as Map);
+      if (blocs['icones'] is Map)
+        _icones = Map<String, dynamic>.from(blocs['icones'] as Map);
     }
   }
 
   /// Les contenus à envoyer avec le site.
   Map<String, dynamic> _blocsAEnvoyer() => {
-        'icones': _icones,
-        'avantages': _avantages
-            .where((a) => a.titre.text.trim().isNotEmpty)
-            .map((a) => {'icone': a.icone, 'titre': a.titre.text.trim(), 'texte': a.texte.text.trim()})
-            .toList(),
-      };
+    'icones': _icones,
+    'avantages': _avantages
+        .where((a) => a.titre.text.trim().isNotEmpty)
+        .map(
+          (a) => {
+            'icone': a.icone,
+            'titre': a.titre.text.trim(),
+            'texte': a.texte.text.trim(),
+          },
+        )
+        .toList(),
+  };
 
   @override
   void dispose() {
@@ -136,8 +146,7 @@ class _AssistantVitrinePageState extends State<AssistantVitrinePage> {
     super.dispose();
   }
 
-  // ── Navigation entre les étapes ─────────────────────────────────────
-
+  // Navigation entre les étapes
   bool get _etapeValide {
     switch (_etape) {
       case 0:
@@ -166,24 +175,25 @@ class _AssistantVitrinePageState extends State<AssistantVitrinePage> {
   }
 
   void _lancerGeneration() {
-    context.read<VitrineBloc>().add(GenererVitrineDemande(
-          logoPath: _logo?.path,
-          secteur: _secteur ?? 'autre',
-          activite: _activite.text.trim(),
-          modele: _modele,
-          accent: _accent,
-          slogan: _slogan.text.trim().isEmpty ? null : _slogan.text.trim(),
-          apropos: _apropos.text.trim(),
-          horaires: _horaires.text.trim(),
-          annonce: _annonce.text.trim(),
-          commande: _commande,
-          paiementLivraison: _paiementLivraison,
-          blocs: _blocsAEnvoyer(),
-        ));
+    context.read<VitrineBloc>().add(
+      GenererVitrineDemande(
+        logoPath: _logo?.path,
+        secteur: _secteur ?? 'autre',
+        activite: _activite.text.trim(),
+        modele: _modele,
+        accent: _accent,
+        slogan: _slogan.text.trim().isEmpty ? null : _slogan.text.trim(),
+        apropos: _apropos.text.trim(),
+        horaires: _horaires.text.trim(),
+        annonce: _annonce.text.trim(),
+        commande: _commande,
+        paiementLivraison: _paiementLivraison,
+        blocs: _blocsAEnvoyer(),
+      ),
+    );
   }
 
-  // ── Choix du logo ───────────────────────────────────────────────────
-
+  // Choix du logo
   Future<void> _choisirLogo() async {
     final fichier = await ImagePicker().pickImage(
       source: ImageSource.gallery,
@@ -198,14 +208,16 @@ class _AssistantVitrinePageState extends State<AssistantVitrinePage> {
     setState(() => _logo = File(fichier.path));
 
     if (!mounted) return;
-    context.read<VitrineBloc>().add(AnalyserLogoDemande(
-          logoPath: fichier.path,
-          secteur: _secteur,
-          activite: _activite.text.trim(),
-        ));
+    context.read<VitrineBloc>().add(
+      AnalyserLogoDemande(
+        logoPath: fichier.path,
+        secteur: _secteur,
+        activite: _activite.text.trim(),
+      ),
+    );
   }
 
-  /// Applique ce que le serveur a proposé — sans écraser ce que le vendeur
+  /// Applique ce que le serveur a proposé, sans écraser ce que le vendeur
   /// aurait déjà saisi à la main.
   void _appliquerAnalyse(dynamic resultat) {
     final analyse = resultat.analyse as AnalyseLogo;
@@ -213,7 +225,9 @@ class _AssistantVitrinePageState extends State<AssistantVitrinePage> {
 
     setState(() {
       _analyse = analyse;
-      _palette = proposition.palette.isNotEmpty ? proposition.palette : analyse.palette;
+      _palette = proposition.palette.isNotEmpty
+          ? proposition.palette
+          : analyse.palette;
       _accent = proposition.accent;
       _pourquoiCouleur = proposition.pourquoiCouleur;
       _pourquoiModele = proposition.pourquoiModele;
@@ -234,18 +248,20 @@ class _AssistantVitrinePageState extends State<AssistantVitrinePage> {
         if (state is VitrineAnalysee) _appliquerAnalyse(state.resultat);
 
         if (state is VitrineCreee) {
-          Navigator.of(context).pushReplacement(MaterialPageRoute(
-            builder: (_) => VitrinePretePage(
-              vitrine: state.vitrine,
-              premiereCreation: !_modification,
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (_) => VitrinePretePage(
+                vitrine: state.vitrine,
+                premiereCreation: !_modification,
+              ),
             ),
-          ));
+          );
         }
 
         if (state is VitrineErreur) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.message)),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(state.message)));
         }
       },
       builder: (context, state) {
@@ -266,7 +282,10 @@ class _AssistantVitrinePageState extends State<AssistantVitrinePage> {
               title: Text(
                 _modification ? 'Modifier mon site' : 'Créer mon site',
                 style: const TextStyle(
-                    color: _C.text, fontWeight: FontWeight.w700, fontSize: 17),
+                  color: _C.text,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 17,
+                ),
               ),
               bottom: PreferredSize(
                 preferredSize: const Size.fromHeight(3),
@@ -297,15 +316,20 @@ class _AssistantVitrinePageState extends State<AssistantVitrinePage> {
                           disabledBackgroundColor: _C.border,
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12)),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
                         onPressed: _etapeValide ? _suivant : null,
                         child: Text(
                           _etape == _nombreEtapes - 1
-                              ? (_modification ? 'Enregistrer' : 'Créer mon site')
+                              ? (_modification
+                                    ? 'Enregistrer'
+                                    : 'Créer mon site')
                               : 'Continuer',
                           style: const TextStyle(
-                              fontSize: 15.5, fontWeight: FontWeight.w700),
+                            fontSize: 15.5,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                       ),
                     ),
@@ -325,13 +349,16 @@ class _AssistantVitrinePageState extends State<AssistantVitrinePage> {
       case 2:
         return _etapeStyle();
       case 3:
-        return EtapeAvantages(avantages: _avantages, onChange: () => setState(() {}));
+        return EtapeAvantages(
+          avantages: _avantages,
+          onChange: () => setState(() {}),
+        );
       default:
         return _etapeTextes();
     }
   }
 
-  // ══ ÉTAPE 1 — L'ACTIVITÉ ═════════════════════════════════════════════
+  // ══ ÉTAPE 1, L'ACTIVITÉ ═════════════════════════════════════════════
 
   Widget _etapeActivite() {
     return Column(
@@ -339,7 +366,8 @@ class _AssistantVitrinePageState extends State<AssistantVitrinePage> {
       children: [
         const _TitreEtape(
           titre: 'Que vendez-vous ?',
-          texte: 'Votre réponse choisit la mise en page et le ton des textes. '
+          texte:
+              'Votre réponse choisit la mise en page et le ton des textes. '
               'La mode se montre en grand, l\'électronique se compare en liste.',
         ),
         const SizedBox(height: 18),
@@ -354,7 +382,10 @@ class _AssistantVitrinePageState extends State<AssistantVitrinePage> {
               borderRadius: BorderRadius.circular(12),
               child: Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 13),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 15,
+                  vertical: 13,
+                ),
                 decoration: BoxDecoration(
                   color: actif ? _C.navyLight : _C.white,
                   border: Border.all(
@@ -369,19 +400,31 @@ class _AssistantVitrinePageState extends State<AssistantVitrinePage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(s.libelle,
-                              style: const TextStyle(
-                                  fontSize: 14.5,
-                                  fontWeight: FontWeight.w700,
-                                  color: _C.text)),
+                          Text(
+                            s.libelle,
+                            style: const TextStyle(
+                              fontSize: 14.5,
+                              fontWeight: FontWeight.w700,
+                              color: _C.text,
+                            ),
+                          ),
                           const SizedBox(height: 2),
-                          Text(s.exemples,
-                              style: const TextStyle(fontSize: 12.4, color: _C.muted)),
+                          Text(
+                            s.exemples,
+                            style: const TextStyle(
+                              fontSize: 12.4,
+                              color: _C.muted,
+                            ),
+                          ),
                         ],
                       ),
                     ),
                     if (actif)
-                      const Icon(Icons.check_circle_rounded, color: _C.navy, size: 20),
+                      const Icon(
+                        Icons.check_circle_rounded,
+                        color: _C.navy,
+                        size: 20,
+                      ),
                   ],
                 ),
               ),
@@ -401,14 +444,14 @@ class _AssistantVitrinePageState extends State<AssistantVitrinePage> {
         const SizedBox(height: 6),
         const Text(
           'Cette phrase ouvrira la présentation de votre boutique. Vos mots '
-          'valent mieux que les nôtres — mais vous pouvez laisser vide.',
+          'valent mieux que les nôtres, mais vous pouvez laisser vide.',
           style: TextStyle(fontSize: 12.2, color: _C.muted, height: 1.45),
         ),
       ],
     );
   }
 
-  // ══ ÉTAPE 2 — LE LOGO ════════════════════════════════════════════════
+  // ══ ÉTAPE 2, LE LOGO ════════════════════════════════════════════════
 
   Widget _etapeLogo(VitrineState state) {
     final analyseEnCours = state is VitrineAnalyseEnCours;
@@ -418,7 +461,8 @@ class _AssistantVitrinePageState extends State<AssistantVitrinePage> {
       children: [
         const _TitreEtape(
           titre: 'Votre logo',
-          texte: 'Nous y relevons vos couleurs et sa forme, pour habiller le '
+          texte:
+              'Nous y relevons vos couleurs et sa forme, pour habiller le '
               'site avec. Vous gardez la main sur tout.',
         ),
         const SizedBox(height: 18),
@@ -447,21 +491,32 @@ class _AssistantVitrinePageState extends State<AssistantVitrinePage> {
                   )
                 else
                   Container(
-                    width: 58, height: 58,
+                    width: 58,
+                    height: 58,
                     decoration: const BoxDecoration(
-                        color: _C.navyLight, shape: BoxShape.circle),
-                    child: const Icon(Icons.add_photo_alternate_outlined,
-                        color: _C.navy, size: 26),
+                      color: _C.navyLight,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.add_photo_alternate_outlined,
+                      color: _C.navy,
+                      size: 26,
+                    ),
                   ),
                 const SizedBox(height: 12),
                 Text(
                   _logo == null ? 'Choisir mon logo' : 'Changer de logo',
                   style: const TextStyle(
-                      fontSize: 14.5, fontWeight: FontWeight.w700, color: _C.navy),
+                    fontSize: 14.5,
+                    fontWeight: FontWeight.w700,
+                    color: _C.navy,
+                  ),
                 ),
                 const SizedBox(height: 3),
-                const Text('PNG ou JPEG',
-                    style: TextStyle(fontSize: 12.2, color: _C.muted)),
+                const Text(
+                  'PNG ou JPEG',
+                  style: TextStyle(fontSize: 12.2, color: _C.muted),
+                ),
               ],
             ),
           ),
@@ -472,12 +527,18 @@ class _AssistantVitrinePageState extends State<AssistantVitrinePage> {
           const Row(
             children: [
               SizedBox(
-                width: 17, height: 17,
-                child: CircularProgressIndicator(strokeWidth: 2.2, color: _C.navy),
+                width: 17,
+                height: 17,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.2,
+                  color: _C.navy,
+                ),
               ),
               SizedBox(width: 11),
-              Text('Analyse de votre logo…',
-                  style: TextStyle(fontSize: 13.5, color: _C.muted)),
+              Text(
+                'Analyse de votre logo…',
+                style: TextStyle(fontSize: 13.5, color: _C.muted),
+              ),
             ],
           ),
         ],
@@ -486,19 +547,27 @@ class _AssistantVitrinePageState extends State<AssistantVitrinePage> {
           const SizedBox(height: 20),
           _Encadre(
             children: [
-              const Text('Ce que nous avons trouvé',
-                  style: TextStyle(
-                      fontSize: 14, fontWeight: FontWeight.w700, color: _C.text)),
+              const Text(
+                'Ce que nous avons trouvé',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: _C.text,
+                ),
+              ),
               const SizedBox(height: 12),
 
               if (_analyse!.couleurs.isNotEmpty) ...[
-                const Text('Vos couleurs',
-                    style: TextStyle(fontSize: 12.5, color: _C.muted)),
+                const Text(
+                  'Vos couleurs',
+                  style: TextStyle(fontSize: 12.5, color: _C.muted),
+                ),
                 const SizedBox(height: 7),
                 Row(
                   children: _analyse!.couleurs.take(5).map((c) {
                     return Container(
-                      width: 34, height: 34,
+                      width: 34,
+                      height: 34,
                       margin: const EdgeInsets.only(right: 8),
                       decoration: BoxDecoration(
                         color: _versCouleur(c.hex),
@@ -536,7 +605,7 @@ class _AssistantVitrinePageState extends State<AssistantVitrinePage> {
     );
   }
 
-  // ══ ÉTAPE 3 — LE STYLE ═══════════════════════════════════════════════
+  // ══ ÉTAPE 3, LE STYLE ═══════════════════════════════════════════════
 
   Widget _etapeStyle() {
     // Les couleurs relevées dans le logo d'abord ; à défaut, une palette de
@@ -563,8 +632,14 @@ class _AssistantVitrinePageState extends State<AssistantVitrinePage> {
         const _Etiquette('Mise en page'),
         if (_pourquoiModele != null) ...[
           const SizedBox(height: 5),
-          Text(_pourquoiModele!,
-              style: const TextStyle(fontSize: 12.3, color: _C.muted, height: 1.45)),
+          Text(
+            _pourquoiModele!,
+            style: const TextStyle(
+              fontSize: 12.3,
+              color: _C.muted,
+              height: 1.45,
+            ),
+          ),
         ],
         const SizedBox(height: 10),
 
@@ -580,7 +655,9 @@ class _AssistantVitrinePageState extends State<AssistantVitrinePage> {
                 decoration: BoxDecoration(
                   color: actif ? _C.navyLight : _C.white,
                   border: Border.all(
-                      color: actif ? _C.navy : _C.border, width: actif ? 1.6 : 1),
+                    color: actif ? _C.navy : _C.border,
+                    width: actif ? 1.6 : 1,
+                  ),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
@@ -591,19 +668,31 @@ class _AssistantVitrinePageState extends State<AssistantVitrinePage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(m.$2,
-                              style: const TextStyle(
-                                  fontSize: 14.5,
-                                  fontWeight: FontWeight.w700,
-                                  color: _C.text)),
+                          Text(
+                            m.$2,
+                            style: const TextStyle(
+                              fontSize: 14.5,
+                              fontWeight: FontWeight.w700,
+                              color: _C.text,
+                            ),
+                          ),
                           const SizedBox(height: 2),
-                          Text(m.$3,
-                              style: const TextStyle(fontSize: 12.4, color: _C.muted)),
+                          Text(
+                            m.$3,
+                            style: const TextStyle(
+                              fontSize: 12.4,
+                              color: _C.muted,
+                            ),
+                          ),
                         ],
                       ),
                     ),
                     if (actif)
-                      const Icon(Icons.check_circle_rounded, color: _C.navy, size: 20),
+                      const Icon(
+                        Icons.check_circle_rounded,
+                        color: _C.navy,
+                        size: 20,
+                      ),
                   ],
                 ),
               ),
@@ -615,8 +704,14 @@ class _AssistantVitrinePageState extends State<AssistantVitrinePage> {
         const _Etiquette('Couleur'),
         if (_pourquoiCouleur != null) ...[
           const SizedBox(height: 5),
-          Text(_pourquoiCouleur!,
-              style: const TextStyle(fontSize: 12.3, color: _C.muted, height: 1.45)),
+          Text(
+            _pourquoiCouleur!,
+            style: const TextStyle(
+              fontSize: 12.3,
+              color: _C.muted,
+              height: 1.45,
+            ),
+          ),
         ],
         const SizedBox(height: 12),
 
@@ -631,7 +726,8 @@ class _AssistantVitrinePageState extends State<AssistantVitrinePage> {
                 onTap: () => setState(() => _accent = c.hex),
                 customBorder: const CircleBorder(),
                 child: Container(
-                  width: 46, height: 46,
+                  width: 46,
+                  height: 46,
                   decoration: BoxDecoration(
                     color: _versCouleur(c.hex),
                     shape: BoxShape.circle,
@@ -641,7 +737,11 @@ class _AssistantVitrinePageState extends State<AssistantVitrinePage> {
                     ),
                   ),
                   child: actif
-                      ? const Icon(Icons.check_rounded, color: Colors.white, size: 20)
+                      ? const Icon(
+                          Icons.check_rounded,
+                          color: Colors.white,
+                          size: 20,
+                        )
                       : null,
                 ),
               ),
@@ -652,7 +752,7 @@ class _AssistantVitrinePageState extends State<AssistantVitrinePage> {
     );
   }
 
-  // ══ ÉTAPE 4 — LES TEXTES ═════════════════════════════════════════════
+  // ══ ÉTAPE 4, LES TEXTES ═════════════════════════════════════════════
 
   Widget _etapeTextes() {
     return Column(
@@ -660,7 +760,8 @@ class _AssistantVitrinePageState extends State<AssistantVitrinePage> {
       children: [
         const _TitreEtape(
           titre: 'Vos textes',
-          texte: 'Nous les avons écrits pour vous. Relisez, corrigez ce qui '
+          texte:
+              'Nous les avons écrits pour vous. Relisez, corrigez ce qui '
               'ne vous ressemble pas.',
         ),
         const SizedBox(height: 20),
@@ -686,7 +787,7 @@ class _AssistantVitrinePageState extends State<AssistantVitrinePage> {
         const SizedBox(height: 18),
         const _Etiquette('Horaires'),
         const SizedBox(height: 7),
-        _Champ(controleur: _horaires, indication: 'Lundi à samedi, 9h — 19h'),
+        _Champ(controleur: _horaires, indication: 'Lundi à samedi, 9h à 19h'),
 
         const SizedBox(height: 18),
         const _Etiquette('Bandeau d\'annonce (facultatif)'),
@@ -708,7 +809,8 @@ class _AssistantVitrinePageState extends State<AssistantVitrinePage> {
             _Bascule(
               valeur: _commande,
               titre: 'Accepter les commandes en ligne',
-              texte: 'Vos clients commandent depuis le site, sans créer de compte.',
+              texte:
+                  'Vos clients commandent depuis le site, sans créer de compte.',
               onChange: (v) => setState(() => _commande = v),
             ),
             const Divider(height: 22, color: _C.border),
@@ -716,7 +818,9 @@ class _AssistantVitrinePageState extends State<AssistantVitrinePage> {
               valeur: _paiementLivraison,
               titre: 'Paiement à la livraison',
               texte: 'Le client règle en espèces à la réception.',
-              onChange: _commande ? (v) => setState(() => _paiementLivraison = v) : null,
+              onChange: _commande
+                  ? (v) => setState(() => _paiementLivraison = v)
+                  : null,
             ),
           ],
         ),
@@ -748,12 +852,20 @@ class _TitreEtape extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(titre,
-            style: const TextStyle(
-                fontSize: 21, fontWeight: FontWeight.w800, color: _C.text, height: 1.25)),
+        Text(
+          titre,
+          style: const TextStyle(
+            fontSize: 21,
+            fontWeight: FontWeight.w800,
+            color: _C.text,
+            height: 1.25,
+          ),
+        ),
         const SizedBox(height: 8),
-        Text(texte,
-            style: const TextStyle(fontSize: 13.5, color: _C.muted, height: 1.55)),
+        Text(
+          texte,
+          style: const TextStyle(fontSize: 13.5, color: _C.muted, height: 1.55),
+        ),
       ],
     );
   }
@@ -765,10 +877,13 @@ class _Etiquette extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Text(
-        texte,
-        style: const TextStyle(
-            fontSize: 13.5, fontWeight: FontWeight.w700, color: _C.text),
-      );
+    texte,
+    style: const TextStyle(
+      fontSize: 13.5,
+      fontWeight: FontWeight.w700,
+      color: _C.text,
+    ),
+  );
 }
 
 class _Champ extends StatelessWidget {
@@ -799,7 +914,10 @@ class _Champ extends StatelessWidget {
         counterText: '',
         filled: true,
         fillColor: _C.white,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 14,
+          vertical: 13,
+        ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(11),
           borderSide: const BorderSide(color: _C.border),
@@ -827,7 +945,10 @@ class _Encadre extends StatelessWidget {
         border: Border.all(color: _C.border),
         borderRadius: BorderRadius.circular(14),
       ),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: children),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: children,
+      ),
     );
   }
 }
@@ -845,18 +966,22 @@ class _Puce extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Icon(
-            alerte ? Icons.info_outline_rounded : Icons.check_circle_outline_rounded,
+            alerte
+                ? Icons.info_outline_rounded
+                : Icons.check_circle_outline_rounded,
             size: 16,
             color: alerte ? const Color(0xFFB0850B) : _C.navy,
           ),
           const SizedBox(width: 9),
           Expanded(
-            child: Text(texte,
-                style: TextStyle(
-                  fontSize: 12.6,
-                  height: 1.5,
-                  color: alerte ? const Color(0xFFB0850B) : _C.muted,
-                )),
+            child: Text(
+              texte,
+              style: TextStyle(
+                fontSize: 12.6,
+                height: 1.5,
+                color: alerte ? const Color(0xFFB0850B) : _C.muted,
+              ),
+            ),
           ),
         ],
       ),
@@ -889,20 +1014,27 @@ class _Bascule extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(titre,
-                    style: const TextStyle(
-                        fontSize: 14, fontWeight: FontWeight.w700, color: _C.text)),
+                Text(
+                  titre,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: _C.text,
+                  ),
+                ),
                 const SizedBox(height: 2),
-                Text(texte,
-                    style: const TextStyle(fontSize: 12.4, color: _C.muted, height: 1.45)),
+                Text(
+                  texte,
+                  style: const TextStyle(
+                    fontSize: 12.4,
+                    color: _C.muted,
+                    height: 1.45,
+                  ),
+                ),
               ],
             ),
           ),
-          Switch(
-            value: valeur,
-            activeThumbColor: _C.navy,
-            onChanged: onChange,
-          ),
+          Switch(value: valeur, activeThumbColor: _C.navy, onChanged: onChange),
         ],
       ),
     );
@@ -920,12 +1052,13 @@ class _CroquisModele extends StatelessWidget {
     final couleur = actif ? _C.navy : const Color(0xFFB9C4D8);
 
     Widget bloc({double? h, double? w}) => Container(
-          height: h, width: w,
-          decoration: BoxDecoration(
-            color: couleur,
-            borderRadius: BorderRadius.circular(2.5),
-          ),
-        );
+      height: h,
+      width: w,
+      decoration: BoxDecoration(
+        color: couleur,
+        borderRadius: BorderRadius.circular(2.5),
+      ),
+    );
 
     Widget contenu;
     switch (modele) {
@@ -934,11 +1067,13 @@ class _CroquisModele extends StatelessWidget {
           children: [
             bloc(h: 18, w: double.infinity),
             const SizedBox(height: 3),
-            Row(children: [
-              Expanded(child: bloc(h: 11)),
-              const SizedBox(width: 3),
-              Expanded(child: bloc(h: 11)),
-            ]),
+            Row(
+              children: [
+                Expanded(child: bloc(h: 11)),
+                const SizedBox(width: 3),
+                Expanded(child: bloc(h: 11)),
+              ],
+            ),
           ],
         );
         break;
@@ -954,17 +1089,20 @@ class _CroquisModele extends StatelessWidget {
         );
         break;
       default:
-        contenu = Row(children: [
-          Expanded(child: bloc(h: 32)),
-          const SizedBox(width: 3),
-          Expanded(child: bloc(h: 32)),
-          const SizedBox(width: 3),
-          Expanded(child: bloc(h: 32)),
-        ]);
+        contenu = Row(
+          children: [
+            Expanded(child: bloc(h: 32)),
+            const SizedBox(width: 3),
+            Expanded(child: bloc(h: 32)),
+            const SizedBox(width: 3),
+            Expanded(child: bloc(h: 32)),
+          ],
+        );
     }
 
     return Container(
-      width: 52, height: 44,
+      width: 52,
+      height: 44,
       padding: const EdgeInsets.all(6),
       decoration: BoxDecoration(
         color: actif ? Colors.white : _C.bg,
@@ -992,14 +1130,18 @@ class _EcranGeneration extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             const SizedBox(
-              width: 42, height: 42,
+              width: 42,
+              height: 42,
               child: CircularProgressIndicator(strokeWidth: 3, color: _C.navy),
             ),
             const SizedBox(height: 26),
             const Text(
               'Nous composons votre site',
               style: TextStyle(
-                  fontSize: 18, fontWeight: FontWeight.w800, color: _C.text),
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+                color: _C.text,
+              ),
             ),
             const SizedBox(height: 10),
             Text(
@@ -1007,10 +1149,11 @@ class _EcranGeneration extends StatelessWidget {
               'sont assemblés. Encore quelques secondes.',
               textAlign: TextAlign.center,
               style: TextStyle(
-                  fontSize: 13.5,
-                  color: _C.muted,
-                  height: 1.55,
-                  letterSpacing: 0.1),
+                fontSize: 13.5,
+                color: _C.muted,
+                height: 1.55,
+                letterSpacing: 0.1,
+              ),
             ),
           ],
         ),

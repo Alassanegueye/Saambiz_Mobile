@@ -5,7 +5,7 @@ import 'package:equatable/equatable.dart';
 /// À ne pas confondre avec l'affichage de la boutique DANS l'application, qui
 /// est le même pour toutes : un client qui parcourt SaamBiz doit reconnaître
 /// une fiche boutique d'un coup d'œil, quelle que soit l'enseigne. Le site
-/// web, lui, appartient au vendeur — c'est le sien qu'il partage à ses
+/// web, lui, appartient au vendeur, c'est le sien qu'il partage à ses
 /// propres clients, et il porte donc ses couleurs.
 class Vitrine extends Equatable {
   final String slug;
@@ -19,8 +19,8 @@ class Vitrine extends Equatable {
   /// « activez votre boutique depuis l'application ».
   final bool configuree;
 
-  final String modele;   // 'classique' | 'galerie' | 'catalogue'
-  final String accent;   // #RRGGBB
+  final String modele; // 'classique' | 'galerie' | 'catalogue'
+  final String accent; // #RRGGBB
   final String? apropos;
   final String? annonce;
   final String? horaires;
@@ -35,7 +35,7 @@ class Vitrine extends Equatable {
 
   /// Renseigné uniquement au retour de la création : faux si le vendeur avait
   /// choisi un logo mais que l'hébergeur d'images l'a refusé. Le site est créé
-  /// quand même — il serait absurde de perdre quatre réponses pour une image —
+  /// quand même, il serait absurde de perdre quatre réponses pour une image
   /// et l'écran d'arrivée le signale pour qu'il le reprenne.
   final bool? logoEnregistre;
 
@@ -67,10 +67,26 @@ class Vitrine extends Equatable {
 
   @override
   List<Object?> get props => [
-        slug, url, active, configuree, modele, accent, apropos, annonce,
-        horaires, secteur, activite, logoForme, reseaux, sections, commande,
-        paiementLivraison, vues, logoEnregistre, blocs,
-      ];
+    slug,
+    url,
+    active,
+    configuree,
+    modele,
+    accent,
+    apropos,
+    annonce,
+    horaires,
+    secteur,
+    activite,
+    logoForme,
+    reseaux,
+    sections,
+    commande,
+    paiementLivraison,
+    vues,
+    logoEnregistre,
+    blocs,
+  ];
 }
 
 /// Une couleur relevée dans le logo du vendeur.
@@ -134,9 +150,16 @@ class AnalyseLogo extends Equatable {
 
   @override
   List<Object?> get props => [
-        largeur, hauteur, forme, conseilForme, couleurs, accentPropose,
-        palette, niveauQualite, messageQualite,
-      ];
+    largeur,
+    hauteur,
+    forme,
+    conseilForme,
+    couleurs,
+    accentPropose,
+    palette,
+    niveauQualite,
+    messageQualite,
+  ];
 }
 
 /// Le site tel que l'assistant le propose, avant enregistrement.
@@ -171,9 +194,16 @@ class PropositionVitrine extends Equatable {
 
   @override
   List<Object?> get props => [
-        modele, accent, slogan, apropos, horaires, palette,
-        pourquoiModele, pourquoiCouleur, pourquoiLogo,
-      ];
+    modele,
+    accent,
+    slogan,
+    apropos,
+    horaires,
+    palette,
+    pourquoiModele,
+    pourquoiCouleur,
+    pourquoiLogo,
+  ];
 }
 
 /// Un secteur d'activité proposé à la première question de l'assistant.

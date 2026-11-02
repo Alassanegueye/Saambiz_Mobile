@@ -33,7 +33,8 @@ class FavorisProduits {
     }
   }
 
-  static bool contient(String produitId) => liste.value.any((p) => p['id'] == produitId);
+  static bool contient(String produitId) =>
+      liste.value.any((p) => p['id'] == produitId);
 
   static List<ProduitCatalogue> get produits =>
       liste.value.map(ProduitCatalogue.fromJson).toList();
@@ -67,7 +68,9 @@ class FavorisProduits {
     liste.value = nouvelle;
     try {
       await sl<SharedPreferences>().setString(_cle, jsonEncode(nouvelle));
-    } catch (_) {/* le cœur reste juste pour cette session */}
+    } catch (_) {
+      /* le cœur reste juste pour cette session */
+    }
     return deja < 0;
   }
 }

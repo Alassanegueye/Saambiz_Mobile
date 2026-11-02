@@ -1,8 +1,7 @@
-
-
 import 'package:saambiz/core/theme/app_color.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+
 class PrimaryButton extends StatefulWidget {
   final VoidCallback onTap;
   final String text;
@@ -13,20 +12,20 @@ class PrimaryButton extends StatefulWidget {
   final IconData? iconData;
   final Color? textColor, bgColor;
   final Widget? child;
-  const PrimaryButton(
-      {Key? key,
-      required this.onTap,
-      required this.text,
-      this.width,
-      this.height,
-      this.elevation = 5,
-      this.borderRadius,
-      this.fontSize,
-      required this.textColor,
-      required this.bgColor,
-      this.child,
-      this.iconData})
-      : super(key: key);
+  const PrimaryButton({
+    Key? key,
+    required this.onTap,
+    required this.text,
+    this.width,
+    this.height,
+    this.elevation = 5,
+    this.borderRadius,
+    this.fontSize,
+    required this.textColor,
+    required this.bgColor,
+    this.child,
+    this.iconData,
+  }) : super(key: key);
 
   @override
   State<PrimaryButton> createState() => _PrimaryButtonState();
@@ -39,10 +38,8 @@ class _PrimaryButtonState extends State<PrimaryButton>
   final Tween<double> _tween = Tween<double>(begin: 1.0, end: 0.95);
   @override
   void initState() {
-    _controller = AnimationController(
-      vsync: this,
-      duration: _animationDuration,
-    )..addListener(() {
+    _controller = AnimationController(vsync: this, duration: _animationDuration)
+      ..addListener(() {
         setState(() {});
       });
     super.initState();
@@ -84,21 +81,24 @@ class _PrimaryButtonState extends State<PrimaryButton>
               color: widget.bgColor,
               borderRadius: BorderRadius.circular(widget.borderRadius!),
             ),
-            child: widget.child ?? Text(
-              widget.text,
-              style: GoogleFonts.plusJakartaSans(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: AppColor.kWhite)
-                  .copyWith(
-                      color: widget.textColor,
-                      fontWeight: FontWeight.w500,
-                      fontSize: widget.fontSize),
-            ),
+            child:
+                widget.child ??
+                Text(
+                  widget.text,
+                  style:
+                      GoogleFonts.inter(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: AppColor.kWhite,
+                      ).copyWith(
+                        color: widget.textColor,
+                        fontWeight: FontWeight.w500,
+                        fontSize: widget.fontSize,
+                      ),
+                ),
           ),
         ),
       ),
     );
   }
 }
-

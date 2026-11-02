@@ -5,7 +5,7 @@ import '../../../../core/errors/failure.dart';
 import '../datasources/signalements_remote_datasource.dart';
 import '../models/signalement_model.dart';
 
-/// Repository signalements — try/catch → Either<Failure, T> au-dessus du datasource.
+/// Repository signalements, try/catch → Either<Failure, T> au-dessus du datasource.
 class SignalementsRepository {
   final SignalementsRemoteDataSource remote;
   SignalementsRepository(this.remote);
@@ -13,7 +13,8 @@ class SignalementsRepository {
   String _msg(Object e) {
     if (e is DioException) {
       final data = e.response?.data;
-      if (data is Map && data['message'] != null) return data['message'].toString();
+      if (data is Map && data['message'] != null)
+        return data['message'].toString();
       return e.message ?? 'Erreur réseau';
     }
     return e.toString();
@@ -26,8 +27,14 @@ class SignalementsRepository {
     required String cibleId,
   }) async {
     try {
-      return Right(await remote.creerSignalement(
-          type: type, raison: raison, description: description, cibleId: cibleId));
+      return Right(
+        await remote.creerSignalement(
+          type: type,
+          raison: raison,
+          description: description,
+          cibleId: cibleId,
+        ),
+      );
     } catch (e) {
       return Left(ServerFailure(errorMessage: _msg(e)));
     }

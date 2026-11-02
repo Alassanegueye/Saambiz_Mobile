@@ -35,33 +35,35 @@ class PanierItem {
 
   /// « Tailles : XL · Parfums : Bissap »
   String get libelleOptions =>
-      options.entries.map((e) => '${e.key} : ${e.value}').join(' · ');
+      options.entries.map((e) => '${e.key} : ${e.value}').join(', ');
 
   Map<String, dynamic> toJson() => {
-        'produitId': produitId,
-        'nom': nom,
-        'prix': prix,
-        'image': image,
-        'vendeurId': vendeurId,
-        'vendeurNom': vendeurNom,
-        if (options.isNotEmpty) 'options': options,
-        'quantite': quantite,
-      };
+    'produitId': produitId,
+    'nom': nom,
+    'prix': prix,
+    'image': image,
+    'vendeurId': vendeurId,
+    'vendeurNom': vendeurNom,
+    if (options.isNotEmpty) 'options': options,
+    'quantite': quantite,
+  };
 
   factory PanierItem.fromJson(Map<String, dynamic> json) => PanierItem(
-        produitId: json['produitId']?.toString() ?? '',
-        nom: json['nom'] ?? '',
-        prix: (json['prix'] is num)
-            ? (json['prix'] as num).toDouble()
-            : double.tryParse('${json['prix']}') ?? 0,
-        image: json['image'] ?? '',
-        vendeurId: json['vendeurId']?.toString() ?? '',
-        vendeurNom: json['vendeurNom'] ?? '',
-        options: json['options'] is Map
-            ? (json['options'] as Map).map((k, v) => MapEntry(k.toString(), v.toString()))
-            : const {},
-        quantite: (json['quantite'] is int)
-            ? json['quantite']
-            : int.tryParse('${json['quantite']}') ?? 1,
-      );
+    produitId: json['produitId']?.toString() ?? '',
+    nom: json['nom'] ?? '',
+    prix: (json['prix'] is num)
+        ? (json['prix'] as num).toDouble()
+        : double.tryParse('${json['prix']}') ?? 0,
+    image: json['image'] ?? '',
+    vendeurId: json['vendeurId']?.toString() ?? '',
+    vendeurNom: json['vendeurNom'] ?? '',
+    options: json['options'] is Map
+        ? (json['options'] as Map).map(
+            (k, v) => MapEntry(k.toString(), v.toString()),
+          )
+        : const {},
+    quantite: (json['quantite'] is int)
+        ? json['quantite']
+        : int.tryParse('${json['quantite']}') ?? 1,
+  );
 }

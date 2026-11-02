@@ -110,7 +110,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                       onPressed: isLast ? null : _finish,
                       child: Text(
                         'Passer',
-                        style: GoogleFonts.plusJakartaSans(
+                        style: GoogleFonts.inter(
                           color: AppColor.kGrayscale40,
                           fontWeight: FontWeight.w600,
                           fontSize: 14,
@@ -156,14 +156,19 @@ class _OnboardingPageState extends State<OnboardingPage> {
             foregroundColor: AppColor.kWhite,
             elevation: 0,
             padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
+            ),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
                 'Suivant',
-                style: GoogleFonts.plusJakartaSans(fontSize: 15, fontWeight: FontWeight.w700),
+                style: GoogleFonts.inter(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
               const SizedBox(width: 6),
               const Icon(Icons.arrow_forward_rounded, size: 19),
@@ -190,11 +195,16 @@ class _OnboardingPageState extends State<OnboardingPage> {
               backgroundColor: AppColor.kSecondary,
               foregroundColor: AppColor.kPrimary,
               elevation: 0,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
             ),
             child: Text(
               'Commencer',
-              style: GoogleFonts.plusJakartaSans(fontSize: 16, fontWeight: FontWeight.w700),
+              style: GoogleFonts.inter(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
         ),
@@ -248,7 +258,7 @@ class _PageSlide extends StatelessWidget {
               Text(
                 slide.titre,
                 textAlign: TextAlign.center,
-                style: GoogleFonts.plusJakartaSans(
+                style: GoogleFonts.inter(
                   fontSize: 24,
                   fontWeight: FontWeight.w700,
                   height: 1.25,
@@ -259,7 +269,7 @@ class _PageSlide extends StatelessWidget {
               Text(
                 slide.texte,
                 textAlign: TextAlign.center,
-                style: GoogleFonts.plusJakartaSans(
+                style: GoogleFonts.inter(
                   fontSize: 15,
                   height: 1.55,
                   color: AppColor.kGrayscale40,

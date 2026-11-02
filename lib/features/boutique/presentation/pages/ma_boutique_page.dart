@@ -10,10 +10,10 @@ import 'boutique_form_page.dart';
 import 'package:saambiz/core/utils/image_url.dart';
 
 class _C {
-  static const green = Color(0xFF0D1B3D);
-  static const black = Color(0xFF0D1B3D);
+  static const green = Color(0xFF01154B);
+  static const black = Color(0xFF01154B);
   static const white = Color(0xFFFFFFFF);
-  static const bg = Color(0xFFF5F7FB);
+  static const bg = Color(0xFFF4F5F8);
   static const sub = Color(0xFF5B6C8A);
   static const border = Color(0xFFE3E8F0);
   static const orange = Color(0xFFFF8F00);
@@ -49,7 +49,10 @@ class _MaBoutiqueView extends StatelessWidget {
         listener: (context, state) {
           if (state is BoutiqueError) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message), backgroundColor: Colors.red),
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.red,
+              ),
             );
           }
         },
@@ -64,15 +67,23 @@ class _MaBoutiqueView extends StatelessWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.storefront_outlined, color: _C.sub, size: 48),
+                    const Icon(
+                      Icons.storefront_outlined,
+                      color: _C.sub,
+                      size: 48,
+                    ),
                     const SizedBox(height: 12),
-                    const Text('Vous n\'avez pas encore de boutique',
-                        style: TextStyle(color: _C.sub)),
+                    const Text(
+                      'Vous n\'avez pas encore de boutique',
+                      style: TextStyle(color: _C.sub),
+                    ),
                     const SizedBox(height: 16),
                     ElevatedButton(
                       onPressed: () async {
                         final res = await Navigator.of(context).push(
-                          MaterialPageRoute(builder: (_) => const BoutiqueFormPage()),
+                          MaterialPageRoute(
+                            builder: (_) => const BoutiqueFormPage(),
+                          ),
                         );
                         if (res != null && context.mounted) {
                           context.read<BoutiqueBloc>().add(LoadMaBoutique());
@@ -113,13 +124,16 @@ class _MaBoutiqueView extends StatelessWidget {
                                     imageUrl: imageOptimisee(b.logo!),
                                     width: 64,
                                     height: 64,
-                                    fit: BoxFit.cover)
+                                    fit: BoxFit.cover,
+                                  )
                                 : Container(
                                     width: 64,
                                     height: 64,
                                     color: _C.bg,
-                                    child: const Icon(Icons.storefront_outlined,
-                                        color: _C.sub),
+                                    child: const Icon(
+                                      Icons.storefront_outlined,
+                                      color: _C.sub,
+                                    ),
                                   ),
                           ),
                           const SizedBox(width: 12),
@@ -127,15 +141,20 @@ class _MaBoutiqueView extends StatelessWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(b.nom,
-                                    style: const TextStyle(
-                                        fontWeight: FontWeight.w800,
-                                        fontSize: 16,
-                                        color: _C.black)),
+                                Text(
+                                  b.nom,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w800,
+                                    fontSize: 16,
+                                    color: _C.black,
+                                  ),
+                                ),
                                 const SizedBox(height: 4),
                                 Container(
                                   padding: const EdgeInsets.symmetric(
-                                      horizontal: 8, vertical: 3),
+                                    horizontal: 8,
+                                    vertical: 3,
+                                  ),
                                   decoration: BoxDecoration(
                                     color: b.enPause
                                         ? _C.orange.withOpacity(0.12)
@@ -145,9 +164,10 @@ class _MaBoutiqueView extends StatelessWidget {
                                   child: Text(
                                     b.enPause ? 'En pause' : 'Active',
                                     style: TextStyle(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w700,
-                                        color: b.enPause ? _C.orange : _C.green),
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w700,
+                                      color: b.enPause ? _C.orange : _C.green,
+                                    ),
                                   ),
                                 ),
                               ],
@@ -156,10 +176,14 @@ class _MaBoutiqueView extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(height: 12),
-                      Text(b.description, style: const TextStyle(color: _C.sub)),
+                      Text(
+                        b.description,
+                        style: const TextStyle(color: _C.sub),
+                      ),
                       const SizedBox(height: 8),
                       _info(Icons.location_on_outlined, b.localisation),
-                      if (b.telephone != null) _info(Icons.phone_outlined, b.telephone!),
+                      if (b.telephone != null)
+                        _info(Icons.phone_outlined, b.telephone!),
                     ],
                   ),
                 ),
@@ -168,7 +192,8 @@ class _MaBoutiqueView extends StatelessWidget {
                   onPressed: () async {
                     await Navigator.of(context).push(
                       MaterialPageRoute(
-                          builder: (_) => BoutiqueFormPage(boutique: b)),
+                        builder: (_) => BoutiqueFormPage(boutique: b),
+                      ),
                     );
                     if (context.mounted) {
                       context.read<BoutiqueBloc>().add(LoadMaBoutique());
@@ -186,12 +211,16 @@ class _MaBoutiqueView extends StatelessWidget {
                 const SizedBox(height: 10),
                 OutlinedButton.icon(
                   onPressed: () {
-                    context.read<BoutiqueBloc>().add(b.enPause
-                        ? ReactiverBoutiqueRequested()
-                        : PauseBoutiqueRequested());
+                    context.read<BoutiqueBloc>().add(
+                      b.enPause
+                          ? ReactiverBoutiqueRequested()
+                          : PauseBoutiqueRequested(),
+                    );
                   },
                   icon: Icon(b.enPause ? Icons.play_arrow : Icons.pause),
-                  label: Text(b.enPause ? 'Réactiver la boutique' : 'Mettre en pause'),
+                  label: Text(
+                    b.enPause ? 'Réactiver la boutique' : 'Mettre en pause',
+                  ),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: b.enPause ? _C.green : _C.orange,
                     padding: const EdgeInsets.symmetric(vertical: 14),
@@ -207,13 +236,15 @@ class _MaBoutiqueView extends StatelessWidget {
   }
 
   Widget _info(IconData icon, String text) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 3),
-        child: Row(
-          children: [
-            Icon(icon, size: 16, color: _C.sub),
-            const SizedBox(width: 8),
-            Expanded(child: Text(text, style: const TextStyle(color: _C.black))),
-          ],
+    padding: const EdgeInsets.symmetric(vertical: 3),
+    child: Row(
+      children: [
+        Icon(icon, size: 16, color: _C.sub),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(text, style: const TextStyle(color: _C.black)),
         ),
-      );
+      ],
+    ),
+  );
 }

@@ -16,7 +16,9 @@ class PromotionsBloc extends Bloc<PromotionsEvent, PromotionsState> {
   }
 
   Future<void> _onLoadActives(
-      LoadPromotionsActives event, Emitter<PromotionsState> emit) async {
+    LoadPromotionsActives event,
+    Emitter<PromotionsState> emit,
+  ) async {
     emit(PromotionsLoading());
     final result = await repository.promotionsActives();
     result.fold(
@@ -26,7 +28,9 @@ class PromotionsBloc extends Bloc<PromotionsEvent, PromotionsState> {
   }
 
   Future<void> _onLoadMes(
-      LoadMesPromotions event, Emitter<PromotionsState> emit) async {
+    LoadMesPromotions event,
+    Emitter<PromotionsState> emit,
+  ) async {
     emit(PromotionsLoading());
     final result = await repository.mesPromotions();
     result.fold(
@@ -35,7 +39,10 @@ class PromotionsBloc extends Bloc<PromotionsEvent, PromotionsState> {
     );
   }
 
-  Future<void> _onCreer(CreerPromotion event, Emitter<PromotionsState> emit) async {
+  Future<void> _onCreer(
+    CreerPromotion event,
+    Emitter<PromotionsState> emit,
+  ) async {
     emit(PromotionsLoading());
     final result = await repository.creerPromotion(
       titre: event.titre,
@@ -52,7 +59,9 @@ class PromotionsBloc extends Bloc<PromotionsEvent, PromotionsState> {
   }
 
   Future<void> _onModifier(
-      ModifierPromotion event, Emitter<PromotionsState> emit) async {
+    ModifierPromotion event,
+    Emitter<PromotionsState> emit,
+  ) async {
     emit(PromotionsLoading());
     final result = await repository.modifierPromotion(
       event.id,
@@ -69,7 +78,9 @@ class PromotionsBloc extends Bloc<PromotionsEvent, PromotionsState> {
   }
 
   Future<void> _onSupprimer(
-      SupprimerPromotion event, Emitter<PromotionsState> emit) async {
+    SupprimerPromotion event,
+    Emitter<PromotionsState> emit,
+  ) async {
     final result = await repository.supprimerPromotion(event.id);
     result.fold(
       (f) => emit(PromotionsError(f.errorMessage)),

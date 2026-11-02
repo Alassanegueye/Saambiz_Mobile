@@ -26,12 +26,12 @@ class BoutiqueSuivie extends Equatable {
   });
 
   BoutiqueSuivie copyWith({bool? clocheActive}) => BoutiqueSuivie(
-        id: id,
-        nom: nom,
-        logo: logo,
-        localisation: localisation,
-        clocheActive: clocheActive ?? this.clocheActive,
-      );
+    id: id,
+    nom: nom,
+    logo: logo,
+    localisation: localisation,
+    clocheActive: clocheActive ?? this.clocheActive,
+  );
 
   @override
   List<Object?> get props => [id, nom, logo, localisation, clocheActive];

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../injection_container.dart';
+import '../../../../core/theme/app_color.dart';
+import '../../../../core/widgets/ui_kit.dart';
 import '../../../../core/routes/app_router.dart';
 import '../bloc/commande_bloc.dart';
 import '../bloc/commande_event.dart';
@@ -16,11 +18,11 @@ class VendeurCommandesPage extends StatelessWidget {
     return BlocProvider(
       create: (_) => sl<CommandeBloc>()..add(LoadCommandesVendeur()),
       child: Scaffold(
-        backgroundColor: const Color(0xFFF5F7FB),
+        backgroundColor: AppColor.kBackground,
         appBar: AppBar(
           backgroundColor: Colors.white,
           elevation: 0.5,
-          foregroundColor: const Color(0xFF0D1B3D),
+          foregroundColor: const Color(0xFF01154B),
           title: const Text('Commandes reçues'),
         ),
         body: BlocBuilder<CommandeBloc, CommandeState>(
@@ -33,13 +35,15 @@ class VendeurCommandesPage extends StatelessWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(state.message,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(color: Color(0xFF5B6C8A))),
+                    Text(
+                      state.message,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(color: Color(0xFF5B6C8A)),
+                    ),
                     TextButton(
-                      onPressed: () => context
-                          .read<CommandeBloc>()
-                          .add(LoadCommandesVendeur()),
+                      onPressed: () => context.read<CommandeBloc>().add(
+                        LoadCommandesVendeur(),
+                      ),
                       child: const Text('Réessayer'),
                     ),
                   ],
@@ -49,14 +53,17 @@ class VendeurCommandesPage extends StatelessWidget {
             if (state is CommandesLoaded) {
               if (state.commandes.isEmpty) {
                 return const Center(
-                  child: Text('Aucune commande reçue',
-                      style: TextStyle(color: Color(0xFF5B6C8A))),
+                  child: EtatVide(
+                    icone: Icons.receipt_long_outlined,
+                    titre: 'Aucune commande reçue',
+                    message:
+                        'Les commandes de vos clients apparaîtront ici dès leur passage.',
+                  ),
                 );
               }
               return RefreshIndicator(
-                onRefresh: () async => context
-                    .read<CommandeBloc>()
-                    .add(LoadCommandesVendeur()),
+                onRefresh: () async =>
+                    context.read<CommandeBloc>().add(LoadCommandesVendeur()),
                 child: ListView.separated(
                   padding: const EdgeInsets.all(16),
                   itemCount: state.commandes.length,

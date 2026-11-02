@@ -4,13 +4,13 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../constants/infos_app.dart';
 import '../theme/app_color.dart';
+import 'animations.dart';
 
-/// Briques des onglets « Compte » (acheteur et vendeur), reprises de
-/// l'application Yobante Boutique : carte bleue d'en-tête, groupes d'entrées
-/// dans des cartes blanches, feuille de confirmation en bas d'écran.
+/// Briques des onglets « Compte » (acheteur et vendeur) : en-tête
+/// d'identité, groupes d'entrées en liste, feuille de confirmation.
 
-/// Carte bleue en tête de l'onglet : photo ou initiales, nom, e-mail, badge
-/// du type de compte et lien « Modifier mon profil ».
+/// En-tête de l'onglet : photo ou initiales, nom, e-mail, type de compte et
+/// bouton « Modifier ». Les compteurs facultatifs suivent sur une ligne.
 class CarteEnteteProfil extends StatelessWidget {
   final String nom;
   final String initiales;
@@ -19,7 +19,7 @@ class CarteEnteteProfil extends StatelessWidget {
   final String? photo;
   final VoidCallback onTap;
 
-  /// Compteurs facultatifs affichés sous l'identité (libellé → valeur).
+  /// Compteurs facultatifs affichés sous l'identité (libellé, valeur).
   final List<(String, String)> compteurs;
 
   const CarteEnteteProfil({
@@ -36,111 +36,111 @@ class CarteEnteteProfil extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final aUnePhoto = photo != null && photo!.isNotEmpty;
-    return Material(
-      color: AppColor.kPrimary,
-      borderRadius: BorderRadius.circular(22),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(18),
-          child: Column(
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColor.kWhite,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColor.kLine),
+      ),
+      child: Column(
+        children: [
+          Row(
             children: [
-              Row(
-                children: [
-                  Container(
-                    width: 56,
-                    height: 56,
-                    decoration: BoxDecoration(
-                      color: AppColor.kPrimaryLight,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: AppColor.kWhite, width: 1.5),
-                    ),
-                    child: aUnePhoto
-                        ? ClipOval(
-                            child: CachedNetworkImage(
-                              imageUrl: photo!,
-                              width: 56,
-                              height: 56,
-                              fit: BoxFit.cover,
-                              placeholder: (_, __) => _initiales(),
-                              errorWidget: (_, __, ___) => _initiales(),
-                            ),
-                          )
-                        : _initiales(),
-                  ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          nom,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700,
-                            color: AppColor.kWhite,
-                          ),
+              CircleAvatar(
+                radius: 28,
+                backgroundColor: AppColor.kPrimary,
+                child: aUnePhoto
+                    ? ClipOval(
+                        child: CachedNetworkImage(
+                          imageUrl: photo!,
+                          width: 56,
+                          height: 56,
+                          fit: BoxFit.cover,
+                          placeholder: (_, __) => _initiales(),
+                          errorWidget: (_, __, ___) => _initiales(),
                         ),
-                        if (email.isNotEmpty) ...[
-                          const SizedBox(height: 2),
-                          Text(
-                            email,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 13,
-                              color: AppColor.kWhite.withValues(alpha: 0.8),
-                            ),
-                          ),
-                        ],
-                        const SizedBox(height: 8),
-                        BadgeTypeProfil(role: role),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Modifier mon profil',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            color: AppColor.kSecondary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const Icon(Icons.chevron_right_rounded, color: AppColor.kWhite),
-                ],
+                      )
+                    : _initiales(),
               ),
-              if (compteurs.isNotEmpty) ...[
-                const SizedBox(height: 16),
-                Row(
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    for (var i = 0; i < compteurs.length; i++) ...[
-                      if (i > 0) const SizedBox(width: 8),
-                      Expanded(child: _Compteur(valeur: compteurs[i].$2, libelle: compteurs[i].$1)),
-                    ],
+                    Text(
+                      nom,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.inter(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w700,
+                        color: AppColor.kGrayscaleDark100,
+                      ),
+                    ),
+                    if (email.isNotEmpty)
+                      Text(
+                        email,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.inter(
+                          fontSize: 13,
+                          color: AppColor.kGrayscale40,
+                        ),
+                      ),
+                    const SizedBox(height: 4),
+                    BadgeTypeProfil(role: role),
                   ],
                 ),
-              ],
+              ),
+              OutlinedButton(
+                onPressed: onTap,
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size(0, 36),
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  side: const BorderSide(color: AppColor.kGrayscale20),
+                  textStyle: GoogleFonts.inter(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                child: const Text('Modifier'),
+              ),
             ],
           ),
-        ),
+          if (compteurs.isNotEmpty) ...[
+            const SizedBox(height: 14),
+            const Divider(height: 1),
+            const SizedBox(height: 12),
+            IntrinsicHeight(
+              child: Row(
+                children: [
+                  for (var i = 0; i < compteurs.length; i++) ...[
+                    if (i > 0) const VerticalDivider(width: 1),
+                    Expanded(
+                      child: _Compteur(
+                        valeur: compteurs[i].$2,
+                        libelle: compteurs[i].$1,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }
 
-  Widget _initiales() => Center(
-        child: Text(
-          initiales,
-          style: GoogleFonts.plusJakartaSans(
-            fontSize: 20,
-            fontWeight: FontWeight.w700,
-            color: AppColor.kPrimary,
-          ),
-        ),
-      );
+  Widget _initiales() => Text(
+    initiales,
+    style: GoogleFonts.inter(
+      fontSize: 19,
+      fontWeight: FontWeight.w700,
+      color: AppColor.kWhite,
+    ),
+  );
 }
 
 class _Compteur extends StatelessWidget {
@@ -150,71 +150,43 @@ class _Compteur extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      decoration: BoxDecoration(
-        color: AppColor.kWhite.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: Column(
-        children: [
-          Text(
-            valeur,
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-              color: AppColor.kSecondary,
-            ),
+    return Column(
+      children: [
+        Text(
+          valeur,
+          style: GoogleFonts.inter(
+            fontSize: 17,
+            fontWeight: FontWeight.w700,
+            color: AppColor.kGrayscaleDark100,
           ),
-          const SizedBox(height: 2),
-          Text(
-            libelle,
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 11,
-              fontWeight: FontWeight.w500,
-              color: AppColor.kWhite.withValues(alpha: 0.8),
-            ),
-          ),
-        ],
-      ),
+        ),
+        Text(
+          libelle,
+          style: GoogleFonts.inter(fontSize: 12, color: AppColor.kGrayscale40),
+        ),
+      ],
     );
   }
 }
 
-/// Badge du type de compte sur la carte bleue : Acheteur, Vendeur…
+/// Type de compte, en petit texte sous le nom : Acheteur, Vendeur…
 class BadgeTypeProfil extends StatelessWidget {
   final String role;
   const BadgeTypeProfil({super.key, required this.role});
 
   @override
   Widget build(BuildContext context) {
-    final r = role.trim().toUpperCase();
-    final (String libelle, IconData icone) = switch (r) {
-      'VENDEUR' => ('Vendeur', Icons.storefront_rounded),
-      'ADMIN' => ('Administrateur', Icons.admin_panel_settings_outlined),
-      _ => ('Acheteur', Icons.shopping_bag_outlined),
+    final libelle = switch (role.trim().toUpperCase()) {
+      'VENDEUR' => 'Compte vendeur',
+      'ADMIN' => 'Administrateur',
+      _ => 'Compte acheteur',
     };
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
-      decoration: BoxDecoration(
-        color: AppColor.kWhite.withValues(alpha: 0.16),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColor.kWhite.withValues(alpha: 0.35)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icone, size: 13, color: AppColor.kWhite),
-          const SizedBox(width: 5),
-          Text(
-            libelle,
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 11.5,
-              fontWeight: FontWeight.w700,
-              color: AppColor.kWhite,
-            ),
-          ),
-        ],
+    return Text(
+      libelle,
+      style: GoogleFonts.inter(
+        fontSize: 12,
+        fontWeight: FontWeight.w600,
+        color: AppColor.kSecondaryDark,
       ),
     );
   }
@@ -229,47 +201,48 @@ class SectionProfil extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 4, bottom: 10),
-          child: Text(
-            titre,
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 13,
-              fontWeight: FontWeight.w700,
-              color: AppColor.kGrayscale40,
-            ),
-          ),
-        ),
-        Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(18),
-            boxShadow: [
-              BoxShadow(
-                color: AppColor.kPrimary.withValues(alpha: 0.05),
-                blurRadius: 16,
-                offset: const Offset(0, 6),
+    return Apparition(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 6, bottom: 10),
+            child: Text(
+              titre,
+              style: GoogleFonts.inter(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: AppColor.kGrayscale40,
               ),
-            ],
-          ),
-          child: Material(
-            color: AppColor.kWhite,
-            borderRadius: BorderRadius.circular(18),
-            clipBehavior: Clip.antiAlias,
-            child: Column(
-              children: [
-                for (var i = 0; i < entrees.length; i++) ...[
-                  entrees[i],
-                  if (i < entrees.length - 1)
-                    const Divider(height: 1, indent: 64, endIndent: 16, color: AppColor.kLine),
-                ],
-              ],
             ),
           ),
-        ),
-      ],
+          Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AppColor.kLine),
+            ),
+            child: Material(
+              color: AppColor.kWhite,
+              borderRadius: BorderRadius.circular(12),
+              clipBehavior: Clip.antiAlias,
+              child: Column(
+                children: [
+                  for (var i = 0; i < entrees.length; i++) ...[
+                    entrees[i],
+                    if (i < entrees.length - 1)
+                      const Divider(
+                        height: 1,
+                        indent: 52,
+                        endIndent: 16,
+                        color: AppColor.kLine,
+                      ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -296,38 +269,31 @@ class LigneProfil extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
-      leading: Container(
-        width: 36,
-        height: 36,
-        decoration: BoxDecoration(
-          color: danger ? AppColor.kErreurLight : AppColor.kPrimaryLight,
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Icon(icone, size: 19, color: danger ? AppColor.kErreur : AppColor.kPrimary),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+      leading: Icon(
+        icone,
+        size: 22,
+        color: danger ? AppColor.kErreur : AppColor.kPrimary,
       ),
+      minLeadingWidth: 24,
       title: Text(
         libelle,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
-        style: GoogleFonts.plusJakartaSans(
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
+        style: GoogleFonts.inter(
+          fontSize: 15,
+          fontWeight: FontWeight.w500,
           color: danger ? AppColor.kErreur : AppColor.kGrayscaleDark100,
         ),
       ),
-      subtitle: sousTitre.isEmpty
-          ? null
-          : Text(
-              sousTitre,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: GoogleFonts.plusJakartaSans(fontSize: 12, color: AppColor.kGrayscale40),
-            ),
-      trailing: fin ??
+      trailing:
+          fin ??
           (onTap == null
               ? null
-              : const Icon(Icons.chevron_right_rounded, color: AppColor.kGrayscale40)),
+              : const Icon(
+                  Icons.chevron_right_rounded,
+                  color: AppColor.kGrayscale30,
+                )),
       onTap: onTap,
     );
   }
@@ -346,7 +312,7 @@ Future<bool> confirmerAction(
     context: context,
     backgroundColor: AppColor.kWhite,
     shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
     builder: (ctx) => SafeArea(
       child: Padding(
@@ -359,7 +325,7 @@ Future<bool> confirmerAction(
               height: 60,
               decoration: BoxDecoration(
                 color: AppColor.kErreurLight,
-                borderRadius: BorderRadius.circular(18),
+                shape: BoxShape.circle,
               ),
               child: Icon(icone, color: AppColor.kErreur, size: 30),
             ),
@@ -367,7 +333,7 @@ Future<bool> confirmerAction(
             Text(
               titre,
               textAlign: TextAlign.center,
-              style: GoogleFonts.plusJakartaSans(
+              style: GoogleFonts.inter(
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
                 color: AppColor.kGrayscaleDark100,
@@ -377,7 +343,7 @@ Future<bool> confirmerAction(
             Text(
               message,
               textAlign: TextAlign.center,
-              style: GoogleFonts.plusJakartaSans(
+              style: GoogleFonts.inter(
                 fontSize: 14,
                 height: 1.55,
                 color: AppColor.kGrayscale40,
@@ -393,8 +359,13 @@ Future<bool> confirmerAction(
                   backgroundColor: AppColor.kErreur,
                   foregroundColor: AppColor.kWhite,
                   elevation: 0,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                  textStyle: GoogleFonts.plusJakartaSans(fontSize: 15, fontWeight: FontWeight.w700),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  textStyle: GoogleFonts.inter(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
                 child: Text(action),
               ),
@@ -404,7 +375,7 @@ Future<bool> confirmerAction(
               onPressed: () => Navigator.pop(ctx, false),
               child: Text(
                 'Annuler',
-                style: GoogleFonts.plusJakartaSans(
+                style: GoogleFonts.inter(
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
                   color: AppColor.kGrayscale40,
@@ -433,8 +404,11 @@ class BoutonDeconnexion extends StatelessWidget {
         side: BorderSide(color: AppColor.kErreur.withValues(alpha: 0.4)),
         backgroundColor: AppColor.kWhite,
         minimumSize: const Size(double.infinity, 48),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-        textStyle: GoogleFonts.plusJakartaSans(fontSize: 15, fontWeight: FontWeight.w700),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        textStyle: GoogleFonts.inter(
+          fontSize: 15,
+          fontWeight: FontWeight.w700,
+        ),
       ),
       icon: const Icon(Icons.logout_rounded, size: 20),
       label: const Text('Se déconnecter'),
@@ -448,13 +422,13 @@ class VersionApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Center(
-        child: Text(
-          '${InfosApp.nom} v${InfosApp.version}',
-          style: GoogleFonts.plusJakartaSans(
-            fontSize: 11,
-            fontWeight: FontWeight.w500,
-            color: AppColor.kGrayscale40,
-          ),
-        ),
-      );
+    child: Text(
+      '${InfosApp.nom} v${InfosApp.version}',
+      style: GoogleFonts.inter(
+        fontSize: 11,
+        fontWeight: FontWeight.w500,
+        color: AppColor.kGrayscale40,
+      ),
+    ),
+  );
 }

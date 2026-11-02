@@ -22,10 +22,10 @@ class ServerFailure extends Failure {
   final int? statusCode;
 
   ServerFailure({required String errorMessage, this.statusCode})
-      : super(errorMessage: errorMessage);
+    : super(errorMessage: errorMessage);
 }
 
 class CacheFailure extends Failure {
   CacheFailure({required String errorMessage})
-      : super(errorMessage: errorMessage);
+    : super(errorMessage: errorMessage);
 }

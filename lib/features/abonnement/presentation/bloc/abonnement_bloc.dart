@@ -25,7 +25,10 @@ class AbonnementBloc extends Bloc<AbonnementEvent, AbonnementState> {
     on<PayerAbonnement>(_onPayer);
   }
 
-  Future<void> _onLoad(LoadAbonnement event, Emitter<AbonnementState> emit) async {
+  Future<void> _onLoad(
+    LoadAbonnement event,
+    Emitter<AbonnementState> emit,
+  ) async {
     emit(AbonnementLoading());
     final result = await getMonAbonnement();
     result.fold(
@@ -35,7 +38,9 @@ class AbonnementBloc extends Bloc<AbonnementEvent, AbonnementState> {
   }
 
   Future<void> _onLoadHistorique(
-      LoadHistoriquePaiements event, Emitter<AbonnementState> emit) async {
+    LoadHistoriquePaiements event,
+    Emitter<AbonnementState> emit,
+  ) async {
     emit(AbonnementLoading());
     final result = await getHistoriquePaiements();
     result.fold(
@@ -45,7 +50,9 @@ class AbonnementBloc extends Bloc<AbonnementEvent, AbonnementState> {
   }
 
   Future<void> _onRenouveler(
-      RenouvelerAbonnement event, Emitter<AbonnementState> emit) async {
+    RenouvelerAbonnement event,
+    Emitter<AbonnementState> emit,
+  ) async {
     emit(AbonnementLoading());
     final result = await initierRenouvellement(montant: event.montant);
     result.fold(
@@ -55,7 +62,9 @@ class AbonnementBloc extends Bloc<AbonnementEvent, AbonnementState> {
   }
 
   Future<void> _onPayer(
-      PayerAbonnement event, Emitter<AbonnementState> emit) async {
+    PayerAbonnement event,
+    Emitter<AbonnementState> emit,
+  ) async {
     emit(AbonnementLoading());
     final result = await payer(
       montant: event.montant,
@@ -64,8 +73,12 @@ class AbonnementBloc extends Bloc<AbonnementEvent, AbonnementState> {
     );
     result.fold(
       (f) => emit(AbonnementError(f.errorMessage)),
-      (r) => emit(PaiementInitieAbonnement(
-          paymentUrl: r.paymentUrl, transactionId: r.transactionId)),
+      (r) => emit(
+        PaiementInitieAbonnement(
+          paymentUrl: r.paymentUrl,
+          transactionId: r.transactionId,
+        ),
+      ),
     );
   }
 }

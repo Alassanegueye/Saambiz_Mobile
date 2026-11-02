@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 
 import '../../../core/utils/app_logger.dart';
 
-/// Catégorie de la marketplace — un seul niveau, pas de sous-rayons.
+/// Catégorie de la marketplace, un seul niveau, pas de sous-rayons.
 ///
 /// La liste, son ordre, les noms et les icônes se gèrent depuis le dashboard
 /// admin : l'application ne fait que les afficher. Le `slug` est
@@ -27,21 +27,23 @@ class Categorie {
   });
 
   factory Categorie.fromJson(Map<String, dynamic> json) => Categorie(
-        id: json['id']?.toString() ?? '',
-        nom: json['nom']?.toString() ?? '',
-        slug: json['slug']?.toString() ?? json['id']?.toString() ?? '',
-        description: json['description']?.toString(),
-        icone: json['icone']?.toString(),
-        image: json['image']?.toString(),
-        nombreBoutiques: (json['nombreBoutiques'] is num)
-            ? (json['nombreBoutiques'] as num).toInt()
-            : int.tryParse('${json['nombreBoutiques'] ?? 0}') ?? 0,
-      );
+    id: json['id']?.toString() ?? '',
+    nom: json['nom']?.toString() ?? '',
+    slug: json['slug']?.toString() ?? json['id']?.toString() ?? '',
+    description: json['description']?.toString(),
+    icone: json['icone']?.toString(),
+    image: json['image']?.toString(),
+    nombreBoutiques: (json['nombreBoutiques'] is num)
+        ? (json['nombreBoutiques'] as num).toInt()
+        : int.tryParse('${json['nombreBoutiques'] ?? 0}') ?? 0,
+  );
 
   /// Vrai si [valeur] désigne cette catégorie (slug, id ou nom).
   bool correspond(String valeur) {
     final v = valeur.trim().toLowerCase();
-    return v == slug.toLowerCase() || v == id.toLowerCase() || v == nom.toLowerCase();
+    return v == slug.toLowerCase() ||
+        v == id.toLowerCase() ||
+        v == nom.toLowerCase();
   }
 }
 
@@ -49,22 +51,102 @@ class Categorie {
 /// le réseau ne répond pas, pour que l'inscription ne reste jamais bloquée
 /// sur une grille vide. Le serveur accepte ces slugs tels quels.
 const List<Categorie> kCategoriesSecours = [
-  Categorie(id: 'mode-femme', slug: 'mode-femme', nom: 'Mode femme', icone: 'checkroom'),
-  Categorie(id: 'mode-homme', slug: 'mode-homme', nom: 'Mode homme', icone: 'man'),
-  Categorie(id: 'chaussures-sacs', slug: 'chaussures-sacs', nom: 'Chaussures & sacs', icone: 'shopping_bag'),
-  Categorie(id: 'beaute-cosmetiques', slug: 'beaute-cosmetiques', nom: 'Beauté & cosmétiques', icone: 'spa'),
-  Categorie(id: 'bijoux-accessoires', slug: 'bijoux-accessoires', nom: 'Bijoux & accessoires', icone: 'diamond'),
-  Categorie(id: 'telephones-electronique', slug: 'telephones-electronique', nom: 'Téléphones & électronique', icone: 'smartphone'),
-  Categorie(id: 'maison-deco', slug: 'maison-deco', nom: 'Maison & déco', icone: 'chair'),
-  Categorie(id: 'alimentation-epicerie', slug: 'alimentation-epicerie', nom: 'Alimentation & épicerie', icone: 'shopping_basket'),
-  Categorie(id: 'plats-traiteur', slug: 'plats-traiteur', nom: 'Plats & traiteur', icone: 'restaurant'),
-  Categorie(id: 'jus-boissons', slug: 'jus-boissons', nom: 'Jus & boissons', icone: 'local_drink'),
-  Categorie(id: 'patisserie-gateaux', slug: 'patisserie-gateaux', nom: 'Pâtisserie & gâteaux', icone: 'cake'),
-  Categorie(id: 'enfants-bebes', slug: 'enfants-bebes', nom: 'Enfants & bébés', icone: 'child_care'),
-  Categorie(id: 'sante-bien-etre', slug: 'sante-bien-etre', nom: 'Santé & bien-être', icone: 'favorite'),
-  Categorie(id: 'sport-loisirs', slug: 'sport-loisirs', nom: 'Sport & loisirs', icone: 'sports_soccer'),
-  Categorie(id: 'artisanat', slug: 'artisanat', nom: 'Artisanat & fait main', icone: 'palette'),
-  Categorie(id: 'services', slug: 'services', nom: 'Services', icone: 'handyman'),
+  Categorie(
+    id: 'mode-femme',
+    slug: 'mode-femme',
+    nom: 'Mode femme',
+    icone: 'checkroom',
+  ),
+  Categorie(
+    id: 'mode-homme',
+    slug: 'mode-homme',
+    nom: 'Mode homme',
+    icone: 'man',
+  ),
+  Categorie(
+    id: 'chaussures-sacs',
+    slug: 'chaussures-sacs',
+    nom: 'Chaussures & sacs',
+    icone: 'shopping_bag',
+  ),
+  Categorie(
+    id: 'beaute-cosmetiques',
+    slug: 'beaute-cosmetiques',
+    nom: 'Beauté & cosmétiques',
+    icone: 'spa',
+  ),
+  Categorie(
+    id: 'bijoux-accessoires',
+    slug: 'bijoux-accessoires',
+    nom: 'Bijoux & accessoires',
+    icone: 'diamond',
+  ),
+  Categorie(
+    id: 'telephones-electronique',
+    slug: 'telephones-electronique',
+    nom: 'Téléphones & électronique',
+    icone: 'smartphone',
+  ),
+  Categorie(
+    id: 'maison-deco',
+    slug: 'maison-deco',
+    nom: 'Maison & déco',
+    icone: 'chair',
+  ),
+  Categorie(
+    id: 'alimentation-epicerie',
+    slug: 'alimentation-epicerie',
+    nom: 'Alimentation & épicerie',
+    icone: 'shopping_basket',
+  ),
+  Categorie(
+    id: 'plats-traiteur',
+    slug: 'plats-traiteur',
+    nom: 'Plats & traiteur',
+    icone: 'restaurant',
+  ),
+  Categorie(
+    id: 'jus-boissons',
+    slug: 'jus-boissons',
+    nom: 'Jus & boissons',
+    icone: 'local_drink',
+  ),
+  Categorie(
+    id: 'patisserie-gateaux',
+    slug: 'patisserie-gateaux',
+    nom: 'Pâtisserie & gâteaux',
+    icone: 'cake',
+  ),
+  Categorie(
+    id: 'enfants-bebes',
+    slug: 'enfants-bebes',
+    nom: 'Enfants & bébés',
+    icone: 'child_care',
+  ),
+  Categorie(
+    id: 'sante-bien-etre',
+    slug: 'sante-bien-etre',
+    nom: 'Santé & bien-être',
+    icone: 'favorite',
+  ),
+  Categorie(
+    id: 'sport-loisirs',
+    slug: 'sport-loisirs',
+    nom: 'Sport & loisirs',
+    icone: 'sports_soccer',
+  ),
+  Categorie(
+    id: 'artisanat',
+    slug: 'artisanat',
+    nom: 'Artisanat & fait main',
+    icone: 'palette',
+  ),
+  Categorie(
+    id: 'services',
+    slug: 'services',
+    nom: 'Services',
+    icone: 'handyman',
+  ),
   Categorie(id: 'autre', slug: 'autre', nom: 'Autre', icone: 'more_horiz'),
 ];
 
@@ -105,7 +187,10 @@ class CategoriesRemoteDataSource {
     }
     try {
       final res = await dio.get('/categories');
-      final brut = (res.data is Map ? (res.data as Map)['categories'] : res.data) as List? ?? [];
+      final brut =
+          (res.data is Map ? (res.data as Map)['categories'] : res.data)
+              as List? ??
+          [];
       final liste = brut
           .whereType<Map>()
           .map((e) => Categorie.fromJson(Map<String, dynamic>.from(e)))
@@ -141,14 +226,20 @@ class CategoriesRemoteDataSource {
       },
     );
     final data = Map<String, dynamic>.from(res.data as Map);
-    final pagination = data['pagination'] is Map ? data['pagination'] as Map : const {};
+    final pagination = data['pagination'] is Map
+        ? data['pagination'] as Map
+        : const {};
     return PageCategorie(
-      categorie: Categorie.fromJson(Map<String, dynamic>.from(data['categorie'] as Map)),
+      categorie: Categorie.fromJson(
+        Map<String, dynamic>.from(data['categorie'] as Map),
+      ),
       boutiques: (data['boutiques'] as List? ?? [])
           .whereType<Map>()
           .map((e) => Map<String, dynamic>.from(e))
           .toList(),
-      total: (pagination['total'] is num) ? (pagination['total'] as num).toInt() : 0,
+      total: (pagination['total'] is num)
+          ? (pagination['total'] as num).toInt()
+          : 0,
     );
   }
 }

@@ -8,10 +8,10 @@ import '../bloc/compte_event.dart';
 import '../bloc/compte_state.dart';
 
 class _C {
-  static const green = Color(0xFF0D1B3D);
-  static const black = Color(0xFF0D1B3D);
+  static const green = Color(0xFF01154B);
+  static const black = Color(0xFF01154B);
   static const white = Color(0xFFFFFFFF);
-  static const bg = Color(0xFFF5F7FB);
+  static const bg = Color(0xFFF4F5F8);
   static const border = Color(0xFFE3E8F0);
 }
 
@@ -50,11 +50,13 @@ class _ResetPasswordViewState extends State<_ResetPasswordView> {
 
   void _confirmer() {
     if (!_formKey.currentState!.validate()) return;
-    context.read<CompteBloc>().add(ResetPasswordRequested(
-          email: widget.email,
-          code: _codeCtrl.text.trim(),
-          nouveauMotDePasse: _nouveauCtrl.text,
-        ));
+    context.read<CompteBloc>().add(
+      ResetPasswordRequested(
+        email: widget.email,
+        code: _codeCtrl.text.trim(),
+        nouveauMotDePasse: _nouveauCtrl.text,
+      ),
+    );
   }
 
   @override
@@ -71,11 +73,15 @@ class _ResetPasswordViewState extends State<_ResetPasswordView> {
         listener: (context, state) {
           if (state is CompteError) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message), backgroundColor: Colors.red),
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.red,
+              ),
             );
           } else if (state is CompteMessageSucces) {
-            Navigator.of(context)
-                .pushNamedAndRemoveUntil(AppRouter.loginRoute, (_) => false);
+            Navigator.of(
+              context,
+            ).pushNamedAndRemoveUntil(AppRouter.loginRoute, (_) => false);
           }
         },
         builder: (context, state) {
@@ -96,8 +102,9 @@ class _ResetPasswordViewState extends State<_ResetPasswordView> {
                 TextFormField(
                   controller: _nouveauCtrl,
                   obscureText: true,
-                  validator: (v) =>
-                      (v == null || v.length < 6) ? 'Au moins 6 caractères' : null,
+                  validator: (v) => (v == null || v.length < 6)
+                      ? 'Au moins 6 caractères'
+                      : null,
                   decoration: _decoration('Nouveau mot de passe'),
                 ),
                 const SizedBox(height: 24),
@@ -108,16 +115,22 @@ class _ResetPasswordViewState extends State<_ResetPasswordView> {
                     foregroundColor: _C.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14)),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
                   ),
                   child: loading
                       ? const SizedBox(
                           height: 20,
                           width: 20,
                           child: CircularProgressIndicator(
-                              strokeWidth: 2, color: Colors.white))
-                      : const Text('Réinitialiser',
-                          style: TextStyle(fontWeight: FontWeight.w700)),
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Text(
+                          'Réinitialiser',
+                          style: TextStyle(fontWeight: FontWeight.w700),
+                        ),
                 ),
               ],
             ),
@@ -128,21 +141,21 @@ class _ResetPasswordViewState extends State<_ResetPasswordView> {
   }
 
   InputDecoration _decoration(String label) => InputDecoration(
-        labelText: label,
-        filled: true,
-        fillColor: _C.white,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: _C.border),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: _C.green),
-        ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: _C.border),
-        ),
-      );
+    labelText: label,
+    filled: true,
+    fillColor: _C.white,
+    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+    enabledBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+      borderSide: const BorderSide(color: _C.border),
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+      borderSide: const BorderSide(color: _C.green),
+    ),
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+      borderSide: const BorderSide(color: _C.border),
+    ),
+  );
 }

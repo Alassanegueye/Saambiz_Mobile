@@ -5,11 +5,18 @@ import 'package:url_launcher/url_launcher.dart';
 class UrlExterne {
   UrlExterne._();
 
-  static const Set<String> _autorises = {'https', 'http', 'whatsapp', 'tel', 'mailto'};
+  static const Set<String> _autorises = {
+    'https',
+    'http',
+    'whatsapp',
+    'tel',
+    'mailto',
+  };
 
   static Future<bool> lancer(String url) async {
     final uri = Uri.tryParse(url);
-    if (uri == null || !_autorises.contains(uri.scheme.toLowerCase())) return false;
+    if (uri == null || !_autorises.contains(uri.scheme.toLowerCase()))
+      return false;
     try {
       return await launchUrl(uri, mode: LaunchMode.externalApplication);
     } catch (_) {

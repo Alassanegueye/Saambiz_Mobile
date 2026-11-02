@@ -34,12 +34,15 @@ class SignalementsRemoteDataSourceImpl implements SignalementsRemoteDataSource {
     required String description,
     required String cibleId,
   }) async {
-    final res = await dio.post(SignalementsEndpoints.signalements, data: {
-      'type': type,
-      'raison': raison,
-      'description': description,
-      'cibleId': cibleId,
-    });
+    final res = await dio.post(
+      SignalementsEndpoints.signalements,
+      data: {
+        'type': type,
+        'raison': raison,
+        'description': description,
+        'cibleId': cibleId,
+      },
+    );
     final data = res.data;
     final map = (data is Map && data['signalement'] is Map)
         ? data['signalement'] as Map<String, dynamic>
@@ -50,8 +53,8 @@ class SignalementsRemoteDataSourceImpl implements SignalementsRemoteDataSource {
   @override
   Future<List<SignalementModel>> mesSignalements() async {
     final res = await dio.get(SignalementsEndpoints.mesSignalements);
-    return _extractList(res.data)
-        .map((e) => SignalementModel.fromJson(e as Map<String, dynamic>))
-        .toList();
+    return _extractList(
+      res.data,
+    ).map((e) => SignalementModel.fromJson(e as Map<String, dynamic>)).toList();
   }
 }

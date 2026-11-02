@@ -24,7 +24,9 @@ class PaiementModel extends Paiement {
       statut: json['statut']?.toString() ?? '',
       date: json['createdAt'] != null
           ? DateTime.tryParse(json['createdAt'].toString())
-          : (json['date'] != null ? DateTime.tryParse(json['date'].toString()) : null),
+          : (json['date'] != null
+                ? DateTime.tryParse(json['date'].toString())
+                : null),
       transactionId: json['transactionId']?.toString(),
     );
   }
