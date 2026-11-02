@@ -9,6 +9,7 @@ import '../../../home/data/models/produit_model.dart';
 import '../bloc/vendeur_produit_bloc.dart';
 import 'produit_form_page.dart';
 import 'package:saambiz/core/utils/image_url.dart';
+import 'package:saambiz/core/utils/texte.dart';
 
 class _C {
   static const green = Color(0xFF01154B);
@@ -93,7 +94,6 @@ class _MesProduitsViewState extends State<_MesProduitsView> {
                     final all = state.produits;
                     final enLigne = all.where(_enLigne).toList();
                     final horsLigne = all.where((p) => !_enLigne(p)).toList();
-                    final q = _recherche.trim().toLowerCase();
                     final shown =
                         (_tab == 1
                                 ? enLigne
@@ -101,8 +101,7 @@ class _MesProduitsViewState extends State<_MesProduitsView> {
                                 ? horsLigne
                                 : all)
                             .where(
-                              (p) =>
-                                  q.isEmpty || p.nom.toLowerCase().contains(q),
+                              (p) => contientRecherche(p.nom, _recherche),
                             )
                             .toList();
 

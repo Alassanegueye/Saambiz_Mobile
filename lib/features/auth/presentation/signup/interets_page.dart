@@ -20,6 +20,49 @@ import 'signup_kit.dart';
 /// alors d'un appareil à l'autre) et cette copie locale sert de secours.
 const String kInteretsKey = 'client_interets';
 
+/// À qui appartient la copie locale : `invite`, ou l'identifiant du compte.
+///
+/// Sans ce marqueur, un invité héritait des choix du dernier compte connecté
+/// sur le téléphone (la déconnexion ne les effaçait pas) et voyait un accueil
+/// « Pour vous » qu'il n'avait jamais demandé.
+const String kInteretsProprietaireKey = 'client_interets_proprietaire';
+const String kProprietaireInvite = 'invite';
+
+/// Centres d'intérêt enregistrés sur l'appareil pour [proprietaire] ; vide
+/// s'ils appartiennent à quelqu'un d'autre (ou à une ancienne version de
+/// l'application, qui ne disait pas à qui).
+List<String> lireInteretsLocaux(String proprietaire) {
+  try {
+    final prefs = sl<SharedPreferences>();
+    if (prefs.getString(kInteretsProprietaireKey) != proprietaire) {
+      return const [];
+    }
+    return prefs.getStringList(kInteretsKey) ?? const [];
+  } catch (_) {
+    return const [];
+  }
+}
+
+Future<void> ecrireInteretsLocaux(
+  List<String> interets,
+  String proprietaire,
+) async {
+  final prefs = sl<SharedPreferences>();
+  await prefs.setStringList(kInteretsKey, interets);
+  await prefs.setString(kInteretsProprietaireKey, proprietaire);
+}
+
+/// À la déconnexion : les choix du compte ne doivent pas suivre l'invité.
+Future<void> effacerInteretsLocaux() async {
+  try {
+    final prefs = sl<SharedPreferences>();
+    await prefs.remove(kInteretsKey);
+    await prefs.remove(kInteretsProprietaireKey);
+  } catch (_) {
+    /* rien à effacer */
+  }
+}
+
 /// Centres d'intérêt du client.
 ///
 /// Trois entrées : après la vérification email (nouveau compte), juste après
@@ -57,21 +100,33 @@ class _InteretsPageState extends State<InteretsPage> {
   // assez de matière pour être différent de l'accueil générique.
   bool get _valide => _selection.length >= 2;
 
+  /// Propriétaire de la sélection : l'invité, ou le compte connecté.
+  String get _proprietaire =>
+      widget.isGuest ? kProprietaireInvite : (widget.user?.id ?? '');
+
   @override
   void initState() {
     super.initState();
     // En édition, on repart de la sélection existante plutôt que d'une
     // grille vide : le client ajuste, il ne recommence pas.
     if (widget.modeEdition) {
-      try {
-        _enregistrees =
-            sl<SharedPreferences>().getStringList(kInteretsKey) ?? const [];
-      } catch (_) {
-        /* grille vide */
-      }
+      _enregistrees = lireInteretsLocaux(_proprietaire);
       _reprendreSelection();
+      // Client connecté : la référence est sur le serveur (elle le suit
+      // d'un appareil à l'autre) ; la copie locale n'est qu'un premier jet.
+      if (!widget.isGuest) _chargerInteretsServeur();
     }
     _chargerCategories();
+  }
+
+  Future<void> _chargerInteretsServeur() async {
+    final interets = await AccueilRemoteDataSource(sl<Dio>()).interets();
+    if (!mounted || interets == null) return;
+    setState(() {
+      _enregistrees = interets;
+      _selection.clear();
+      _reprendreSelection();
+    });
   }
 
   Future<void> _chargerCategories() async {
@@ -102,7 +157,7 @@ class _InteretsPageState extends State<InteretsPage> {
     final choix = _selection.toList();
 
     try {
-      await sl<SharedPreferences>().setStringList(kInteretsKey, choix);
+      await ecrireInteretsLocaux(choix, _proprietaire);
     } catch (_) {
       // Confort d'affichage : on n'empêche pas d'entrer dans l'application
       // si l'écriture locale échoue.
@@ -148,7 +203,7 @@ class _InteretsPageState extends State<InteretsPage> {
       etape: widget.modeEdition ? null : 5,
       icone: Icons.favorite_border_rounded,
       titre: widget.modeEdition
-          ? 'Vos goûts'
+          ? 'Vos centres d’intérêt'
           : prenom == null || prenom.isEmpty
           ? 'Bienvenue !'
           : 'Bienvenue $prenom',

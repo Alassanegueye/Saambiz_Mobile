@@ -3,6 +3,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../../../core/services/token_service.dart';
 import '../../../../injection_container.dart';
 import '../../domain/usecases/login_user.dart';
+import '../signup/interets_page.dart' show effacerInteretsLocaux;
 import 'auth_event.dart';
 import 'auth_state.dart';
 
@@ -49,6 +50,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
       await sl<TokenService>().clearToken();
       await storage.delete(key: 'user_id');
+      // Les goûts du compte restent au compte (sur le serveur) : l'invité
+      // qui prend la suite sur ce téléphone repart d'un accueil neutre.
+      await effacerInteretsLocaux();
 
       emit(AuthInitial());
     } catch (e) {

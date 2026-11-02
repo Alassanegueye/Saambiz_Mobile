@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:saambiz/core/connection/auth_interceptor.dart';
+import 'core/routes/observateur_routes.dart';
 
 void main() async {
   // Capture toute erreur non interceptée (synchrone ou asynchrone) pour éviter
@@ -81,6 +82,7 @@ class MyApp extends StatelessWidget {
         scrollBehavior: const _DefilementSouple(),
         home: const AppBootstrap(),
         onGenerateRoute: AppRouter.onGenerateRoute,
+        navigatorObservers: [observateurRoutes],
         // Barre d'état par défaut : fond transparent, icônes sombres (heure,
         // réseau, batterie lisibles sur les écrans blancs). Sans ce réglage,
         // les icônes blanches laissées par un écran bleu (connexion,
