@@ -15,7 +15,10 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
     on<NotificationRecueTempsReel>(_onRecueTempsReel);
   }
 
-  Future<void> _onLoad(LoadNotifications event, Emitter<NotificationsState> emit) async {
+  Future<void> _onLoad(
+    LoadNotifications event,
+    Emitter<NotificationsState> emit,
+  ) async {
     emit(NotificationsLoading());
     final result = await repository.notifications();
     result.fold(
@@ -25,7 +28,9 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
   }
 
   Future<void> _onLoadNonLues(
-      LoadNombreNonLues event, Emitter<NotificationsState> emit) async {
+    LoadNombreNonLues event,
+    Emitter<NotificationsState> emit,
+  ) async {
     final result = await repository.nombreNonLues();
     result.fold(
       (f) => emit(NotificationsError(f.errorMessage)),
@@ -34,7 +39,9 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
   }
 
   Future<void> _onMarquerToutesLues(
-      MarquerToutesLues event, Emitter<NotificationsState> emit) async {
+    MarquerToutesLues event,
+    Emitter<NotificationsState> emit,
+  ) async {
     final result = await repository.marquerToutesLues();
     result.fold(
       (f) => emit(NotificationsError(f.errorMessage)),
@@ -43,7 +50,9 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
   }
 
   Future<void> _onMarquerLue(
-      MarquerNotificationLue event, Emitter<NotificationsState> emit) async {
+    MarquerNotificationLue event,
+    Emitter<NotificationsState> emit,
+  ) async {
     final result = await repository.marquerLue(event.id);
     result.fold(
       (f) => emit(NotificationsError(f.errorMessage)),
@@ -52,7 +61,9 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
   }
 
   Future<void> _onRecueTempsReel(
-      NotificationRecueTempsReel event, Emitter<NotificationsState> emit) async {
+    NotificationRecueTempsReel event,
+    Emitter<NotificationsState> emit,
+  ) async {
     // Une nouvelle notification est arrivée : on rafraîchit la liste.
     add(LoadNotifications());
   }

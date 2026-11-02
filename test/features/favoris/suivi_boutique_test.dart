@@ -16,13 +16,21 @@ void main() {
     });
 
     test('on peut suivre sans activer la cloche', () {
-      const suivi = SuiviBoutique(boutiqueId: 'b1', suivi: true, clocheActive: false);
+      const suivi = SuiviBoutique(
+        boutiqueId: 'b1',
+        suivi: true,
+        clocheActive: false,
+      );
       expect(suivi.suivi, isTrue);
       expect(suivi.clocheActive, isFalse);
     });
 
     test('copyWith ne touche qu\'au champ demandé', () {
-      const avant = SuiviBoutique(boutiqueId: 'b1', suivi: true, clocheActive: false);
+      const avant = SuiviBoutique(
+        boutiqueId: 'b1',
+        suivi: true,
+        clocheActive: false,
+      );
       final apres = avant.copyWith(clocheActive: true);
 
       expect(apres.suivi, isTrue);
@@ -32,8 +40,16 @@ void main() {
 
     test('deux états identiques sont égaux', () {
       // L'égalité de valeur évite les reconstructions inutiles de widgets.
-      const a = SuiviBoutique(boutiqueId: 'b1', suivi: true, clocheActive: true);
-      const b = SuiviBoutique(boutiqueId: 'b1', suivi: true, clocheActive: true);
+      const a = SuiviBoutique(
+        boutiqueId: 'b1',
+        suivi: true,
+        clocheActive: true,
+      );
+      const b = SuiviBoutique(
+        boutiqueId: 'b1',
+        suivi: true,
+        clocheActive: true,
+      );
       expect(a, equals(b));
     });
   });
@@ -53,7 +69,10 @@ void main() {
 
     test('copyWith bascule la cloche sans perdre le reste', () {
       const b = BoutiqueSuivie(
-        id: 'b1', nom: 'Sañse Couture', logo: 'logo.png', localisation: 'Dakar',
+        id: 'b1',
+        nom: 'Sañse Couture',
+        logo: 'logo.png',
+        localisation: 'Dakar',
       );
       final apres = b.copyWith(clocheActive: true);
 

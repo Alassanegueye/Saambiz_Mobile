@@ -16,7 +16,7 @@ Widget buildDetailChip({required IconData icon, required String label}) {
         const SizedBox(width: 4),
         Text(
           label,
-          style: GoogleFonts.plusJakartaSans(
+          style: GoogleFonts.inter(
             fontSize: 12,
             fontWeight: FontWeight.w500,
             color: AppColor.kGrayscaleDark100,

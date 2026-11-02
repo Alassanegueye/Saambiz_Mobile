@@ -5,7 +5,7 @@ import '../../../../core/errors/failure.dart';
 import '../datasources/messagerie_remote_datasource.dart';
 import '../models/message_model.dart';
 
-/// Repository messagerie — try/catch → Either<Failure, T> au-dessus du datasource.
+/// Repository messagerie, try/catch → Either<Failure, T> au-dessus du datasource.
 class MessagerieRepository {
   final MessagerieRemoteDataSource remote;
   MessagerieRepository(this.remote);
@@ -13,17 +13,24 @@ class MessagerieRepository {
   String _msg(Object e) {
     if (e is DioException) {
       final data = e.response?.data;
-      if (data is Map && data['message'] != null) return data['message'].toString();
+      if (data is Map && data['message'] != null)
+        return data['message'].toString();
       return e.message ?? 'Erreur réseau';
     }
     return e.toString();
   }
 
-  Future<Either<Failure, MessageModel>> envoyerMessage(
-      {required String destinataireId, required String contenu}) async {
+  Future<Either<Failure, MessageModel>> envoyerMessage({
+    required String destinataireId,
+    required String contenu,
+  }) async {
     try {
-      return Right(await remote.envoyerMessage(
-          destinataireId: destinataireId, contenu: contenu));
+      return Right(
+        await remote.envoyerMessage(
+          destinataireId: destinataireId,
+          contenu: contenu,
+        ),
+      );
     } catch (e) {
       return Left(ServerFailure(errorMessage: _msg(e)));
     }

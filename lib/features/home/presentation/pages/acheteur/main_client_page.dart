@@ -17,8 +17,7 @@ import '../../../../../core/widgets/ui_kit.dart';
 /// 2 favoris, 3 commandes, 4 compte.
 final ValueNotifier<int?> ongletAcheteurDemande = ValueNotifier<int?>(null);
 
-/// Espace acheteur : cinq onglets sous une barre de navigation flottante
-/// (même construction que l'application Yobante Boutique).
+/// Espace acheteur : cinq onglets, barre de navigation en bas d'écran.
 class MainAcheteurPage extends StatefulWidget {
   final User? user;
   final bool isGuest;
@@ -64,10 +63,8 @@ class _MainAcheteurPageState extends State<MainAcheteurPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColor.kBackground,
-      // Le contenu défile sous la barre flottante.
-      extendBody: true,
-      body: KeyedSubtree(
-        key: ValueKey(_selectedIndex),
+      body: TransitionOnglet(
+        index: _selectedIndex,
         child: _pages[_selectedIndex],
       ),
       bottomNavigationBar: BarreNavigationVerre(
@@ -118,9 +115,11 @@ class _FavorisInvite extends StatelessWidget {
             child: EtatVide(
               icone: Icons.favorite_border_rounded,
               titre: 'Vos boutiques préférées',
-              message: 'Connectez-vous pour suivre des boutiques et recevoir leurs nouveautés et promotions en premier.',
+              message:
+                  'Connectez-vous pour suivre des boutiques et recevoir leurs nouveautés et promotions en premier.',
               action: 'Se connecter',
-              onAction: () => Navigator.of(context).pushNamed(AppRouter.loginRoute),
+              onAction: () =>
+                  Navigator.of(context).pushNamed(AppRouter.loginRoute),
             ),
           ),
         ),

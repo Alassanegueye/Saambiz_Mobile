@@ -23,7 +23,7 @@ class CustomRichText extends StatelessWidget {
         textAlign: TextAlign.center,
         text: TextSpan(
           text: textePrincipal,
-          style: GoogleFonts.plusJakartaSans(
+          style: GoogleFonts.inter(
             color: AppColor.kGrayscale40,
             fontWeight: FontWeight.w600,
             fontSize: 14,

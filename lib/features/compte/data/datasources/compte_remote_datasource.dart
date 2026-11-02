@@ -55,8 +55,10 @@ class CompteRemoteDataSourceImpl implements CompteRemoteDataSource {
       if (adresse != null) 'adresse': adresse,
       if (telephone != null) 'telephone': telephone,
       if (photoProfilPath != null)
-        'photoProfil': await MultipartFile.fromFile(photoProfilPath,
-            filename: File(photoProfilPath).uri.pathSegments.last),
+        'photoProfil': await MultipartFile.fromFile(
+          photoProfilPath,
+          filename: File(photoProfilPath).uri.pathSegments.last,
+        ),
     });
     final res = await dio.put(CompteEndpoints.modifierProfil, data: form);
     return CompteModel.fromJson(res.data as Map<String, dynamic>);
@@ -67,10 +69,13 @@ class CompteRemoteDataSourceImpl implements CompteRemoteDataSource {
     required String ancienMotDePasse,
     required String nouveauMotDePasse,
   }) async {
-    await dio.put(CompteEndpoints.changePassword, data: {
-      'ancienMotDePasse': ancienMotDePasse,
-      'nouveauMotDePasse': nouveauMotDePasse,
-    });
+    await dio.put(
+      CompteEndpoints.changePassword,
+      data: {
+        'ancienMotDePasse': ancienMotDePasse,
+        'nouveauMotDePasse': nouveauMotDePasse,
+      },
+    );
   }
 
   @override
@@ -84,11 +89,14 @@ class CompteRemoteDataSourceImpl implements CompteRemoteDataSource {
     required String code,
     required String nouveauMotDePasse,
   }) async {
-    await dio.post(CompteEndpoints.resetPassword, data: {
-      'email': email,
-      'code': code,
-      'nouveauMotDePasse': nouveauMotDePasse,
-    });
+    await dio.post(
+      CompteEndpoints.resetPassword,
+      data: {
+        'email': email,
+        'code': code,
+        'nouveauMotDePasse': nouveauMotDePasse,
+      },
+    );
   }
 
   @override

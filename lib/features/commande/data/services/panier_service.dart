@@ -93,11 +93,13 @@ class PanierService extends ChangeNotifier {
   /// Transforme le panier en payload `items` pour l'API de création de commande.
   List<Map<String, dynamic>> toApiItems() {
     return _items
-        .map((e) => {
-              'produitId': e.produitId,
-              'quantite': e.quantite,
-              if (e.options.isNotEmpty) 'options': e.options,
-            })
+        .map(
+          (e) => {
+            'produitId': e.produitId,
+            'quantite': e.quantite,
+            if (e.options.isNotEmpty) 'options': e.options,
+          },
+        )
         .toList();
   }
 }

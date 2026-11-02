@@ -4,7 +4,7 @@ import '../../domain/entities/vitrine.dart';
 ///
 /// Les routes récentes répondent toutes `{ success, message, data }` ; les
 /// plus anciennes renvoient l'objet nu. Les fabriques descendent donc dans
-/// `data` quand il est là, et prennent la racine sinon — c'est ce qui permet
+/// `data` quand il est là, et prennent la racine sinon, c'est ce qui permet
 /// d'écrire les écrans sans se demander de quelle génération vient la route.
 Map<String, dynamic> deballer(dynamic json) {
   if (json is Map<String, dynamic>) {
@@ -88,7 +88,9 @@ class VitrineModel extends Vitrine {
       logoEnregistre: racine.containsKey('logoEnregistre')
           ? racine['logoEnregistre'] == true
           : null,
-      blocs: v['blocs'] is Map ? Map<String, dynamic>.from(v['blocs'] as Map) : const {},
+      blocs: v['blocs'] is Map
+          ? Map<String, dynamic>.from(v['blocs'] as Map)
+          : const {},
     );
   }
 }
@@ -111,20 +113,32 @@ class AnalyseLogoModel extends AnalyseLogo {
     final qualite = a['qualite'];
 
     return AnalyseLogoModel(
-      largeur: dimensions is Map ? (dimensions['largeur'] as num?)?.toInt() : null,
-      hauteur: dimensions is Map ? (dimensions['hauteur'] as num?)?.toInt() : null,
+      largeur: dimensions is Map
+          ? (dimensions['largeur'] as num?)?.toInt()
+          : null,
+      hauteur: dimensions is Map
+          ? (dimensions['hauteur'] as num?)?.toInt()
+          : null,
       forme: '${a['forme'] ?? 'libre'}',
       conseilForme: a['conseilForme']?.toString(),
       couleurs: (a['couleurs'] as List? ?? [])
           .whereType<Map>()
-          .map((c) => CouleurLogo(hex: '${c['hex']}', part: _versDouble(c['part'])))
+          .map(
+            (c) =>
+                CouleurLogo(hex: '${c['hex']}', part: _versDouble(c['part'])),
+          )
           .toList(),
       accentPropose: '${a['accentPropose'] ?? '#0D1B3D'}',
       palette: (a['palette'] as List? ?? [])
           .whereType<Map>()
-          .map((c) => CouleurProposee(hex: '${c['hex']}', nom: '${c['nom'] ?? ''}'))
+          .map(
+            (c) =>
+                CouleurProposee(hex: '${c['hex']}', nom: '${c['nom'] ?? ''}'),
+          )
           .toList(),
-      niveauQualite: qualite is Map ? '${qualite['niveau'] ?? 'inconnue'}' : 'inconnue',
+      niveauQualite: qualite is Map
+          ? '${qualite['niveau'] ?? 'inconnue'}'
+          : 'inconnue',
       messageQualite: qualite is Map ? qualite['message']?.toString() : null,
     );
   }
@@ -153,7 +167,10 @@ class PropositionVitrineModel extends PropositionVitrine {
       horaires: '${p['horaires'] ?? ''}',
       palette: (p['palette'] as List? ?? [])
           .whereType<Map>()
-          .map((c) => CouleurProposee(hex: '${c['hex']}', nom: '${c['nom'] ?? ''}'))
+          .map(
+            (c) =>
+                CouleurProposee(hex: '${c['hex']}', nom: '${c['nom'] ?? ''}'),
+          )
           .toList(),
       pourquoiModele: pourquoi is Map ? pourquoi['modele']?.toString() : null,
       pourquoiCouleur: pourquoi is Map ? pourquoi['couleur']?.toString() : null,
@@ -190,7 +207,8 @@ class SecteurVitrineModel extends SecteurVitrine {
     required super.modeleRecommande,
   });
 
-  factory SecteurVitrineModel.fromMap(Map<String, dynamic> s) => SecteurVitrineModel(
+  factory SecteurVitrineModel.fromMap(Map<String, dynamic> s) =>
+      SecteurVitrineModel(
         cle: '${s['cle']}',
         libelle: '${s['libelle']}',
         exemples: '${s['exemples'] ?? ''}',

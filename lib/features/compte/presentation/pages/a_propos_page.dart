@@ -25,11 +25,16 @@ class AProposPage extends StatelessWidget {
             child: Column(
               children: [
                 const SizedBox(height: 12),
-                Image.asset('assets/images/picto_navy.png', width: 76, height: 76, fit: BoxFit.contain),
+                Image.asset(
+                  'assets/images/picto_navy.png',
+                  width: 76,
+                  height: 76,
+                  fit: BoxFit.contain,
+                ),
                 const SizedBox(height: 14),
                 Text(
                   InfosApp.nom,
-                  style: GoogleFonts.plusJakartaSans(
+                  style: GoogleFonts.inter(
                     fontSize: 20,
                     fontWeight: FontWeight.w700,
                     color: AppColor.kPrimary,
@@ -38,13 +43,20 @@ class AProposPage extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   'Version ${InfosApp.version}',
-                  style: GoogleFonts.plusJakartaSans(fontSize: 13, color: AppColor.kGrayscale40),
+                  style: GoogleFonts.inter(
+                    fontSize: 13,
+                    color: AppColor.kGrayscale40,
+                  ),
                 ),
                 const SizedBox(height: 10),
                 Text(
                   'L\'application qui met la boutique des commerçants sénégalais en ligne.',
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.plusJakartaSans(fontSize: 13.5, height: 1.5, color: AppColor.kGrayscale40),
+                  style: GoogleFonts.inter(
+                    fontSize: 13.5,
+                    height: 1.5,
+                    color: AppColor.kGrayscale40,
+                  ),
                 ),
                 const SizedBox(height: 24),
               ],
@@ -64,7 +76,9 @@ class AProposPage extends StatelessWidget {
                 libelle: 'Conditions d\'utilisation',
                 sousTitre: 'Règles d\'utilisation de SaamBiz',
                 onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const ConditionUtilisation()),
+                  MaterialPageRoute(
+                    builder: (_) => const ConditionUtilisation(),
+                  ),
                 ),
               ),
               LigneProfil(
@@ -72,7 +86,9 @@ class AProposPage extends StatelessWidget {
                 libelle: 'Politique de confidentialité',
                 sousTitre: 'Ce que nous faisons de vos données',
                 onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const PolitiqueConfidentialite()),
+                  MaterialPageRoute(
+                    builder: (_) => const PolitiqueConfidentialite(),
+                  ),
                 ),
               ),
             ],

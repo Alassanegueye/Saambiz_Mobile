@@ -38,14 +38,19 @@ class BoutiqueBloc extends Bloc<BoutiqueEvent, BoutiqueState> {
     }
   }
 
-  Future<void> _onLoad(LoadMaBoutique event, Emitter<BoutiqueState> emit) async {
+  Future<void> _onLoad(
+    LoadMaBoutique event,
+    Emitter<BoutiqueState> emit,
+  ) async {
     emit(BoutiqueLoading());
     final result = await getMaBoutique();
     result.fold((f) => _emitFailure(f, emit), (b) => emit(BoutiqueLoaded(b)));
   }
 
   Future<void> _onCreer(
-      CreerBoutiqueRequested event, Emitter<BoutiqueState> emit) async {
+    CreerBoutiqueRequested event,
+    Emitter<BoutiqueState> emit,
+  ) async {
     emit(BoutiqueLoading());
     final result = await creerBoutique(
       nom: event.nom,
@@ -59,7 +64,9 @@ class BoutiqueBloc extends Bloc<BoutiqueEvent, BoutiqueState> {
   }
 
   Future<void> _onModifier(
-      ModifierBoutiqueRequested event, Emitter<BoutiqueState> emit) async {
+    ModifierBoutiqueRequested event,
+    Emitter<BoutiqueState> emit,
+  ) async {
     emit(BoutiqueLoading());
     final result = await modifierBoutique(
       nom: event.nom,
@@ -73,20 +80,18 @@ class BoutiqueBloc extends Bloc<BoutiqueEvent, BoutiqueState> {
   }
 
   Future<void> _onPause(
-      PauseBoutiqueRequested event, Emitter<BoutiqueState> emit) async {
+    PauseBoutiqueRequested event,
+    Emitter<BoutiqueState> emit,
+  ) async {
     final result = await pauseBoutique();
-    result.fold(
-      (f) => _emitFailure(f, emit),
-      (_) => add(LoadMaBoutique()),
-    );
+    result.fold((f) => _emitFailure(f, emit), (_) => add(LoadMaBoutique()));
   }
 
   Future<void> _onReactiver(
-      ReactiverBoutiqueRequested event, Emitter<BoutiqueState> emit) async {
+    ReactiverBoutiqueRequested event,
+    Emitter<BoutiqueState> emit,
+  ) async {
     final result = await reactiverBoutique();
-    result.fold(
-      (f) => _emitFailure(f, emit),
-      (_) => add(LoadMaBoutique()),
-    );
+    result.fold((f) => _emitFailure(f, emit), (_) => add(LoadMaBoutique()));
   }
 }

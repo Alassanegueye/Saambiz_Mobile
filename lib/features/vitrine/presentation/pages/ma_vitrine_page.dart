@@ -10,26 +10,26 @@ import '../bloc/vitrine_event.dart';
 import '../bloc/vitrine_state.dart';
 import 'assistant_vitrine_page.dart';
 
-/// Palette locale — même convention que les autres écrans vendeur.
+/// Palette locale, même convention que les autres écrans vendeur.
 class _C {
-  static const navy      = Color(0xFF0D1B3D);
+  static const navy = Color(0xFF01154B);
   static const navyLight = Color(0xFFE8EDF7);
-  static const gold      = Color(0xFFF2B705);
-  static const bg        = Color(0xFFF7F9FC);
-  static const white     = Color(0xFFFFFFFF);
-  static const border    = Color(0xFFE2E7F0);
-  static const text      = Color(0xFF0D1B3D);
-  static const muted     = Color(0xFF5B6C8A);
-  static const success   = Color(0xFF15803D);
+  static const gold = Color(0xFFFBB900);
+  static const bg = Color(0xFFF7F9FC);
+  static const white = Color(0xFFFFFFFF);
+  static const border = Color(0xFFE2E7F0);
+  static const text = Color(0xFF01154B);
+  static const muted = Color(0xFF5B6C8A);
+  static const success = Color(0xFF15803D);
   static const successBg = Color(0xFFE9F8EE);
 }
 
-/// « Mon site web » — le point d'entrée du site public de la boutique.
+/// « Mon site web », le point d'entrée du site public de la boutique.
 ///
 /// Deux écrans en un, selon que le site existe ou non :
 ///
 ///   - pas encore créé : on explique ce qu'est ce site et on ouvre l'assistant.
-///     C'est ici, dans l'application, que la création se fait — le tableau de
+///     C'est ici, dans l'application, que la création se fait, le tableau de
 ///     bord web renvoie vers cet écran ;
 ///   - déjà en ligne : l'adresse, de quoi la partager, et l'accès aux réglages.
 ///
@@ -61,16 +61,20 @@ class _VueVitrine extends StatelessWidget {
         elevation: 0,
         title: const Text(
           'Mon site web',
-          style: TextStyle(color: _C.text, fontWeight: FontWeight.w700, fontSize: 17),
+          style: TextStyle(
+            color: _C.text,
+            fontWeight: FontWeight.w700,
+            fontSize: 17,
+          ),
         ),
         iconTheme: const IconThemeData(color: _C.text),
       ),
       body: BlocConsumer<VitrineBloc, VitrineState>(
         listener: (context, state) {
           if (state is VitrineErreur) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message)),
-            );
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(state.message)));
           }
           // Retour de l'assistant : on recharge pour repartir d'un état sûr,
           // plutôt que de recomposer l'écran à partir de ce qu'il a renvoyé.
@@ -80,7 +84,9 @@ class _VueVitrine extends StatelessWidget {
         },
         builder: (context, state) {
           if (state is VitrineChargement || state is VitrineInitial) {
-            return const Center(child: CircularProgressIndicator(color: _C.navy));
+            return const Center(
+              child: CircularProgressIndicator(color: _C.navy),
+            );
           }
 
           if (state is VitrineSansBoutique) {
@@ -97,7 +103,8 @@ class _VueVitrine extends StatelessWidget {
               titre: 'Chargement impossible',
               texte: state.message,
               action: FilledButton(
-                onPressed: () => context.read<VitrineBloc>().add(ChargerVitrine()),
+                onPressed: () =>
+                    context.read<VitrineBloc>().add(ChargerVitrine()),
                 child: const Text('Réessayer'),
               ),
             );
@@ -145,7 +152,10 @@ class _SiteAcreer extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: _C.gold.withValues(alpha: 0.18),
                     borderRadius: BorderRadius.circular(999),
@@ -153,8 +163,10 @@ class _SiteAcreer extends StatelessWidget {
                   child: const Text(
                     'GRATUIT',
                     style: TextStyle(
-                      color: _C.gold, fontSize: 11,
-                      fontWeight: FontWeight.w800, letterSpacing: 0.8,
+                      color: _C.gold,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.8,
                     ),
                   ),
                 ),
@@ -162,8 +174,10 @@ class _SiteAcreer extends StatelessWidget {
                 const Text(
                   'Votre boutique a droit à son site web',
                   style: TextStyle(
-                    color: Colors.white, fontSize: 21,
-                    fontWeight: FontWeight.w800, height: 1.25,
+                    color: Colors.white,
+                    fontSize: 21,
+                    fontWeight: FontWeight.w800,
+                    height: 1.25,
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -173,7 +187,8 @@ class _SiteAcreer extends StatelessWidget {
                   'commandent directement, sans installer quoi que ce soit.',
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.82),
-                    fontSize: 13.5, height: 1.55,
+                    fontSize: 13.5,
+                    height: 1.55,
                   ),
                 ),
               ],
@@ -184,24 +199,31 @@ class _SiteAcreer extends StatelessWidget {
 
           const Text(
             'Comment ça se passe',
-            style: TextStyle(fontSize: 15.5, fontWeight: FontWeight.w700, color: _C.text),
+            style: TextStyle(
+              fontSize: 15.5,
+              fontWeight: FontWeight.w700,
+              color: _C.text,
+            ),
           ),
           const SizedBox(height: 12),
 
           const _Etape(
             numero: '1',
             titre: 'Vous déposez votre logo',
-            texte: 'Nous y relevons vos couleurs et sa forme, pour habiller le site avec.',
+            texte:
+                'Nous y relevons vos couleurs et sa forme, pour habiller le site avec.',
           ),
           const _Etape(
             numero: '2',
             titre: 'Vous dites ce que vous vendez',
-            texte: 'La mise en page et les textes s\'adaptent à votre activité.',
+            texte:
+                'La mise en page et les textes s\'adaptent à votre activité.',
           ),
           const _Etape(
             numero: '3',
             titre: 'Votre site est composé',
-            texte: 'Vous le relisez, vous corrigez ce que vous voulez, et vous le publiez.',
+            texte:
+                'Vous le relisez, vous corrigez ce que vous voulez, et vous le publiez.',
             dernier: true,
           ),
 
@@ -211,7 +233,9 @@ class _SiteAcreer extends StatelessWidget {
             style: FilledButton.styleFrom(
               backgroundColor: _C.navy,
               padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
             onPressed: () => _ouvrirAssistant(context, secteurs),
             child: const Text(
@@ -253,13 +277,19 @@ class _Etape extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: 28, height: 28,
+            width: 28,
+            height: 28,
             alignment: Alignment.center,
-            decoration: const BoxDecoration(color: _C.navyLight, shape: BoxShape.circle),
+            decoration: const BoxDecoration(
+              color: _C.navyLight,
+              shape: BoxShape.circle,
+            ),
             child: Text(
               numero,
               style: const TextStyle(
-                color: _C.navy, fontWeight: FontWeight.w800, fontSize: 13,
+                color: _C.navy,
+                fontWeight: FontWeight.w800,
+                fontSize: 13,
               ),
             ),
           ),
@@ -268,12 +298,23 @@ class _Etape extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(titre,
-                    style: const TextStyle(
-                        fontSize: 14.2, fontWeight: FontWeight.w700, color: _C.text)),
+                Text(
+                  titre,
+                  style: const TextStyle(
+                    fontSize: 14.2,
+                    fontWeight: FontWeight.w700,
+                    color: _C.text,
+                  ),
+                ),
                 const SizedBox(height: 2),
-                Text(texte,
-                    style: const TextStyle(fontSize: 13, color: _C.muted, height: 1.45)),
+                Text(
+                  texte,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: _C.muted,
+                    height: 1.45,
+                  ),
+                ),
               ],
             ),
           ),
@@ -313,33 +354,45 @@ class _SiteEnLigne extends StatelessWidget {
                 Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 9,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
-                        color: vitrine.active ? _C.successBg : const Color(0xFFF1F3F7),
+                        color: vitrine.active
+                            ? _C.successBg
+                            : const Color(0xFFF1F3F7),
                         borderRadius: BorderRadius.circular(999),
                       ),
                       child: Text(
                         vitrine.active ? 'En ligne' : 'Hors ligne',
                         style: TextStyle(
                           color: vitrine.active ? _C.success : _C.muted,
-                          fontSize: 11.5, fontWeight: FontWeight.w700,
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                     ),
                     const Spacer(),
                     if (vitrine.vues > 0)
-                      Text('${vitrine.vues} visites',
-                          style: const TextStyle(color: _C.muted, fontSize: 12)),
+                      Text(
+                        '${vitrine.vues} visites',
+                        style: const TextStyle(color: _C.muted, fontSize: 12),
+                      ),
                   ],
                 ),
                 const SizedBox(height: 14),
-                const Text('L\'adresse de votre site',
-                    style: TextStyle(color: _C.muted, fontSize: 12.5)),
+                const Text(
+                  'L\'adresse de votre site',
+                  style: TextStyle(color: _C.muted, fontSize: 12.5),
+                ),
                 const SizedBox(height: 5),
                 SelectableText(
                   vitrine.url,
                   style: const TextStyle(
-                    color: _C.navy, fontSize: 15.5, fontWeight: FontWeight.w700,
+                    color: _C.navy,
+                    fontSize: 15.5,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
 
@@ -348,7 +401,11 @@ class _SiteEnLigne extends StatelessWidget {
                   const Text(
                     'Votre site est fermé : cette adresse affiche une page '
                     '« boutique introuvable » à vos clients.',
-                    style: TextStyle(color: Color(0xFFB0850B), fontSize: 12.5, height: 1.45),
+                    style: TextStyle(
+                      color: Color(0xFFB0850B),
+                      fontSize: 12.5,
+                      height: 1.45,
+                    ),
                   ),
                 ],
 
@@ -361,12 +418,19 @@ class _SiteEnLigne extends StatelessWidget {
                           backgroundColor: _C.navy,
                           padding: const EdgeInsets.symmetric(vertical: 13),
                           shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10)),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
                         ),
-                        onPressed: () => _partagerWhatsapp(context, vitrine.url),
+                        onPressed: () =>
+                            _partagerWhatsapp(context, vitrine.url),
                         icon: const Icon(Icons.share_rounded, size: 17),
-                        label: const Text('Partager',
-                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700)),
+                        label: const Text(
+                          'Partager',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
                       ),
                     ),
                     const SizedBox(width: 9),
@@ -374,7 +438,9 @@ class _SiteEnLigne extends StatelessWidget {
                       icone: Icons.copy_rounded,
                       infobulle: 'Copier l\'adresse',
                       onTap: () async {
-                        await Clipboard.setData(ClipboardData(text: vitrine.url));
+                        await Clipboard.setData(
+                          ClipboardData(text: vitrine.url),
+                        );
                         if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(content: Text('Adresse copiée.')),
@@ -403,14 +469,18 @@ class _SiteEnLigne extends StatelessWidget {
             onTap: () => _ouvrirAssistant(context, secteurs, vitrine: vitrine),
           ),
           _Carte(
-            icone: vitrine.active ? Icons.visibility_off_outlined : Icons.public_rounded,
-            titre: vitrine.active ? 'Fermer mon site' : 'Remettre mon site en ligne',
+            icone: vitrine.active
+                ? Icons.visibility_off_outlined
+                : Icons.public_rounded,
+            titre: vitrine.active
+                ? 'Fermer mon site'
+                : 'Remettre mon site en ligne',
             sous: vitrine.active
                 ? 'Votre boutique reste visible dans l\'application'
                 : 'Vos clients pourront de nouveau y commander',
-            onTap: () => context
-                .read<VitrineBloc>()
-                .add(ModifierVitrineDemande({'active': !vitrine.active})),
+            onTap: () => context.read<VitrineBloc>().add(
+              ModifierVitrineDemande({'active': !vitrine.active}),
+            ),
           ),
 
           const SizedBox(height: 20),
@@ -433,7 +503,11 @@ class _SiteEnLigne extends StatelessWidget {
                   child: Text(
                     'Votre site ne vous coûte rien : aucun abonnement, aucune '
                     'commission sur vos ventes. Partagez-le sans crainte.',
-                    style: TextStyle(color: _C.navy, fontSize: 12.8, height: 1.5),
+                    style: TextStyle(
+                      color: _C.navy,
+                      fontSize: 12.8,
+                      height: 1.5,
+                    ),
                   ),
                 ),
               ],
@@ -464,7 +538,8 @@ class _BoutonIcone extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(10),
         child: Container(
-          width: 46, height: 46,
+          width: 46,
+          height: 46,
           decoration: BoxDecoration(
             border: Border.all(color: _C.border),
             borderRadius: BorderRadius.circular(10),
@@ -508,7 +583,8 @@ class _Carte extends StatelessWidget {
             child: Row(
               children: [
                 Container(
-                  width: 38, height: 38,
+                  width: 38,
+                  height: 38,
                   decoration: BoxDecoration(
                     color: _C.navyLight,
                     borderRadius: BorderRadius.circular(10),
@@ -520,12 +596,19 @@ class _Carte extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(titre,
-                          style: const TextStyle(
-                              fontSize: 14.5, fontWeight: FontWeight.w700, color: _C.text)),
+                      Text(
+                        titre,
+                        style: const TextStyle(
+                          fontSize: 14.5,
+                          fontWeight: FontWeight.w700,
+                          color: _C.text,
+                        ),
+                      ),
                       const SizedBox(height: 2),
-                      Text(sous,
-                          style: const TextStyle(fontSize: 12.5, color: _C.muted)),
+                      Text(
+                        sous,
+                        style: const TextStyle(fontSize: 12.5, color: _C.muted),
+                      ),
                     ],
                   ),
                 ),
@@ -562,14 +645,25 @@ class _MessageCentre extends StatelessWidget {
           children: [
             Icon(icone, size: 42, color: _C.muted),
             const SizedBox(height: 14),
-            Text(titre,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                    fontSize: 17, fontWeight: FontWeight.w700, color: _C.text)),
+            Text(
+              titre,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 17,
+                fontWeight: FontWeight.w700,
+                color: _C.text,
+              ),
+            ),
             const SizedBox(height: 8),
-            Text(texte,
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 13.5, color: _C.muted, height: 1.5)),
+            Text(
+              texte,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 13.5,
+                color: _C.muted,
+                height: 1.5,
+              ),
+            ),
             if (action != null) ...[const SizedBox(height: 18), action!],
           ],
         ),
@@ -617,7 +711,9 @@ Future<void> _partagerWhatsapp(BuildContext context, String url) async {
     await Clipboard.setData(ClipboardData(text: url));
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Adresse copiée : collez-la où vous voulez.')),
+        const SnackBar(
+          content: Text('Adresse copiée : collez-la où vous voulez.'),
+        ),
       );
     }
   }

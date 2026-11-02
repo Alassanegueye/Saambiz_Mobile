@@ -35,16 +35,16 @@ class VendeurProduitDataSource {
 
   Future<List<ProduitModel>> mesProduits() async {
     final res = await dio.get(VendeurProduitEndpoints.listeProduits);
-    return _extractList(res.data)
-        .map((e) => ProduitModel.fromJson(e as Map<String, dynamic>))
-        .toList();
+    return _extractList(
+      res.data,
+    ).map((e) => ProduitModel.fromJson(e as Map<String, dynamic>)).toList();
   }
 
   Future<List<CategorieModel>> categories() async {
     final res = await dio.get(VendeurProduitEndpoints.categories);
-    return _extractList(res.data)
-        .map((e) => CategorieModel.fromJson(e as Map<String, dynamic>))
-        .toList();
+    return _extractList(
+      res.data,
+    ).map((e) => CategorieModel.fromJson(e as Map<String, dynamic>)).toList();
   }
 
   Future<void> ajouterProduit({
@@ -64,8 +64,7 @@ class VendeurProduitDataSource {
       'categorieId': categorieId,
       // Caractéristiques de la catégorie, en JSON (formulaire multipart).
       if (attributs != null) 'attributs': jsonEncode(attributs),
-      if (imagePath != null)
-        'image': await MultipartFile.fromFile(imagePath),
+      if (imagePath != null) 'image': await MultipartFile.fromFile(imagePath),
     });
     await dio.post(VendeurProduitEndpoints.ajouterProduit, data: form);
   }
@@ -120,8 +119,7 @@ class VendeurProduitDataSource {
     await dio.delete(VendeurProduitEndpoints.image(produitId, imageId));
   }
 
-  // ── Dashboard / statistiques ──────────────────────────────────────────
-
+  // Dashboard / statistiques
   Future<Map<String, dynamic>> dashboard() async {
     final res = await dio.get(VendeurDashboardEndpoints.dashboard);
     return _extractMap(res.data);
@@ -152,8 +150,8 @@ class VendeurProduitDataSource {
       VendeurDashboardEndpoints.rechercheProduits,
       queryParameters: {'recherche': recherche},
     );
-    return _extractList(res.data)
-        .map((e) => ProduitModel.fromJson(e as Map<String, dynamic>))
-        .toList();
+    return _extractList(
+      res.data,
+    ).map((e) => ProduitModel.fromJson(e as Map<String, dynamic>)).toList();
   }
 }

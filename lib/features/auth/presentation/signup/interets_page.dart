@@ -66,7 +66,9 @@ class _InteretsPageState extends State<InteretsPage> {
       try {
         _enregistrees =
             sl<SharedPreferences>().getStringList(kInteretsKey) ?? const [];
-      } catch (_) {/* grille vide */}
+      } catch (_) {
+        /* grille vide */
+      }
       _reprendreSelection();
     }
     _chargerCategories();
@@ -148,8 +150,8 @@ class _InteretsPageState extends State<InteretsPage> {
       titre: widget.modeEdition
           ? 'Vos goûts'
           : prenom == null || prenom.isEmpty
-              ? 'Bienvenue !'
-              : 'Bienvenue $prenom',
+          ? 'Bienvenue !'
+          : 'Bienvenue $prenom',
       sousTitre: 'Choisissez au moins 2 catégories.',
       carte: [
         GridView.builder(
@@ -239,7 +241,7 @@ class _CategoryTile extends StatelessWidget {
                       child: Text(
                         label,
                         textAlign: TextAlign.center,
-                        style: GoogleFonts.plusJakartaSans(
+                        style: GoogleFonts.inter(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
                           color: Sb.navy,

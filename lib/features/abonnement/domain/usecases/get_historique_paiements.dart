@@ -8,5 +8,6 @@ class GetHistoriquePaiements {
   final AbonnementRepository repository;
   GetHistoriquePaiements(this.repository);
 
-  Future<Either<Failure, List<Paiement>>> call() => repository.historiquePaiements();
+  Future<Either<Failure, List<Paiement>>> call() =>
+      repository.historiquePaiements();
 }

@@ -9,13 +9,17 @@ abstract class NotificationsRemoteDataSource {
   Future<void> marquerToutesLues();
   Future<void> marquerLue(String id);
 
-  /// Device token FCM — la couche d'appel REST est prête, le token pourra
+  /// Device token FCM, la couche d'appel REST est prête, le token pourra
   /// être branché sur firebase_messaging plus tard (non présent au pubspec).
-  Future<void> registerDeviceToken({required String token, required String platform});
+  Future<void> registerDeviceToken({
+    required String token,
+    required String platform,
+  });
   Future<void> unregisterDeviceToken(String token);
 }
 
-class NotificationsRemoteDataSourceImpl implements NotificationsRemoteDataSource {
+class NotificationsRemoteDataSourceImpl
+    implements NotificationsRemoteDataSource {
   final Dio dio;
   NotificationsRemoteDataSourceImpl(this.dio);
 
@@ -58,15 +62,21 @@ class NotificationsRemoteDataSourceImpl implements NotificationsRemoteDataSource
   }
 
   @override
-  Future<void> registerDeviceToken(
-      {required String token, required String platform}) async {
-    await dio.post(NotificationsEndpoints.registerDeviceToken,
-        data: {'token': token, 'platform': platform});
+  Future<void> registerDeviceToken({
+    required String token,
+    required String platform,
+  }) async {
+    await dio.post(
+      NotificationsEndpoints.registerDeviceToken,
+      data: {'token': token, 'platform': platform},
+    );
   }
 
   @override
   Future<void> unregisterDeviceToken(String token) async {
-    await dio.delete(NotificationsEndpoints.unregisterDeviceToken,
-        data: {'token': token});
+    await dio.delete(
+      NotificationsEndpoints.unregisterDeviceToken,
+      data: {'token': token},
+    );
   }
 }

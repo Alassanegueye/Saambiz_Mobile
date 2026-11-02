@@ -20,12 +20,14 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<Either<Failure, User>> login(
-      String identifiant,
-      String motDePasse,
-      ) async {
+    String identifiant,
+    String motDePasse,
+  ) async {
     try {
-      final authResponse =
-      await remoteDataSource.login(identifiant, motDePasse);
+      final authResponse = await remoteDataSource.login(
+        identifiant,
+        motDePasse,
+      );
 
       await sl<TokenService>().setToken(authResponse.token);
 
@@ -41,17 +43,18 @@ class AuthRepositoryImpl implements AuthRepository {
       // apprend rien.
       String message = 'Une erreur est survenue';
 
-      if (e.response?.data is Map &&
-          e.response?.data['message'] != null) {
+      if (e.response?.data is Map && e.response?.data['message'] != null) {
         message = e.response!.data['message'];
       } else if (e.message != null) {
         message = e.message!;
       }
 
-      return Left(ServerFailure(
-        errorMessage: message,
-        statusCode: e.response?.statusCode,
-      ));
+      return Left(
+        ServerFailure(
+          errorMessage: message,
+          statusCode: e.response?.statusCode,
+        ),
+      );
     } catch (e) {
       return Left(ServerFailure(errorMessage: e.toString()));
     }

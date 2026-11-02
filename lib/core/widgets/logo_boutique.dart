@@ -9,23 +9,29 @@ class LogoBoutiqueParDefaut extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(builder: (context, contraintes) {
-      final cote = contraintes.biggest.shortestSide;
-      final taille = cote.isFinite && cote > 0 ? cote : 48.0;
-      return Container(
-        width: contraintes.hasBoundedWidth ? double.infinity : taille,
-        height: contraintes.hasBoundedHeight ? double.infinity : taille,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          borderRadius: rayon == null ? null : BorderRadius.circular(rayon!),
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFF2A4C96), Color(0xFF0D1B3D)],
+    return LayoutBuilder(
+      builder: (context, contraintes) {
+        final cote = contraintes.biggest.shortestSide;
+        final taille = cote.isFinite && cote > 0 ? cote : 48.0;
+        return Container(
+          width: contraintes.hasBoundedWidth ? double.infinity : taille,
+          height: contraintes.hasBoundedHeight ? double.infinity : taille,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            borderRadius: rayon == null ? null : BorderRadius.circular(rayon!),
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFF2A4C96), Color(0xFF01154B)],
+            ),
           ),
-        ),
-        child: Icon(Icons.shopping_bag_rounded, size: taille * 0.48, color: const Color(0xFFF2B705)),
-      );
-    });
+          child: Icon(
+            Icons.shopping_bag_rounded,
+            size: taille * 0.48,
+            color: const Color(0xFFFBB900),
+          ),
+        );
+      },
+    );
   }
 }

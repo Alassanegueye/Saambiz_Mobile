@@ -4,22 +4,23 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class PrimaryTextFormField extends StatelessWidget {
-  const PrimaryTextFormField(
-      {super.key,
-      required this.hintText,
-      this.keyboardType,
-      required this.controller,
-      required this.width,
-      required this.height,
-      this.hintTextColor,
-      this.onChanged,
-      this.onTapOutside,
-      this.prefixIcon,
-      this.prefixIconColor,
-      this.inputFormatters,
-      this.maxLines = 1, // Par défaut, une seule ligne
-      this.borderRadius,
-      this.validator}); // Ajout du validateur
+  const PrimaryTextFormField({
+    super.key,
+    required this.hintText,
+    this.keyboardType,
+    required this.controller,
+    required this.width,
+    required this.height,
+    this.hintTextColor,
+    this.onChanged,
+    this.onTapOutside,
+    this.prefixIcon,
+    this.prefixIconColor,
+    this.inputFormatters,
+    this.maxLines = 1, // Par défaut, une seule ligne
+    this.borderRadius,
+    this.validator,
+  }); // Ajout du validateur
 
   final BorderRadiusGeometry? borderRadius;
   final String hintText;
@@ -40,14 +41,15 @@ class PrimaryTextFormField extends StatelessWidget {
       width: width,
       height: height,
       decoration: BoxDecoration(
-          borderRadius: borderRadius,
-          color: AppColor.kBackground,
-          border: Border.all(color: AppColor.kLine)),
+        borderRadius: borderRadius,
+        color: AppColor.kBackground,
+        border: Border.all(color: AppColor.kLine),
+      ),
       child: TextFormField(
         controller: controller,
         maxLines: maxLines,
         keyboardType: keyboardType,
-        style: GoogleFonts.plusJakartaSans(
+        style: GoogleFonts.inter(
           color: AppColor.kGrayscaleDark100,
           fontSize: 14,
           fontWeight: FontWeight.w500,
@@ -55,12 +57,14 @@ class PrimaryTextFormField extends StatelessWidget {
         validator: validator, // Passage du validateur au TextFormField
         decoration: InputDecoration(
           border: InputBorder.none, // La bordure est gérée par le Container
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 15,
+          ),
           filled: true,
           fillColor: Colors.transparent, // Le Container gère la couleur
           hintText: hintText,
-          hintStyle: GoogleFonts.plusJakartaSans(
+          hintStyle: GoogleFonts.inter(
             color: AppColor.kGrayscale40,
             fontWeight: FontWeight.w500,
             fontSize: 14,

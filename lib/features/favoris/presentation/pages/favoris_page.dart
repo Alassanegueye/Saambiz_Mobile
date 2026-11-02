@@ -13,10 +13,10 @@ import '../../../catalogue/data/favoris_produits.dart';
 import '../../../catalogue/presentation/widgets/produit_card.dart';
 
 class _C {
-  static const green = Color(0xFF0D1B3D);
-  static const black = Color(0xFF0D1B3D);
+  static const green = Color(0xFF01154B);
+  static const black = Color(0xFF01154B);
   static const white = Color(0xFFFFFFFF);
-  static const bg = Color(0xFFF5F7FB);
+  static const bg = Color(0xFFF4F5F8);
   static const sub = Color(0xFF5B6C8A);
   static const border = Color(0xFFE3E8F0);
 }
@@ -53,99 +53,120 @@ class _FavorisView extends StatelessWidget {
           const _ProduitsAimes(),
           Expanded(
             child: BlocConsumer<FavorisBloc, FavorisState>(
-        listener: (context, state) {
-          if (state is FavorisError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message), backgroundColor: Colors.red),
-            );
-          }
-        },
-        builder: (context, state) {
-          if (state is FavorisLoading || state is FavorisInitial) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (state is FavorisLoaded) {
-            if (state.boutiques.isEmpty) {
-              return const Center(
-                child: Text('Aucune boutique favorite pour le moment',
-                    style: TextStyle(color: _C.sub)),
-              );
-            }
-            return RefreshIndicator(
-              onRefresh: () async =>
-                  context.read<FavorisBloc>().add(LoadFavoris()),
-              child: ListView.separated(
-                padding: const EdgeInsets.all(16),
-                itemCount: state.boutiques.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 12),
-                itemBuilder: (context, i) {
-                  final b = state.boutiques[i];
-                  return Container(
-                    decoration: BoxDecoration(
-                      color: _C.white,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: _C.border),
-                    ),
-                    padding: const EdgeInsets.all(10),
-                    child: Row(
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(12),
-                          child: (b.logo ?? '').isNotEmpty
-                              ? CachedNetworkImage(
-                                  imageUrl: imageOptimisee(b.logo!),
-                                  width: 56,
-                                  height: 56,
-                                  fit: BoxFit.cover,
-                                  errorWidget: (_, __, ___) => _fallback())
-                              : _fallback(),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(b.nom,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.w700, color: _C.black)),
-                              const SizedBox(height: 2),
-                              Text(b.localisation ?? 'Localisation non précisée',
-                                  style: const TextStyle(color: _C.sub, fontSize: 12)),
-                            ],
-                          ),
-                        ),
-                        // 🔔 Cloche : notifications nouveaux produits / promos
-                        IconButton(
-                          tooltip: b.clocheActive
-                              ? 'Désactiver les notifications'
-                              : 'Activer les notifications',
-                          icon: Icon(
-                            b.clocheActive
-                                ? Icons.notifications_active
-                                : Icons.notifications_off_outlined,
-                            color: b.clocheActive ? _C.green : _C.sub,
-                          ),
-                          onPressed: () => context
-                              .read<FavorisBloc>()
-                              .add(ToggleClocheFavori(b.id, !b.clocheActive)),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.favorite, color: Colors.redAccent),
-                          onPressed: () => context
-                              .read<FavorisBloc>()
-                              .add(SupprimerFavori(b.id)),
-                        ),
-                      ],
+              listener: (context, state) {
+                if (state is FavorisError) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(state.message),
+                      backgroundColor: Colors.red,
                     ),
                   );
-                },
-              ),
-            );
-          }
-          return const SizedBox.shrink();
-        },
+                }
+              },
+              builder: (context, state) {
+                if (state is FavorisLoading || state is FavorisInitial) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (state is FavorisLoaded) {
+                  if (state.boutiques.isEmpty) {
+                    return const Center(
+                      child: Text(
+                        'Aucune boutique favorite pour le moment',
+                        style: TextStyle(color: _C.sub),
+                      ),
+                    );
+                  }
+                  return RefreshIndicator(
+                    onRefresh: () async =>
+                        context.read<FavorisBloc>().add(LoadFavoris()),
+                    child: ListView.separated(
+                      padding: const EdgeInsets.all(16),
+                      itemCount: state.boutiques.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 12),
+                      itemBuilder: (context, i) {
+                        final b = state.boutiques[i];
+                        return Container(
+                          decoration: BoxDecoration(
+                            color: _C.white,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: _C.border),
+                          ),
+                          padding: const EdgeInsets.all(10),
+                          child: Row(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: (b.logo ?? '').isNotEmpty
+                                    ? CachedNetworkImage(
+                                        imageUrl: imageOptimisee(b.logo!),
+                                        width: 56,
+                                        height: 56,
+                                        fit: BoxFit.cover,
+                                        errorWidget: (_, __, ___) =>
+                                            _fallback(),
+                                      )
+                                    : _fallback(),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      b.nom,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w700,
+                                        color: _C.black,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      b.localisation ??
+                                          'Localisation non précisée',
+                                      style: const TextStyle(
+                                        color: _C.sub,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              // 🔔 Cloche : notifications nouveaux produits / promos
+                              IconButton(
+                                tooltip: b.clocheActive
+                                    ? 'Désactiver les notifications'
+                                    : 'Activer les notifications',
+                                icon: Icon(
+                                  b.clocheActive
+                                      ? Icons.notifications_active
+                                      : Icons.notifications_off_outlined,
+                                  color: b.clocheActive ? _C.green : _C.sub,
+                                ),
+                                onPressed: () =>
+                                    context.read<FavorisBloc>().add(
+                                      ToggleClocheFavori(b.id, !b.clocheActive),
+                                    ),
+                              ),
+                              IconButton(
+                                icon: const Icon(
+                                  Icons.favorite,
+                                  color: Colors.redAccent,
+                                ),
+                                onPressed: () => context
+                                    .read<FavorisBloc>()
+                                    .add(SupprimerFavori(b.id)),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                }
+                return const SizedBox.shrink();
+              },
             ),
           ),
         ],
@@ -153,11 +174,8 @@ class _FavorisView extends StatelessWidget {
     );
   }
 
-  Widget _fallback() => const SizedBox(
-        width: 56,
-        height: 56,
-        child: LogoBoutiqueParDefaut(),
-      );
+  Widget _fallback() =>
+      const SizedBox(width: 56, height: 56, child: LogoBoutiqueParDefaut());
 }
 
 /// Les produits aimés, sur une ligne qui défile. Rien tant qu'il n'y en a pas.
@@ -180,8 +198,14 @@ class _ProduitsAimes extends StatelessWidget {
             children: [
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Text('Produits aimés (${produits.length})',
-                    style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16, color: _C.black)),
+                child: Text(
+                  'Produits aimés (${produits.length})',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 16,
+                    color: _C.black,
+                  ),
+                ),
               ),
               const SizedBox(height: 10),
               SizedBox(
@@ -191,7 +215,10 @@ class _ProduitsAimes extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   itemCount: produits.length,
                   separatorBuilder: (_, __) => const SizedBox(width: 10),
-                  itemBuilder: (_, i) => SizedBox(width: largeur, child: ProduitCard(produit: produits[i])),
+                  itemBuilder: (_, i) => SizedBox(
+                    width: largeur,
+                    child: ProduitCard(produit: produits[i]),
+                  ),
                 ),
               ),
             ],

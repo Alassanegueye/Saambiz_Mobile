@@ -5,7 +5,7 @@ import 'package:saambiz/core/theme/app_dimensions.dart';
 import 'package:saambiz/core/theme/app_typo.dart';
 
 /// Ce fichier contenait le test « Counter increments » généré par
-/// `flutter create` — il vérifiait un compteur qui n'a jamais existé dans
+/// `flutter create`, il vérifiait un compteur qui n'a jamais existé dans
 /// cette application et échouait donc à chaque exécution. Un test rouge en
 /// permanence finit par être ignoré, et emporte les vrais avec lui.
 ///
@@ -33,10 +33,17 @@ void main() {
       // 11 pt est le plancher raisonnable sur mobile ; en dessous, le texte
       // devient illisible pour une partie des utilisateurs.
       final toutes = [
-        TailleTexte.titreXL, TailleTexte.titreL, TailleTexte.titreM,
-        TailleTexte.titreS, TailleTexte.corps, TailleTexte.petit,
-        TailleTexte.minuscule, TailleTexte.bouton, TailleTexte.etiquette,
-        TailleTexte.prix, TailleTexte.prixGrand,
+        TailleTexte.titreXL,
+        TailleTexte.titreL,
+        TailleTexte.titreM,
+        TailleTexte.titreS,
+        TailleTexte.corps,
+        TailleTexte.petit,
+        TailleTexte.minuscule,
+        TailleTexte.bouton,
+        TailleTexte.etiquette,
+        TailleTexte.prix,
+        TailleTexte.prixGrand,
       ];
       for (final t in toutes) {
         expect(t, greaterThanOrEqualTo(11));
@@ -60,7 +67,10 @@ void main() {
 
     test('les cibles tactiles respectent le minimum des plateformes', () {
       // 48 dp : en dessous, le bouton devient difficile à atteindre au pouce.
-      expect(AppDim.hauteurBouton, greaterThanOrEqualTo(AppDim.cibleTactileMin));
+      expect(
+        AppDim.hauteurBouton,
+        greaterThanOrEqualTo(AppDim.cibleTactileMin),
+      );
       expect(AppDim.hauteurChamp, greaterThanOrEqualTo(AppDim.cibleTactileMin));
     });
 
@@ -81,10 +91,14 @@ void main() {
     });
 
     test('les nuances de gris sont ordonnées du foncé au clair', () {
-      expect(AppColor.kGrayscale80.computeLuminance(),
-          lessThan(AppColor.kGrayscale40.computeLuminance()));
-      expect(AppColor.kGrayscale40.computeLuminance(),
-          lessThan(AppColor.kGrayscale20.computeLuminance()));
+      expect(
+        AppColor.kGrayscale80.computeLuminance(),
+        lessThan(AppColor.kGrayscale40.computeLuminance()),
+      );
+      expect(
+        AppColor.kGrayscale40.computeLuminance(),
+        lessThan(AppColor.kGrayscale20.computeLuminance()),
+      );
     });
 
     test('le texte fort contraste suffisamment avec le fond', () {

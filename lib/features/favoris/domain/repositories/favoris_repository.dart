@@ -7,7 +7,7 @@ import '../entities/suivi_boutique.dart';
 /// Contrat de la couche données pour les abonnements aux boutiques.
 ///
 /// La présentation ne connaît que cette interface : elle ignore qu'il y a du
-/// Dio derrière, et aucune exception ne peut lui remonter — tout échec est un
+/// Dio derrière, et aucune exception ne peut lui remonter, tout échec est un
 /// [Failure] typé qu'elle sait afficher.
 abstract class FavorisRepository {
   /// Ajoute la boutique aux favoris. La cloche reste désactivée.

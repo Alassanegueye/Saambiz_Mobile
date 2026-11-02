@@ -24,7 +24,7 @@ class AidePage extends StatelessWidget {
     ),
     (
       'Où trouver le lien de ma boutique ?',
-      "Dans Compte → Mon site web. Votre boutique a sa propre adresse, saambiz.com/b/votre-boutique : partagez-la sur WhatsApp ou Instagram, vos clients commandent sans installer l'application.",
+      "Dans Compte, puis Mon site web. Votre boutique a sa propre adresse, saambiz.com/b/votre-boutique : partagez-la sur WhatsApp ou Instagram, vos clients commandent sans installer l'application.",
     ),
     (
       'Je n\'ai pas reçu le code de confirmation',
@@ -40,7 +40,7 @@ class AidePage extends StatelessWidget {
     ),
     (
       'Comment supprimer mon compte ?',
-      'Compte → Sécurité → Supprimer mon compte. La suppression est définitive.',
+      'Compte, puis Sécurité, puis Supprimer mon compte. La suppression est définitive.',
     ),
   ];
 
@@ -48,7 +48,9 @@ class AidePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColor.kBackground,
-      appBar: AppAppBar(title: contactSeulement ? 'Nous contacter' : 'Centre d\'aide'),
+      appBar: AppAppBar(
+        title: contactSeulement ? 'Nous contacter' : 'Centre d\'aide',
+      ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
         children: [
@@ -57,7 +59,7 @@ class AidePage extends StatelessWidget {
               padding: const EdgeInsets.only(left: 4, bottom: 10),
               child: Text(
                 'Questions fréquentes',
-                style: GoogleFonts.plusJakartaSans(
+                style: GoogleFonts.inter(
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
                   color: AppColor.kGrayscale40,
@@ -72,15 +74,22 @@ class AidePage extends StatelessWidget {
                 children: [
                   for (var i = 0; i < _faq.length; i++) ...[
                     Theme(
-                      data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+                      data: Theme.of(
+                        context,
+                      ).copyWith(dividerColor: Colors.transparent),
                       child: ExpansionTile(
                         tilePadding: const EdgeInsets.symmetric(horizontal: 16),
-                        childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                        childrenPadding: const EdgeInsets.fromLTRB(
+                          16,
+                          0,
+                          16,
+                          16,
+                        ),
                         iconColor: AppColor.kPrimary,
                         collapsedIconColor: AppColor.kGrayscale30,
                         title: Text(
                           _faq[i].$1,
-                          style: GoogleFonts.plusJakartaSans(
+                          style: GoogleFonts.inter(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
                             color: AppColor.kGrayscaleDark100,
@@ -91,7 +100,7 @@ class AidePage extends StatelessWidget {
                             alignment: Alignment.centerLeft,
                             child: Text(
                               _faq[i].$2,
-                              style: GoogleFonts.plusJakartaSans(
+                              style: GoogleFonts.inter(
                                 fontSize: 13.5,
                                 height: 1.55,
                                 color: AppColor.kGrayscale40,
@@ -101,7 +110,13 @@ class AidePage extends StatelessWidget {
                         ],
                       ),
                     ),
-                    if (i < _faq.length - 1) const Divider(height: 1, indent: 16, endIndent: 16, color: AppColor.kLine),
+                    if (i < _faq.length - 1)
+                      const Divider(
+                        height: 1,
+                        indent: 16,
+                        endIndent: 16,
+                        color: AppColor.kLine,
+                      ),
                   ],
                 ],
               ),
@@ -115,19 +130,24 @@ class AidePage extends StatelessWidget {
                 icone: Icons.chat_outlined,
                 libelle: 'WhatsApp',
                 sousTitre: 'Réponse rapide, 7j/7',
-                onTap: () => _ouvrir(context, 'https://wa.me/${InfosApp.supportWhatsapp}'),
+                onTap: () => _ouvrir(
+                  context,
+                  'https://wa.me/${InfosApp.supportWhatsapp}',
+                ),
               ),
               LigneProfil(
                 icone: Icons.email_outlined,
                 libelle: InfosApp.supportEmail,
                 sousTitre: 'Par e-mail',
-                onTap: () => _ouvrir(context, 'mailto:${InfosApp.supportEmail}'),
+                onTap: () =>
+                    _ouvrir(context, 'mailto:${InfosApp.supportEmail}'),
               ),
               LigneProfil(
                 icone: Icons.phone_outlined,
                 libelle: InfosApp.supportTelephone,
                 sousTitre: 'Par téléphone',
-                onTap: () => _ouvrir(context, 'tel:${InfosApp.supportTelephone}'),
+                onTap: () =>
+                    _ouvrir(context, 'tel:${InfosApp.supportTelephone}'),
               ),
             ],
           ),
@@ -140,7 +160,9 @@ class AidePage extends StatelessWidget {
     final ok = await UrlExterne.lancer(url);
     if (!ok && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Impossible d\'ouvrir ce lien sur cet appareil.')),
+        const SnackBar(
+          content: Text('Impossible d\'ouvrir ce lien sur cet appareil.'),
+        ),
       );
     }
   }

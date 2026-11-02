@@ -30,7 +30,7 @@ class ChampsSpecifications extends StatefulWidget {
 }
 
 class _ChampsSpecificationsState extends State<ChampsSpecifications> {
-  static const _navy = Color(0xFF0D1B3D);
+  static const _navy = Color(0xFF01154B);
   static const _border = Color(0xFFE2E7F0);
   static const _sub = Color(0xFF6B7891);
 
@@ -56,23 +56,28 @@ class _ChampsSpecificationsState extends State<ChampsSpecifications> {
     final connues = widget.specifications.map((s) => s.cle).toSet();
     final ajoutees = widget.valeurs.keys
         .where((cle) => !connues.contains(cle))
-        .map((cle) => SpecificationProduit(
-              cle: cle,
-              libelle: cle,
-              type: widget.valeurs[cle] is List ? 'variantes' : 'texte',
-              libre: true,
-            ));
+        .map(
+          (cle) => SpecificationProduit(
+            cle: cle,
+            libelle: cle,
+            type: widget.valeurs[cle] is List ? 'variantes' : 'texte',
+            libre: true,
+          ),
+        );
     return [...widget.specifications, ...ajoutees];
   }
 
-  bool _estAjoutee(String cle) => !widget.specifications.any((s) => s.cle == cle);
+  bool _estAjoutee(String cle) =>
+      !widget.specifications.any((s) => s.cle == cle);
 
   void _ajouterOption() {
     final nom = _nouveauNom.text.trim();
     if (nom.isEmpty) return;
-    final existe = _champs.any((c) =>
-        c.cle.toLowerCase() == nom.toLowerCase() ||
-        c.libelle.toLowerCase() == nom.toLowerCase());
+    final existe = _champs.any(
+      (c) =>
+          c.cle.toLowerCase() == nom.toLowerCase() ||
+          c.libelle.toLowerCase() == nom.toLowerCase(),
+    );
     if (!existe) _maj(nom.length > 40 ? nom.substring(0, 40) : nom, <String>[]);
     _nouveauNom.clear();
   }
@@ -95,11 +100,19 @@ class _ChampsSpecificationsState extends State<ChampsSpecifications> {
               children: [
                 TextSpan(
                   text: '  (facultatif)',
-                  style: TextStyle(fontWeight: FontWeight.w500, color: _sub, fontSize: 12.5),
+                  style: TextStyle(
+                    fontWeight: FontWeight.w500,
+                    color: _sub,
+                    fontSize: 12.5,
+                  ),
                 ),
               ],
             ),
-            style: TextStyle(fontWeight: FontWeight.w700, color: _navy, fontSize: 15),
+            style: TextStyle(
+              fontWeight: FontWeight.w700,
+              color: _navy,
+              fontSize: 15,
+            ),
           ),
           const SizedBox(height: 4),
           const Text(
@@ -116,17 +129,30 @@ class _ChampsSpecificationsState extends State<ChampsSpecifications> {
                       text: s.libelle,
                       children: [
                         if (s.obligatoire)
-                          const TextSpan(text: ' *', style: TextStyle(color: Colors.red)),
+                          const TextSpan(
+                            text: ' *',
+                            style: TextStyle(color: Colors.red),
+                          ),
                       ],
                     ),
-                    style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600, color: _navy),
+                    style: const TextStyle(
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w600,
+                      color: _navy,
+                    ),
                   ),
                 ),
                 if (_estAjoutee(s.cle))
                   GestureDetector(
                     onTap: () => _retirer(s.cle),
-                    child: const Text('Retirer',
-                        style: TextStyle(fontSize: 12, color: _sub, decoration: TextDecoration.underline)),
+                    child: const Text(
+                      'Retirer',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: _sub,
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
                   ),
               ],
             ),
@@ -135,8 +161,10 @@ class _ChampsSpecificationsState extends State<ChampsSpecifications> {
             if (widget.erreurs[s.cle] != null)
               Padding(
                 padding: const EdgeInsets.only(top: 4),
-                child: Text(widget.erreurs[s.cle]!,
-                    style: const TextStyle(fontSize: 12, color: Colors.red)),
+                child: Text(
+                  widget.erreurs[s.cle]!,
+                  style: const TextStyle(fontSize: 12, color: Colors.red),
+                ),
               ),
             const SizedBox(height: 14),
           ],
@@ -182,7 +210,9 @@ class _ChampsSpecificationsState extends State<ChampsSpecifications> {
           initialValue: s.options.contains(v) ? v as String : null,
           isExpanded: true,
           decoration: _decoration('Choisir'),
-          items: s.options.map((o) => DropdownMenuItem(value: o, child: Text(o))).toList(),
+          items: s.options
+              .map((o) => DropdownMenuItem(value: o, child: Text(o)))
+              .toList(),
           onChanged: (o) => _maj(s.cle, o),
         );
       case 'oui_non':
@@ -200,7 +230,8 @@ class _ChampsSpecificationsState extends State<ChampsSpecifications> {
           initialValue: v?.toString() ?? '',
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
           decoration: _decoration('', suffixe: s.unite),
-          onChanged: (t) => _maj(s.cle, num.tryParse(t.replaceAll(',', '.')) ?? t),
+          onChanged: (t) =>
+              _maj(s.cle, num.tryParse(t.replaceAll(',', '.')) ?? t),
         );
       default:
         return TextFormField(
@@ -217,12 +248,17 @@ class _ChampsSpecificationsState extends State<ChampsSpecifications> {
   static List<String> _enListe(dynamic v) {
     if (v is List) return v.map((e) => e.toString()).toList();
     if (v is String && v.trim().isNotEmpty) {
-      return v.split(RegExp(r',\s+')).map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+      return v
+          .split(RegExp(r',\s+'))
+          .map((e) => e.trim())
+          .where((e) => e.isNotEmpty)
+          .toList();
     }
     return const [];
   }
 
-  static InputDecoration _decoration(String hint, {String? suffixe}) => InputDecoration(
+  static InputDecoration _decoration(String hint, {String? suffixe}) =>
+      InputDecoration(
         hintText: hint.isEmpty ? null : hint,
         hintStyle: const TextStyle(fontSize: 13, color: Color(0xFF9AA5B8)),
         suffixText: suffixe,
@@ -230,7 +266,10 @@ class _ChampsSpecificationsState extends State<ChampsSpecifications> {
         isDense: true,
         filled: true,
         fillColor: Colors.white,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 12,
+          vertical: 12,
+        ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: _border),
@@ -253,14 +292,18 @@ class _Valeurs extends StatefulWidget {
   final List<String> valeurs;
   final ValueChanged<List<String>> onChanged;
 
-  const _Valeurs({required this.spec, required this.valeurs, required this.onChanged});
+  const _Valeurs({
+    required this.spec,
+    required this.valeurs,
+    required this.onChanged,
+  });
 
   @override
   State<_Valeurs> createState() => _ValeursState();
 }
 
 class _ValeursState extends State<_Valeurs> {
-  static const _navy = Color(0xFF0D1B3D);
+  static const _navy = Color(0xFF01154B);
   static const _tint = Color(0xFFEEF3FC);
   static const _border = Color(0xFFE2E7F0);
 
@@ -272,12 +315,17 @@ class _ValeursState extends State<_Valeurs> {
     super.dispose();
   }
 
-  bool _coche(String o) => widget.valeurs.any((v) => v.toLowerCase() == o.toLowerCase());
+  bool _coche(String o) =>
+      widget.valeurs.any((v) => v.toLowerCase() == o.toLowerCase());
 
   void _basculer(String o) {
-    widget.onChanged(_coche(o)
-        ? widget.valeurs.where((v) => v.toLowerCase() != o.toLowerCase()).toList()
-        : [...widget.valeurs, o]);
+    widget.onChanged(
+      _coche(o)
+          ? widget.valeurs
+                .where((v) => v.toLowerCase() != o.toLowerCase())
+                .toList()
+          : [...widget.valeurs, o],
+    );
   }
 
   /// « S, M, L » tapé d'un coup donne trois valeurs ; « 1,5 L » en reste une.
@@ -287,7 +335,8 @@ class _ValeursState extends State<_Valeurs> {
         .map((e) => e.trim())
         .where((e) => e.isNotEmpty && !_coche(e))
         .toList();
-    if (nouvelles.isNotEmpty) widget.onChanged([...widget.valeurs, ...nouvelles]);
+    if (nouvelles.isNotEmpty)
+      widget.onChanged([...widget.valeurs, ...nouvelles]);
     _saisie.clear();
   }
 
@@ -300,7 +349,10 @@ class _ValeursState extends State<_Valeurs> {
         decoration: BoxDecoration(
           color: active ? _tint : Colors.white,
           borderRadius: BorderRadius.circular(999),
-          border: Border.all(color: active ? _navy : _border, width: active ? 1.4 : 1.1),
+          border: Border.all(
+            color: active ? _navy : _border,
+            width: active ? 1.4 : 1.1,
+          ),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -354,12 +406,21 @@ class _ValeursState extends State<_Valeurs> {
             onTapOutside: (_) => _ajouter(),
             decoration: InputDecoration(
               hintText: widget.spec.aide ?? 'Tapez une valeur puis OK',
-              hintStyle: const TextStyle(fontSize: 13, color: Color(0xFF9AA5B8)),
+              hintStyle: const TextStyle(
+                fontSize: 13,
+                color: Color(0xFF9AA5B8),
+              ),
               counterText: '',
               isDense: true,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 12,
+              ),
               suffixIcon: IconButton(
-                icon: const Icon(Icons.add_circle_outline_rounded, color: _navy),
+                icon: const Icon(
+                  Icons.add_circle_outline_rounded,
+                  color: _navy,
+                ),
                 tooltip: 'Ajouter',
                 onPressed: _ajouter,
               ),

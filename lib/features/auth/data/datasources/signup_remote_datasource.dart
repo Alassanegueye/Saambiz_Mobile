@@ -16,13 +16,13 @@ class SignupException implements Exception {
 
 /// Parcours d'inscription mobile, en deux temps :
 ///
-///   1. [envoyerCode]    — un code à 6 chiffres part à l'adresse saisie ;
-///   2. [verifierCode]   — le code est validé, un jeton est remis ;
-///   3. [register]       — le compte est créé, en présentant ce jeton.
+///   1. [envoyerCode]   , un code à 6 chiffres part à l'adresse saisie ;
+///   2. [verifierCode]  , le code est validé, un jeton est remis ;
+///   3. [register]      , le compte est créé, en présentant ce jeton.
 ///
 /// L'ordre n'est pas un détail. Créer le compte d'abord laissait une ligne
-/// utilisateur définitive derrière chaque adresse jamais confirmée — fautes de
-/// frappe comprises — et n'empêchait rien, puisque la connexion ne regardait
+/// utilisateur définitive derrière chaque adresse jamais confirmée, fautes de
+/// frappe comprises, et n'empêchait rien, puisque la connexion ne regardait
 /// pas si l'adresse avait été vérifiée.
 ///
 /// Volontairement séparé de [AuthRemoteDataSource] : celui-ci ne connaît ni le
@@ -33,7 +33,7 @@ class SignupRemoteDataSource {
 
   const SignupRemoteDataSource(this.dio);
 
-  /// Étape 1 — demande l'envoi d'un code à 6 chiffres.
+  /// Étape 1, demande l'envoi d'un code à 6 chiffres.
   ///
   /// Aucun compte n'est créé ici. Renvoie le message du backend, qui indique
   /// à quelle adresse le code est parti.
@@ -43,7 +43,8 @@ class SignupRemoteDataSource {
         AuthEndpoints.envoyerCodeInscription,
         data: {
           'email': email,
-          if (prenom != null && prenom.trim().isNotEmpty) 'prenom': prenom.trim(),
+          if (prenom != null && prenom.trim().isNotEmpty)
+            'prenom': prenom.trim(),
         },
       );
       final data = res.data;
@@ -54,7 +55,7 @@ class SignupRemoteDataSource {
     }
   }
 
-  /// Étape 2 — valide le code et rend le jeton à présenter à [register].
+  /// Étape 2, valide le code et rend le jeton à présenter à [register].
   ///
   /// Ce jeton lie la création du compte à cette vérification-là : sans lui,
   /// entre la validation du code et l'envoi du formulaire, un tiers
@@ -80,7 +81,7 @@ class SignupRemoteDataSource {
     }
   }
 
-  /// Étape 3 — crée le compte, l'adresse étant déjà vérifiée.
+  /// Étape 3, crée le compte, l'adresse étant déjà vérifiée.
   Future<void> register({
     required String nom,
     required String prenom,
@@ -110,7 +111,7 @@ class SignupRemoteDataSource {
     }
   }
 
-  /// Valide le code d'un compte DÉJÀ créé — parcours conservé pour les
+  /// Valide le code d'un compte DÉJÀ créé, parcours conservé pour les
   /// comptes ouverts avant l'inscription en deux temps.
   Future<void> verifierEmail({
     required String email,

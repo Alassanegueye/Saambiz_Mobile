@@ -16,7 +16,8 @@ class CompteModel extends User {
   });
 
   factory CompteModel.fromJson(Map<String, dynamic> json) {
-    final data = (json['utilisateur'] ?? json['user'] ?? json) as Map<String, dynamic>;
+    final data =
+        (json['utilisateur'] ?? json['user'] ?? json) as Map<String, dynamic>;
     return CompteModel(
       id: data['id']?.toString() ?? '',
       nom: data['nom'] ?? '',

@@ -14,10 +14,10 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:saambiz/core/utils/image_url.dart';
 
 class _C {
-  static const green = Color(0xFF0D1B3D);
-  static const black = Color(0xFF0D1B3D);
+  static const green = Color(0xFF01154B);
+  static const black = Color(0xFF01154B);
   static const white = Color(0xFFFFFFFF);
-  static const bg = Color(0xFFF5F7FB);
+  static const bg = Color(0xFFF4F5F8);
   static const sub = Color(0xFF5B6C8A);
   static const border = Color(0xFFE3E8F0);
 }
@@ -73,7 +73,10 @@ class _ConversationsViewState extends State<_ConversationsView> {
         listener: (context, state) {
           if (state is MessagerieError) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message), backgroundColor: Colors.red),
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.red,
+              ),
             );
           }
         },
@@ -84,8 +87,10 @@ class _ConversationsViewState extends State<_ConversationsView> {
           if (state is ConversationsLoaded) {
             if (state.conversations.isEmpty) {
               return const Center(
-                child: Text('Aucune conversation pour le moment',
-                    style: TextStyle(color: _C.sub)),
+                child: Text(
+                  'Aucune conversation pour le moment',
+                  style: TextStyle(color: _C.sub),
+                ),
               );
             }
             return RefreshIndicator(
@@ -101,51 +106,68 @@ class _ConversationsViewState extends State<_ConversationsView> {
                     leading: CircleAvatar(
                       backgroundColor: _C.green.withOpacity(0.15),
                       backgroundImage: (c.interlocuteurPhoto ?? '').isNotEmpty
-                          ? CachedNetworkImageProvider(imageOptimisee(c.interlocuteurPhoto!))
+                          ? CachedNetworkImageProvider(
+                              imageOptimisee(c.interlocuteurPhoto!),
+                            )
                           : null,
                       child: (c.interlocuteurPhoto ?? '').isEmpty
                           ? Text(
                               c.interlocuteurNom.isNotEmpty
                                   ? c.interlocuteurNom[0].toUpperCase()
                                   : '?',
-                              style: const TextStyle(color: _C.green))
+                              style: const TextStyle(color: _C.green),
+                            )
                           : null,
                     ),
-                    title: Text(c.interlocuteurNom,
-                        style: const TextStyle(fontWeight: FontWeight.w700)),
-                    subtitle: Text(c.dernierMessage,
-                        maxLines: 1, overflow: TextOverflow.ellipsis),
+                    title: Text(
+                      c.interlocuteurNom,
+                      style: const TextStyle(fontWeight: FontWeight.w700),
+                    ),
+                    subtitle: Text(
+                      c.dernierMessage,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                     trailing: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         if (c.dateDernierMessage != null)
-                          Text(DateFormat('HH:mm').format(c.dateDernierMessage!),
-                              style: const TextStyle(fontSize: 11, color: _C.sub)),
+                          Text(
+                            DateFormat('HH:mm').format(c.dateDernierMessage!),
+                            style: const TextStyle(fontSize: 11, color: _C.sub),
+                          ),
                         if (c.nombreNonLus > 0)
                           Container(
                             margin: const EdgeInsets.only(top: 4),
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 7, vertical: 2),
+                              horizontal: 7,
+                              vertical: 2,
+                            ),
                             decoration: BoxDecoration(
                               color: _C.green,
                               borderRadius: BorderRadius.circular(10),
                             ),
-                            child: Text('${c.nombreNonLus}',
-                                style: const TextStyle(
-                                    color: _C.white,
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w700)),
+                            child: Text(
+                              '${c.nombreNonLus}',
+                              style: const TextStyle(
+                                color: _C.white,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
                           ),
                       ],
                     ),
                     onTap: () {
-                      Navigator.of(context).push(MaterialPageRoute(
-                        builder: (_) => ChatPage(
-                          interlocuteurId: c.interlocuteurId,
-                          interlocuteurNom: c.interlocuteurNom,
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => ChatPage(
+                            interlocuteurId: c.interlocuteurId,
+                            interlocuteurNom: c.interlocuteurNom,
+                          ),
                         ),
-                      ));
+                      );
                     },
                   );
                 },

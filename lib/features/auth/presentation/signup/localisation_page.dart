@@ -11,8 +11,8 @@ import 'signup_kit.dart';
 /// Dernière étape avant l'accueil : proposer la géolocalisation.
 ///
 /// Écran dédié plutôt qu'une fenêtre système surgie de nulle part : le client
-/// doit d'abord comprendre ce qu'il y gagne — voir les boutiques de son
-/// quartier — avant qu'on lui demande quoi que ce soit. Le refus est un
+/// doit d'abord comprendre ce qu'il y gagne, voir les boutiques de son
+/// quartier, avant qu'on lui demande quoi que ce soit. Le refus est un
 /// chemin normal, pas une impasse.
 class LocalisationPage extends StatefulWidget {
   final User? user;
@@ -78,9 +78,18 @@ class _LocalisationPageState extends State<LocalisationPage> {
       titre: 'Près de chez vous',
       sousTitre: 'Voir d’abord les boutiques de votre quartier.',
       carte: const [
-        _Argument(icon: Icons.storefront_outlined, texte: 'Commerces proches en premier'),
-        _Argument(icon: Icons.local_shipping_outlined, texte: 'Livraisons plus rapides'),
-        _Argument(icon: Icons.lock_outline_rounded, texte: 'Jamais partagée aux vendeurs'),
+        _Argument(
+          icon: Icons.storefront_outlined,
+          texte: 'Commerces proches en premier',
+        ),
+        _Argument(
+          icon: Icons.local_shipping_outlined,
+          texte: 'Livraisons plus rapides',
+        ),
+        _Argument(
+          icon: Icons.lock_outline_rounded,
+          texte: 'Jamais partagée aux vendeurs',
+        ),
       ],
       apres: [
         SbPrimaryButton(
@@ -89,7 +98,10 @@ class _LocalisationPageState extends State<LocalisationPage> {
           onPressed: _autoriser,
         ),
         const SizedBox(height: 10),
-        SbSecondaryButton(label: 'Plus tard', onPressed: _enCours ? null : _plusTard),
+        SbSecondaryButton(
+          label: 'Plus tard',
+          onPressed: _enCours ? null : _plusTard,
+        ),
       ],
     );
   }

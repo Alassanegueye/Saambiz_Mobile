@@ -7,12 +7,12 @@ class ProduitImage {
   ProduitImage({required this.id, required this.url, this.ordre = 0});
 
   factory ProduitImage.fromJson(Map<String, dynamic> json) => ProduitImage(
-        id: json['id']?.toString() ?? '',
-        url: (json['url'] ?? json['image'] ?? '').toString(),
-        ordre: (json['ordre'] is int)
-            ? json['ordre'] as int
-            : int.tryParse(json['ordre']?.toString() ?? '') ?? 0,
-      );
+    id: json['id']?.toString() ?? '',
+    url: (json['url'] ?? json['image'] ?? '').toString(),
+    ordre: (json['ordre'] is int)
+        ? json['ordre'] as int
+        : int.tryParse(json['ordre']?.toString() ?? '') ?? 0,
+  );
 }
 
 class ProduitModel {
@@ -22,14 +22,16 @@ class ProduitModel {
   final String prix;
   final int quantite;
   final String image;
-  final String ville;       // extrait de vendeur.boutiques[0].localisation
-  final String categorie;   // extrait de categorie.nom
-  final String vendeurNom;  // extrait de vendeur.nom + prenom
-  final String vendeurNumero;  // extrait de vendeur.nom + prenom
-  final String vendeurId;   // id du vendeur (pour le panier / commande)
-  final String boutiqueId;  // id de la boutique (favoris / avis / signalements)
-  final List<ProduitImage>? images; // galerie d'images supplémentaires (vendeur)
+  final String ville; // extrait de vendeur.boutiques[0].localisation
+  final String categorie; // extrait de categorie.nom
+  final String vendeurNom; // extrait de vendeur.nom + prenom
+  final String vendeurNumero; // extrait de vendeur.nom + prenom
+  final String vendeurId; // id du vendeur (pour le panier / commande)
+  final String boutiqueId; // id de la boutique (favoris / avis / signalements)
+  final List<ProduitImage>?
+  images; // galerie d'images supplémentaires (vendeur)
   final String categorieId;
+
   /// Caractéristiques propres à la catégorie : { tailles: [...], etat: 'Neuf' }.
   /// Un tableau = variantes que le client choisit ; sinon, une information.
   final Map<String, dynamic> attributs;
@@ -53,15 +55,15 @@ class ProduitModel {
   });
 
   factory ProduitModel.fromJson(Map<String, dynamic> json) {
-    // ── Vendeur ──────────────────────────────────────────────────────
-    final vendeur   = json['vendeur'] as Map<String, dynamic>?;
-    final vPrenom   = vendeur?['prenom'] ?? '';
-    final vNom      = vendeur?['nom'] ?? '';
+    // Vendeur
+    final vendeur = json['vendeur'] as Map<String, dynamic>?;
+    final vPrenom = vendeur?['prenom'] ?? '';
+    final vNom = vendeur?['nom'] ?? '';
     final vendeurNom = '$vPrenom $vNom'.trim();
     final vendeurNumero = vendeur?['telephone'] ?? '';
     final vendeurId = (json['vendeurId'] ?? vendeur?['id'] ?? '').toString();
 
-    // ── Localisation + id (première boutique du vendeur) ─────────────
+    // Localisation + id (première boutique du vendeur)
     String ville = '';
     String boutiqueId = '';
     if (vendeur != null) {
@@ -75,11 +77,11 @@ class ProduitModel {
     // vendeur (cohérent avec le reste du modèle qui suppose 1 boutique/vendeur).
     if (boutiqueId.isEmpty) boutiqueId = vendeurId;
 
-    // ── Catégorie ────────────────────────────────────────────────────
+    // Catégorie
     final categorieMap = json['categorie'] as Map<String, dynamic>?;
     final categorie = categorieMap?['nom'] ?? '';
 
-    // ── Images supplémentaires (galerie vendeur) ──────────────────────
+    // Images supplémentaires (galerie vendeur)
     List<ProduitImage>? images;
     final rawImages = json['images'];
     if (rawImages is List) {
@@ -90,35 +92,36 @@ class ProduitModel {
     }
 
     return ProduitModel(
-      id:          json['id']?.toString() ?? '',
-      nom:         json['nom'] ?? '',
+      id: json['id']?.toString() ?? '',
+      nom: json['nom'] ?? '',
       description: json['description'] ?? '',
-      prix:        json['prix']?.toString() ?? '0',
-      quantite:    (json['quantite'] ?? 0) as int,
-      image:       json['image'] ?? '',
-      ville:       ville,
-      categorie:   categorie,
-      vendeurNom:  vendeurNom,
-      vendeurNumero:  vendeurNumero,
-      vendeurId:   vendeurId,
-      boutiqueId:  boutiqueId,
-      images:      images,
-      categorieId: (json['categorieId'] ?? categorieMap?['id'] ?? '').toString(),
-      attributs:   json['attributs'] is Map
+      prix: json['prix']?.toString() ?? '0',
+      quantite: (json['quantite'] ?? 0) as int,
+      image: json['image'] ?? '',
+      ville: ville,
+      categorie: categorie,
+      vendeurNom: vendeurNom,
+      vendeurNumero: vendeurNumero,
+      vendeurId: vendeurId,
+      boutiqueId: boutiqueId,
+      images: images,
+      categorieId: (json['categorieId'] ?? categorieMap?['id'] ?? '')
+          .toString(),
+      attributs: json['attributs'] is Map
           ? Map<String, dynamic>.from(json['attributs'] as Map)
           : const {},
     );
   }
 
   Map<String, dynamic> toJson() => {
-    'id':          id,
-    'nom':         nom,
+    'id': id,
+    'nom': nom,
     'description': description,
-    'prix':        prix,
-    'quantite':    quantite,
-    'image':       image,
-    'ville':       ville,
-    'categorie':   categorie,
-    'vendeurNom':  vendeurNom,
+    'prix': prix,
+    'quantite': quantite,
+    'image': image,
+    'ville': ville,
+    'categorie': categorie,
+    'vendeurNom': vendeurNom,
   };
 }

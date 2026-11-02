@@ -53,14 +53,19 @@ class ProduitCatalogue {
   });
 
   /// Prix réellement payé.
-  double get prixPaye => (prixPromo != null && prixPromo! < prix) ? prixPromo! : prix;
+  double get prixPaye =>
+      (prixPromo != null && prixPromo! < prix) ? prixPromo! : prix;
 
   /// Prix d'origine à barrer, s'il y a une remise.
-  double? get prixBarre => (prixPromo != null && prixPromo! < prix) ? prix : null;
+  double? get prixBarre =>
+      (prixPromo != null && prixPromo! < prix) ? prix : null;
 
   /// Visuels : la galerie, à défaut l'image principale.
   List<String> get visuels {
-    final liste = [if (image.isNotEmpty) image, ...images.where((i) => i.isNotEmpty && i != image)];
+    final liste = [
+      if (image.isNotEmpty) image,
+      ...images.where((i) => i.isNotEmpty && i != image),
+    ];
     return liste;
   }
 
@@ -78,7 +83,9 @@ class ProduitCatalogue {
       prix: _double(j['prix']),
       prixPromo: promo == null ? null : _double(promo),
       remise: (j['remise'] is num) ? (j['remise'] as num).toInt() : 0,
-      finPromotion: j['finPromotion'] == null ? null : DateTime.tryParse(j['finPromotion'].toString())?.toLocal(),
+      finPromotion: j['finPromotion'] == null
+          ? null
+          : DateTime.tryParse(j['finPromotion'].toString())?.toLocal(),
       image: j['image']?.toString() ?? '',
       images: (j['images'] as List? ?? []).map((e) => e.toString()).toList(),
       marque: j['marque']?.toString(),
@@ -95,13 +102,19 @@ class ProduitCatalogue {
           .map((e) => Caracteristique.fromJson(Map<String, dynamic>.from(e)))
           .toList(),
       categorie: j['categorie'] is Map
-          ? CategorieResume.fromJson(Map<String, dynamic>.from(j['categorie'] as Map))
+          ? CategorieResume.fromJson(
+              Map<String, dynamic>.from(j['categorie'] as Map),
+            )
           : null,
       vendeurId: j['vendeurId']?.toString() ?? '',
       boutique: j['boutique'] is Map
-          ? BoutiqueResume.fromJson(Map<String, dynamic>.from(j['boutique'] as Map))
+          ? BoutiqueResume.fromJson(
+              Map<String, dynamic>.from(j['boutique'] as Map),
+            )
           : null,
-      nombreVentes: (j['nombreVentes'] is num) ? (j['nombreVentes'] as num).toInt() : 0,
+      nombreVentes: (j['nombreVentes'] is num)
+          ? (j['nombreVentes'] as num).toInt()
+          : 0,
       nouveau: j['nouveau'] == true,
     );
   }
@@ -111,13 +124,20 @@ class OptionProduit {
   final String cle;
   final String libelle;
   final List<String> valeurs;
-  const OptionProduit({required this.cle, required this.libelle, required this.valeurs});
+  const OptionProduit({
+    required this.cle,
+    required this.libelle,
+    required this.valeurs,
+  });
 
   factory OptionProduit.fromJson(Map<String, dynamic> j) => OptionProduit(
-        cle: j['cle']?.toString() ?? '',
-        libelle: j['libelle']?.toString() ?? j['cle']?.toString() ?? '',
-        valeurs: (j['valeurs'] as List? ?? []).map((e) => e.toString()).where((e) => e.isNotEmpty).toList(),
-      );
+    cle: j['cle']?.toString() ?? '',
+    libelle: j['libelle']?.toString() ?? j['cle']?.toString() ?? '',
+    valeurs: (j['valeurs'] as List? ?? [])
+        .map((e) => e.toString())
+        .where((e) => e.isNotEmpty)
+        .toList(),
+  );
 }
 
 class Caracteristique {
@@ -126,9 +146,9 @@ class Caracteristique {
   const Caracteristique({required this.libelle, required this.valeur});
 
   factory Caracteristique.fromJson(Map<String, dynamic> j) => Caracteristique(
-        libelle: j['libelle']?.toString() ?? '',
-        valeur: j['valeur']?.toString() ?? '',
-      );
+    libelle: j['libelle']?.toString() ?? '',
+    valeur: j['valeur']?.toString() ?? '',
+  );
 }
 
 class CategorieResume {
@@ -136,14 +156,19 @@ class CategorieResume {
   final String nom;
   final String slug;
   final String? icone;
-  const CategorieResume({required this.id, required this.nom, required this.slug, this.icone});
+  const CategorieResume({
+    required this.id,
+    required this.nom,
+    required this.slug,
+    this.icone,
+  });
 
   factory CategorieResume.fromJson(Map<String, dynamic> j) => CategorieResume(
-        id: j['id']?.toString() ?? '',
-        nom: j['nom']?.toString() ?? '',
-        slug: j['slug']?.toString() ?? j['id']?.toString() ?? '',
-        icone: j['icone']?.toString(),
-      );
+    id: j['id']?.toString() ?? '',
+    nom: j['nom']?.toString() ?? '',
+    slug: j['slug']?.toString() ?? j['id']?.toString() ?? '',
+    icone: j['icone']?.toString(),
+  );
 }
 
 class BoutiqueResume {
@@ -166,14 +191,14 @@ class BoutiqueResume {
   });
 
   factory BoutiqueResume.fromJson(Map<String, dynamic> j) => BoutiqueResume(
-        id: j['id']?.toString() ?? '',
-        nom: j['nom']?.toString() ?? '',
-        slug: j['slug']?.toString(),
-        logo: j['logo']?.toString(),
-        localisation: (j['localisation'] ?? j['ville'] ?? '').toString(),
-        telephone: (j['telephone'] ?? j['whatsapp'] ?? '').toString(),
-        verifiee: j['verifiee'] == true,
-      );
+    id: j['id']?.toString() ?? '',
+    nom: j['nom']?.toString() ?? '',
+    slug: j['slug']?.toString(),
+    logo: j['logo']?.toString(),
+    localisation: (j['localisation'] ?? j['ville'] ?? '').toString(),
+    telephone: (j['telephone'] ?? j['whatsapp'] ?? '').toString(),
+    verifiee: j['verifiee'] == true,
+  );
 }
 
 /// Une page de résultats.
@@ -182,5 +207,10 @@ class PageProduits {
   final int total;
   final int pages;
   final CategorieResume? categorie;
-  const PageProduits({required this.produits, this.total = 0, this.pages = 1, this.categorie});
+  const PageProduits({
+    required this.produits,
+    this.total = 0,
+    this.pages = 1,
+    this.categorie,
+  });
 }

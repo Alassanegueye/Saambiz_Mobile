@@ -1,9 +1,7 @@
-
-
-
 import 'package:saambiz/core/theme/app_color.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+
 class PrimaryTextButton extends StatelessWidget {
   const PrimaryTextButton({
     super.key,
@@ -27,8 +25,9 @@ class PrimaryTextButton extends StatelessWidget {
       ),
       child: Text(
         titre,
-        style: style ??
-            GoogleFonts.plusJakartaSans(
+        style:
+            style ??
+            GoogleFonts.inter(
               color: AppColor.kPrimary,
               fontWeight: FontWeight.w600,
               fontSize: 14,

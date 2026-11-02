@@ -14,7 +14,8 @@ class AbonnementRepositoryImpl implements AbonnementRepository {
   String _errorMessage(Object e) {
     if (e is DioException) {
       final data = e.response?.data;
-      if (data is Map && data['message'] != null) return data['message'].toString();
+      if (data is Map && data['message'] != null)
+        return data['message'].toString();
       return e.message ?? 'Une erreur est survenue';
     }
     return e.toString();
@@ -32,7 +33,9 @@ class AbonnementRepositoryImpl implements AbonnementRepository {
   @override
   Future<Either<Failure, String>> initierRenouvellement({num? montant}) async {
     try {
-      return Right(await remoteDataSource.initierRenouvellement(montant: montant));
+      return Right(
+        await remoteDataSource.initierRenouvellement(montant: montant),
+      );
     } catch (e) {
       return Left(ServerFailure(errorMessage: _errorMessage(e)));
     }
@@ -59,7 +62,10 @@ class AbonnementRepositoryImpl implements AbonnementRepository {
         numeroTelephone: numeroTelephone,
         methode: methode,
       );
-      return Right((paymentUrl: res['paymentUrl'], transactionId: res['transactionId']));
+      return Right((
+        paymentUrl: res['paymentUrl'],
+        transactionId: res['transactionId'],
+      ));
     } catch (e) {
       return Left(ServerFailure(errorMessage: _errorMessage(e)));
     }

@@ -27,6 +27,8 @@ class InfosApp {
 
   /// Numéro WhatsApp du service client, au format international (221…).
   static String get supportWhatsapp => _env('SUPPORT_WHATSAPP', '221775929390');
-  static String get supportEmail => _env('SUPPORT_EMAIL', 'contact@saambiz.com');
-  static String get supportTelephone => _env('SUPPORT_TELEPHONE', '+221775929390');
+  static String get supportEmail =>
+      _env('SUPPORT_EMAIL', 'contact@saambiz.com');
+  static String get supportTelephone =>
+      _env('SUPPORT_TELEPHONE', '+221775929390');
 }

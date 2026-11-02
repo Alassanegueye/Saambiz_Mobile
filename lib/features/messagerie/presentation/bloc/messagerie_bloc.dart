@@ -18,7 +18,9 @@ class MessagerieBloc extends Bloc<MessagerieEvent, MessagerieState> {
   }
 
   Future<void> _onLoadConversations(
-      LoadConversations event, Emitter<MessagerieState> emit) async {
+    LoadConversations event,
+    Emitter<MessagerieState> emit,
+  ) async {
     emit(MessagerieLoading());
     final result = await repository.conversations();
     result.fold(
@@ -28,7 +30,9 @@ class MessagerieBloc extends Bloc<MessagerieEvent, MessagerieState> {
   }
 
   Future<void> _onLoadHistorique(
-      LoadHistorique event, Emitter<MessagerieState> emit) async {
+    LoadHistorique event,
+    Emitter<MessagerieState> emit,
+  ) async {
     emit(MessagerieLoading());
     final result = await repository.historique(event.userId);
     result.fold(
@@ -37,9 +41,14 @@ class MessagerieBloc extends Bloc<MessagerieEvent, MessagerieState> {
     );
   }
 
-  Future<void> _onEnvoyer(EnvoyerMessage event, Emitter<MessagerieState> emit) async {
+  Future<void> _onEnvoyer(
+    EnvoyerMessage event,
+    Emitter<MessagerieState> emit,
+  ) async {
     final result = await repository.envoyerMessage(
-        destinataireId: event.destinataireId, contenu: event.contenu);
+      destinataireId: event.destinataireId,
+      contenu: event.contenu,
+    );
     result.fold(
       (f) => emit(MessagerieError(f.errorMessage)),
       (_) => add(LoadHistorique(event.destinataireId)),
@@ -47,12 +56,16 @@ class MessagerieBloc extends Bloc<MessagerieEvent, MessagerieState> {
   }
 
   Future<void> _onMarquerLu(
-      MarquerMessageLu event, Emitter<MessagerieState> emit) async {
+    MarquerMessageLu event,
+    Emitter<MessagerieState> emit,
+  ) async {
     await repository.marquerLu(event.messageId);
   }
 
   Future<void> _onLoadNonLus(
-      LoadNombreNonLus event, Emitter<MessagerieState> emit) async {
+    LoadNombreNonLus event,
+    Emitter<MessagerieState> emit,
+  ) async {
     final result = await repository.nombreNonLus();
     result.fold(
       (f) => emit(MessagerieError(f.errorMessage)),
@@ -60,14 +73,19 @@ class MessagerieBloc extends Bloc<MessagerieEvent, MessagerieState> {
     );
   }
 
-  void _onMessageRecu(MessageRecuTempsReel event, Emitter<MessagerieState> emit) {
+  void _onMessageRecu(
+    MessageRecuTempsReel event,
+    Emitter<MessagerieState> emit,
+  ) {
     final current = state;
     if (current is HistoriqueLoaded) {
       try {
         final message = MessageModel.fromJson(event.data);
         if (message.expediteurId == current.userId ||
             message.destinataireId == current.userId) {
-          emit(HistoriqueLoaded(current.userId, [...current.messages, message]));
+          emit(
+            HistoriqueLoaded(current.userId, [...current.messages, message]),
+          );
         }
       } catch (_) {
         // Ignore un message temps réel mal formé.

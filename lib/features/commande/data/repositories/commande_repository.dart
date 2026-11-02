@@ -1,7 +1,7 @@
 import '../datasources/commande_remote_datasource.dart';
 import '../models/commande_model.dart';
 
-/// Repository commande — fine couche au-dessus du datasource.
+/// Repository commande, fine couche au-dessus du datasource.
 class CommandeRepository {
   final CommandeRemoteDataSource remote;
   CommandeRepository(this.remote);
@@ -31,9 +31,11 @@ class CommandeRepository {
 
   Future<CommandeModel> annuler(String id) => remote.annuler(id);
 
-  Future<String?> payer(String id,
-          {required String methode, String? numeroTelephone}) =>
-      remote.payer(id, methode: methode, numeroTelephone: numeroTelephone);
+  Future<String?> payer(
+    String id, {
+    required String methode,
+    String? numeroTelephone,
+  }) => remote.payer(id, methode: methode, numeroTelephone: numeroTelephone);
 
   Future<List<CommandeModel>> commandesVendeur({String? statut}) =>
       remote.commandesVendeur(statut: statut);

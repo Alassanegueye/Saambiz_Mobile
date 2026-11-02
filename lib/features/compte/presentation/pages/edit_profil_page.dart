@@ -11,10 +11,10 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:saambiz/core/utils/image_url.dart';
 
 class _C {
-  static const green = Color(0xFF0D1B3D);
-  static const black = Color(0xFF0D1B3D);
+  static const green = Color(0xFF01154B);
+  static const black = Color(0xFF01154B);
   static const white = Color(0xFFFFFFFF);
-  static const bg = Color(0xFFF5F7FB);
+  static const bg = Color(0xFFF4F5F8);
   static const sub = Color(0xFF5B6C8A);
   static const border = Color(0xFFE3E8F0);
 }
@@ -44,9 +44,15 @@ class _EditProfileView extends StatefulWidget {
 class _EditProfileViewState extends State<_EditProfileView> {
   final _formKey = GlobalKey<FormState>();
   late final _nomCtrl = TextEditingController(text: widget.user?.nom ?? '');
-  late final _prenomCtrl = TextEditingController(text: widget.user?.prenom ?? '');
-  late final _adresseCtrl = TextEditingController(text: widget.user?.adresse ?? '');
-  late final _telephoneCtrl = TextEditingController(text: widget.user?.telephone ?? '');
+  late final _prenomCtrl = TextEditingController(
+    text: widget.user?.prenom ?? '',
+  );
+  late final _adresseCtrl = TextEditingController(
+    text: widget.user?.adresse ?? '',
+  );
+  late final _telephoneCtrl = TextEditingController(
+    text: widget.user?.telephone ?? '',
+  );
   String? _photoPath;
 
   @override
@@ -61,19 +67,24 @@ class _EditProfileViewState extends State<_EditProfileView> {
   Future<void> _choisirPhoto() async {
     final picker = ImagePicker();
     final x = await picker.pickImage(
-        source: ImageSource.gallery, imageQuality: 80, maxWidth: 800);
+      source: ImageSource.gallery,
+      imageQuality: 80,
+      maxWidth: 800,
+    );
     if (x != null) setState(() => _photoPath = x.path);
   }
 
   void _soumettre() {
     if (!_formKey.currentState!.validate()) return;
-    context.read<CompteBloc>().add(ModifierProfilRequested(
-          nom: _nomCtrl.text.trim(),
-          prenom: _prenomCtrl.text.trim(),
-          adresse: _adresseCtrl.text.trim(),
-          telephone: _telephoneCtrl.text.trim(),
-          photoProfilPath: _photoPath,
-        ));
+    context.read<CompteBloc>().add(
+      ModifierProfilRequested(
+        nom: _nomCtrl.text.trim(),
+        prenom: _prenomCtrl.text.trim(),
+        adresse: _adresseCtrl.text.trim(),
+        telephone: _telephoneCtrl.text.trim(),
+        photoProfilPath: _photoPath,
+      ),
+    );
   }
 
   @override
@@ -90,7 +101,10 @@ class _EditProfileViewState extends State<_EditProfileView> {
         listener: (context, state) {
           if (state is CompteError) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message), backgroundColor: Colors.red),
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.red,
+              ),
             );
           } else if (state is CompteActionSucces) {
             Navigator.of(context).pop(state.user);
@@ -112,10 +126,15 @@ class _EditProfileViewState extends State<_EditProfileView> {
                       backgroundImage: _photoPath != null
                           ? null
                           : (widget.user?.photoProfil != null &&
-                                  widget.user!.photoProfil!.isNotEmpty)
-                              ? CachedNetworkImageProvider(imageOptimisee(widget.user!.photoProfil!))
-                              : null,
-                      child: const Icon(Icons.camera_alt_outlined, color: _C.green),
+                                widget.user!.photoProfil!.isNotEmpty)
+                          ? CachedNetworkImageProvider(
+                              imageOptimisee(widget.user!.photoProfil!),
+                            )
+                          : null,
+                      child: const Icon(
+                        Icons.camera_alt_outlined,
+                        color: _C.green,
+                      ),
                     ),
                   ),
                 ),
@@ -124,7 +143,11 @@ class _EditProfileViewState extends State<_EditProfileView> {
                 const SizedBox(height: 12),
                 _input(_nomCtrl, 'Nom'),
                 const SizedBox(height: 12),
-                _input(_telephoneCtrl, 'Téléphone', keyboard: TextInputType.phone),
+                _input(
+                  _telephoneCtrl,
+                  'Téléphone',
+                  keyboard: TextInputType.phone,
+                ),
                 const SizedBox(height: 12),
                 _input(_adresseCtrl, 'Adresse'),
                 const SizedBox(height: 24),
@@ -135,16 +158,22 @@ class _EditProfileViewState extends State<_EditProfileView> {
                     foregroundColor: _C.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14)),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
                   ),
                   child: loading
                       ? const SizedBox(
                           height: 20,
                           width: 20,
                           child: CircularProgressIndicator(
-                              strokeWidth: 2, color: Colors.white))
-                      : const Text('Enregistrer',
-                          style: TextStyle(fontWeight: FontWeight.w700)),
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Text(
+                          'Enregistrer',
+                          style: TextStyle(fontWeight: FontWeight.w700),
+                        ),
                 ),
               ],
             ),
@@ -154,17 +183,24 @@ class _EditProfileViewState extends State<_EditProfileView> {
     );
   }
 
-  Widget _input(TextEditingController c, String label,
-      {TextInputType? keyboard}) {
+  Widget _input(
+    TextEditingController c,
+    String label, {
+    TextInputType? keyboard,
+  }) {
     return TextFormField(
       controller: c,
       keyboardType: keyboard,
-      validator: (v) => (v == null || v.trim().isEmpty) ? '$label requis' : null,
+      validator: (v) =>
+          (v == null || v.trim().isEmpty) ? '$label requis' : null,
       decoration: InputDecoration(
         labelText: label,
         filled: true,
         fillColor: _C.white,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 14,
+          vertical: 14,
+        ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: _C.border),

@@ -3,31 +3,28 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../theme/app_color.dart';
 
-/// Composants visuels communs de l'espace client (charte reprise de
-/// l'application Yobante Boutique) : cartes blanches aérées, titres courts,
-/// pastilles d'icône bleu clair, états vides soignés.
+/// Composants visuels communs de l'espace client : cartes blanches à
+/// filet fin, titres de section sobres, puces de filtre et champ de
+/// recherche. Pas d'ornement : l'information d'abord.
 
-TextStyle titreSection([double taille = 15]) => GoogleFonts.plusJakartaSans(
-      fontSize: taille,
-      fontWeight: FontWeight.w700,
-      color: AppColor.kGrayscaleDark100,
-    );
+TextStyle titreSection([double taille = 15]) => GoogleFonts.inter(
+  fontSize: taille,
+  fontWeight: FontWeight.w700,
+  color: AppColor.kGrayscaleDark100,
+);
 
 TextStyle texteDiscret([double taille = 12]) =>
-    GoogleFonts.plusJakartaSans(fontSize: taille, color: AppColor.kGrayscale40);
+    GoogleFonts.inter(fontSize: taille, color: AppColor.kGrayscale40);
 
-/// Carte blanche : coins arrondis, ombre bleutée très douce, sans contour.
-BoxDecoration decorationCarte({double rayon = 16, Color couleur = AppColor.kWhite}) => BoxDecoration(
-      color: couleur,
-      borderRadius: BorderRadius.circular(rayon),
-      boxShadow: [
-        BoxShadow(
-          color: AppColor.kPrimary.withValues(alpha: 0.06),
-          blurRadius: 18,
-          offset: const Offset(0, 6),
-        ),
-      ],
-    );
+/// Carte blanche : coins arrondis, filet fin, sans ombre.
+BoxDecoration decorationCarte({
+  double rayon = 12,
+  Color couleur = AppColor.kWhite,
+}) => BoxDecoration(
+  color: couleur,
+  borderRadius: BorderRadius.circular(rayon),
+  border: Border.all(color: AppColor.kLine),
+);
 
 /// Titre de section avec lien « Voir tout » facultatif.
 class EnteteSection extends StatelessWidget {
@@ -35,22 +32,27 @@ class EnteteSection extends StatelessWidget {
   final String? sousTitre;
   final String? action;
   final VoidCallback? onAction;
-  const EnteteSection(this.titre, {super.key, this.sousTitre, this.action, this.onAction});
+  const EnteteSection(
+    this.titre, {
+    super.key,
+    this.sousTitre,
+    this.action,
+    this.onAction,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(titre, style: titreSection(16.5)),
+              Text(titre, style: titreSection(17)),
               if (sousTitre != null && sousTitre!.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.only(top: 2),
-                  child: Text(sousTitre!, style: texteDiscret(12)),
+                  child: Text(sousTitre!, style: texteDiscret(12.5)),
                 ),
             ],
           ),
@@ -64,10 +66,10 @@ class EnteteSection extends StatelessWidget {
             ),
             child: Text(
               action!,
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-                color: AppColor.kPrimary,
+              style: GoogleFonts.inter(
+                fontSize: 13.5,
+                fontWeight: FontWeight.w600,
+                color: AppColor.kPrimaryMedium,
               ),
             ),
           ),
@@ -76,12 +78,17 @@ class EnteteSection extends StatelessWidget {
   }
 }
 
-/// Pastille d'icône carrée bleu clair (ou jaune clair si [accent]).
+/// Pastille d'icône : carré arrondi gris clair (ou doré si [accent]).
 class PastilleIcone extends StatelessWidget {
   final IconData icone;
   final bool accent;
   final double taille;
-  const PastilleIcone(this.icone, {super.key, this.accent = false, this.taille = 36});
+  const PastilleIcone(
+    this.icone, {
+    super.key,
+    this.accent = false,
+    this.taille = 36,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -90,15 +97,18 @@ class PastilleIcone extends StatelessWidget {
       height: taille,
       decoration: BoxDecoration(
         color: accent ? AppColor.kSecondaryLight : AppColor.kPrimaryLight,
-        borderRadius: BorderRadius.circular(taille * 0.28),
+        borderRadius: BorderRadius.circular(taille * 0.25),
       ),
-      child: Icon(icone,
-          size: taille * 0.53, color: accent ? AppColor.kSecondaryDark : AppColor.kPrimary),
+      child: Icon(
+        icone,
+        size: taille * 0.52,
+        color: accent ? AppColor.kSecondaryDark : AppColor.kPrimary,
+      ),
     );
   }
 }
 
-/// État vide ou d'erreur : grande pastille, titre, texte, action facultative.
+/// État vide ou d'erreur : icône, titre, texte, action facultative.
 class EtatVide extends StatelessWidget {
   final IconData icone;
   final String titre;
@@ -120,25 +130,20 @@ class EtatVide extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 28, vertical: compact ? 20 : 40),
+      padding: EdgeInsets.symmetric(
+        horizontal: 32,
+        vertical: compact ? 28 : 48,
+      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            width: compact ? 64 : 84,
-            height: compact ? 64 : 84,
-            decoration: BoxDecoration(
-              color: AppColor.kPrimaryLight,
-              borderRadius: BorderRadius.circular(compact ? 20 : 26),
-            ),
-            child: Icon(icone, size: compact ? 30 : 38, color: AppColor.kPrimary),
-          ),
-          const SizedBox(height: 16),
+          Icon(icone, size: compact ? 40 : 48, color: AppColor.kGrayscale30),
+          const SizedBox(height: 14),
           Text(
             titre,
             textAlign: TextAlign.center,
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 16,
+            style: GoogleFonts.inter(
+              fontSize: 16.5,
               fontWeight: FontWeight.w700,
               color: AppColor.kGrayscaleDark100,
             ),
@@ -148,8 +153,8 @@ class EtatVide extends StatelessWidget {
             Text(
               message!,
               textAlign: TextAlign.center,
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 13.5,
+              style: GoogleFonts.inter(
+                fontSize: 14,
                 height: 1.45,
                 color: AppColor.kGrayscale40,
               ),
@@ -157,20 +162,7 @@ class EtatVide extends StatelessWidget {
           ],
           if (action != null && onAction != null) ...[
             const SizedBox(height: 18),
-            ElevatedButton(
-              onPressed: onAction,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColor.kPrimary,
-                foregroundColor: AppColor.kWhite,
-                elevation: 0,
-                padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 13),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-              ),
-              child: Text(
-                action!,
-                style: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.w700),
-              ),
-            ),
+            OutlinedButton(onPressed: onAction, child: Text(action!)),
           ],
         ],
       ),
@@ -184,32 +176,44 @@ class PuceFiltre extends StatelessWidget {
   final bool active;
   final VoidCallback onTap;
   final IconData? icone;
-  const PuceFiltre({super.key, required this.libelle, required this.active, required this.onTap, this.icone});
+  const PuceFiltre({
+    super.key,
+    required this.libelle,
+    required this.active,
+    required this.onTap,
+    this.icone,
+  });
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(999),
+      borderRadius: BorderRadius.circular(8),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 160),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
         decoration: BoxDecoration(
           color: active ? AppColor.kPrimary : AppColor.kWhite,
-          borderRadius: BorderRadius.circular(999),
-          border: Border.all(color: active ? AppColor.kPrimary : AppColor.kLine),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: active ? AppColor.kPrimary : AppColor.kGrayscale20,
+          ),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             if (icone != null) ...[
-              Icon(icone, size: 15, color: active ? AppColor.kWhite : AppColor.kPrimary),
+              Icon(
+                icone,
+                size: 15,
+                color: active ? AppColor.kWhite : AppColor.kPrimary,
+              ),
               const SizedBox(width: 5),
             ],
             Text(
               libelle,
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 12.5,
+              style: GoogleFonts.inter(
+                fontSize: 13,
                 fontWeight: FontWeight.w600,
                 color: active ? AppColor.kWhite : AppColor.kGrayscaleDark100,
               ),
@@ -221,7 +225,7 @@ class PuceFiltre extends StatelessWidget {
   }
 }
 
-/// Champ de recherche arrondi sur fond clair.
+/// Champ de recherche : rectangle arrondi blanc, loupe à gauche.
 class ChampRecherche extends StatelessWidget {
   final TextEditingController? controleur;
   final String indication;
@@ -231,13 +235,13 @@ class ChampRecherche extends StatelessWidget {
   final bool lectureSeule;
   final bool autofocus;
 
-  /// Fond blanc et ombre légère (sur un écran gris clair), comme Yobante.
+  /// Filet autour du champ, quand il est posé sur un fond clair.
   final bool surFondClair;
 
   const ChampRecherche({
     super.key,
     this.controleur,
-    this.indication = 'Rechercher un produit, une boutique…',
+    this.indication = 'Rechercher un produit, une boutique',
     this.onSubmitted,
     this.onChanged,
     this.onTap,
@@ -248,23 +252,22 @@ class ChampRecherche extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Même champ que Yobante Boutique : 48 de haut, fond clair, filet gris,
-    // loupe bleue de la marque.
     return Container(
-      height: 48,
+      height: 46,
       decoration: BoxDecoration(
-        color: surFondClair ? AppColor.kWhite : AppColor.kBackground,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColor.kLine),
-        boxShadow: surFondClair
-            ? [BoxShadow(color: AppColor.kPrimary.withValues(alpha: 0.05), blurRadius: 14, offset: const Offset(0, 5))]
-            : null,
+        color: AppColor.kWhite,
+        borderRadius: BorderRadius.circular(10),
+        border: surFondClair ? Border.all(color: AppColor.kGrayscale20) : null,
       ),
       child: Row(
         children: [
-          const SizedBox(width: 14),
-          const Icon(Icons.search_rounded, color: AppColor.kPrimary, size: 22),
-          const SizedBox(width: 10),
+          const SizedBox(width: 12),
+          const Icon(
+            Icons.search_rounded,
+            color: AppColor.kGrayscale40,
+            size: 22,
+          ),
+          const SizedBox(width: 8),
           Expanded(
             child: TextField(
               controller: controleur,
@@ -275,21 +278,25 @@ class ChampRecherche extends StatelessWidget {
               onSubmitted: onSubmitted,
               textInputAction: TextInputAction.search,
               cursorColor: AppColor.kPrimary,
-              style: GoogleFonts.plusJakartaSans(
-                  fontSize: 14.5, fontWeight: FontWeight.w500, color: AppColor.kGrayscaleDark100),
+              style: GoogleFonts.inter(
+                fontSize: 15,
+                color: AppColor.kGrayscaleDark100,
+              ),
               decoration: InputDecoration(
                 isCollapsed: true,
                 filled: false,
                 hintText: indication,
-                hintStyle: GoogleFonts.plusJakartaSans(
-                    fontSize: 14, fontWeight: FontWeight.w500, color: AppColor.kGrayscale40),
+                hintStyle: GoogleFonts.inter(
+                  fontSize: 15,
+                  color: AppColor.kGrayscale30,
+                ),
                 border: InputBorder.none,
                 enabledBorder: InputBorder.none,
                 focusedBorder: InputBorder.none,
               ),
             ),
           ),
-          const SizedBox(width: 14),
+          const SizedBox(width: 12),
         ],
       ),
     );

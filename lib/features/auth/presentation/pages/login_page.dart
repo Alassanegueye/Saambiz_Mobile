@@ -40,12 +40,12 @@ class _LoginPageState extends State<LoginPage> {
     // E-mail ou téléphone : le serveur attend l'un ou l'autre.
     final isEmail = RegExp(r'\S+@\S+\.\S+').hasMatch(input);
     context.read<AuthBloc>().add(
-          LoginRequested(
-            email: isEmail ? input : null,
-            telephone: isEmail ? null : input,
-            mot_de_passe: _passwordController.text,
-          ),
-        );
+      LoginRequested(
+        email: isEmail ? input : null,
+        telephone: isEmail ? null : input,
+        mot_de_passe: _passwordController.text,
+      ),
+    );
   }
 
   @override
@@ -106,13 +106,16 @@ class _LoginPageState extends State<LoginPage> {
             child: AutofillGroup(
               child: CorpsAuth(
                 titre: 'Se connecter',
-                sousTitre: 'Retrouvez vos boutiques, vos commandes et vos favoris.',
+                sousTitre:
+                    'Retrouvez vos boutiques, vos commandes et vos favoris.',
                 enfants: [
                   CarteAuth(child: _formulaire(isLoading)),
                   LienAuth(
                     question: 'Pas encore de compte ? ',
                     action: 'Créer un compte',
-                    onTap: () => Navigator.of(context).pushNamed(AppRouter.profileChoiceRoute),
+                    onTap: () => Navigator.of(
+                      context,
+                    ).pushNamed(AppRouter.profileChoiceRoute),
                   ),
                   const SizedBox(height: 24),
                 ],
@@ -136,7 +139,9 @@ class _LoginPageState extends State<LoginPage> {
           clavier: TextInputType.emailAddress,
           action: TextInputAction.next,
           autofill: const [AutofillHints.username, AutofillHints.email],
-          validator: (v) => (v == null || v.trim().isEmpty) ? 'E-mail ou téléphone requis' : null,
+          validator: (v) => (v == null || v.trim().isEmpty)
+              ? 'E-mail ou téléphone requis'
+              : null,
         ),
         const SizedBox(height: 16),
         const LibelleChamp('Mot de passe'),
@@ -144,15 +149,17 @@ class _LoginPageState extends State<LoginPage> {
           controller: _passwordController,
           action: TextInputAction.done,
           onSubmitted: (_) => _onLoginPressed(),
-          validator: (v) => (v == null || v.isEmpty) ? 'Mot de passe requis' : null,
+          validator: (v) =>
+              (v == null || v.isEmpty) ? 'Mot de passe requis' : null,
         ),
         Align(
           alignment: Alignment.centerRight,
           child: TextButton(
-            onPressed: () => Navigator.of(context).pushNamed(AppRouter.forgotPasswordRoute),
+            onPressed: () =>
+                Navigator.of(context).pushNamed(AppRouter.forgotPasswordRoute),
             child: Text(
               'Mot de passe oublié ?',
-              style: GoogleFonts.plusJakartaSans(
+              style: GoogleFonts.inter(
                 color: AppColor.kPrimary,
                 fontWeight: FontWeight.w600,
                 fontSize: 13,

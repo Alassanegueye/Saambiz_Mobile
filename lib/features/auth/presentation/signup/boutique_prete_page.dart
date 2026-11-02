@@ -7,7 +7,7 @@ import '../../domain/entities/user.dart';
 import 'signup_kit.dart';
 
 /// Écran 5B : la boutique existe, on propose d'y mettre un premier produit.
-/// L'étape est volontairement sautable — un vendeur qui n'a pas ses photos
+/// L'étape est volontairement sautable, un vendeur qui n'a pas ses photos
 /// sous la main doit pouvoir entrer dans l'application quand même.
 class BoutiquePretePage extends StatelessWidget {
   final User? user;
@@ -42,8 +42,15 @@ class BoutiquePretePage extends StatelessWidget {
             Container(
               width: 44,
               height: 44,
-              decoration: BoxDecoration(color: Sb.goldSoft, borderRadius: BorderRadius.circular(14)),
-              child: const Icon(Icons.storefront_rounded, color: Sb.navy, size: 22),
+              decoration: BoxDecoration(
+                color: Sb.goldSoft,
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: const Icon(
+                Icons.storefront_rounded,
+                color: Sb.navy,
+                size: 22,
+              ),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -51,7 +58,11 @@ class BoutiquePretePage extends StatelessWidget {
                 nomBoutique,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: GoogleFonts.plusJakartaSans(fontSize: 16, fontWeight: FontWeight.w700, color: Sb.navy),
+                style: GoogleFonts.inter(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: Sb.navy,
+                ),
               ),
             ),
             const Icon(Icons.check_circle_rounded, color: Sb.green, size: 22),
@@ -64,7 +75,10 @@ class BoutiquePretePage extends StatelessWidget {
           onPressed: () => _ajouterProduit(context),
         ),
         const SizedBox(height: 10),
-        SbSecondaryButton(label: "Passer pour l'instant", onPressed: () => _versBienvenue(context)),
+        SbSecondaryButton(
+          label: "Passer pour l'instant",
+          onPressed: () => _versBienvenue(context),
+        ),
       ],
     );
   }

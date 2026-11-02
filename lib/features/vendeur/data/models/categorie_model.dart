@@ -8,11 +8,15 @@ class CategorieModel {
   /// (tailles, pointures, contenance…). Défini dans le dashboard admin.
   final List<SpecificationProduit> specifications;
 
-  CategorieModel({required this.id, required this.nom, this.specifications = const []});
+  CategorieModel({
+    required this.id,
+    required this.nom,
+    this.specifications = const [],
+  });
 
   factory CategorieModel.fromJson(Map<String, dynamic> json) => CategorieModel(
-        id: json['id']?.toString() ?? '',
-        nom: json['nom'] ?? '',
-        specifications: SpecificationProduit.liste(json['specifications']),
-      );
+    id: json['id']?.toString() ?? '',
+    nom: json['nom'] ?? '',
+    specifications: SpecificationProduit.liste(json['specifications']),
+  );
 }

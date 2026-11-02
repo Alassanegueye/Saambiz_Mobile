@@ -40,8 +40,10 @@ class AbonnementRemoteDataSourceImpl implements AbonnementRemoteDataSource {
 
   @override
   Future<String> initierRenouvellement({num? montant}) async {
-    final res = await dio.post(AbonnementEndpoints.initierRenouvellement,
-        data: montant != null ? {'montant': montant} : null);
+    final res = await dio.post(
+      AbonnementEndpoints.initierRenouvellement,
+      data: montant != null ? {'montant': montant} : null,
+    );
     final data = res.data;
     if (data is Map && data['paiementId'] != null) {
       return data['paiementId'].toString();
@@ -52,9 +54,9 @@ class AbonnementRemoteDataSourceImpl implements AbonnementRemoteDataSource {
   @override
   Future<List<PaiementModel>> historiquePaiementsAbonnement() async {
     final res = await dio.get(AbonnementEndpoints.historiquePaiements);
-    return _extractList(res.data)
-        .map((e) => PaiementModel.fromJson(e as Map<String, dynamic>))
-        .toList();
+    return _extractList(
+      res.data,
+    ).map((e) => PaiementModel.fromJson(e as Map<String, dynamic>)).toList();
   }
 
   @override
@@ -63,11 +65,14 @@ class AbonnementRemoteDataSourceImpl implements AbonnementRemoteDataSource {
     required String numeroTelephone,
     required String methode,
   }) async {
-    final res = await dio.post(PaiementEndpoints.payer, data: {
-      'montant': montant,
-      'numeroTelephone': numeroTelephone,
-      'methode': methode,
-    });
+    final res = await dio.post(
+      PaiementEndpoints.payer,
+      data: {
+        'montant': montant,
+        'numeroTelephone': numeroTelephone,
+        'methode': methode,
+      },
+    );
     final data = res.data;
     return {
       'paymentUrl': data is Map ? data['paymentUrl']?.toString() : null,
@@ -84,8 +89,8 @@ class AbonnementRemoteDataSourceImpl implements AbonnementRemoteDataSource {
   @override
   Future<List<PaiementModel>> historiquePaiementGeneral() async {
     final res = await dio.get(PaiementEndpoints.historique);
-    return _extractList(res.data)
-        .map((e) => PaiementModel.fromJson(e as Map<String, dynamic>))
-        .toList();
+    return _extractList(
+      res.data,
+    ).map((e) => PaiementModel.fromJson(e as Map<String, dynamic>)).toList();
   }
 }

@@ -51,19 +51,22 @@ class ConversationModel {
         (json['interlocuteur'] ?? json['utilisateur']) as Map<String, dynamic>?;
     final dernierMessage = json['dernierMessage'];
     return ConversationModel(
-      interlocuteurId: (json['interlocuteurId'] ?? interlocuteur?['id'])?.toString() ?? '',
+      interlocuteurId:
+          (json['interlocuteurId'] ?? interlocuteur?['id'])?.toString() ?? '',
       interlocuteurNom: interlocuteur != null
-          ? '${interlocuteur['prenom'] ?? ''} ${interlocuteur['nom'] ?? ''}'.trim()
+          ? '${interlocuteur['prenom'] ?? ''} ${interlocuteur['nom'] ?? ''}'
+                .trim()
           : (json['interlocuteurNom']?.toString() ?? ''),
       interlocuteurPhoto: interlocuteur?['photoProfil']?.toString(),
       dernierMessage: dernierMessage is Map
           ? (dernierMessage['contenu']?.toString() ?? '')
           : (json['contenu']?.toString() ?? ''),
-      dateDernierMessage: dernierMessage is Map && dernierMessage['createdAt'] != null
+      dateDernierMessage:
+          dernierMessage is Map && dernierMessage['createdAt'] != null
           ? DateTime.tryParse(dernierMessage['createdAt'].toString())
           : (json['createdAt'] != null
-              ? DateTime.tryParse(json['createdAt'].toString())
-              : null),
+                ? DateTime.tryParse(json['createdAt'].toString())
+                : null),
       nombreNonLus: (json['nombreNonLus'] ?? json['nonLus'] ?? 0) is int
           ? (json['nombreNonLus'] ?? json['nonLus'] ?? 0)
           : int.tryParse('${json['nombreNonLus'] ?? json['nonLus']}') ?? 0,

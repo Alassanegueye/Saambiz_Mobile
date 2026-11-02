@@ -8,10 +8,10 @@ import '../bloc/compte_state.dart';
 import 'reset_password_page.dart';
 
 class _C {
-  static const green = Color(0xFF0D1B3D);
-  static const black = Color(0xFF0D1B3D);
+  static const green = Color(0xFF01154B);
+  static const black = Color(0xFF01154B);
   static const white = Color(0xFFFFFFFF);
-  static const bg = Color(0xFFF5F7FB);
+  static const bg = Color(0xFFF4F5F8);
   static const sub = Color(0xFF5B6C8A);
   static const border = Color(0xFFE3E8F0);
 }
@@ -47,7 +47,9 @@ class _ForgotPasswordViewState extends State<_ForgotPasswordView> {
 
   void _envoyer() {
     if (!_formKey.currentState!.validate()) return;
-    context.read<CompteBloc>().add(ForgotPasswordRequested(_emailCtrl.text.trim()));
+    context.read<CompteBloc>().add(
+      ForgotPasswordRequested(_emailCtrl.text.trim()),
+    );
   }
 
   @override
@@ -64,12 +66,16 @@ class _ForgotPasswordViewState extends State<_ForgotPasswordView> {
         listener: (context, state) {
           if (state is CompteError) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message), backgroundColor: Colors.red),
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.red,
+              ),
             );
           } else if (state is CompteMessageSucces) {
             Navigator.of(context).pushReplacement(
               MaterialPageRoute(
-                builder: (_) => ResetPasswordPage(email: _emailCtrl.text.trim()),
+                builder: (_) =>
+                    ResetPasswordPage(email: _emailCtrl.text.trim()),
               ),
             );
           }
@@ -95,8 +101,10 @@ class _ForgotPasswordViewState extends State<_ForgotPasswordView> {
                     labelText: 'E-mail',
                     filled: true,
                     fillColor: _C.white,
-                    contentPadding:
-                        const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 14,
+                    ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: const BorderSide(color: _C.border),
@@ -119,16 +127,22 @@ class _ForgotPasswordViewState extends State<_ForgotPasswordView> {
                     foregroundColor: _C.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14)),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
                   ),
                   child: loading
                       ? const SizedBox(
                           height: 20,
                           width: 20,
                           child: CircularProgressIndicator(
-                              strokeWidth: 2, color: Colors.white))
-                      : const Text('Envoyer le code',
-                          style: TextStyle(fontWeight: FontWeight.w700)),
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Text(
+                          'Envoyer le code',
+                          style: TextStyle(fontWeight: FontWeight.w700),
+                        ),
                 ),
               ],
             ),

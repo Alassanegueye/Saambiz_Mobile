@@ -20,17 +20,17 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:saambiz/core/utils/image_url.dart';
 
 class _C {
-  static const green      = Color(0xFF0D1B3D);
+  static const green = Color(0xFF01154B);
   static const greenLight = Color(0xFFE8EEF7);
-  static const black      = Color(0xFF0D1B3D);
-  static const white      = Color(0xFFFFFFFF);
-  static const bg         = Color(0xFFF5F7FB);
-  static const surface    = Color(0xFFF7F9FC);
-  static const border     = Color(0xFFE8EDF7);
-  static const label      = Color(0xFF93A1B8);
-  static const sub        = Color(0xFF5B6C8A);
-  static const orange     = Color(0xFFFF5722);
-  static const whatsapp   = Color(0xFF25D366);
+  static const black = Color(0xFF01154B);
+  static const white = Color(0xFFFFFFFF);
+  static const bg = Color(0xFFF4F5F8);
+  static const surface = Color(0xFFF7F9FC);
+  static const border = Color(0xFFE8EDF7);
+  static const label = Color(0xFF93A1B8);
+  static const sub = Color(0xFF5B6C8A);
+  static const orange = Color(0xFFFF5722);
+  static const whatsapp = Color(0xFF25D366);
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -43,11 +43,11 @@ class ProduitPage extends StatefulWidget {
 }
 
 class _ProduitPageState extends State<ProduitPage> {
-  String           _search     = '';
-  final Set<String> _favoris   = {};
-  final _searchCtrl            = TextEditingController();
+  String _search = '';
+  final Set<String> _favoris = {};
+  final _searchCtrl = TextEditingController();
   ProduitRemoteDataSource? _dataSource;
-  ProduitBloc?             _produitBloc;
+  ProduitBloc? _produitBloc;
 
   @override
   void initState() {
@@ -59,11 +59,11 @@ class _ProduitPageState extends State<ProduitPage> {
     try {
       // Récupérés via l'injection de dépendances (Dio partagé + API_BASE_URL du .env)
       final dataSource = sl<ProduitRemoteDataSource>();
-      final bloc       = sl<ProduitBloc>();
+      final bloc = sl<ProduitBloc>();
       bloc.add(LoadProduits());
       if (mounted) {
         setState(() {
-          _dataSource  = dataSource;
+          _dataSource = dataSource;
           _produitBloc = bloc;
         });
       }
@@ -72,7 +72,7 @@ class _ProduitPageState extends State<ProduitPage> {
     }
   }
 
-  // ── Appel WhatsApp ─────────────────────────────────────────────
+  // Appel WhatsApp
   Future<void> _contactWhatsapp(String produitId) async {
     if (_dataSource == null) return; // ✅ _dataSource pas widget.dataSource
 
@@ -83,26 +83,33 @@ class _ProduitPageState extends State<ProduitPage> {
         await launchUrl(uri, mode: LaunchMode.externalApplication);
       } else {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('WhatsApp non disponible',
-                style: GoogleFonts.plusJakartaSans(color: _C.white)),
-            backgroundColor: _C.orange,
-            behavior: SnackBarBehavior.floating,
-          ));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'WhatsApp non disponible',
+                style: GoogleFonts.inter(color: _C.white),
+              ),
+              backgroundColor: _C.orange,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('Erreur: ${e.toString()}',
-              style: GoogleFonts.plusJakartaSans(color: _C.white)),
-          backgroundColor: _C.orange,
-          behavior: SnackBarBehavior.floating,
-        ));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Erreur: ${e.toString()}',
+              style: GoogleFonts.inter(color: _C.white),
+            ),
+            backgroundColor: _C.orange,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
       }
     }
   }
-
 
   @override
   void dispose() {
@@ -123,20 +130,23 @@ class _ProduitPageState extends State<ProduitPage> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (_) => _ProduitModal(
-        produit:        p,
-        isFavori:       _favoris.contains(p.id),
+        produit: p,
+        isFavori: _favoris.contains(p.id),
         onToggleFavori: () => _toggleFavori(p.id),
-        dataSource:     _dataSource,
+        dataSource: _dataSource,
       ),
     );
   }
 
   List<ProduitModel> _filter(List<ProduitModel> produits) {
     if (_search.isEmpty) return produits;
-    return produits.where((p) =>
-    p.nom.toLowerCase().contains(_search.toLowerCase()) ||
-        p.ville.toLowerCase().contains(_search.toLowerCase()),
-    ).toList();
+    return produits
+        .where(
+          (p) =>
+              p.nom.toLowerCase().contains(_search.toLowerCase()) ||
+              p.ville.toLowerCase().contains(_search.toLowerCase()),
+        )
+        .toList();
   }
 
   @override
@@ -145,8 +155,7 @@ class _ProduitPageState extends State<ProduitPage> {
       backgroundColor: _C.bg,
       floatingActionButton: FloatingActionButton(
         backgroundColor: _C.green,
-        onPressed: () =>
-            Navigator.of(context).pushNamed(AppRouter.panierRoute),
+        onPressed: () => Navigator.of(context).pushNamed(AppRouter.panierRoute),
         child: ListenableBuilder(
           listenable: sl<PanierService>(),
           builder: (_, __) {
@@ -162,15 +171,22 @@ class _ProduitPageState extends State<ProduitPage> {
                     child: Container(
                       padding: const EdgeInsets.all(4),
                       decoration: const BoxDecoration(
-                          color: Colors.white, shape: BoxShape.circle),
-                      constraints:
-                          const BoxConstraints(minWidth: 18, minHeight: 18),
-                      child: Text('$n',
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                              color: _C.green,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w800)),
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                      ),
+                      constraints: const BoxConstraints(
+                        minWidth: 18,
+                        minHeight: 18,
+                      ),
+                      child: Text(
+                        '$n',
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: _C.green,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
                     ),
                   ),
               ],
@@ -206,36 +222,40 @@ class _ProduitPageState extends State<ProduitPage> {
     try {
       await panier.ajouter(item);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('${p.nom} ajouté au panier'),
-        backgroundColor: _C.green,
-        action: SnackBarAction(
-          label: 'Voir',
-          textColor: Colors.white,
-          onPressed: () =>
-              Navigator.of(context).pushNamed(AppRouter.panierRoute),
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${p.nom} ajouté au panier'),
+          backgroundColor: _C.green,
+          action: SnackBarAction(
+            label: 'Voir',
+            textColor: Colors.white,
+            onPressed: () =>
+                Navigator.of(context).pushNamed(AppRouter.panierRoute),
+          ),
         ),
-      ));
+      );
     } on PanierVendeurDifferentException catch (e) {
       // Une commande = une boutique : on propose de vider l'ancien panier.
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(e.message),
-        backgroundColor: Colors.orange,
-        duration: const Duration(seconds: 6),
-        action: SnackBarAction(
-          label: 'Vider et ajouter',
-          textColor: Colors.white,
-          onPressed: () async {
-            await panier.vider();
-            await panier.ajouter(item);
-          },
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.message),
+          backgroundColor: Colors.orange,
+          duration: const Duration(seconds: 6),
+          action: SnackBarAction(
+            label: 'Vider et ajouter',
+            textColor: Colors.white,
+            onPressed: () async {
+              await panier.vider();
+              await panier.ajouter(item);
+            },
+          ),
         ),
-      ));
+      );
     }
   }
 
-  // ── Header ─────────────────────────────────────────────────────────────────
+  // Header
   Widget _buildHeader() {
     return Container(
       color: _C.black,
@@ -247,9 +267,11 @@ class _ProduitPageState extends State<ProduitPage> {
           Stack(
             children: [
               Positioned(
-                right: -10, top: -10,
+                right: -10,
+                top: -10,
                 child: Container(
-                  width: 100, height: 100,
+                  width: 100,
+                  height: 100,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: _C.green.withOpacity(0.07),
@@ -258,22 +280,28 @@ class _ProduitPageState extends State<ProduitPage> {
               ),
               // Titre
               RichText(
-                text: TextSpan(children: [
-                  TextSpan(
-                    text: 'Les ',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 20, fontWeight: FontWeight.w800,
-                      color: _C.white, letterSpacing: -0.5,
+                text: TextSpan(
+                  children: [
+                    TextSpan(
+                      text: 'Les ',
+                      style: GoogleFonts.inter(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w800,
+                        color: _C.white,
+                        letterSpacing: -0.5,
+                      ),
                     ),
-                  ),
-                  TextSpan(
-                    text: 'Produits',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 20, fontWeight: FontWeight.w800,
-                      color: _C.green, letterSpacing: -0.5,
+                    TextSpan(
+                      text: 'Produits',
+                      style: GoogleFonts.inter(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w800,
+                        color: _C.green,
+                        letterSpacing: -0.5,
+                      ),
                     ),
-                  ),
-                ]),
+                  ],
+                ),
               ),
             ],
           ),
@@ -284,23 +312,31 @@ class _ProduitPageState extends State<ProduitPage> {
             child: TextField(
               controller: _searchCtrl,
               onChanged: (v) => setState(() => _search = v),
-              style: GoogleFonts.plusJakartaSans(fontSize: 15, color: _C.white),
+              style: GoogleFonts.inter(fontSize: 15, color: _C.white),
               cursorColor: _C.green,
               decoration: InputDecoration(
                 hintText: 'Rechercher un produit...',
-                hintStyle: GoogleFonts.plusJakartaSans(
+                hintStyle: GoogleFonts.inter(
                   fontSize: 15,
                   color: Colors.white.withOpacity(0.4),
                 ),
-                prefixIcon: const Icon(Icons.search_rounded, color: _C.green, size: 20),
+                prefixIcon: const Icon(
+                  Icons.search_rounded,
+                  color: _C.green,
+                  size: 20,
+                ),
                 suffixIcon: _search.isNotEmpty
                     ? IconButton(
-                  icon: const Icon(Icons.close_rounded, color: _C.green, size: 18),
-                  onPressed: () {
-                    _searchCtrl.clear();
-                    setState(() => _search = '');
-                  },
-                )
+                        icon: const Icon(
+                          Icons.close_rounded,
+                          color: _C.green,
+                          size: 18,
+                        ),
+                        onPressed: () {
+                          _searchCtrl.clear();
+                          setState(() => _search = '');
+                        },
+                      )
                     : null,
                 filled: true,
                 fillColor: Colors.white.withOpacity(0.1),
@@ -325,7 +361,7 @@ class _ProduitPageState extends State<ProduitPage> {
     );
   }
 
-  // ── Compteur résultats ─────────────────────────────────────────────────────
+  // Compteur résultats
   Widget _buildResultCount() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(18, 14, 18, 10),
@@ -334,19 +370,24 @@ class _ProduitPageState extends State<ProduitPage> {
         children: [
           Text(
             'Produits',
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 14, fontWeight: FontWeight.w700, color: _C.black,
+            style: GoogleFonts.inter(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: _C.black,
             ),
           ),
           GestureDetector(
             onTap: () => _produitBloc?.add(LoadProduits()),
             child: Row(
               children: [
-                Text('Actualiser',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 12, fontWeight: FontWeight.w600,
-                      color: _C.green,
-                    )),
+                Text(
+                  'Actualiser',
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: _C.green,
+                  ),
+                ),
                 const SizedBox(width: 3),
                 const Icon(Icons.refresh_rounded, color: _C.green, size: 16),
               ],
@@ -357,7 +398,7 @@ class _ProduitPageState extends State<ProduitPage> {
     );
   }
 
-  // ── Grille produits ────────────────────────────────────────────────────────
+  // Grille produits
   Widget _buildGrid() {
     if (_produitBloc == null) {
       return const Center(
@@ -379,13 +420,17 @@ class _ProduitPageState extends State<ProduitPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.error_outline_rounded, color: _C.orange, size: 48),
+                const Icon(
+                  Icons.error_outline_rounded,
+                  color: _C.orange,
+                  size: 48,
+                ),
                 const SizedBox(height: 12),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 32),
                   child: Text(
                     'Erreur: ${state.message}',
-                    style: GoogleFonts.plusJakartaSans(color: _C.orange),
+                    style: GoogleFonts.inter(color: _C.orange),
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -393,14 +438,21 @@ class _ProduitPageState extends State<ProduitPage> {
                 GestureDetector(
                   onTap: () => _produitBloc?.add(LoadProduits()),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 10,
+                    ),
                     decoration: BoxDecoration(
                       color: _C.black,
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Text('Réessayer',
-                        style: GoogleFonts.plusJakartaSans(
-                            color: _C.white, fontWeight: FontWeight.w600)),
+                    child: Text(
+                      'Réessayer',
+                      style: GoogleFonts.inter(
+                        color: _C.white,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -416,13 +468,20 @@ class _ProduitPageState extends State<ProduitPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.search_off_rounded, color: _C.label, size: 48),
+                  const Icon(
+                    Icons.search_off_rounded,
+                    color: _C.label,
+                    size: 48,
+                  ),
                   const SizedBox(height: 12),
-                  Text('Aucun produit trouvé',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 15, fontWeight: FontWeight.w700,
-                        color: _C.label,
-                      )),
+                  Text(
+                    'Aucun produit trouvé',
+                    style: GoogleFonts.inter(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: _C.label,
+                    ),
+                  ),
                 ],
               ),
             );
@@ -436,9 +495,9 @@ class _ProduitPageState extends State<ProduitPage> {
               padding: const EdgeInsets.fromLTRB(18, 0, 18, 100),
               physics: const BouncingScrollPhysics(),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount:   2,
+                crossAxisCount: 2,
                 crossAxisSpacing: 12,
-                mainAxisSpacing:  12,
+                mainAxisSpacing: 12,
                 childAspectRatio: 0.78,
               ),
               itemCount: list.length,
@@ -452,7 +511,7 @@ class _ProduitPageState extends State<ProduitPage> {
     );
   }
 
-  // ── Carte produit ──────────────────────────────────────────────────────────
+  // Carte produit
   Widget _buildCard(ProduitModel p) {
     return GestureDetector(
       onTap: () => _openModal(p),
@@ -464,7 +523,8 @@ class _ProduitPageState extends State<ProduitPage> {
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.03),
-              blurRadius: 8, offset: const Offset(0, 2),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
             ),
           ],
         ),
@@ -475,18 +535,30 @@ class _ProduitPageState extends State<ProduitPage> {
               child: Container(
                 decoration: BoxDecoration(
                   color: _C.surface,
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(19)),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(19),
+                  ),
                   image: p.image.isNotEmpty
-                      ? DecorationImage(image: CachedNetworkImageProvider(imageOptimisee(p.image)), fit: BoxFit.cover)
+                      ? DecorationImage(
+                          image: CachedNetworkImageProvider(
+                            imageOptimisee(p.image),
+                          ),
+                          fit: BoxFit.cover,
+                        )
                       : null,
                 ),
-                child: Stack(children: [
-                  if (p.image.isEmpty)
-                    const Center(
-                      child: Icon(Icons.storefront_rounded, size: 44, color: Colors.white54),
-                    ),
-
-                ]),
+                child: Stack(
+                  children: [
+                    if (p.image.isEmpty)
+                      const Center(
+                        child: Icon(
+                          Icons.storefront_rounded,
+                          size: 44,
+                          color: Colors.white54,
+                        ),
+                      ),
+                  ],
+                ),
               ),
             ),
             Padding(
@@ -494,69 +566,99 @@ class _ProduitPageState extends State<ProduitPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(p.nom,
-                      style: GoogleFonts.plusJakartaSans(
-                          fontSize: 12, fontWeight: FontWeight.w700, color: _C.black),
-                      maxLines: 1, overflow: TextOverflow.ellipsis),
+                  Text(
+                    p.nom,
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: _C.black,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                   const SizedBox(height: 2),
-                  Text(p.ville,
-                      style: GoogleFonts.plusJakartaSans(fontSize: 10, color: _C.label)),
+                  Text(
+                    p.ville,
+                    style: GoogleFonts.inter(fontSize: 10, color: _C.label),
+                  ),
                   const SizedBox(height: 8),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       RichText(
-                        text: TextSpan(children: [
-                          TextSpan(
-                            text: p.prix,
-                            style: GoogleFonts.plusJakartaSans(
-                                fontSize: 13, fontWeight: FontWeight.w800, color: _C.black),
-                          ),
-                          TextSpan(
-                            text: ' F',
-                            style: GoogleFonts.plusJakartaSans(fontSize: 10, color: _C.label),
-                          ),
-                        ]),
+                        text: TextSpan(
+                          children: [
+                            TextSpan(
+                              text: p.prix,
+                              style: GoogleFonts.inter(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w800,
+                                color: _C.black,
+                              ),
+                            ),
+                            TextSpan(
+                              text: ' F',
+                              style: GoogleFonts.inter(
+                                fontSize: 10,
+                                color: _C.label,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                       Row(
                         children: [
-                          // ── Bouton WhatsApp ──────────────────────────
+                          // Bouton WhatsApp
                           GestureDetector(
                             onTap: () => _contactWhatsapp(p.id),
                             child: Container(
-                              width: 28, height: 28,
+                              width: 28,
+                              height: 28,
                               decoration: BoxDecoration(
                                 color: _C.whatsapp,
                                 borderRadius: BorderRadius.circular(8),
                               ),
-                              child: const Icon(Icons.chat_rounded, color: _C.white, size: 15),
+                              child: const Icon(
+                                Icons.chat_rounded,
+                                color: _C.white,
+                                size: 15,
+                              ),
                             ),
                           ),
                           const SizedBox(width: 6),
-                          // ── Bouton ajouter au panier ─────────────────
+                          // Bouton ajouter au panier
                           GestureDetector(
                             onTap: () => _ajouterAuPanier(p),
                             child: Container(
-                              width: 28, height: 28,
+                              width: 28,
+                              height: 28,
                               decoration: BoxDecoration(
                                 color: _C.green,
                                 borderRadius: BorderRadius.circular(8),
                               ),
-                              child: const Icon(Icons.add_shopping_cart_rounded,
-                                  color: _C.white, size: 15),
+                              child: const Icon(
+                                Icons.add_shopping_cart_rounded,
+                                color: _C.white,
+                                size: 15,
+                              ),
                             ),
                           ),
                           const SizedBox(width: 6),
-                          // ── Bouton détail ────────────────────────────
+                          // Bouton détail
                           GestureDetector(
                             onTap: () => _openModal(p),
                             child: Container(
-                              width: 28, height: 28,
+                              width: 28,
+                              height: 28,
                               decoration: BoxDecoration(
                                 color: _C.black,
                                 borderRadius: BorderRadius.circular(8),
                               ),
-                              child: const Icon(Icons.add_rounded, color: _C.white, size: 16),
+                              child: const Icon(
+                                Icons.add_rounded,
+                                color: _C.white,
+                                size: 16,
+                              ),
                             ),
                           ),
                         ],
@@ -583,9 +685,9 @@ class _ProduitPageState extends State<ProduitPage> {
 // MODAL DÉTAIL PRODUIT
 // ══════════════════════════════════════════════════════════════════════════════
 class _ProduitModal extends StatefulWidget {
-  final ProduitModel             produit;
-  final bool                     isFavori;
-  final VoidCallback             onToggleFavori;
+  final ProduitModel produit;
+  final bool isFavori;
+  final VoidCallback onToggleFavori;
   final ProduitRemoteDataSource? dataSource;
 
   const _ProduitModal({
@@ -636,12 +738,14 @@ class _ProduitModalState extends State<_ProduitModal> {
   }
 
   void _ouvrirSignalement() {
-    Navigator.of(context).push(MaterialPageRoute(
-      builder: (_) => SignalerFormPage(
-        type: 'boutique',
-        cibleId: widget.produit.boutiqueId,
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => SignalerFormPage(
+          type: 'boutique',
+          cibleId: widget.produit.boutiqueId,
+        ),
       ),
-    ));
+    );
   }
 
   Future<void> _contactWhatsApp() async {
@@ -653,20 +757,28 @@ class _ProduitModalState extends State<_ProduitModal> {
         await launchUrl(uri, mode: LaunchMode.externalApplication);
       } else {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('WhatsApp non disponible',
-                style: GoogleFonts.plusJakartaSans(color: _C.white)),
-            backgroundColor: _C.black,
-          ));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'WhatsApp non disponible',
+                style: GoogleFonts.inter(color: _C.white),
+              ),
+              backgroundColor: _C.black,
+            ),
+          );
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('Erreur: ${e.toString()}',
-              style: GoogleFonts.plusJakartaSans(color: _C.white)),
-          backgroundColor: _C.orange,
-        ));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Erreur: ${e.toString()}',
+              style: GoogleFonts.inter(color: _C.white),
+            ),
+            backgroundColor: _C.orange,
+          ),
+        );
       }
     }
   }
@@ -697,7 +809,8 @@ class _ProduitModalState extends State<_ProduitModal> {
         children: [
           // Handle
           Container(
-            width: 36, height: 4,
+            width: 36,
+            height: 4,
             margin: const EdgeInsets.only(top: 12),
             decoration: BoxDecoration(
               color: const Color(0xFFE3E8F0),
@@ -719,29 +832,46 @@ class _ProduitModalState extends State<_ProduitModal> {
                       color: _C.surface,
                       borderRadius: BorderRadius.circular(20),
                       image: p.image.isNotEmpty
-                          ? DecorationImage(image: CachedNetworkImageProvider(imageOptimisee(p.image)), fit: BoxFit.cover)
+                          ? DecorationImage(
+                              image: CachedNetworkImageProvider(
+                                imageOptimisee(p.image),
+                              ),
+                              fit: BoxFit.cover,
+                            )
                           : null,
                     ),
-                    child: Stack(children: [
-                      if (p.image.isEmpty)
-                        const Center(
-                          child: Icon(Icons.storefront_rounded, size: 72, color: Colors.white38),
-                        ),
-                      Positioned(
-                        top: 10, right: 10,
-                        child: GestureDetector(
-                          onTap: () => Navigator.pop(context),
-                          child: Container(
-                            width: 32, height: 32,
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.9),
-                              shape: BoxShape.circle,
+                    child: Stack(
+                      children: [
+                        if (p.image.isEmpty)
+                          const Center(
+                            child: Icon(
+                              Icons.storefront_rounded,
+                              size: 72,
+                              color: Colors.white38,
                             ),
-                            child: const Icon(Icons.close_rounded, size: 16, color: _C.black),
+                          ),
+                        Positioned(
+                          top: 10,
+                          right: 10,
+                          child: GestureDetector(
+                            onTap: () => Navigator.pop(context),
+                            child: Container(
+                              width: 32,
+                              height: 32,
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.9),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.close_rounded,
+                                size: 16,
+                                color: _C.black,
+                              ),
+                            ),
                           ),
                         ),
-                      ),
-                    ]),
+                      ],
+                    ),
                   ),
 
                   Padding(
@@ -753,27 +883,36 @@ class _ProduitModalState extends State<_ProduitModal> {
                         Row(
                           children: [
                             Expanded(
-                              child: Text(p.nom,
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 20, fontWeight: FontWeight.w800,
-                                    color: _C.black, letterSpacing: -0.5,
-                                  )),
+                              child: Text(
+                                p.nom,
+                                style: GoogleFonts.inter(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w800,
+                                  color: _C.black,
+                                  letterSpacing: -0.5,
+                                ),
+                              ),
                             ),
                             GestureDetector(
                               onTap: () => _onToggleFavoriTap(isFav),
                               child: AnimatedContainer(
                                 duration: const Duration(milliseconds: 200),
-                                width: 36, height: 36,
+                                width: 36,
+                                height: 36,
                                 decoration: BoxDecoration(
                                   color: isFav
                                       ? const Color(0xFFFEF3F2)
-                                      : const Color(0xFFF5F7FB),
+                                      : const Color(0xFFF4F5F8),
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                                 child: Icon(
-                                  isFav ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+                                  isFav
+                                      ? Icons.favorite_rounded
+                                      : Icons.favorite_border_rounded,
                                   size: 18,
-                                  color: isFav ? const Color(0xFFE53935) : _C.label,
+                                  color: isFav
+                                      ? const Color(0xFFE53935)
+                                      : _C.label,
                                 ),
                               ),
                             ),
@@ -785,14 +924,17 @@ class _ProduitModalState extends State<_ProduitModal> {
                         if (p.categorie != null && p.categorie!.isNotEmpty)
                           Container(
                             margin: const EdgeInsets.only(bottom: 12),
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
                             decoration: BoxDecoration(
                               color: _C.greenLight,
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Text(
                               p.categorie!,
-                              style: GoogleFonts.plusJakartaSans(
+                              style: GoogleFonts.inter(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
                                 color: _C.green,
@@ -801,19 +943,31 @@ class _ProduitModalState extends State<_ProduitModal> {
                           ),
 
                         // Ville
-                        Row(children: [
-                          Container(
-                            width: 26, height: 26,
-                            decoration: BoxDecoration(
-                              color: _C.greenLight,
-                              borderRadius: BorderRadius.circular(8),
+                        Row(
+                          children: [
+                            Container(
+                              width: 26,
+                              height: 26,
+                              decoration: BoxDecoration(
+                                color: _C.greenLight,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: const Icon(
+                                Icons.location_on_outlined,
+                                color: _C.green,
+                                size: 14,
+                              ),
                             ),
-                            child: const Icon(Icons.location_on_outlined, color: _C.green, size: 14),
-                          ),
-                          const SizedBox(width: 8),
-                          Text(p.ville,
-                              style: GoogleFonts.plusJakartaSans(fontSize: 13, color: _C.label)),
-                        ]),
+                            const SizedBox(width: 8),
+                            Text(
+                              p.ville,
+                              style: GoogleFonts.inter(
+                                fontSize: 13,
+                                color: _C.label,
+                              ),
+                            ),
+                          ],
+                        ),
                         const SizedBox(height: 16),
 
                         // Description
@@ -822,7 +976,10 @@ class _ProduitModalState extends State<_ProduitModal> {
                             padding: const EdgeInsets.only(bottom: 16),
                             child: Text(
                               p.description!,
-                              style: GoogleFonts.plusJakartaSans(fontSize: 13, color: _C.sub),
+                              style: GoogleFonts.inter(
+                                fontSize: 13,
+                                color: _C.sub,
+                              ),
                             ),
                           ),
 
@@ -833,17 +990,25 @@ class _ProduitModalState extends State<_ProduitModal> {
                             child: Row(
                               children: [
                                 Container(
-                                  width: 26, height: 26,
+                                  width: 26,
+                                  height: 26,
                                   decoration: BoxDecoration(
                                     color: _C.greenLight,
                                     borderRadius: BorderRadius.circular(8),
                                   ),
-                                  child: const Icon(Icons.inventory_2_rounded, color: _C.green, size: 14),
+                                  child: const Icon(
+                                    Icons.inventory_2_rounded,
+                                    color: _C.green,
+                                    size: 14,
+                                  ),
                                 ),
                                 const SizedBox(width: 8),
                                 Text(
                                   'Stock disponible : ${p.quantite}',
-                                  style: GoogleFonts.plusJakartaSans(fontSize: 13, color: _C.label),
+                                  style: GoogleFonts.inter(
+                                    fontSize: 13,
+                                    color: _C.label,
+                                  ),
                                 ),
                               ],
                             ),
@@ -865,7 +1030,11 @@ class _ProduitModalState extends State<_ProduitModal> {
                                   color: _C.greenLight,
                                   borderRadius: BorderRadius.circular(12),
                                 ),
-                                child: const Icon(Icons.storefront_rounded, color: _C.green, size: 20),
+                                child: const Icon(
+                                  Icons.storefront_rounded,
+                                  color: _C.green,
+                                  size: 20,
+                                ),
                               ),
                               const SizedBox(width: 12),
                               Expanded(
@@ -874,7 +1043,7 @@ class _ProduitModalState extends State<_ProduitModal> {
                                   children: [
                                     Text(
                                       p.vendeurNom,
-                                      style: GoogleFonts.plusJakartaSans(
+                                      style: GoogleFonts.inter(
                                         fontSize: 14,
                                         fontWeight: FontWeight.w700,
                                         color: _C.black,
@@ -883,7 +1052,7 @@ class _ProduitModalState extends State<_ProduitModal> {
                                     const SizedBox(height: 2),
                                     Text(
                                       'Vendeur',
-                                      style: GoogleFonts.plusJakartaSans(
+                                      style: GoogleFonts.inter(
                                         fontSize: 11,
                                         color: _C.label,
                                       ),
@@ -893,17 +1062,24 @@ class _ProduitModalState extends State<_ProduitModal> {
                               ),
                               GestureDetector(
                                 onTap: () async {
-                                  final uri = Uri.parse('tel:${p.vendeurNumero}');
+                                  final uri = Uri.parse(
+                                    'tel:${p.vendeurNumero}',
+                                  );
                                   if (await canLaunchUrl(uri)) {
                                     await launchUrl(uri);
                                   }
                                 },
                                 child: Row(
                                   children: [
-                                    const Icon(Icons.phone_rounded, size: 14, color: _C.green),
+                                    const Icon(
+                                      Icons.phone_rounded,
+                                      size: 14,
+                                      color: _C.green,
+                                    ),
                                     const SizedBox(width: 4),
-                                    Text(p.vendeurNumero,
-                                      style: GoogleFonts.plusJakartaSans(
+                                    Text(
+                                      p.vendeurNumero,
+                                      style: GoogleFonts.inter(
                                         fontSize: 12,
                                         fontWeight: FontWeight.w600,
                                         color: _C.green,
@@ -922,19 +1098,28 @@ class _ProduitModalState extends State<_ProduitModal> {
                           width: double.infinity,
                           child: OutlinedButton.icon(
                             onPressed: _ouvrirSignalement,
-                            icon: const Icon(Icons.flag_outlined,
-                                size: 18, color: Colors.redAccent),
-                            label: Text('Signaler',
-                                style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 12.5,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.redAccent)),
+                            icon: const Icon(
+                              Icons.flag_outlined,
+                              size: 18,
+                              color: Colors.redAccent,
+                            ),
+                            label: Text(
+                              'Signaler',
+                              style: GoogleFonts.inter(
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.redAccent,
+                              ),
+                            ),
                             style: OutlinedButton.styleFrom(
                               side: const BorderSide(color: _C.border),
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 14, vertical: 10),
+                                horizontal: 14,
+                                vertical: 10,
+                              ),
                               shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12)),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
                             ),
                           ),
                         ),
@@ -953,26 +1138,36 @@ class _ProduitModalState extends State<_ProduitModal> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text('PRIX UNITAIRE',
-                                        style: GoogleFonts.plusJakartaSans(
-                                          fontSize: 9.5, fontWeight: FontWeight.w700,
-                                          color: _C.label, letterSpacing: 0.6,
-                                        )),
+                                    Text(
+                                      'PRIX UNITAIRE',
+                                      style: GoogleFonts.inter(
+                                        fontSize: 9.5,
+                                        fontWeight: FontWeight.w700,
+                                        color: _C.label,
+                                        letterSpacing: 0.6,
+                                      ),
+                                    ),
                                     const SizedBox(height: 3),
                                     RichText(
-                                      text: TextSpan(children: [
-                                        TextSpan(
-                                          text: '$prixUnitaire ',
-                                          style: GoogleFonts.plusJakartaSans(
-                                            fontSize: 22, fontWeight: FontWeight.w800,
-                                            color: _C.black,
+                                      text: TextSpan(
+                                        children: [
+                                          TextSpan(
+                                            text: '$prixUnitaire ',
+                                            style: GoogleFonts.inter(
+                                              fontSize: 22,
+                                              fontWeight: FontWeight.w800,
+                                              color: _C.black,
+                                            ),
                                           ),
-                                        ),
-                                        TextSpan(
-                                          text: 'FCFA',
-                                          style: GoogleFonts.plusJakartaSans(fontSize: 12, color: _C.label),
-                                        ),
-                                      ]),
+                                          TextSpan(
+                                            text: 'FCFA',
+                                            style: GoogleFonts.inter(
+                                              fontSize: 12,
+                                              color: _C.label,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -997,18 +1192,24 @@ class _ProduitModalState extends State<_ProduitModal> {
                 GestureDetector(
                   onTap: _contactWhatsApp,
                   child: Container(
-                    width: 52, height: 52,
+                    width: 52,
+                    height: 52,
                     decoration: BoxDecoration(
                       color: _C.whatsapp,
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: [
                         BoxShadow(
                           color: _C.whatsapp.withOpacity(0.35),
-                          blurRadius: 12, offset: const Offset(0, 4),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
                         ),
                       ],
                     ),
-                    child: const Icon(Icons.chat_rounded, color: _C.white, size: 22),
+                    child: const Icon(
+                      Icons.chat_rounded,
+                      color: _C.white,
+                      size: 22,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -1024,7 +1225,7 @@ class _ProduitModalState extends State<_ProduitModal> {
                       child: Center(
                         child: Text(
                           'Fermer',
-                          style: GoogleFonts.plusJakartaSans(
+                          style: GoogleFonts.inter(
                             color: _C.white,
                             fontWeight: FontWeight.w600,
                           ),

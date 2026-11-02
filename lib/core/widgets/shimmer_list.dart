@@ -60,17 +60,13 @@ class _ShimmerCard extends StatelessWidget {
   const _ShimmerCard({required this.progress});
 
   Decoration _box({BorderRadius? radius}) => BoxDecoration(
-        borderRadius: radius ?? BorderRadius.circular(8),
-        gradient: LinearGradient(
-          begin: Alignment(-2.5 + progress * 5, 0),
-          end: Alignment(-1.5 + progress * 5, 0),
-          colors: const [
-            Color(0xFFEBEBEB),
-            Color(0xFFF5F5F5),
-            Color(0xFFEBEBEB),
-          ],
-        ),
-      );
+    borderRadius: radius ?? BorderRadius.circular(8),
+    gradient: LinearGradient(
+      begin: Alignment(-2.5 + progress * 5, 0),
+      end: Alignment(-1.5 + progress * 5, 0),
+      colors: const [Color(0xFFEBEBEB), Color(0xFFF5F5F5), Color(0xFFEBEBEB)],
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -89,7 +85,7 @@ class _ShimmerCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // ── Ligne en-tête ─────────────────────────────────────────────
+          // Ligne en-tête
           Padding(
             padding: const EdgeInsets.all(16),
             child: Row(
@@ -106,11 +102,7 @@ class _ShimmerCard extends StatelessWidget {
                     children: [
                       Container(height: 13, decoration: _box()),
                       const SizedBox(height: 8),
-                      Container(
-                        height: 10,
-                        width: 110,
-                        decoration: _box(),
-                      ),
+                      Container(height: 10, width: 110, decoration: _box()),
                     ],
                   ),
                 ),
@@ -124,7 +116,7 @@ class _ShimmerCard extends StatelessWidget {
             ),
           ),
           Divider(color: Colors.grey[100], height: 1),
-          // ── Chips ─────────────────────────────────────────────────────
+          // Chips
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Row(
@@ -146,7 +138,7 @@ class _ShimmerCard extends StatelessWidget {
             ),
           ),
           Divider(color: Colors.grey[100], height: 1),
-          // ── Boutons ───────────────────────────────────────────────────
+          // Boutons
           Padding(
             padding: const EdgeInsets.all(12),
             child: Row(
@@ -172,4 +164,3 @@ class _ShimmerCard extends StatelessWidget {
     );
   }
 }
-

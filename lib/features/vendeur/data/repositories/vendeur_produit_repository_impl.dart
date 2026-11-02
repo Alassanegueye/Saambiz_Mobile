@@ -14,13 +14,15 @@ class VendeurProduitRepositoryImpl implements VendeurProduitRepository {
   String _errorMessage(Object e) {
     if (e is DioException) {
       final data = e.response?.data;
-      if (data is Map && data['message'] != null) return data['message'].toString();
+      if (data is Map && data['message'] != null)
+        return data['message'].toString();
       return e.message ?? 'Une erreur est survenue';
     }
     return e.toString();
   }
 
-  int? _statusCode(Object e) => e is DioException ? e.response?.statusCode : null;
+  int? _statusCode(Object e) =>
+      e is DioException ? e.response?.statusCode : null;
 
   Failure _failure(Object e) =>
       ServerFailure(errorMessage: _errorMessage(e), statusCode: _statusCode(e));
@@ -125,7 +127,9 @@ class VendeurProduitRepositoryImpl implements VendeurProduitRepository {
 
   @override
   Future<Either<Failure, void>> ajouterImages(
-      String produitId, List<String> imagePaths) async {
+    String produitId,
+    List<String> imagePaths,
+  ) async {
     try {
       await dataSource.ajouterImages(produitId, imagePaths);
       return const Right(null);
@@ -136,7 +140,9 @@ class VendeurProduitRepositoryImpl implements VendeurProduitRepository {
 
   @override
   Future<Either<Failure, void>> supprimerImage(
-      String produitId, String imageId) async {
+    String produitId,
+    String imageId,
+  ) async {
     try {
       await dataSource.supprimerImage(produitId, imageId);
       return const Right(null);
@@ -192,7 +198,8 @@ class VendeurProduitRepositoryImpl implements VendeurProduitRepository {
 
   @override
   Future<Either<Failure, List<ProduitVendeur>>> rechercheProduits(
-      String recherche) async {
+    String recherche,
+  ) async {
     try {
       return Right(await dataSource.rechercheProduits(recherche));
     } catch (e) {

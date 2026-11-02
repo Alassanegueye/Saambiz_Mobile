@@ -17,7 +17,8 @@ class VitrineRepositoryImpl implements VitrineRepository {
   String _message(Object e) {
     if (e is DioException) {
       final data = e.response?.data;
-      if (data is Map && data['message'] != null) return data['message'].toString();
+      if (data is Map && data['message'] != null)
+        return data['message'].toString();
       return e.message ?? 'Une erreur est survenue';
     }
     return e.toString();
@@ -29,7 +30,9 @@ class VitrineRepositoryImpl implements VitrineRepository {
     try {
       return Right(await action());
     } catch (e) {
-      return Left(ServerFailure(errorMessage: _message(e), statusCode: _statut(e)));
+      return Left(
+        ServerFailure(errorMessage: _message(e), statusCode: _statut(e)),
+      );
     }
   }
 
@@ -46,12 +49,13 @@ class VitrineRepositoryImpl implements VitrineRepository {
     required String logoPath,
     String? secteur,
     String? activite,
-  }) =>
-      _proteger(() => remoteDataSource.analyserLogo(
-            logoPath: logoPath,
-            secteur: secteur,
-            activite: activite,
-          ));
+  }) => _proteger(
+    () => remoteDataSource.analyserLogo(
+      logoPath: logoPath,
+      secteur: secteur,
+      activite: activite,
+    ),
+  );
 
   @override
   Future<Either<Failure, Vitrine>> genererVitrine({
@@ -68,24 +72,26 @@ class VitrineRepositoryImpl implements VitrineRepository {
     bool paiementLivraison = true,
     bool active = true,
     Map<String, dynamic>? blocs,
-  }) =>
-      _proteger(() => remoteDataSource.genererVitrine(
-            logoPath: logoPath,
-            secteur: secteur,
-            activite: activite,
-            modele: modele,
-            accent: accent,
-            slogan: slogan,
-            apropos: apropos,
-            horaires: horaires,
-            annonce: annonce,
-            commande: commande,
-            paiementLivraison: paiementLivraison,
-            active: active,
-            blocs: blocs,
-          ));
+  }) => _proteger(
+    () => remoteDataSource.genererVitrine(
+      logoPath: logoPath,
+      secteur: secteur,
+      activite: activite,
+      modele: modele,
+      accent: accent,
+      slogan: slogan,
+      apropos: apropos,
+      horaires: horaires,
+      annonce: annonce,
+      commande: commande,
+      paiementLivraison: paiementLivraison,
+      active: active,
+      blocs: blocs,
+    ),
+  );
 
   @override
-  Future<Either<Failure, Vitrine>> modifierVitrine(Map<String, dynamic> champs) =>
-      _proteger(() => remoteDataSource.modifierVitrine(champs));
+  Future<Either<Failure, Vitrine>> modifierVitrine(
+    Map<String, dynamic> champs,
+  ) => _proteger(() => remoteDataSource.modifierVitrine(champs));
 }

@@ -8,9 +8,9 @@ import '../bloc/signalements_event.dart';
 import '../bloc/signalements_state.dart';
 
 class _C {
-  static const black = Color(0xFF0D1B3D);
+  static const black = Color(0xFF01154B);
   static const white = Color(0xFFFFFFFF);
-  static const bg = Color(0xFFF5F7FB);
+  static const bg = Color(0xFFF4F5F8);
   static const sub = Color(0xFF5B6C8A);
   static const border = Color(0xFFE3E8F0);
   static const orange = Color(0xFFFF8F00);
@@ -46,7 +46,10 @@ class _MesSignalementsView extends StatelessWidget {
         listener: (context, state) {
           if (state is SignalementsError) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message), backgroundColor: Colors.red),
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.red,
+              ),
             );
           }
         },
@@ -57,7 +60,10 @@ class _MesSignalementsView extends StatelessWidget {
           if (state is SignalementsLoaded) {
             if (state.signalements.isEmpty) {
               return const Center(
-                child: Text('Aucun signalement envoyé', style: TextStyle(color: _C.sub)),
+                child: Text(
+                  'Aucun signalement envoyé',
+                  style: TextStyle(color: _C.sub),
+                ),
               );
             }
             return RefreshIndicator(
@@ -82,28 +88,38 @@ class _MesSignalementsView extends StatelessWidget {
                         Row(
                           children: [
                             Icon(
-                                s.type == 'boutique'
-                                    ? Icons.storefront_outlined
-                                    : Icons.inventory_2_outlined,
-                                size: 16,
-                                color: _C.sub),
+                              s.type == 'boutique'
+                                  ? Icons.storefront_outlined
+                                  : Icons.inventory_2_outlined,
+                              size: 16,
+                              color: _C.sub,
+                            ),
                             const SizedBox(width: 6),
                             Expanded(
-                              child: Text(s.raison,
-                                  style: const TextStyle(fontWeight: FontWeight.w700)),
+                              child: Text(
+                                s.raison,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
                             ),
                             Container(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 3),
+                                horizontal: 8,
+                                vertical: 3,
+                              ),
                               decoration: BoxDecoration(
                                 color: _C.orange.withOpacity(0.12),
                                 borderRadius: BorderRadius.circular(8),
                               ),
-                              child: Text(s.statut,
-                                  style: const TextStyle(
-                                      fontSize: 11,
-                                      color: _C.orange,
-                                      fontWeight: FontWeight.w700)),
+                              child: Text(
+                                s.statut,
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  color: _C.orange,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
                             ),
                           ],
                         ),
@@ -111,8 +127,10 @@ class _MesSignalementsView extends StatelessWidget {
                         Text(s.description),
                         if (s.createdAt != null) ...[
                           const SizedBox(height: 6),
-                          Text(DateFormat('dd/MM/yyyy').format(s.createdAt!),
-                              style: const TextStyle(fontSize: 11, color: _C.sub)),
+                          Text(
+                            DateFormat('dd/MM/yyyy').format(s.createdAt!),
+                            style: const TextStyle(fontSize: 11, color: _C.sub),
+                          ),
                         ],
                       ],
                     ),

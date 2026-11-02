@@ -4,11 +4,11 @@ import 'package:flutter/foundation.dart';
 ///
 /// Pourquoi `--dart-define` et non un `.env` embarqué : un fichier déclaré
 /// dans `pubspec.yaml` est un asset. Il part tel quel dans l'APK, et
-/// n'importe qui peut le lire en dézippant le paquet — `unzip app.apk` suffit.
+/// n'importe qui peut le lire en dézippant le paquet, `unzip app.apk` suffit.
 /// Tout ce qu'on y met est donc public.
 ///
 /// Les valeurs passées par `--dart-define` sont compilées dans le binaire.
-/// Ce n'est pas un coffre-fort — un binaire se décompile — mais ça retire la
+/// Ce n'est pas un coffre-fort, un binaire se décompile, mais ça retire la
 /// lecture triviale, et surtout ça sort la configuration du dépôt.
 ///
 /// Lancement en développement :
@@ -28,14 +28,16 @@ import 'package:flutter/foundation.dart';
 class Env {
   Env._();
 
-  // ─── Environnement ────────────────────────────────────────────────────────
-  static const String environnement =
-      String.fromEnvironment('ENVIRONNEMENT', defaultValue: 'dev');
+  // Environnement
+  static const String environnement = String.fromEnvironment(
+    'ENVIRONNEMENT',
+    defaultValue: 'dev',
+  );
 
   static bool get estProduction => environnement == 'prod';
   static bool get estDeveloppement => !estProduction;
 
-  // ─── API ──────────────────────────────────────────────────────────────────
+  // API
   /// Adresse de l'API.
   ///
   /// Le repli vise l'émulateur Android : `10.0.2.2` est l'alias de la machine
@@ -72,7 +74,7 @@ class Env {
   /// postes de développement qui ne le passent pas encore.
   ///
   /// L'ordre était inversé, et silencieusement : le `.env` gagnait toujours.
-  /// Comme `pubspec.yaml` le déclare en asset, il part dans l'APK — un build
+  /// Comme `pubspec.yaml` le déclare en asset, il part dans l'APK, un build
   /// de production compilé avec l'URL HTTPS réelle continuait donc d'appeler
   /// l'adresse LAN du poste de développement qui traînait dans ce fichier.
   /// [verifier] ne voyait rien : elle contrôlait [apiBaseUrl], pas la valeur
@@ -90,14 +92,16 @@ class Env {
   static const Duration timeoutReception = Duration(seconds: 60);
   static const Duration timeoutEnvoi = Duration(seconds: 60);
 
-  // ─── Épinglage de certificat ──────────────────────────────────────────────
+  // Épinglage de certificat
   /// Empreintes SHA-256 des clés publiques acceptées, séparées par des virgules.
   ///
   /// Vide = pas d'épinglage, on s'en remet à la validation système. C'est le
   /// mode de développement, où l'on passe souvent par un proxy ou un certificat
   /// auto-signé.
-  static const String _empreintesBrutes =
-      String.fromEnvironment('EMPREINTES_CERTIFICAT', defaultValue: '');
+  static const String _empreintesBrutes = String.fromEnvironment(
+    'EMPREINTES_CERTIFICAT',
+    defaultValue: '',
+  );
 
   static List<String> get empreintesCertificat => _empreintesBrutes
       .split(',')
@@ -105,16 +109,17 @@ class Env {
       .where((e) => e.isNotEmpty)
       .toList();
 
-  static bool get epinglageActif => estProduction && empreintesCertificat.isNotEmpty;
+  static bool get epinglageActif =>
+      estProduction && empreintesCertificat.isNotEmpty;
 
-  // ─── Mise à jour forcée ───────────────────────────────────────────────────
+  // Mise à jour forcée
   /// Adresse consultée au démarrage pour connaître la version minimale exigée.
   static const String urlConfigApp = String.fromEnvironment(
     'URL_CONFIG_APP',
     defaultValue: '',
   );
 
-  // ─── Rapports de plantage ─────────────────────────────────────────────────
+  // Rapports de plantage
   /// Désactivés en débogage : sinon chaque rechargement à chaud pollue la
   /// console Crashlytics de plantages qui n'existent pas en production.
   static bool get crashlyticsActif => estProduction && !kDebugMode;
@@ -142,10 +147,11 @@ class Env {
           'Le trafic passerait en clair.',
         );
       }
-      if (url.contains('localhost')
-          || url.contains('10.0.2.2')
-          || RegExp(r'//(127\.|192\.168\.|10\.|172\.(1[6-9]|2\d|3[01])\.)')
-              .hasMatch(url)) {
+      if (url.contains('localhost') ||
+          url.contains('10.0.2.2') ||
+          RegExp(
+            r'//(127\.|192\.168\.|10\.|172\.(1[6-9]|2\d|3[01])\.)',
+          ).hasMatch(url)) {
         throw StateError(
           "API_BASE_URL pointe sur une adresse de développement en production "
           '($url).',
@@ -156,9 +162,11 @@ class Env {
 
   /// Résumé lisible, affiché au démarrage en débogage.
   static Map<String, Object?> get resume => {
-        'environnement': environnement,
-        'apiBaseUrl': apiBaseUrl,
-        'épinglage': epinglageActif ? '${empreintesCertificat.length} empreinte(s)' : 'désactivé',
-        'crashlytics': crashlyticsActif,
-      };
+    'environnement': environnement,
+    'apiBaseUrl': apiBaseUrl,
+    'épinglage': epinglageActif
+        ? '${empreintesCertificat.length} empreinte(s)'
+        : 'désactivé',
+    'crashlytics': crashlyticsActif,
+  };
 }

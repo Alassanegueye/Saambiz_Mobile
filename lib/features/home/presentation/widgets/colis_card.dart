@@ -60,7 +60,7 @@ Widget buildColisCard({required Colis colis, required bool isReception}) {
                     Expanded(
                       child: Text(
                         colis.destination,
-                        style: GoogleFonts.plusJakartaSans(
+                        style: GoogleFonts.inter(
                           fontWeight: FontWeight.w700,
                           fontSize: 16,
                           color: AppColor.kGrayscaleDark100,
@@ -72,7 +72,10 @@ Widget buildColisCard({required Colis colis, required bool isReception}) {
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: statusColor.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(20),
@@ -80,7 +83,7 @@ Widget buildColisCard({required Colis colis, required bool isReception}) {
                 ),
                 child: Text(
                   colis.statut,
-                  style: GoogleFonts.plusJakartaSans(
+                  style: GoogleFonts.inter(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                     color: statusColor,
@@ -110,14 +113,14 @@ Widget buildColisCard({required Colis colis, required bool isReception}) {
                   children: [
                     Text(
                       personneLabel,
-                      style: GoogleFonts.plusJakartaSans(
+                      style: GoogleFonts.inter(
                         fontSize: 12,
                         color: AppColor.kGrayscale60,
                       ),
                     ),
                     Text(
                       personneNom,
-                      style: GoogleFonts.plusJakartaSans(
+                      style: GoogleFonts.inter(
                         fontWeight: FontWeight.w600,
                         fontSize: 15,
                         color: AppColor.kGrayscaleDark100,
@@ -127,7 +130,7 @@ Widget buildColisCard({required Colis colis, required bool isReception}) {
                     if (personne?.email != null && personne!.email.isNotEmpty)
                       Text(
                         personne.email,
-                        style: GoogleFonts.plusJakartaSans(
+                        style: GoogleFonts.inter(
                           fontSize: 12,
                           color: AppColor.kGrayscale40,
                         ),
@@ -153,7 +156,7 @@ Widget buildColisCard({required Colis colis, required bool isReception}) {
               const Spacer(),
               Text(
                 formatDate(colis.createdAt),
-                style: GoogleFonts.plusJakartaSans(
+                style: GoogleFonts.inter(
                   fontSize: 12,
                   color: AppColor.kGrayscale40,
                 ),

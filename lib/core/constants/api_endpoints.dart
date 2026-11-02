@@ -13,13 +13,13 @@ class AuthEndpoints {
   static const register = '/auth/register';
 
   /// Vérification de l'adresse email par code à 6 chiffres (POST { email, code }).
-  // ── Inscription en deux temps ──────────────────────────────────────────
+  // Inscription en deux temps
   // L'adresse est vérifiée AVANT que le compte n'existe : une adresse jamais
   // confirmée ne laisse donc aucune ligne utilisateur derrière elle.
   static const envoyerCodeInscription = '/auth/inscription/envoyer-code';
   static const verifierCodeInscription = '/auth/inscription/verifier-code';
 
-  // Vérification d'un compte DÉJÀ créé — conservée pour les comptes ouverts
+  // Vérification d'un compte DÉJÀ créé, conservée pour les comptes ouverts
   // avant l'inscription en deux temps.
   static const verifyEmail = '/auth/verify-email';
 
@@ -63,11 +63,10 @@ class VendeurProduitEndpoints {
   static const listeProduits = '/vendeur/liste-produits';
   static const categories = '/categories';
   static const ajouterProduit = '/vendeur/ajout-produit';
-  static String modifierProduit(String id) =>
-      '/vendeur/modifier-produit/$id';
-  static String supprimerProduit(String id) =>
-      '/vendeur/supprimer-produit/$id';
-  static String disponibilite(String id) => '/vendeur/produit/$id/disponibilite';
+  static String modifierProduit(String id) => '/vendeur/modifier-produit/$id';
+  static String supprimerProduit(String id) => '/vendeur/supprimer-produit/$id';
+  static String disponibilite(String id) =>
+      '/vendeur/produit/$id/disponibilite';
   static String dupliquer(String id) => '/vendeur/produit/$id/dupliquer';
   static String images(String id) => '/vendeur/produit/$id/images';
   static String image(String id, String imageId) =>
@@ -99,7 +98,7 @@ class BoutiqueEndpoints {
   static const reactiver = '/vendeur/boutique/reactiver';
 }
 
-/// Le site web public de la boutique — « vitrine ».
+/// Le site web public de la boutique, « vitrine ».
 ///
 /// La CRÉATION du site se fait ici, dans l'application : c'est le seul endroit
 /// où le vendeur téléverse son logo et répond sur son activité. Le tableau de

@@ -39,17 +39,16 @@ class CompteBloc extends Bloc<CompteEvent, CompteState> {
   Future<void> _onLoad(LoadCompte event, Emitter<CompteState> emit) async {
     emit(CompteLoading());
     final result = await getMe();
-    result.fold(
-      (failure) => emit(CompteError(failure.errorMessage)),
-      (user) {
-        _current = user;
-        emit(CompteLoaded(user));
-      },
-    );
+    result.fold((failure) => emit(CompteError(failure.errorMessage)), (user) {
+      _current = user;
+      emit(CompteLoaded(user));
+    });
   }
 
   Future<void> _onModifierProfil(
-      ModifierProfilRequested event, Emitter<CompteState> emit) async {
+    ModifierProfilRequested event,
+    Emitter<CompteState> emit,
+  ) async {
     if (_current != null) emit(CompteActionEnCours(_current!));
     final result = await modifierProfil(
       nom: event.nom,
@@ -58,46 +57,47 @@ class CompteBloc extends Bloc<CompteEvent, CompteState> {
       telephone: event.telephone,
       photoProfilPath: event.photoProfilPath,
     );
-    result.fold(
-      (failure) => emit(CompteError(failure.errorMessage)),
-      (user) {
-        _current = user;
-        emit(CompteActionSucces(user, 'Profil mis à jour'));
-      },
-    );
+    result.fold((failure) => emit(CompteError(failure.errorMessage)), (user) {
+      _current = user;
+      emit(CompteActionSucces(user, 'Profil mis à jour'));
+    });
   }
 
   Future<void> _onChangePassword(
-      ChangePasswordRequested event, Emitter<CompteState> emit) async {
+    ChangePasswordRequested event,
+    Emitter<CompteState> emit,
+  ) async {
     if (_current != null) emit(CompteActionEnCours(_current!));
     final result = await changePassword(
       ancienMotDePasse: event.ancienMotDePasse,
       nouveauMotDePasse: event.nouveauMotDePasse,
     );
-    result.fold(
-      (failure) => emit(CompteError(failure.errorMessage)),
-      (_) {
-        if (_current != null) {
-          emit(CompteActionSucces(_current!, 'Mot de passe modifié'));
-        } else {
-          emit(CompteMessageSucces('Mot de passe modifié'));
-        }
-      },
-    );
+    result.fold((failure) => emit(CompteError(failure.errorMessage)), (_) {
+      if (_current != null) {
+        emit(CompteActionSucces(_current!, 'Mot de passe modifié'));
+      } else {
+        emit(CompteMessageSucces('Mot de passe modifié'));
+      }
+    });
   }
 
   Future<void> _onForgotPassword(
-      ForgotPasswordRequested event, Emitter<CompteState> emit) async {
+    ForgotPasswordRequested event,
+    Emitter<CompteState> emit,
+  ) async {
     emit(CompteLoading());
     final result = await forgotPassword(event.email);
     result.fold(
       (failure) => emit(CompteError(failure.errorMessage)),
-      (_) => emit(CompteMessageSucces('Un code de réinitialisation a été envoyé')),
+      (_) =>
+          emit(CompteMessageSucces('Un code de réinitialisation a été envoyé')),
     );
   }
 
   Future<void> _onResetPassword(
-      ResetPasswordRequested event, Emitter<CompteState> emit) async {
+    ResetPasswordRequested event,
+    Emitter<CompteState> emit,
+  ) async {
     emit(CompteLoading());
     final result = await resetPassword(
       email: event.email,
@@ -111,7 +111,9 @@ class CompteBloc extends Bloc<CompteEvent, CompteState> {
   }
 
   Future<void> _onDeleteAccount(
-      DeleteAccountRequested event, Emitter<CompteState> emit) async {
+    DeleteAccountRequested event,
+    Emitter<CompteState> emit,
+  ) async {
     if (_current != null) emit(CompteActionEnCours(_current!));
     final result = await deleteAccount(motif: event.motif);
     result.fold(

@@ -7,6 +7,8 @@ class AjouterImagesProduitUsecase {
   final VendeurProduitRepository repository;
   AjouterImagesProduitUsecase(this.repository);
 
-  Future<Either<Failure, void>> call(String produitId, List<String> imagePaths) =>
-      repository.ajouterImages(produitId, imagePaths);
+  Future<Either<Failure, void>> call(
+    String produitId,
+    List<String> imagePaths,
+  ) => repository.ajouterImages(produitId, imagePaths);
 }

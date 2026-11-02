@@ -24,7 +24,7 @@ class LigneCommandeModel {
   });
 
   String get libelleOptions =>
-      options.entries.map((e) => '${e.key} : ${e.value}').join(' · ');
+      options.entries.map((e) => '${e.key} : ${e.value}').join(', ');
 
   factory LigneCommandeModel.fromJson(Map<String, dynamic> json) {
     return LigneCommandeModel(
@@ -38,7 +38,9 @@ class LigneCommandeModel {
           : int.tryParse('${json['quantite']}') ?? 0,
       sousTotal: _toDouble(json['sousTotal']),
       options: json['options'] is Map
-          ? (json['options'] as Map).map((k, v) => MapEntry(k.toString(), v.toString()))
+          ? (json['options'] as Map).map(
+              (k, v) => MapEntry(k.toString(), v.toString()),
+            )
           : const {},
     );
   }
@@ -95,8 +97,10 @@ class CommandeModel {
     final lignesRaw = json['lignes'];
     final lignes = (lignesRaw is List)
         ? lignesRaw
-            .map((e) => LigneCommandeModel.fromJson(e as Map<String, dynamic>))
-            .toList()
+              .map(
+                (e) => LigneCommandeModel.fromJson(e as Map<String, dynamic>),
+              )
+              .toList()
         : <LigneCommandeModel>[];
 
     String? joinNom(Map<String, dynamic>? p) {

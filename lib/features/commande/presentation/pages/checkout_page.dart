@@ -9,10 +9,10 @@ import '../bloc/commande_event.dart';
 import '../bloc/commande_state.dart';
 
 class _C {
-  static const green = Color(0xFF0D1B3D);
-  static const black = Color(0xFF0D1B3D);
+  static const green = Color(0xFF01154B);
+  static const black = Color(0xFF01154B);
   static const white = Color(0xFFFFFFFF);
-  static const bg = Color(0xFFF5F7FB);
+  static const bg = Color(0xFFF4F5F8);
   static const sub = Color(0xFF5B6C8A);
   static const border = Color(0xFFE3E8F0);
 }
@@ -57,15 +57,18 @@ class _CheckoutViewState extends State<_CheckoutView> {
 
   void _soumettre(BuildContext context) {
     if (!_formKey.currentState!.validate()) return;
-    context.read<CommandeBloc>().add(CreerCommande(
-          items: _panier.toApiItems(),
-          modeLivraison: _modeLivraison,
-          modePaiement: _modePaiement,
-          adresseLivraison:
-              _modeLivraison == 'livraison' ? _adresseCtrl.text.trim() : null,
-          numeroTelephone: _telCtrl.text.trim(),
-          note: _noteCtrl.text.trim().isEmpty ? null : _noteCtrl.text.trim(),
-        ));
+    context.read<CommandeBloc>().add(
+      CreerCommande(
+        items: _panier.toApiItems(),
+        modeLivraison: _modeLivraison,
+        modePaiement: _modePaiement,
+        adresseLivraison: _modeLivraison == 'livraison'
+            ? _adresseCtrl.text.trim()
+            : null,
+        numeroTelephone: _telCtrl.text.trim(),
+        note: _noteCtrl.text.trim().isEmpty ? null : _noteCtrl.text.trim(),
+      ),
+    );
   }
 
   Future<void> _ouvrirPaiement(String? url) async {
@@ -91,7 +94,10 @@ class _CheckoutViewState extends State<_CheckoutView> {
         listener: (context, state) async {
           if (state is CommandeError) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message), backgroundColor: Colors.red),
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.red,
+              ),
             );
           } else if (state is CommandeCreee) {
             // Paiement à la livraison → terminé. En ligne → on lance le paiement.
@@ -100,9 +106,12 @@ class _CheckoutViewState extends State<_CheckoutView> {
               if (context.mounted) _allerMesCommandes(context);
             } else {
               context.read<CommandeBloc>().add(
-                    PayerCommande(state.commande.id,
-                        methode: _methode, numeroTelephone: _telCtrl.text.trim()),
-                  );
+                PayerCommande(
+                  state.commande.id,
+                  methode: _methode,
+                  numeroTelephone: _telCtrl.text.trim(),
+                ),
+              );
             }
           } else if (state is PaiementInitie) {
             await _ouvrirPaiement(state.paymentUrl);
@@ -120,40 +129,60 @@ class _CheckoutViewState extends State<_CheckoutView> {
                 padding: const EdgeInsets.all(16),
                 children: [
                   _section('Mode de réception'),
-                  _choix(['livraison', 'retrait'], _modeLivraison,
-                      {'livraison': 'Livraison', 'retrait': 'Retrait'},
-                      (v) => setState(() => _modeLivraison = v)),
+                  _choix(
+                    ['livraison', 'retrait'],
+                    _modeLivraison,
+                    {'livraison': 'Livraison', 'retrait': 'Retrait'},
+                    (v) => setState(() => _modeLivraison = v),
+                  ),
                   if (_modeLivraison == 'livraison') ...[
                     const SizedBox(height: 12),
-                    _input(_adresseCtrl, 'Adresse de livraison',
-                        validator: (v) => (_modeLivraison == 'livraison' &&
-                                (v == null || v.trim().isEmpty))
-                            ? 'Adresse requise'
-                            : null),
+                    _input(
+                      _adresseCtrl,
+                      'Adresse de livraison',
+                      validator: (v) =>
+                          (_modeLivraison == 'livraison' &&
+                              (v == null || v.trim().isEmpty))
+                          ? 'Adresse requise'
+                          : null,
+                    ),
                   ],
                   const SizedBox(height: 12),
-                  _input(_telCtrl, 'Téléphone',
-                      keyboard: TextInputType.phone,
-                      validator: (v) => (v == null || v.trim().isEmpty)
-                          ? 'Téléphone requis'
-                          : null),
+                  _input(
+                    _telCtrl,
+                    'Téléphone',
+                    keyboard: TextInputType.phone,
+                    validator: (v) => (v == null || v.trim().isEmpty)
+                        ? 'Téléphone requis'
+                        : null,
+                  ),
                   const SizedBox(height: 20),
                   _section('Paiement'),
-                  _choix(['en_ligne', 'a_la_livraison'], _modePaiement, {
-                    'en_ligne': 'En ligne',
-                    'a_la_livraison': 'À la livraison'
-                  }, (v) => setState(() => _modePaiement = v)),
+                  _choix(
+                    ['en_ligne', 'a_la_livraison'],
+                    _modePaiement,
+                    {
+                      'en_ligne': 'En ligne',
+                      'a_la_livraison': 'À la livraison',
+                    },
+                    (v) => setState(() => _modePaiement = v),
+                  ),
                   if (_modePaiement == 'en_ligne') ...[
                     const SizedBox(height: 12),
-                    _choix(['orange_money', 'wave'], _methode, {
-                      'orange_money': 'Orange Money',
-                      'wave': 'Wave'
-                    }, (v) => setState(() => _methode = v)),
+                    _choix(
+                      ['orange_money', 'wave'],
+                      _methode,
+                      {'orange_money': 'Orange Money', 'wave': 'Wave'},
+                      (v) => setState(() => _methode = v),
+                    ),
                   ],
                   const SizedBox(height: 20),
                   _section('Note (optionnel)'),
-                  _input(_noteCtrl, 'Une précision pour le vendeur ?',
-                      maxLines: 3),
+                  _input(
+                    _noteCtrl,
+                    'Une précision pour le vendeur ?',
+                    maxLines: 3,
+                  ),
                   const SizedBox(height: 24),
                   ElevatedButton(
                     onPressed: loading ? null : () => _soumettre(context),
@@ -162,18 +191,22 @@ class _CheckoutViewState extends State<_CheckoutView> {
                       foregroundColor: _C.white,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14)),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
                     ),
                     child: loading
                         ? const SizedBox(
                             height: 20,
                             width: 20,
                             child: CircularProgressIndicator(
-                                strokeWidth: 2, color: Colors.white))
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
                         : Text(
                             'Confirmer (${_panier.total.toStringAsFixed(0)} FCFA + livraison)',
-                            style:
-                                const TextStyle(fontWeight: FontWeight.w700)),
+                            style: const TextStyle(fontWeight: FontWeight.w700),
+                          ),
                   ),
                 ],
               ),
@@ -192,16 +225,24 @@ class _CheckoutViewState extends State<_CheckoutView> {
   }
 
   Widget _section(String t) => Padding(
-        padding: const EdgeInsets.only(bottom: 8),
-        child: Text(t,
-            style: const TextStyle(
-                fontWeight: FontWeight.w800, color: _C.black, fontSize: 15)),
-      );
+    padding: const EdgeInsets.only(bottom: 8),
+    child: Text(
+      t,
+      style: const TextStyle(
+        fontWeight: FontWeight.w800,
+        color: _C.black,
+        fontSize: 15,
+      ),
+    ),
+  );
 
-  Widget _input(TextEditingController c, String hint,
-      {TextInputType? keyboard,
-      int maxLines = 1,
-      String? Function(String?)? validator}) {
+  Widget _input(
+    TextEditingController c,
+    String hint, {
+    TextInputType? keyboard,
+    int maxLines = 1,
+    String? Function(String?)? validator,
+  }) {
     return TextFormField(
       controller: c,
       keyboardType: keyboard,
@@ -211,8 +252,10 @@ class _CheckoutViewState extends State<_CheckoutView> {
         hintText: hint,
         filled: true,
         fillColor: _C.white,
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 14,
+          vertical: 14,
+        ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: _C.border),
@@ -229,8 +272,12 @@ class _CheckoutViewState extends State<_CheckoutView> {
     );
   }
 
-  Widget _choix(List<String> valeurs, String selected,
-      Map<String, String> labels, ValueChanged<String> onSelect) {
+  Widget _choix(
+    List<String> valeurs,
+    String selected,
+    Map<String, String> labels,
+    ValueChanged<String> onSelect,
+  ) {
     return Row(
       children: valeurs.map((v) {
         final sel = v == selected;
@@ -248,10 +295,13 @@ class _CheckoutViewState extends State<_CheckoutView> {
                   border: Border.all(color: sel ? _C.green : _C.border),
                 ),
                 alignment: Alignment.center,
-                child: Text(labels[v] ?? v,
-                    style: TextStyle(
-                        color: sel ? _C.green : _C.sub,
-                        fontWeight: FontWeight.w700)),
+                child: Text(
+                  labels[v] ?? v,
+                  style: TextStyle(
+                    color: sel ? _C.green : _C.sub,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
               ),
             ),
           ),

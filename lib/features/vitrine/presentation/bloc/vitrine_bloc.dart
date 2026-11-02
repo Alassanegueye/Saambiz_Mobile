@@ -34,7 +34,10 @@ class VitrineBloc extends Bloc<VitrineEvent, VitrineState> {
     on<ModifierVitrineDemande>(_onModifier);
   }
 
-  Future<void> _onCharger(ChargerVitrine event, Emitter<VitrineState> emit) async {
+  Future<void> _onCharger(
+    ChargerVitrine event,
+    Emitter<VitrineState> emit,
+  ) async {
     emit(VitrineChargement());
 
     // Les deux appels sont lancés AVANT le premier `await` : ils voyagent donc
@@ -51,22 +54,21 @@ class VitrineBloc extends Bloc<VitrineEvent, VitrineState> {
       (await futureSecteurs).fold((_) {}, (liste) => _secteurs = liste);
     }
 
-    etat.fold(
-      (f) {
-        // 404 : pas de boutique du tout. Ce n'est pas une panne, c'est une
-        // étape — l'écran renvoie vers la création de la boutique.
-        if (f is ServerFailure && f.statusCode == 404) {
-          emit(VitrineSansBoutique(f.errorMessage));
-        } else {
-          emit(VitrineErreur(f.errorMessage));
-        }
-      },
-      (v) => emit(VitrineChargee(vitrine: v, secteurs: _secteurs)),
-    );
+    etat.fold((f) {
+      // 404 : pas de boutique du tout. Ce n'est pas une panne, c'est une
+      // étape, l'écran renvoie vers la création de la boutique.
+      if (f is ServerFailure && f.statusCode == 404) {
+        emit(VitrineSansBoutique(f.errorMessage));
+      } else {
+        emit(VitrineErreur(f.errorMessage));
+      }
+    }, (v) => emit(VitrineChargee(vitrine: v, secteurs: _secteurs)));
   }
 
   Future<void> _onAnalyser(
-      AnalyserLogoDemande event, Emitter<VitrineState> emit) async {
+    AnalyserLogoDemande event,
+    Emitter<VitrineState> emit,
+  ) async {
     emit(VitrineAnalyseEnCours());
     final r = await analyserLogo(
       logoPath: event.logoPath,
@@ -80,7 +82,9 @@ class VitrineBloc extends Bloc<VitrineEvent, VitrineState> {
   }
 
   Future<void> _onGenerer(
-      GenererVitrineDemande event, Emitter<VitrineState> emit) async {
+    GenererVitrineDemande event,
+    Emitter<VitrineState> emit,
+  ) async {
     emit(VitrineGenerationEnCours());
     final r = await genererVitrine(
       logoPath: event.logoPath,
@@ -103,7 +107,9 @@ class VitrineBloc extends Bloc<VitrineEvent, VitrineState> {
   }
 
   Future<void> _onModifier(
-      ModifierVitrineDemande event, Emitter<VitrineState> emit) async {
+    ModifierVitrineDemande event,
+    Emitter<VitrineState> emit,
+  ) async {
     emit(VitrineChargement());
     final r = await modifierVitrine(event.champs);
     r.fold(

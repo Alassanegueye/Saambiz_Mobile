@@ -36,13 +36,16 @@ abstract class VendeurProduitRepository {
   Future<Either<Failure, void>> dupliquerProduit(String id);
 
   Future<Either<Failure, void>> ajouterImages(
-      String produitId, List<String> imagePaths);
+    String produitId,
+    List<String> imagePaths,
+  );
 
   Future<Either<Failure, void>> supprimerImage(
-      String produitId, String imageId);
+    String produitId,
+    String imageId,
+  );
 
-  // ── Dashboard / statistiques ──────────────────────────────────────────
-
+  // Dashboard / statistiques
   Future<Either<Failure, Map<String, dynamic>>> dashboard();
 
   Future<Either<Failure, Map<String, dynamic>>> statistiques();
@@ -54,5 +57,6 @@ abstract class VendeurProduitRepository {
   Future<Either<Failure, Map<String, dynamic>>> nombreProduitCategorie();
 
   Future<Either<Failure, List<ProduitVendeur>>> rechercheProduits(
-      String recherche);
+    String recherche,
+  );
 }

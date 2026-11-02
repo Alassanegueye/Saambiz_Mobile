@@ -4,7 +4,7 @@ import '../../../../core/errors/failure.dart';
 import '../entities/vitrine.dart';
 import '../repositories/vitrine_repository.dart';
 
-/// Crée le site et le publie — dernière étape de l'assistant.
+/// Crée le site et le publie, dernière étape de l'assistant.
 class GenererVitrine {
   final VitrineRepository repository;
   GenererVitrine(this.repository);
@@ -23,20 +23,19 @@ class GenererVitrine {
     bool paiementLivraison = true,
     bool active = true,
     Map<String, dynamic>? blocs,
-  }) =>
-      repository.genererVitrine(
-        logoPath: logoPath,
-        secteur: secteur,
-        activite: activite,
-        modele: modele,
-        accent: accent,
-        slogan: slogan,
-        apropos: apropos,
-        horaires: horaires,
-        annonce: annonce,
-        commande: commande,
-        paiementLivraison: paiementLivraison,
-        active: active,
-        blocs: blocs,
-      );
+  }) => repository.genererVitrine(
+    logoPath: logoPath,
+    secteur: secteur,
+    activite: activite,
+    modele: modele,
+    accent: accent,
+    slogan: slogan,
+    apropos: apropos,
+    horaires: horaires,
+    annonce: annonce,
+    commande: commande,
+    paiementLivraison: paiementLivraison,
+    active: active,
+    blocs: blocs,
+  );
 }

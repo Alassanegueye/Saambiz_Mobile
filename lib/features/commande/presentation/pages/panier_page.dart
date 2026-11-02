@@ -28,7 +28,9 @@ Future<void> _commander(BuildContext context) async {
   showModalBottomSheet<void>(
     context: context,
     backgroundColor: _C.white,
-    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+    ),
     builder: (ctx) => SafeArea(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
@@ -37,13 +39,21 @@ Future<void> _commander(BuildContext context) async {
           children: [
             const Icon(Icons.lock_open_rounded, size: 40, color: _C.green),
             const SizedBox(height: 12),
-            const Text('Connectez-vous pour commander',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800, color: _C.black)),
+            const Text(
+              'Connectez-vous pour commander',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 17,
+                fontWeight: FontWeight.w800,
+                color: _C.black,
+              ),
+            ),
             const SizedBox(height: 6),
-            const Text('Votre panier est conservé. Il vous suffit d\'un compte pour valider et suivre la livraison.',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 13.5, height: 1.4, color: _C.sub)),
+            const Text(
+              'Votre panier est conservé. Il vous suffit d\'un compte pour valider et suivre la livraison.',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 13.5, height: 1.4, color: _C.sub),
+            ),
             const SizedBox(height: 20),
             SizedBox(
               width: double.infinity,
@@ -55,9 +65,14 @@ Future<void> _commander(BuildContext context) async {
                 style: FilledButton.styleFrom(
                   backgroundColor: _C.green,
                   padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
                 ),
-                child: const Text('Se connecter', style: TextStyle(fontWeight: FontWeight.w700)),
+                child: const Text(
+                  'Se connecter',
+                  style: TextStyle(fontWeight: FontWeight.w700),
+                ),
               ),
             ),
             TextButton(
@@ -65,7 +80,10 @@ Future<void> _commander(BuildContext context) async {
                 Navigator.pop(ctx);
                 Navigator.of(context).pushNamed(AppRouter.clientSignupRoute);
               },
-              child: const Text('Créer un compte', style: TextStyle(fontWeight: FontWeight.w700, color: _C.green)),
+              child: const Text(
+                'Créer un compte',
+                style: TextStyle(fontWeight: FontWeight.w700, color: _C.green),
+              ),
             ),
           ],
         ),
@@ -131,35 +149,49 @@ class PanierPage extends StatelessWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(item.nom,
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                        fontWeight: FontWeight.w700,
-                                        color: _C.black)),
+                                Text(
+                                  item.nom,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w700,
+                                    color: _C.black,
+                                  ),
+                                ),
                                 if (item.options.isNotEmpty)
                                   Padding(
                                     padding: const EdgeInsets.only(top: 3),
-                                    child: Text(item.libelleOptions,
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: const TextStyle(
-                                            fontSize: 12, color: _C.sub)),
+                                    child: Text(
+                                      item.libelleOptions,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        color: _C.sub,
+                                      ),
+                                    ),
                                   ),
                                 const SizedBox(height: 4),
-                                Text('${item.prix.toStringAsFixed(0)} FCFA',
-                                    style: const TextStyle(
-                                        color: _C.green,
-                                        fontWeight: FontWeight.w700)),
+                                Text(
+                                  '${item.prix.toStringAsFixed(0)} FCFA',
+                                  style: const TextStyle(
+                                    color: _C.green,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
                               ],
                             ),
                           ),
                           _QtyStepper(
                             quantite: item.quantite,
                             onMoins: () => panier.changerQuantite(
-                                item.cle, item.quantite - 1),
+                              item.cle,
+                              item.quantite - 1,
+                            ),
                             onPlus: () => panier.changerQuantite(
-                                item.cle, item.quantite + 1),
+                              item.cle,
+                              item.quantite + 1,
+                            ),
                           ),
                         ],
                       ),
@@ -183,8 +215,11 @@ class _QtyStepper extends StatelessWidget {
   final int quantite;
   final VoidCallback onMoins;
   final VoidCallback onPlus;
-  const _QtyStepper(
-      {required this.quantite, required this.onMoins, required this.onPlus});
+  const _QtyStepper({
+    required this.quantite,
+    required this.onMoins,
+    required this.onPlus,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -193,9 +228,13 @@ class _QtyStepper extends StatelessWidget {
         _circle(Icons.remove, onMoins),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 10),
-          child: Text('$quantite',
-              style: const TextStyle(
-                  fontWeight: FontWeight.w700, color: _C.black)),
+          child: Text(
+            '$quantite',
+            style: const TextStyle(
+              fontWeight: FontWeight.w700,
+              color: _C.black,
+            ),
+          ),
         ),
         _circle(Icons.add, onPlus),
       ],
@@ -203,19 +242,19 @@ class _QtyStepper extends StatelessWidget {
   }
 
   Widget _circle(IconData icon, VoidCallback onTap) => InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(20),
-        child: Container(
-          width: 30,
-          height: 30,
-          decoration: BoxDecoration(
-            color: _C.bg,
-            shape: BoxShape.circle,
-            border: Border.all(color: _C.border),
-          ),
-          child: Icon(icon, size: 16, color: _C.black),
-        ),
-      );
+    onTap: onTap,
+    borderRadius: BorderRadius.circular(20),
+    child: Container(
+      width: 30,
+      height: 30,
+      decoration: BoxDecoration(
+        color: _C.bg,
+        shape: BoxShape.circle,
+        border: Border.all(color: _C.border),
+      ),
+      child: Icon(icon, size: 16, color: _C.black),
+    ),
+  );
 }
 
 class _BarreTotal extends StatelessWidget {
@@ -240,11 +279,14 @@ class _BarreTotal extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text('Total', style: TextStyle(color: _C.sub)),
-                  Text('${total.toStringAsFixed(0)} FCFA',
-                      style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w800,
-                          color: _C.black)),
+                  Text(
+                    '${total.toStringAsFixed(0)} FCFA',
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w800,
+                      color: _C.black,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -253,13 +295,18 @@ class _BarreTotal extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: _C.green,
                 foregroundColor: _C.white,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 28,
+                  vertical: 14,
+                ),
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14)),
+                  borderRadius: BorderRadius.circular(14),
+                ),
               ),
-              child: const Text('Commander',
-                  style: TextStyle(fontWeight: FontWeight.w700)),
+              child: const Text(
+                'Commander',
+                style: TextStyle(fontWeight: FontWeight.w700),
+              ),
             ),
           ],
         ),
@@ -278,8 +325,10 @@ class _PanierVide extends StatelessWidget {
         children: const [
           Icon(Icons.shopping_cart_outlined, size: 64, color: _C.sub),
           SizedBox(height: 12),
-          Text('Votre panier est vide',
-              style: TextStyle(color: _C.sub, fontSize: 16)),
+          Text(
+            'Votre panier est vide',
+            style: TextStyle(color: _C.sub, fontSize: 16),
+          ),
         ],
       ),
     );
@@ -290,9 +339,9 @@ class _ImgFallback extends StatelessWidget {
   const _ImgFallback();
   @override
   Widget build(BuildContext context) => Container(
-        width: 64,
-        height: 64,
-        color: _C.bg,
-        child: const Icon(Icons.image_not_supported_outlined, color: _C.sub),
-      );
+    width: 64,
+    height: 64,
+    color: _C.bg,
+    child: const Icon(Icons.image_not_supported_outlined, color: _C.sub),
+  );
 }

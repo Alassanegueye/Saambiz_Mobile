@@ -8,7 +8,7 @@ class UserModel extends User {
     required super.email,
     required super.mot_de_passe,
     required super.adresse,
-    required super.telephone
+    required super.telephone,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -19,7 +19,7 @@ class UserModel extends User {
       email: json['email'] ?? '',
       mot_de_passe: json['mot_de_passe'] ?? '',
       adresse: json['adresse'] ?? '',
-      telephone: json['telephone'] ?? ''
+      telephone: json['telephone'] ?? '',
     );
   }
 
@@ -31,7 +31,7 @@ class UserModel extends User {
       'email': email,
       'mot_de_passe': mot_de_passe,
       'adresse': adresse,
-      'telephone': telephone
+      'telephone': telephone,
     };
   }
 }
@@ -52,9 +52,6 @@ class AuthResponseModel {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'token': token,
-      'utilisateur': user.toJson(),
-    };
+    return {'token': token, 'utilisateur': user.toJson()};
   }
 }

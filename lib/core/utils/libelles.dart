@@ -27,7 +27,7 @@ const Map<String, String> _libelles = {
   'free_money': 'Free Money',
 };
 
-String libelle(String? valeur, {String vide = '—'}) {
+String libelle(String? valeur, {String vide = 'Non renseigné'}) {
   if (valeur == null || valeur.trim().isEmpty) return vide;
   final v = valeur.trim();
   final connu = _libelles[v.toLowerCase()];

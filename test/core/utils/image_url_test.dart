@@ -14,7 +14,10 @@ void main() {
     });
 
     test('respecte la largeur demandée', () {
-      expect(imageOptimisee(brute, largeur: 400), contains('c_limit,w_400,q_auto/'));
+      expect(
+        imageOptimisee(brute, largeur: 400),
+        contains('c_limit,w_400,q_auto/'),
+      );
     });
 
     test("n'empile pas deux transformations", () {

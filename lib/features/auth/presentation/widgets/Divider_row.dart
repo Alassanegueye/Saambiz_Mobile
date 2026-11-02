@@ -4,10 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 class DividerRow extends StatelessWidget {
   final String title;
-  const DividerRow({
-    required this.title,
-    super.key,
-  });
+  const DividerRow({required this.title, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +20,7 @@ class DividerRow extends StatelessWidget {
               softWrap: false,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
-              style: GoogleFonts.plusJakartaSans(
+              style: GoogleFonts.inter(
                 color: AppColor.kGrayscale40,
                 fontWeight: FontWeight.w500,
                 fontSize: 14,

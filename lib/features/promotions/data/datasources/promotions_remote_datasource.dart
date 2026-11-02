@@ -49,17 +49,17 @@ class PromotionsRemoteDataSourceImpl implements PromotionsRemoteDataSource {
   @override
   Future<List<PromotionModel>> promotionsActives() async {
     final res = await dio.get(PromotionsEndpoints.actives);
-    return _extractList(res.data)
-        .map((e) => PromotionModel.fromJson(e as Map<String, dynamic>))
-        .toList();
+    return _extractList(
+      res.data,
+    ).map((e) => PromotionModel.fromJson(e as Map<String, dynamic>)).toList();
   }
 
   @override
   Future<List<PromotionModel>> mesPromotions() async {
     final res = await dio.get(PromotionsEndpoints.promotions);
-    return _extractList(res.data)
-        .map((e) => PromotionModel.fromJson(e as Map<String, dynamic>))
-        .toList();
+    return _extractList(
+      res.data,
+    ).map((e) => PromotionModel.fromJson(e as Map<String, dynamic>)).toList();
   }
 
   @override
@@ -71,14 +71,17 @@ class PromotionsRemoteDataSourceImpl implements PromotionsRemoteDataSource {
     required String dateFin,
     required String produitId,
   }) async {
-    final res = await dio.post(PromotionsEndpoints.promotions, data: {
-      'titre': titre,
-      'description': description,
-      'prixPromo': prixPromo,
-      'dateDebut': dateDebut,
-      'dateFin': dateFin,
-      'produitId': produitId,
-    });
+    final res = await dio.post(
+      PromotionsEndpoints.promotions,
+      data: {
+        'titre': titre,
+        'description': description,
+        'prixPromo': prixPromo,
+        'dateDebut': dateDebut,
+        'dateFin': dateFin,
+        'produitId': produitId,
+      },
+    );
     return _parseUne(res.data);
   }
 
@@ -91,13 +94,16 @@ class PromotionsRemoteDataSourceImpl implements PromotionsRemoteDataSource {
     String? dateDebut,
     String? dateFin,
   }) async {
-    final res = await dio.put(PromotionsEndpoints.parId(id), data: {
-      if (titre != null) 'titre': titre,
-      if (description != null) 'description': description,
-      if (prixPromo != null) 'prixPromo': prixPromo,
-      if (dateDebut != null) 'dateDebut': dateDebut,
-      if (dateFin != null) 'dateFin': dateFin,
-    });
+    final res = await dio.put(
+      PromotionsEndpoints.parId(id),
+      data: {
+        if (titre != null) 'titre': titre,
+        if (description != null) 'description': description,
+        if (prixPromo != null) 'prixPromo': prixPromo,
+        if (dateDebut != null) 'dateDebut': dateDebut,
+        if (dateFin != null) 'dateFin': dateFin,
+      },
+    );
     return _parseUne(res.data);
   }
 

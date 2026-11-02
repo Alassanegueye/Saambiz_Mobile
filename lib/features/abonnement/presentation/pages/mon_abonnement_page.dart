@@ -10,10 +10,10 @@ import '../bloc/abonnement_event.dart';
 import '../bloc/abonnement_state.dart';
 
 class _C {
-  static const green = Color(0xFF0D1B3D);
-  static const black = Color(0xFF0D1B3D);
+  static const green = Color(0xFF01154B);
+  static const black = Color(0xFF01154B);
   static const white = Color(0xFFFFFFFF);
-  static const bg = Color(0xFFF5F7FB);
+  static const bg = Color(0xFFF4F5F8);
   static const sub = Color(0xFF5B6C8A);
   static const border = Color(0xFFE3E8F0);
   static const orange = Color(0xFFFF8F00);
@@ -55,27 +55,35 @@ class _MonAbonnementViewState extends State<_MonAbonnementView> {
               TextField(
                 controller: numeroCtrl,
                 keyboardType: TextInputType.phone,
-                decoration: const InputDecoration(labelText: 'Numéro de téléphone'),
+                decoration: const InputDecoration(
+                  labelText: 'Numéro de téléphone',
+                ),
               ),
               const SizedBox(height: 12),
               DropdownButton<String>(
                 value: methode,
                 isExpanded: true,
                 items: const [
-                  DropdownMenuItem(value: 'orange_money', child: Text('Orange Money')),
+                  DropdownMenuItem(
+                    value: 'orange_money',
+                    child: Text('Orange Money'),
+                  ),
                   DropdownMenuItem(value: 'wave', child: Text('Wave')),
                 ],
-                onChanged: (v) => setStateDialog(() => methode = v ?? 'orange_money'),
+                onChanged: (v) =>
+                    setStateDialog(() => methode = v ?? 'orange_money'),
               ),
             ],
           ),
           actions: [
             TextButton(
-                onPressed: () => Navigator.pop(ctx, false),
-                child: const Text('Annuler')),
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Annuler'),
+            ),
             TextButton(
-                onPressed: () => Navigator.pop(ctx, true),
-                child: const Text('Payer')),
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('Payer'),
+            ),
           ],
         ),
       ),
@@ -83,12 +91,16 @@ class _MonAbonnementViewState extends State<_MonAbonnementView> {
     if (res == true && numeroCtrl.text.trim().isNotEmpty && context.mounted) {
       final bloc = context.read<AbonnementBloc>();
       final state = bloc.state;
-      final montant = state is AbonnementLoaded ? state.abonnement.montant : null;
-      bloc.add(PayerAbonnement(
-        montant: montant ?? 0,
-        numeroTelephone: numeroCtrl.text.trim(),
-        methode: methode,
-      ));
+      final montant = state is AbonnementLoaded
+          ? state.abonnement.montant
+          : null;
+      bloc.add(
+        PayerAbonnement(
+          montant: montant ?? 0,
+          numeroTelephone: numeroCtrl.text.trim(),
+          methode: methode,
+        ),
+      );
     }
   }
 
@@ -114,7 +126,10 @@ class _MonAbonnementViewState extends State<_MonAbonnementView> {
         listener: (context, state) async {
           if (state is AbonnementError) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message), backgroundColor: Colors.red),
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.red,
+              ),
             );
           } else if (state is PaiementInitieAbonnement) {
             final url = state.paymentUrl;
@@ -161,11 +176,19 @@ class _MonAbonnementViewState extends State<_MonAbonnementView> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(libelle(a.type, vide: 'Abonnement'),
-                      style: const TextStyle(
-                          fontWeight: FontWeight.w800, fontSize: 18, color: _C.black)),
+                  Text(
+                    libelle(a.type, vide: 'Abonnement'),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 18,
+                      color: _C.black,
+                    ),
+                  ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: (actif ? _C.green : _C.orange).withOpacity(0.12),
                       borderRadius: BorderRadius.circular(10),
@@ -173,9 +196,10 @@ class _MonAbonnementViewState extends State<_MonAbonnementView> {
                     child: Text(
                       libelle(a.statut),
                       style: TextStyle(
-                          color: actif ? _C.green : _C.orange,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 12),
+                        color: actif ? _C.green : _C.orange,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 12,
+                      ),
                     ),
                   ),
                 ],
@@ -210,10 +234,16 @@ class _MonAbonnementViewState extends State<_MonAbonnementView> {
     );
   }
 
-  Widget _historiqueView(BuildContext context, HistoriquePaiementsLoaded state) {
+  Widget _historiqueView(
+    BuildContext context,
+    HistoriquePaiementsLoaded state,
+  ) {
     if (state.paiements.isEmpty) {
       return const Center(
-        child: Text('Aucun paiement pour le moment', style: TextStyle(color: _C.sub)),
+        child: Text(
+          'Aucun paiement pour le moment',
+          style: TextStyle(color: _C.sub),
+        ),
       );
     }
     return RefreshIndicator(
@@ -238,19 +268,28 @@ class _MonAbonnementViewState extends State<_MonAbonnementView> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('${p.montant.toStringAsFixed(0)} FCFA',
-                          style: const TextStyle(
-                              fontWeight: FontWeight.w700, color: _C.black)),
+                      Text(
+                        '${p.montant.toStringAsFixed(0)} FCFA',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w700,
+                          color: _C.black,
+                        ),
+                      ),
                       if (p.date != null)
-                        Text(_dateFmt.format(p.date!),
-                            style: const TextStyle(color: _C.sub, fontSize: 12)),
+                        Text(
+                          _dateFmt.format(p.date!),
+                          style: const TextStyle(color: _C.sub, fontSize: 12),
+                        ),
                     ],
                   ),
                 ),
-                Text(libelle(p.statut),
-                    style: TextStyle(
-                        color: p.statut == 'reussi' ? _C.green : _C.orange,
-                        fontWeight: FontWeight.w700)),
+                Text(
+                  libelle(p.statut),
+                  style: TextStyle(
+                    color: p.statut == 'reussi' ? _C.green : _C.orange,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
               ],
             ),
           );
@@ -260,13 +299,16 @@ class _MonAbonnementViewState extends State<_MonAbonnementView> {
   }
 
   Widget _row(String l, String v) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(l, style: const TextStyle(color: _C.sub)),
-            Text(v, style: const TextStyle(fontWeight: FontWeight.w700, color: _C.black)),
-          ],
+    padding: const EdgeInsets.symmetric(vertical: 4),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(l, style: const TextStyle(color: _C.sub)),
+        Text(
+          v,
+          style: const TextStyle(fontWeight: FontWeight.w700, color: _C.black),
         ),
-      );
+      ],
+    ),
+  );
 }

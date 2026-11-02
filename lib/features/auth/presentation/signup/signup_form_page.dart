@@ -10,7 +10,7 @@ import 'signup_kit.dart';
 
 /// Données transportées d'un écran à l'autre pendant l'inscription.
 /// Le mot de passe est conservé le temps du parcours pour connecter
-/// l'utilisateur automatiquement une fois son email vérifié — il n'est jamais
+/// l'utilisateur automatiquement une fois son email vérifié, il n'est jamais
 /// écrit sur le disque.
 class SignupDraft {
   final String role; // 'Acheteur' ou 'Vendeur'
@@ -35,11 +35,11 @@ class SignupDraft {
 /// Inscription en plusieurs pages, une question à la fois, adaptées au profil
 /// choisi :
 ///
-///   1. Vous          — le nom
-///   2. Contact       — l'e-mail, et le téléphone (WhatsApp, obligatoire
+///   1. Vous         , le nom
+///   2. Contact      , l'e-mail, et le téléphone (WhatsApp, obligatoire
 ///                      pour un vendeur : c'est là que ses clients l'écrivent)
-///   3. Sécurité      — le mot de passe, règles cochées en direct
-///   4. Vérification  — le code reçu par e-mail (EmailVerificationPage)
+///   3. Sécurité     , le mot de passe, règles cochées en direct
+///   4. Vérification , le code reçu par e-mail (EmailVerificationPage)
 ///   5. Vos goûts (client) ou Votre boutique (vendeur)
 ///
 /// Chaque page ne demande qu'une chose : moins de champs à l'écran, moins
@@ -101,14 +101,22 @@ class _SignupFormPageState extends State<SignupFormPage> {
       _error = null;
       switch (_page) {
         case 0:
-          _nameError = _nameCtrl.text.trim().length < 2 ? 'Indiquez votre nom.' : null;
+          _nameError = _nameCtrl.text.trim().length < 2
+              ? 'Indiquez votre nom.'
+              : null;
         case 1:
-          _emailError = kEmailRegExp.hasMatch(_emailCtrl.text.trim()) ? null : 'Adresse e-mail invalide.';
+          _emailError = kEmailRegExp.hasMatch(_emailCtrl.text.trim())
+              ? null
+              : 'Adresse e-mail invalide.';
           final tel = _telNormalise;
           if (tel.isEmpty) {
-            _telError = _isVendeur ? 'Vos clients vous contacteront sur ce numéro.' : null;
+            _telError = _isVendeur
+                ? 'Vos clients vous contacteront sur ce numéro.'
+                : null;
           } else {
-            _telError = RegExp(r'^\+?\d{8,15}$').hasMatch(tel) ? null : 'Numéro invalide.';
+            _telError = RegExp(r'^\+?\d{8,15}$').hasMatch(tel)
+                ? null
+                : 'Numéro invalide.';
           }
         default:
           _passError = validateMotDePasse(_passCtrl.text);
@@ -159,7 +167,9 @@ class _SignupFormPageState extends State<SignupFormPage> {
     try {
       // Le compte n'est PAS créé ici : on demande d'abord un code à l'adresse
       // saisie. Il ne naîtra qu'une fois ce code validé, à l'écran suivant.
-      await SignupRemoteDataSource(sl<Dio>()).envoyerCode(email: email, prenom: prenom);
+      await SignupRemoteDataSource(
+        sl<Dio>(),
+      ).envoyerCode(email: email, prenom: prenom);
       if (!mounted) return;
       Navigator.of(context).pushNamed(
         AppRouter.emailVerificationRoute,
@@ -181,7 +191,9 @@ class _SignupFormPageState extends State<SignupFormPage> {
 
   @override
   Widget build(BuildContext context) {
-    final libelleBouton = _page < _nbPages - 1 ? 'Suivant' : 'Recevoir mon code';
+    final libelleBouton = _page < _nbPages - 1
+        ? 'Suivant'
+        : 'Recevoir mon code';
     final etape = switch (_page) {
       0 => _etapeNom(),
       1 => _etapeContact(),
@@ -222,61 +234,65 @@ class _SignupFormPageState extends State<SignupFormPage> {
         ],
         apres: [
           if (_page == 0)
-            SbLoginLink(onTap: () => Navigator.of(context).pushNamed(AppRouter.loginRoute)),
+            SbLoginLink(
+              onTap: () =>
+                  Navigator.of(context).pushNamed(AppRouter.loginRoute),
+            ),
         ],
       ),
     );
   }
 
-  // ─── Étapes ───────────────────────────────────────────────────────────────
-
+  // Étapes
   _Etape _etapeNom() => _Etape(
-        icone: _isVendeur ? Icons.badge_outlined : Icons.person_outline_rounded,
-        titre: 'Votre nom',
-        texte: _isVendeur ? 'Le responsable de la boutique.' : 'Pour préparer vos commandes.',
-        champs: [
-          SbField(
-            label: 'Nom complet',
-            hint: 'Ex. Awa Diop',
-            icon: Icons.person_outline_rounded,
-            controller: _nameCtrl,
-            keyboardType: TextInputType.name,
-            autofillHint: AutofillHints.name,
-            errorText: _nameError,
-            onSubmitted: (_) => _suivant(),
-          ),
-        ],
-      );
+    icone: _isVendeur ? Icons.badge_outlined : Icons.person_outline_rounded,
+    titre: 'Votre nom',
+    texte: _isVendeur
+        ? 'Le responsable de la boutique.'
+        : 'Pour préparer vos commandes.',
+    champs: [
+      SbField(
+        label: 'Nom complet',
+        hint: 'Ex. Awa Diop',
+        icon: Icons.person_outline_rounded,
+        controller: _nameCtrl,
+        keyboardType: TextInputType.name,
+        autofillHint: AutofillHints.name,
+        errorText: _nameError,
+        onSubmitted: (_) => _suivant(),
+      ),
+    ],
+  );
 
   _Etape _etapeContact() => _Etape(
-        icone: Icons.alternate_email_rounded,
-        titre: 'Vos coordonnées',
-        texte: 'Un code vous sera envoyé par e-mail.',
-        champs: [
-          SbField(
-            label: 'E-mail',
-            hint: 'exemple@email.com',
-            icon: Icons.mail_outline_rounded,
-            controller: _emailCtrl,
-            keyboardType: TextInputType.emailAddress,
-            autofillHint: AutofillHints.email,
-            errorText: _emailError,
-          ),
-          const SizedBox(height: 16),
-          SbField(
-            label: _isVendeur ? 'WhatsApp' : 'Téléphone (facultatif)',
-            hint: 'Ex. 77 123 45 67',
-            icon: Icons.phone_outlined,
-            controller: _telCtrl,
-            keyboardType: TextInputType.phone,
-            autofillHint: AutofillHints.telephoneNumber,
-            textInputAction: TextInputAction.done,
-            formatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9+ ]'))],
-            errorText: _telError,
-            onSubmitted: (_) => _suivant(),
-          ),
-        ],
-      );
+    icone: Icons.alternate_email_rounded,
+    titre: 'Vos coordonnées',
+    texte: 'Un code vous sera envoyé par e-mail.',
+    champs: [
+      SbField(
+        label: 'E-mail',
+        hint: 'exemple@email.com',
+        icon: Icons.mail_outline_rounded,
+        controller: _emailCtrl,
+        keyboardType: TextInputType.emailAddress,
+        autofillHint: AutofillHints.email,
+        errorText: _emailError,
+      ),
+      const SizedBox(height: 16),
+      SbField(
+        label: _isVendeur ? 'WhatsApp' : 'Téléphone (facultatif)',
+        hint: 'Ex. 77 123 45 67',
+        icon: Icons.phone_outlined,
+        controller: _telCtrl,
+        keyboardType: TextInputType.phone,
+        autofillHint: AutofillHints.telephoneNumber,
+        textInputAction: TextInputAction.done,
+        formatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9+ ]'))],
+        errorText: _telError,
+        onSubmitted: (_) => _suivant(),
+      ),
+    ],
+  );
 
   _Etape _etapeMotDePasse() {
     final mdp = _passCtrl.text;
@@ -298,11 +314,15 @@ class _SignupFormPageState extends State<SignupFormPage> {
           suffix: IconButton(
             onPressed: () => setState(() => _obscure = !_obscure),
             icon: Icon(
-              _obscure ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+              _obscure
+                  ? Icons.visibility_outlined
+                  : Icons.visibility_off_outlined,
               size: 20,
               color: Sb.textLight,
             ),
-            tooltip: _obscure ? 'Afficher le mot de passe' : 'Masquer le mot de passe',
+            tooltip: _obscure
+                ? 'Afficher le mot de passe'
+                : 'Masquer le mot de passe',
           ),
         ),
         const SizedBox(height: 14),
@@ -351,12 +371,14 @@ class _Regle extends StatelessWidget {
               color: ok ? Sb.green : Colors.transparent,
               border: Border.all(color: ok ? Sb.green : Sb.border, width: 1.6),
             ),
-            child: ok ? const Icon(Icons.check_rounded, size: 13, color: Sb.white) : null,
+            child: ok
+                ? const Icon(Icons.check_rounded, size: 13, color: Sb.white)
+                : null,
           ),
           const SizedBox(width: 10),
           Text(
             texte,
-            style: GoogleFonts.plusJakartaSans(
+            style: GoogleFonts.inter(
               fontSize: 13,
               fontWeight: ok ? FontWeight.w600 : FontWeight.w500,
               color: ok ? Sb.navy : Sb.textMid,

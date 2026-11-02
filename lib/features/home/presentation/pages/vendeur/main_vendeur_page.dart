@@ -10,7 +10,7 @@ import '../../../../vendeur/presentation/pages/mes_produits_page.dart';
 import '../../../../promotions/presentation/pages/mes_promotions_page.dart';
 
 /// Espace vendeur : tableau de bord, commandes, produits, promotions et
-/// compte, sous la barre de navigation flottante.
+/// compte, barre de navigation en bas d'écran.
 class MainVendeurPage extends StatefulWidget {
   final User? user;
   const MainVendeurPage({super.key, this.user});
@@ -23,7 +23,10 @@ class _MainVendeurPageState extends State<MainVendeurPage> {
   int _selectedIndex = 0;
 
   late final List<Widget> _pages = [
-    HomePage(user: widget.user),
+    HomePage(
+      user: widget.user,
+      ouvrirOnglet: (i) => setState(() => _selectedIndex = i),
+    ),
     const VendeurCommandesPage(),
     const MesProduitsPage(),
     const MesPromotionsPage(),
@@ -34,9 +37,8 @@ class _MainVendeurPageState extends State<MainVendeurPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColor.kBackground,
-      extendBody: true,
-      body: KeyedSubtree(
-        key: ValueKey(_selectedIndex),
+      body: TransitionOnglet(
+        index: _selectedIndex,
         child: _pages[_selectedIndex],
       ),
       bottomNavigationBar: BarreNavigationVerre(

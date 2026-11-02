@@ -16,7 +16,11 @@ abstract class ProduitRemoteDataSource {
   Future<List<ProduitModel>> getProduitsByBoutique(String boutiqueId);
   Future<String> getWhatsappUrl(String produitId);
   Future<Map<String, dynamic>> getAvisBoutique(String boutiqueId);
-  Future<Map<String, dynamic>> laisserAvis(String boutiqueId, int note, String? commentaire);
+  Future<Map<String, dynamic>> laisserAvis(
+    String boutiqueId,
+    int note,
+    String? commentaire,
+  );
 }
 
 class ProduitRemoteDataSourceImpl implements ProduitRemoteDataSource {
@@ -24,9 +28,7 @@ class ProduitRemoteDataSourceImpl implements ProduitRemoteDataSource {
 
   ProduitRemoteDataSourceImpl(this.dio);
 
-  // ─────────────────────────────────────────────
   // 🔐 Gestion centralisée erreur token
-  // ─────────────────────────────────────────────
   void _handleAuthError(dynamic e) {
     if (e is DioException) {
       final data = e.response?.data;
@@ -34,7 +36,7 @@ class ProduitRemoteDataSourceImpl implements ProduitRemoteDataSource {
       if (data is Map && data['message'] == 'Token expiré') {
         AuthInterceptor.navigatorKey.currentState?.pushNamedAndRemoveUntil(
           AppRouter.loginRoute,
-              (route) => false,
+          (route) => false,
         );
       }
 
@@ -42,21 +44,25 @@ class ProduitRemoteDataSourceImpl implements ProduitRemoteDataSource {
       if (e.response?.statusCode == 401) {
         AuthInterceptor.navigatorKey.currentState?.pushNamedAndRemoveUntil(
           AppRouter.loginRoute,
-              (route) => false,
+          (route) => false,
         );
       }
     }
   }
 
-  // ─────────────────────────────────────────────
   // 📦 Extract list helper
-  // ─────────────────────────────────────────────
   List<dynamic> _extractList(dynamic raw) {
     if (raw is List) return raw;
 
     if (raw is Map<String, dynamic>) {
       for (final key in [
-        'produits', 'boutiques', 'data', 'content', 'items', 'results', 'list'
+        'produits',
+        'boutiques',
+        'data',
+        'content',
+        'items',
+        'results',
+        'list',
       ]) {
         if (raw[key] is List) {
           return raw[key] as List;
@@ -64,7 +70,7 @@ class ProduitRemoteDataSourceImpl implements ProduitRemoteDataSource {
       }
 
       final listEntry = raw.entries.firstWhere(
-            (e) => e.value is List,
+        (e) => e.value is List,
         orElse: () => const MapEntry('', []),
       );
 
@@ -74,9 +80,7 @@ class ProduitRemoteDataSourceImpl implements ProduitRemoteDataSource {
     throw Exception('Impossible d\'extraire une liste');
   }
 
-  // ─────────────────────────────────────────────
   // 🔐 Token
-  // ─────────────────────────────────────────────
   Future<String?> _getToken() async {
     return await sl<TokenService>().getToken();
   }
@@ -97,9 +101,7 @@ class ProduitRemoteDataSourceImpl implements ProduitRemoteDataSource {
     );
   }
 
-  // ─────────────────────────────────────────────
   // 🛍️ Produits
-  // ─────────────────────────────────────────────
   @override
   Future<List<ProduitModel>> getProduits() async {
     try {
@@ -113,16 +115,13 @@ class ProduitRemoteDataSourceImpl implements ProduitRemoteDataSource {
       return data
           .map((e) => ProduitModel.fromJson(e as Map<String, dynamic>))
           .toList();
-
     } catch (e) {
       _handleAuthError(e);
       rethrow;
     }
   }
 
-  // ─────────────────────────────────────────────
   // 🏪 Boutiques
-  // ─────────────────────────────────────────────
   @override
   Future<List<BoutiqueModel>> getBoutiques() async {
     try {
@@ -136,16 +135,13 @@ class ProduitRemoteDataSourceImpl implements ProduitRemoteDataSource {
       return data
           .map((e) => BoutiqueModel.fromJson(e as Map<String, dynamic>))
           .toList();
-
     } catch (e) {
       _handleAuthError(e);
       rethrow;
     }
   }
 
-  // ─────────────────────────────────────────────
   // 🔍 Recherche
-  // ─────────────────────────────────────────────
   @override
   Future<List<ProduitModel>> rechercher(String query) async {
     try {
@@ -160,16 +156,13 @@ class ProduitRemoteDataSourceImpl implements ProduitRemoteDataSource {
       return data
           .map((e) => ProduitModel.fromJson(e as Map<String, dynamic>))
           .toList();
-
     } catch (e) {
       _handleAuthError(e);
       rethrow;
     }
   }
 
-  // ─────────────────────────────────────────────
   // 🏙️ Filtrer ville
-  // ─────────────────────────────────────────────
   @override
   Future<List<ProduitModel>> filtrerVille(String ville) async {
     try {
@@ -184,16 +177,13 @@ class ProduitRemoteDataSourceImpl implements ProduitRemoteDataSource {
       return data
           .map((e) => ProduitModel.fromJson(e as Map<String, dynamic>))
           .toList();
-
     } catch (e) {
       _handleAuthError(e);
       rethrow;
     }
   }
 
-  // ─────────────────────────────────────────────
   // 🏪 Produits par boutique
-  // ─────────────────────────────────────────────
   @override
   Future<List<ProduitModel>> getProduitsByBoutique(String boutiqueId) async {
     try {
@@ -203,22 +193,21 @@ class ProduitRemoteDataSourceImpl implements ProduitRemoteDataSource {
       );
 
       final data = _extractList(
-        response.data is Map ? response.data['produits'] ?? response.data : response.data,
+        response.data is Map
+            ? response.data['produits'] ?? response.data
+            : response.data,
       );
 
       return data
           .map((e) => ProduitModel.fromJson(e as Map<String, dynamic>))
           .toList();
-
     } catch (e) {
       _handleAuthError(e);
       rethrow;
     }
   }
 
-  // ─────────────────────────────────────────────
-  // 💬 WhatsApp — contacter vendeur
-  // ─────────────────────────────────────────────
+  // 💬 WhatsApp, contacter vendeur
   @override
   Future<String> getWhatsappUrl(String produitId) async {
     try {
@@ -247,15 +236,15 @@ class ProduitRemoteDataSourceImpl implements ProduitRemoteDataSource {
     }
   }
 
-  // ─────────────────────────────────────────────
   // ⭐ Avis / notation boutique
-  // ─────────────────────────────────────────────
   @override
   Future<Map<String, dynamic>> getAvisBoutique(String boutiqueId) async {
     try {
       final response = await dio.get('/avis/boutique/$boutiqueId');
       final data = response.data;
-      return data is Map<String, dynamic> ? data : {'moyenne': 0, 'total': 0, 'avis': []};
+      return data is Map<String, dynamic>
+          ? data
+          : {'moyenne': 0, 'total': 0, 'avis': []};
     } catch (e) {
       _handleAuthError(e);
       rethrow;
@@ -263,11 +252,19 @@ class ProduitRemoteDataSourceImpl implements ProduitRemoteDataSource {
   }
 
   @override
-  Future<Map<String, dynamic>> laisserAvis(String boutiqueId, int note, String? commentaire) async {
+  Future<Map<String, dynamic>> laisserAvis(
+    String boutiqueId,
+    int note,
+    String? commentaire,
+  ) async {
     try {
       final response = await dio.post(
         '/avis',
-        data: {'boutiqueId': boutiqueId, 'note': note, 'commentaire': commentaire},
+        data: {
+          'boutiqueId': boutiqueId,
+          'note': note,
+          'commentaire': commentaire,
+        },
         options: await _getOptions(),
       );
       final data = response.data;
