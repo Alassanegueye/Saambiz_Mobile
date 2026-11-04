@@ -24,10 +24,16 @@
 	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>SaamBiz utilise l'appareil photo pour prendre en photo vos produits ou votre boutique.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>SaamBiz utilise votre position pour vous proposer les boutiques proches de vous. Vous pouvez refuser : les boutiques vous seront alors proposées selon vos centres d'intérêt.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>SaamBiz accède à vos photos pour illustrer vos produits, votre boutique et votre profil. Vous choisissez chaque image vous-même.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

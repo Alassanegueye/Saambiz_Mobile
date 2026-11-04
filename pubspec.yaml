@@ -42,7 +42,6 @@ dependencies:
   dartz: ^0.10.1
   flutter_svg: ^2.2.0
   dio: ^5.9.0
-  permission_handler: ^12.0.1
   # Position du client, pour lui proposer les boutiques proches. Facultatif :
   # un refus n'empêche pas d'utiliser l'application.
   geolocator: ^14.0.2

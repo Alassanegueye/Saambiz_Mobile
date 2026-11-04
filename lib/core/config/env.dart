@@ -79,8 +79,16 @@ class Env {
   /// l'adresse LAN du poste de développement qui traînait dans ce fichier.
   /// [verifier] ne voyait rien : elle contrôlait [apiBaseUrl], pas la valeur
   /// employée.
+  ///
+  /// En RELEASE, le `.env` est ignoré, quoi qu'il contienne. C'est un fichier
+  /// de confort pour les postes de développement, et il part dans l'IPA avec
+  /// l'adresse qui y traîne — `10.0.2.2`, l'alias de l'émulateur Android.
+  /// Une application publiée qui prenait cette adresse n'appelait rien du
+  /// tout sur un vrai téléphone, sans le moindre message. Un `flutter build`
+  /// lancé sans `--dart-define` vise donc la production, qui est la valeur
+  /// par défaut compilée.
   static void resoudreApiBaseUrl(String? depuisDotenv) {
-    if (apiBaseUrlCompilee) {
+    if (apiBaseUrlCompilee || kReleaseMode) {
       _apiBaseUrlEffective = apiBaseUrl;
       return;
     }
