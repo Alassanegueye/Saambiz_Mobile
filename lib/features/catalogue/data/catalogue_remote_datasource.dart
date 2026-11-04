@@ -78,6 +78,25 @@ class CatalogueRemoteDataSource {
     return _liste((res.data as Map)['produits']);
   }
 
+  /// Boutiques en ligne dont le nom, le slogan, la catégorie ou la ville
+  /// contient [recherche].
+  Future<List<Map<String, dynamic>>> rechercherBoutiques(
+    String recherche, {
+    int limit = 10,
+  }) async {
+    if (recherche.trim().isEmpty) return const [];
+    final res = await dio.get(
+      '/catalogue/boutiques',
+      queryParameters: {'q': recherche.trim(), 'limit': limit},
+    );
+    final liste = (res.data as Map)['boutiques'];
+    if (liste is! List) return const [];
+    return liste
+        .whereType<Map>()
+        .map((b) => Map<String, dynamic>.from(b))
+        .toList();
+  }
+
   /// Fiche publique d'une boutique.
   Future<Map<String, dynamic>> boutique(String id) async {
     final res = await dio.get('/catalogue/boutiques/$id');

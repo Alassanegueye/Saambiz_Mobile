@@ -1,8 +1,10 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/theme/app_color.dart';
+import '../../../../core/utils/image_url.dart';
 import '../../../../core/widgets/ui_kit.dart';
 import '../../../../injection_container.dart';
 import '../../../categories/data/categorie.dart';
@@ -11,10 +13,15 @@ import '../../../categories/presentation/pages/categorie_boutiques_page.dart';
 import '../../data/catalogue_remote_datasource.dart';
 import '../../data/produit_catalogue.dart';
 import '../widgets/bouton_panier.dart';
+import 'boutique_publique_page.dart';
 import '../widgets/produit_card.dart';
 
 /// Liste de produits : une catégorie, une recherche ou les promotions.
 /// Tri en un geste (récents, populaires, prix), défilement infini.
+///
+/// Le champ cherche dans ce que la page montre : les produits de la
+/// catégorie quand il y en a une ; sinon (recherche lancée depuis
+/// l'accueil) les produits ET les boutiques, ces dernières en bandeau.
 class ProduitsPage extends StatefulWidget {
   final String titre;
 
@@ -50,6 +57,7 @@ class _ProduitsPageState extends State<ProduitsPage> {
   );
 
   final List<ProduitCatalogue> _produits = [];
+  List<Map<String, dynamic>> _boutiques = const [];
   late String _tri = widget.promotions ? 'promos' : 'recents';
   late String _recherche = widget.recherche ?? '';
   int _page = 1;
@@ -84,15 +92,29 @@ class _ProduitsPageState extends State<ProduitsPage> {
     page: page,
   );
 
+  /// Recherche générale : ni catégorie ni promotions.
+  bool get _rechercheGenerale =>
+      widget.categorie == null && !widget.promotions;
+
+  Future<List<Map<String, dynamic>>> _chercherBoutiques() async {
+    if (!_rechercheGenerale || _recherche.trim().isEmpty) return const [];
+    try {
+      return await _ds.rechercherBoutiques(_recherche);
+    } catch (_) {
+      return const []; // Les produits restent affichés.
+    }
+  }
+
   Future<void> _charger() async {
     setState(() {
       _chargement = true;
       _erreur = null;
     });
     try {
-      final res = await _requete(1);
+      final (res, boutiques) = await (_requete(1), _chercherBoutiques()).wait;
       if (!mounted) return;
       setState(() {
+        _boutiques = boutiques;
         _produits
           ..clear()
           ..addAll(res.produits);
@@ -225,7 +247,7 @@ class _ProduitsPageState extends State<ProduitsPage> {
               controleur: _rechercheCtrl,
               indication: c != null
                   ? 'Rechercher dans ${c.nom}'
-                  : 'Rechercher un produit…',
+                  : 'Rechercher un produit, une boutique',
               onSubmitted: (v) {
                 _recherche = v;
                 _charger();
@@ -306,7 +328,7 @@ class _ProduitsPageState extends State<ProduitsPage> {
         ),
       ];
     }
-    if (_produits.isEmpty) {
+    if (_produits.isEmpty && _boutiques.isEmpty) {
       return [
         SliverToBoxAdapter(
           child: EtatVide(
@@ -328,6 +350,14 @@ class _ProduitsPageState extends State<ProduitsPage> {
       ];
     }
     return [
+      if (_boutiques.isNotEmpty) ..._bandeauBoutiques(),
+      if (_produits.isNotEmpty && _boutiques.isNotEmpty)
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 18, 16, 0),
+            child: Text('Produits', style: _styleTitreSection),
+          ),
+        ),
       SliverPadding(
         padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
         sliver: SliverGrid(
@@ -339,5 +369,110 @@ class _ProduitsPageState extends State<ProduitsPage> {
         ),
       ),
     ];
+  }
+
+  static final _styleTitreSection = GoogleFonts.inter(
+    fontSize: 15,
+    fontWeight: FontWeight.w700,
+    color: AppColor.kGrayscaleDark100,
+  );
+
+  /// Boutiques trouvées, en bandeau horizontal au-dessus des produits.
+  List<Widget> _bandeauBoutiques() => [
+    SliverToBoxAdapter(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 10),
+        child: Text('Boutiques', style: _styleTitreSection),
+      ),
+    ),
+    SliverToBoxAdapter(
+      child: SizedBox(
+        height: 118,
+        child: ListView.separated(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          itemCount: _boutiques.length,
+          separatorBuilder: (_, __) => const SizedBox(width: 10),
+          itemBuilder: (_, i) => _CarteBoutique(donnees: _boutiques[i]),
+        ),
+      ),
+    ),
+  ];
+}
+
+/// Boutique trouvée par la recherche : logo, nom, ville.
+class _CarteBoutique extends StatelessWidget {
+  final Map<String, dynamic> donnees;
+  const _CarteBoutique({required this.donnees});
+
+  @override
+  Widget build(BuildContext context) {
+    final id = donnees['id']?.toString();
+    final logo = donnees['logo']?.toString();
+    final lieu = (donnees['ville'] ?? donnees['localisation'] ?? '').toString();
+    return Material(
+      color: AppColor.kWhite,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: const BorderSide(color: AppColor.kLine),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: id == null
+            ? null
+            : () => Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => BoutiquePubliquePage(
+                    boutiqueId: id,
+                    apercu: BoutiqueResume.fromJson(donnees),
+                  ),
+                ),
+              ),
+        child: SizedBox(
+          width: 132,
+          child: Padding(
+            padding: const EdgeInsets.all(10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: SizedBox(
+                    width: 44,
+                    height: 44,
+                    child: logo != null && logo.isNotEmpty
+                        ? CachedNetworkImage(
+                            imageUrl: imageOptimisee(logo, largeur: 120),
+                            fit: BoxFit.cover,
+                            errorWidget: (_, __, ___) =>
+                                const PastilleIcone(Icons.storefront_outlined),
+                          )
+                        : const PastilleIcone(Icons.storefront_outlined),
+                  ),
+                ),
+                const Spacer(),
+                Text(
+                  donnees['nom']?.toString() ?? 'Boutique',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.inter(
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w700,
+                    color: AppColor.kGrayscaleDark100,
+                  ),
+                ),
+                if (lieu.isNotEmpty)
+                  Text(
+                    lieu,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: texteDiscret(11.5),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

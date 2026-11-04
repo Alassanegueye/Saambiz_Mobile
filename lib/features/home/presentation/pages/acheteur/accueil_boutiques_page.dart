@@ -5,7 +5,6 @@ import 'package:flutter/services.dart';
 import 'package:saambiz/core/widgets/logo_boutique.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:saambiz/core/utils/image_url.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../../core/services/localisation_service.dart';
 import '../../../../../core/theme/app_color.dart';
@@ -17,6 +16,8 @@ import '../../../../../injection_container.dart';
 import '../../../../auth/domain/entities/user.dart';
 import '../../../../auth/presentation/signup/interets_page.dart';
 import '../../../../catalogue/data/produit_catalogue.dart';
+import '../../../../categories/data/categorie.dart';
+import '../../../../categories/presentation/icones_categories.dart';
 import '../../../../catalogue/presentation/pages/boutique_publique_page.dart';
 import '../../../../catalogue/presentation/pages/produits_page.dart';
 import '../../../../catalogue/presentation/widgets/bouton_panier.dart';
@@ -24,6 +25,7 @@ import '../../../../catalogue/presentation/widgets/produit_card.dart';
 import '../../../../notifications/data/datasources/notifications_remote_datasource.dart';
 import '../../../../notifications/presentation/pages/notifications_page.dart';
 import '../../../../../core/routes/app_router.dart';
+import '../../../../../core/routes/observateur_routes.dart';
 import '../../../data/datasources/accueil_remote_datasource.dart';
 import '../../../../../core/widgets/app_app_bar.dart';
 import '../../../../../core/widgets/empty_state.dart';
@@ -45,11 +47,34 @@ class AccueilBoutiquesPage extends StatefulWidget {
   State<AccueilBoutiquesPage> createState() => _AccueilBoutiquesPageState();
 }
 
-class _AccueilBoutiquesPageState extends State<AccueilBoutiquesPage> {
+class _AccueilBoutiquesPageState extends State<AccueilBoutiquesPage>
+    with RouteAware {
   AccueilPersonnalise? _accueil;
   bool _chargement = true;
   String? _erreur;
   int _nonLues = 0;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final route = ModalRoute.of(context);
+    if (route != null) observateurRoutes.subscribe(this, route);
+  }
+
+  @override
+  void dispose() {
+    observateurRoutes.unsubscribe(this);
+    super.dispose();
+  }
+
+  /// Retour sur l'accueil (après une recherche, une fiche produit, une
+  /// boutique) : ces gestes ont fait évoluer les recommandations, on les
+  /// recalcule sans masquer l'écran actuel.
+  @override
+  void didPopNext() {
+    _charger();
+    _chargerNonLues();
+  }
 
   @override
   void initState() {
@@ -84,11 +109,7 @@ class _AccueilBoutiquesPageState extends State<AccueilBoutiquesPage> {
   /// Les centres d'intérêt d'un invité vivent sur son téléphone.
   List<String> _interetsLocaux() {
     if (!widget.isGuest) return const [];
-    try {
-      return sl<SharedPreferences>().getStringList(kInteretsKey) ?? const [];
-    } catch (_) {
-      return const [];
-    }
+    return lireInteretsLocaux(kProprietaireInvite);
   }
 
   Future<void> _charger() async {
@@ -277,6 +298,8 @@ class _AccueilBoutiquesPageState extends State<AccueilBoutiquesPage> {
     }
 
     final blocs = <Widget>[];
+    final mesCategories = _mesCategories();
+    if (mesCategories.isNotEmpty) blocs.add(_rangeeMesCategories(mesCategories));
     for (final s in produits) {
       blocs.add(
         s.cle == 'promotions' ? _bandeauProduits(s) : _grilleProduits(s),
@@ -322,10 +345,67 @@ class _AccueilBoutiquesPageState extends State<AccueilBoutiquesPage> {
     Navigator.of(context).push(MaterialPageRoute(builder: (_) => page));
   }
 
+  /// Catégories du client, dans l'ordre de ses goûts : celles choisies à
+  /// l'inscription au départ, puis celles que ses recherches, visites et
+  /// abonnements font monter.
+  List<Categorie> _mesCategories() {
+    final accueil = _accueil;
+    if (accueil == null) return const [];
+    return [
+      for (final nom in accueil.interets)
+        ...accueil.categories.where((c) => c.correspond(nom)).take(1),
+    ];
+  }
+
+  /// « Vos catégories » : raccourcis en tête d'accueil.
+  Widget _rangeeMesCategories(List<Categorie> categories) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 14, 0, 4),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(right: 8, bottom: 8),
+            child: EnteteSection(
+              'Vos catégories',
+              action: 'Modifier',
+              onAction: _modifierInterets,
+            ),
+          ),
+          SizedBox(
+            height: 36,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.only(right: 16),
+              itemCount: categories.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 8),
+              itemBuilder: (_, i) {
+                final c = categories[i];
+                return PuceFiltre(
+                  libelle: c.nom,
+                  icone: iconeCategorie(c.icone),
+                  active: false,
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => ProduitsPage(titre: c.nom, categorie: c),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   static const List<_BlocAccueil> _blocsAccueil = [
     _BlocAccueil('promotions'),
+    _BlocAccueil('produitsPourVous'),
+    _BlocAccueil('dapresRecherches', connecteSeulement: true),
     _BlocAccueil('abonnements', connecteSeulement: true),
     _BlocAccueil('nouveautes'),
+    _BlocAccueil('suivies', connecteSeulement: true),
     _BlocAccueil('pourVous'),
     _BlocAccueil('proches'),
     _BlocAccueil('meilleures'),
@@ -348,6 +428,7 @@ class _AccueilBoutiquesPageState extends State<AccueilBoutiquesPage> {
             padding: const EdgeInsets.fromLTRB(16, 16, 8, 10),
             child: EnteteSection(
               s.titre,
+              sousTitre: s.sousTitre,
               action: 'Voir tout',
               onAction: () => _voirTout(s.cle, s.titre),
             ),
@@ -385,6 +466,7 @@ class _AccueilBoutiquesPageState extends State<AccueilBoutiquesPage> {
             padding: const EdgeInsets.only(bottom: 10),
             child: EnteteSection(
               s.titre,
+              sousTitre: s.sousTitre,
               action: s.elements.length > elements.length ? 'Voir tout' : null,
               onAction: () => _voirTout(s.cle, s.titre),
             ),
@@ -420,6 +502,7 @@ class _BlocBoutiquesState extends State<_BlocBoutiques> {
 
   /// Libellé court de chaque section pour l'onglet.
   static const _courts = {
+    'suivies': 'Suivies',
     'pourVous': 'Pour vous',
     'proches': 'À proximité',
     'meilleures': 'Populaires',

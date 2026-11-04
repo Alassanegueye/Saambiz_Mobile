@@ -16,6 +16,10 @@ class Categorie {
   final String? image;
   final int nombreBoutiques;
 
+  /// Produits en vente dans la catégorie ; `null` si le serveur ne le dit
+  /// pas (ancienne version de l'API, liste de secours).
+  final int? nombreProduits;
+
   const Categorie({
     required this.id,
     required this.nom,
@@ -24,6 +28,7 @@ class Categorie {
     this.icone,
     this.image,
     this.nombreBoutiques = 0,
+    this.nombreProduits,
   });
 
   factory Categorie.fromJson(Map<String, dynamic> json) => Categorie(
@@ -36,6 +41,9 @@ class Categorie {
     nombreBoutiques: (json['nombreBoutiques'] is num)
         ? (json['nombreBoutiques'] as num).toInt()
         : int.tryParse('${json['nombreBoutiques'] ?? 0}') ?? 0,
+    nombreProduits: json['nombreProduits'] is num
+        ? (json['nombreProduits'] as num).toInt()
+        : int.tryParse('${json['nombreProduits'] ?? ''}'),
   );
 
   /// Vrai si [valeur] désigne cette catégorie (slug, id ou nom).

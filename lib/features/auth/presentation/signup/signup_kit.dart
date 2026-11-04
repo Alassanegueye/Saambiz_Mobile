@@ -84,7 +84,7 @@ class SbScaffold extends StatelessWidget {
 
 /// Progression du parcours d'inscription : segments et « Étape 2 sur 5 ·
 /// Contact ». Même nombre d'étapes pour les deux profils, seule la dernière
-/// change (vos goûts pour un client, votre boutique pour un vendeur).
+/// change (ses centres d'intérêt pour un client, votre boutique pour un vendeur).
 /// Pas de logo sur ces écrans : la progression tient lieu d'en-tête.
 class SbEtapes extends StatelessWidget {
   final int courante;
@@ -103,7 +103,7 @@ class SbEtapes extends StatelessWidget {
 
   List<String> get etapes => [
     ..._communes,
-    vendeur ? 'Votre boutique' : 'Vos goûts',
+    vendeur ? 'Votre boutique' : 'Centres d’intérêt',
   ];
 
   @override

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/theme/app_color.dart';
+import '../../../../core/utils/texte.dart';
 import '../../../../core/widgets/animations.dart';
 import '../../../../core/widgets/app_app_bar.dart';
 import '../../../../core/widgets/barre_navigation_verre.dart'
@@ -17,6 +18,10 @@ import 'produits_page.dart';
 /// Onglet « Catégories » : champ de recherche, puis les catégories en
 /// grille de tuiles (icône, nom). « Promotions » ouvre les promotions en
 /// cours.
+///
+/// Le champ filtre la grille sur place, au fil de la frappe : il ne cherche
+/// que parmi les catégories. La recherche de produits et de boutiques vit
+/// sur l'accueil.
 class CategoriesPage extends StatefulWidget {
   const CategoriesPage({super.key});
 
@@ -28,6 +33,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
   final _ctrl = TextEditingController();
   List<Categorie> _categories = const [];
   bool _chargement = true;
+  String _filtre = '';
 
   @override
   void initState() {
@@ -52,14 +58,11 @@ class _CategoriesPageState extends State<CategoriesPage> {
     });
   }
 
-  void _rechercher(String texte) {
-    if (texte.trim().isEmpty) return;
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) =>
-            ProduitsPage(titre: 'Résultats', recherche: texte.trim()),
-      ),
-    );
+  bool _correspond(String nom) => contientRecherche(nom, _filtre);
+
+  void _effacerFiltre() {
+    _ctrl.clear();
+    setState(() => _filtre = '');
   }
 
   void _ouvrir(Widget page) =>
@@ -76,8 +79,10 @@ class _CategoriesPageState extends State<CategoriesPage> {
             padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
             child: ChampRecherche(
               controleur: _ctrl,
+              indication: 'Rechercher une catégorie',
               surFondClair: true,
-              onSubmitted: _rechercher,
+              onChanged: (texte) => setState(() => _filtre = texte),
+              onSubmitted: (_) => FocusScope.of(context).unfocus(),
             ),
           ),
           Expanded(child: _corps()),
@@ -96,7 +101,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
             crossAxisCount: 2,
             mainAxisSpacing: 12,
             crossAxisSpacing: 12,
-            childAspectRatio: 1.45,
+            childAspectRatio: 1.25,
           ),
           itemCount: 8,
           itemBuilder: (_, __) => const Os(hauteur: double.infinity, rayon: 12),
@@ -110,6 +115,17 @@ class _CategoriesPageState extends State<CategoriesPage> {
         subtitle: 'Les catégories arrivent très bientôt.',
         actionLabel: 'Réessayer',
         onAction: () => _charger(forcer: true),
+      );
+    }
+    final promotionsVisible = _correspond('Promotions');
+    final visibles = _categories.where((c) => _correspond(c.nom)).toList();
+    if (!promotionsVisible && visibles.isEmpty) {
+      return EmptyState(
+        icon: Icons.search_off_rounded,
+        title: 'Aucune catégorie trouvée',
+        subtitle: 'Aucune catégorie ne correspond à « ${_filtre.trim()} ».',
+        actionLabel: 'Effacer la recherche',
+        onAction: _effacerFiltre,
       );
     }
     return RefreshIndicator(
@@ -126,21 +142,23 @@ class _CategoriesPageState extends State<CategoriesPage> {
                 crossAxisCount: 2,
                 mainAxisSpacing: 12,
                 crossAxisSpacing: 12,
-                childAspectRatio: 1.45,
+                childAspectRatio: 1.25,
               ),
               delegate: SliverChildListDelegate([
-                _tuile(
-                  rang: 0,
-                  nom: 'Promotions',
-                  icone: Icons.local_offer_outlined,
-                  onTap: () => _ouvrir(
-                    const ProduitsPage(titre: 'Promotions', promotions: true),
+                if (promotionsVisible)
+                  _tuile(
+                    rang: 0,
+                    nom: 'Promotions',
+                    icone: Icons.local_offer_outlined,
+                    onTap: () => _ouvrir(
+                      const ProduitsPage(titre: 'Promotions', promotions: true),
+                    ),
                   ),
-                ),
-                for (final (i, c) in _categories.indexed)
+                for (final (i, c) in visibles.indexed)
                   _tuile(
                     rang: i + 1,
                     nom: c.nom,
+                    nombre: c.nombreProduits,
                     icone: iconeCategorie(c.icone),
                     onTap: () =>
                         _ouvrir(ProduitsPage(titre: c.nom, categorie: c)),
@@ -159,12 +177,19 @@ class _CategoriesPageState extends State<CategoriesPage> {
     required String nom,
     required IconData icone,
     required VoidCallback onTap,
+    int? nombre,
     bool mise = false,
   }) {
     return Apparition(
       rang: rang,
       child: Pressable(
-        child: _contenuTuile(nom: nom, icone: icone, onTap: onTap, mise: mise),
+        child: _contenuTuile(
+          nom: nom,
+          nombre: nombre,
+          icone: icone,
+          onTap: onTap,
+          mise: mise,
+        ),
       ),
     );
   }
@@ -173,6 +198,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
     required String nom,
     required IconData icone,
     required VoidCallback onTap,
+    int? nombre,
     bool mise = false,
   }) {
     return Material(
@@ -218,6 +244,16 @@ class _CategoriesPageState extends State<CategoriesPage> {
                   color: AppColor.kGrayscaleDark100,
                 ),
               ),
+              // Nombre de produits en vente, sous le nom.
+              if (nombre != null) ...[
+                const SizedBox(height: 3),
+                Text(
+                  nombre == 0
+                      ? 'Bientôt des produits'
+                      : '$nombre produit${nombre > 1 ? 's' : ''}',
+                  style: texteDiscret(12.5),
+                ),
+              ],
             ],
           ),
         ),

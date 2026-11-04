@@ -130,6 +130,19 @@ class AccueilRemoteDataSource {
     }
   }
 
+  /// Centres d'intérêt enregistrés pour le client connecté ; `null` si le
+  /// serveur ne répond pas (on garde alors ce qu'on a).
+  Future<List<String>?> interets() async {
+    try {
+      final res = await dio.get('/acheteurs/preferences');
+      final liste = (res.data as Map)['interets'];
+      return liste is List ? liste.map((e) => e.toString()).toList() : const [];
+    } on DioException catch (e) {
+      logDebug('⚠️ préférences non lues: ${e.response?.statusCode}');
+      return null;
+    }
+  }
+
   /// Enregistre côté serveur les centres d'intérêt et/ou la position.
   /// Réservé aux clients connectés, un invité garde tout sur son téléphone.
   Future<void> majPreferences({

@@ -40,7 +40,7 @@ class SignupDraft {
 ///                      pour un vendeur : c'est là que ses clients l'écrivent)
 ///   3. Sécurité     , le mot de passe, règles cochées en direct
 ///   4. Vérification , le code reçu par e-mail (EmailVerificationPage)
-///   5. Vos goûts (client) ou Votre boutique (vendeur)
+///   5. Centres d'intérêt (client) ou Votre boutique (vendeur)
 ///
 /// Chaque page ne demande qu'une chose : moins de champs à l'écran, moins
 /// d'abandons. La flèche retour ramène à la page précédente du parcours.
