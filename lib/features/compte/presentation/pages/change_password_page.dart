@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/libelle_obligatoire.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -62,9 +63,6 @@ class _ChangePasswordViewState extends State<_ChangePasswordView> {
     return Scaffold(
       backgroundColor: _C.bg,
       appBar: AppBar(
-        backgroundColor: _C.white,
-        elevation: 0.5,
-        foregroundColor: _C.black,
         title: const Text('Changer le mot de passe'),
       ),
       body: BlocConsumer<CompteBloc, CompteState>(
@@ -148,7 +146,7 @@ class _ChangePasswordViewState extends State<_ChangePasswordView> {
           validator ??
           (v) => (v == null || v.trim().isEmpty) ? '$label requis' : null,
       decoration: InputDecoration(
-        labelText: label,
+        label: LibelleObligatoire(label),
         filled: true,
         fillColor: _C.white,
         contentPadding: const EdgeInsets.symmetric(

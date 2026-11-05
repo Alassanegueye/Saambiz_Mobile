@@ -56,18 +56,14 @@ class _VueVitrine extends StatelessWidget {
     return Scaffold(
       backgroundColor: _C.bg,
       appBar: AppBar(
-        backgroundColor: _C.white,
-        surfaceTintColor: _C.white,
-        elevation: 0,
         title: const Text(
           'Mon site web',
           style: TextStyle(
-            color: _C.text,
+            color: Colors.white,
             fontWeight: FontWeight.w700,
             fontSize: 17,
           ),
         ),
-        iconTheme: const IconThemeData(color: _C.text),
       ),
       body: BlocConsumer<VitrineBloc, VitrineState>(
         listener: (context, state) {

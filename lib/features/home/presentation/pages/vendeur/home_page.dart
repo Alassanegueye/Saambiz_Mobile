@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/onglets_conserves.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:dio/dio.dart';
@@ -15,13 +16,21 @@ import '../../../data/models/boutique_model.dart';
 import '../../../../../injection_container.dart';
 import '../../../../../core/utils/app_logger.dart';
 import '../../../../vendeur/domain/usecases/get_vendeur_dashboard.dart';
+import 'package:saambiz/features/compte/domain/usecases/get_me.dart';
 import '../../../../commande/data/datasources/commande_remote_datasource.dart';
 import '../../../../commande/data/models/commande_model.dart';
+import '../../../../commande/presentation/pages/commande_detail_page.dart'
+    show CommandeDetailArgs;
+import '../../../../../core/routes/app_router.dart';
+import '../../../../commande/presentation/widgets/commande_card.dart'
+    show couleurStatutCommande;
 import '../../../../notifications/presentation/pages/notifications_page.dart';
 import '../../../../abonnes/abonnes_page.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:saambiz/core/utils/image_url.dart';
 import '../../../../../core/theme/app_color.dart';
+import '../../../../../core/utils/texte.dart';
+import '../../../../../core/widgets/avatar_utilisateur.dart';
 import '../../../../../core/widgets/ui_kit.dart';
 import '../../../../vendeur/presentation/pages/produit_form_page.dart';
 import '../../../../vitrine/presentation/pages/ma_vitrine_page.dart';
@@ -56,7 +65,15 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
+class _HomePageState extends State<HomePage>
+    with TickerProviderStateMixin, RetourSurOnglet {
+  @override
+  void surRetourOnglet() {
+    _loadStats();
+    _fetchBoutiques();
+    _loadUtilisateur();
+  }
+
   bool _loading = false;
   int _nbCommandes = 0;
   int _nbFavoris = 0;
@@ -68,6 +85,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   int _commandesCount = 0;
   int _notifNonLues = 0; // 🔔 notifications non lues (via dashboard)
   List<CommandeModel> _recentOrders = [];
+  int _aTraiter = 0; // commandes en attente d'une décision du vendeur
+
+  // Profil relu sur le serveur : à la réouverture de l'application, la session
+  // est restaurée sans transmettre d'utilisateur à cette page.
+  User? _utilisateur;
 
   List<BoutiqueModel> _boutiques = [];
   bool _boutiquesLoad = false;
@@ -104,8 +126,20 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     Future.delayed(const Duration(milliseconds: 250), () {
       if (mounted) _contentCtrl.forward();
     });
+    _utilisateur = widget.user;
     _loadStats();
+    _loadUtilisateur();
     _initBloc();
+  }
+
+  /// En cas d'échec, l'en-tête garde simplement ce qu'il connaît déjà.
+  Future<void> _loadUtilisateur() async {
+    final resultat = await sl<GetMe>()();
+    if (!mounted) return;
+    resultat.fold(
+      (echec) => logDebug('Profil non chargé : ${echec.errorMessage}'),
+      (user) => setState(() => _utilisateur = user),
+    );
   }
 
   Future<void> _initBloc() async {
@@ -133,10 +167,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       _boutiquesError = null;
     });
     try {
-      final list = await _dataSource!.getBoutiques();
+      // Surtout pas la liste publique : elle contient les boutiques de tous les
+      // vendeurs, la plus récente en premier.
+      final maBoutique = await _dataSource!.getMaBoutique();
       if (mounted)
         setState(() {
-          _boutiques = list;
+          _boutiques = maBoutique == null ? [] : [maBoutique];
           _boutiquesLoad = false;
         });
     } catch (e) {
@@ -179,7 +215,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     // 2) Commandes récentes (3 dernières)
     try {
       final orders = await sl<CommandeRemoteDataSource>().commandesVendeur();
-      if (mounted) setState(() => _recentOrders = orders.take(3).toList());
+      if (mounted) {
+        setState(() {
+          _recentOrders = orders.take(3).toList();
+          _aTraiter = orders.where((o) => o.statut == 'en_attente').length;
+        });
+      }
     } catch (e) {
       debugPrint('commandes récentes error: $e');
     }
@@ -214,21 +255,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     return 'Il y a ${diff.inDays}j';
   }
 
-  ({String label, Color color}) _statutInfo(String statut) {
-    switch (statut.toLowerCase()) {
-      case 'livree':
-        return (label: 'Livrée', color: _C.success);
-      case 'confirmee':
-        return (label: 'Confirmée', color: _C.green);
-      case 'annulee':
-        return (label: 'Annulée', color: _C.orange);
-      case 'en_cours':
-        return (label: 'En cours', color: _C.amber);
-      case 'en_attente':
-      default:
-        return (label: 'En attente', color: _C.amber);
-    }
-  }
+  /// Mêmes libellés et couleurs que la liste des commandes : une table à part
+  /// ici affichait « En attente » pour tout statut qu'elle ne connaissait pas.
+  ({String label, Color color}) _statutInfo(String statut) => (
+    label: kStatutCommandeLabels[statut] ?? statut,
+    color: couleurStatutCommande(statut),
+  );
 
   void _openNotifications() async {
     await Navigator.of(
@@ -261,22 +293,44 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         backgroundColor: AppColor.kBackground,
         body: Column(
           children: [
-            _buildDashHeader(),
+            _buildBarreHaut(),
             Expanded(
               child: RefreshIndicator(
                 onRefresh: () async {
                   _produitBloc?.add(LoadProduits());
-                  await Future.wait([_loadStats(), _fetchBoutiques()]);
+                  await Future.wait([
+                    _loadStats(),
+                    _fetchBoutiques(),
+                    _loadUtilisateur(),
+                  ]);
                 },
                 color: AppColor.kPrimary,
                 child: FadeTransition(
                   opacity: _contentFade,
+                  // Sans rebond : il ferait apparaître un trou clair entre la
+                  // barre du haut et le bloc bleu.
                   child: ListView(
-                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+                    physics: const ClampingScrollPhysics(
+                      parent: AlwaysScrollableScrollPhysics(),
+                    ),
+                    padding: const EdgeInsets.only(bottom: 24),
                     children: [
-                      _buildActions(),
-                      const SizedBox(height: 24),
-                      _buildRecentOrders(),
+                      _buildBlocChiffres(),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            if (_aTraiter > 0) ...[
+                              _buildATraiter(),
+                              const SizedBox(height: 16),
+                            ],
+                            _buildActions(),
+                            const SizedBox(height: 24),
+                            _buildRecentOrders(),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -288,91 +342,85 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
   }
 
-  /// En-tête : logo et nom de la boutique, lien vers la boutique, cloche.
-  Widget _buildDashHeader() {
+  /// Barre du haut, toujours visible : boutique, salutation, cloche.
+  Widget _buildBarreHaut() {
     final boutique = _boutiques.isNotEmpty ? _boutiques.first : null;
-    final logo = boutique?.logo;
-    final hasLogo = logo != null && logo.isNotEmpty;
+    final prenom = _utilisateur?.prenom.trim() ?? '';
+    final nom = prenom.isNotEmpty ? prenom : (_utilisateur?.nomAffiche ?? '');
 
     return Container(
       color: AppColor.kPrimary,
       child: SafeArea(
         bottom: false,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 10, 6, 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          padding: const EdgeInsets.fromLTRB(20, 8, 10, 8),
+          child: Row(
             children: [
-              Row(
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: Container(
-                      width: 44,
-                      height: 44,
-                      color: AppColor.kWhite,
-                      child: hasLogo
-                          ? CachedNetworkImage(
-                              imageUrl: imageOptimisee(logo),
-                              fit: BoxFit.cover,
-                              errorWidget: (_, __, ___) =>
-                                  const LogoBoutiqueParDefaut(),
-                            )
-                          : const LogoBoutiqueParDefaut(),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
+              _logoBoutique(boutique),
+              const SizedBox(width: 12),
+              Expanded(
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: boutique == null
+                      ? null
+                      : () => _openBoutiqueSheet(boutique),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (nom.isNotEmpty)
                         Text(
-                          boutique?.nom ?? 'Ma boutique',
+                          'Bonjour, $nom',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: GoogleFonts.inter(
-                            fontSize: 17,
-                            fontWeight: FontWeight.w700,
-                            color: AppColor.kWhite,
+                            fontSize: 12.5,
+                            color: AppColor.kWhite.withValues(alpha: 0.7),
                           ),
                         ),
-                        if (boutique != null)
-                          GestureDetector(
-                            onTap: () => _openBoutiqueSheet(boutique),
+                      Row(
+                        children: [
+                          Flexible(
                             child: Text(
-                              'Voir ma boutique',
+                              boutique?.nom ?? 'Ma boutique',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                               style: GoogleFonts.inter(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w500,
-                                color: AppColor.kSecondary,
+                                fontSize: 17,
+                                fontWeight: FontWeight.w700,
+                                color: AppColor.kWhite,
                               ),
                             ),
                           ),
-                      ],
-                    ),
-                  ),
-                  IconButton(
-                    tooltip: 'Notifications',
-                    onPressed: _openNotifications,
-                    icon: Badge(
-                      isLabelVisible: _notifNonLues > 0,
-                      backgroundColor: AppColor.kSecondary,
-                      textColor: AppColor.kPrimary,
-                      label: Text(
-                        _notifNonLues > 99 ? '99+' : '$_notifNonLues',
+                          if (boutique != null)
+                            const Icon(
+                              Icons.chevron_right_rounded,
+                              color: AppColor.kSecondary,
+                              size: 20,
+                            ),
+                        ],
                       ),
-                      child: const Icon(
-                        Icons.notifications_none_rounded,
-                        color: AppColor.kWhite,
-                      ),
-                    ),
+                    ],
                   ),
-                ],
+                ),
               ),
-              const SizedBox(height: 20),
-              Padding(
-                padding: const EdgeInsets.only(right: 10),
-                child: _buildStatCards(),
+              IconButton(
+                tooltip: 'Notifications',
+                onPressed: _openNotifications,
+                icon: Badge(
+                  isLabelVisible: _notifNonLues > 0,
+                  backgroundColor: AppColor.kSecondary,
+                  textColor: AppColor.kPrimary,
+                  label: Text(_notifNonLues > 99 ? '99+' : '$_notifNonLues'),
+                  child: const Icon(
+                    Icons.notifications_none_rounded,
+                    color: AppColor.kWhite,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 2),
+              AvatarUtilisateur(
+                utilisateur: _utilisateur,
+                onTap: () => widget.ouvrirOnglet?.call(4),
               ),
             ],
           ),
@@ -381,33 +429,139 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
   }
 
-  /// Chiffres clés sur l'en-tête marine : le chiffre d'affaires en grand,
-  /// puis commandes, visites et abonnés sur une ligne.
-  Widget _buildStatCards() {
-    final etiquette = GoogleFonts.inter(
-      fontSize: 12.5,
-      color: AppColor.kWhite.withValues(alpha: 0.7),
+  /// Le logo de la boutique, ou ses initiales tant qu'elle n'en a pas.
+  Widget _logoBoutique(BoutiqueModel? boutique) {
+    final logo = boutique?.logo;
+    final Widget initiales = boutique == null
+        ? const LogoBoutiqueParDefaut()
+        : Center(
+            child: Text(
+              initialesDe(boutique.nom),
+              style: GoogleFonts.inter(
+                fontSize: 16,
+                fontWeight: FontWeight.w800,
+                color: AppColor.kPrimary,
+              ),
+            ),
+          );
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        width: 44,
+        height: 44,
+        color: AppColor.kWhite,
+        child: logo != null && logo.isNotEmpty
+            ? CachedNetworkImage(
+                imageUrl: imageOptimisee(logo),
+                fit: BoxFit.cover,
+                errorWidget: (_, __, ___) => initiales,
+              )
+            : initiales,
+      ),
     );
-    Widget petit(String label, String valeur, {VoidCallback? onTap}) {
+  }
+
+  /// Le chiffre d'affaires sur le bleu, et la carte des chiffres clés posée à
+  /// cheval sur le bas du bloc.
+  Widget _buildBlocChiffres() {
+    return Stack(
+      children: [
+        const Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 44,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: AppColor.kPrimary,
+              borderRadius: BorderRadius.vertical(bottom: Radius.circular(24)),
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Chiffre d’affaires',
+                      style: GoogleFonts.inter(
+                        fontSize: 13,
+                        color: AppColor.kWhite.withValues(alpha: 0.7),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text.rich(
+                        TextSpan(
+                          text: _ventes,
+                          children: [
+                            TextSpan(
+                              text: ' FCFA',
+                              style: GoogleFonts.inter(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: AppColor.kSecondary,
+                              ),
+                            ),
+                          ],
+                        ),
+                        style: GoogleFonts.inter(
+                          fontSize: 36,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: -0.5,
+                          color: AppColor.kWhite,
+                          fontFeatures: const [FontFeature.tabularFigures()],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 18),
+              _buildCarteChiffres(),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCarteChiffres() {
+    Widget chiffre(
+      IconData icone,
+      String label,
+      String valeur, {
+      VoidCallback? onTap,
+    }) {
       return Expanded(
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(16),
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4),
+            padding: const EdgeInsets.symmetric(vertical: 14),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Icon(icone, size: 20, color: AppColor.kPrimaryMedium),
+                const SizedBox(height: 6),
                 Text(
                   valeur,
                   style: GoogleFonts.inter(
-                    fontSize: 18,
+                    fontSize: 20,
                     fontWeight: FontWeight.w700,
-                    color: AppColor.kWhite,
+                    color: AppColor.kGrayscaleDark100,
                     fontFeatures: const [FontFeature.tabularFigures()],
                   ),
                 ),
-                Text(label, style: etiquette),
+                const SizedBox(height: 1),
+                Text(label, style: texteDiscret(12)),
               ],
             ),
           ),
@@ -415,92 +569,123 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       );
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('Chiffre d’affaires', style: etiquette),
-        const SizedBox(height: 2),
-        Text.rich(
-          TextSpan(
-            text: _ventes,
-            children: [
-              TextSpan(
-                text: ' FCFA',
-                style: GoogleFonts.inter(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                  color: AppColor.kSecondary,
-                ),
-              ),
-            ],
+    Widget separateur() =>
+        Container(width: 1, height: 44, color: AppColor.kLine);
+
+    return Material(
+      color: AppColor.kWhite,
+      elevation: 3,
+      shadowColor: AppColor.kPrimary.withValues(alpha: 0.18),
+      borderRadius: BorderRadius.circular(16),
+      child: Row(
+        children: [
+          chiffre(
+            Icons.receipt_long_outlined,
+            'Commandes',
+            '$_commandesCount',
+            onTap: () => widget.ouvrirOnglet?.call(1),
           ),
-          style: GoogleFonts.inter(
-            fontSize: 30,
-            fontWeight: FontWeight.w700,
-            color: AppColor.kWhite,
-            fontFeatures: const [FontFeature.tabularFigures()],
+          separateur(),
+          chiffre(Icons.visibility_outlined, 'Visites', _visites),
+          separateur(),
+          // Le nombre d'abonnés ouvre la liste des clients abonnés.
+          chiffre(
+            Icons.people_outline_rounded,
+            'Abonnés',
+            _clients,
+            onTap: () => Navigator.of(
+              context,
+            ).push(MaterialPageRoute(builder: (_) => const AbonnesPage())),
           ),
-        ),
-        const SizedBox(height: 14),
-        Container(height: 1, color: AppColor.kWhite.withValues(alpha: 0.12)),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            petit(
-              'Commandes',
-              '$_commandesCount',
-              onTap: () => widget.ouvrirOnglet?.call(1),
-            ),
-            petit('Visites', _visites),
-            // Le nombre d'abonnés ouvre la liste des clients abonnés.
-            petit(
-              'Abonnés',
-              _clients,
-              onTap: () => Navigator.of(
-                context,
-              ).push(MaterialPageRoute(builder: (_) => const AbonnesPage())),
-            ),
-          ],
-        ),
-      ],
+        ],
+      ),
     );
   }
 
-  /// Actions rapides : ce qu'un vendeur fait le plus souvent.
+  /// Ce qui attend une décision passe avant le reste de la page.
+  Widget _buildATraiter() {
+    final pluriel = _aTraiter > 1;
+    return Material(
+      color: AppColor.kSecondaryLight,
+      borderRadius: BorderRadius.circular(14),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(14),
+        onTap: () => widget.ouvrirOnglet?.call(1),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(14, 12, 10, 12),
+          child: Row(
+            children: [
+              const Icon(
+                Icons.notifications_active_outlined,
+                color: AppColor.kSecondaryDark,
+                size: 22,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '$_aTraiter commande${pluriel ? 's' : ''} à traiter',
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: AppColor.kGrayscaleDark100,
+                      ),
+                    ),
+                    Text(
+                      pluriel
+                          ? 'Acceptez-les ou rejetez-les'
+                          : 'Acceptez-la ou rejetez-la',
+                      style: texteDiscret(12.5),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(
+                Icons.chevron_right_rounded,
+                color: AppColor.kSecondaryDark,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Actions rapides : une action principale, deux raccourcis plus discrets.
   Widget _buildActions() {
-    Widget action(
-      IconData icone,
-      String libelle,
-      VoidCallback onTap, {
-      bool principale = false,
-    }) {
+    void ouvrir(Widget page) =>
+        Navigator.of(context).push(MaterialPageRoute(builder: (_) => page));
+
+    Widget raccourci(IconData icone, String libelle, VoidCallback onTap) {
       return Expanded(
         child: Material(
-          color: principale ? AppColor.kSecondary : AppColor.kWhite,
+          color: AppColor.kWhite,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-            side: BorderSide(
-              color: principale ? AppColor.kSecondary : AppColor.kLine,
-            ),
+            borderRadius: BorderRadius.circular(14),
+            side: const BorderSide(color: AppColor.kLine),
           ),
           child: InkWell(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(14),
             onTap: onTap,
             child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 6),
-              child: Column(
+              padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 10),
+              child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(icone, color: AppColor.kPrimary, size: 24),
-                  const SizedBox(height: 6),
-                  Text(
-                    libelle,
-                    textAlign: TextAlign.center,
-                    maxLines: 2,
-                    style: GoogleFonts.inter(
-                      fontSize: 12.5,
-                      fontWeight: FontWeight.w600,
-                      color: AppColor.kGrayscaleDark100,
+                  Icon(icone, color: AppColor.kPrimary, size: 20),
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: Text(
+                      libelle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.inter(
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w600,
+                        color: AppColor.kGrayscaleDark100,
+                      ),
                     ),
                   ),
                 ],
@@ -511,37 +696,47 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       );
     }
 
-    void ouvrir(Widget page) =>
-        Navigator.of(context).push(MaterialPageRoute(builder: (_) => page));
-
-    return IntrinsicHeight(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          action(
-            Icons.add_box_outlined,
-            'Ajouter un produit',
-            () => ouvrir(const ProduitFormPage()),
-            principale: true,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        FilledButton.icon(
+          onPressed: () => ouvrir(const ProduitFormPage()),
+          icon: const Icon(Icons.add_rounded, size: 22),
+          label: const Text('Ajouter un produit'),
+          style: FilledButton.styleFrom(
+            backgroundColor: AppColor.kSecondary,
+            foregroundColor: AppColor.kPrimary,
+            padding: const EdgeInsets.symmetric(vertical: 15),
+            textStyle: GoogleFonts.inter(
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+            ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
+            ),
           ),
-          const SizedBox(width: 10),
-          action(
-            Icons.local_offer_outlined,
-            'Promotions',
-            () => widget.ouvrirOnglet?.call(3),
-          ),
-          const SizedBox(width: 10),
-          action(
-            Icons.language_rounded,
-            'Mon site web',
-            () => ouvrir(const MaVitrinePage()),
-          ),
-        ],
-      ),
+        ),
+        const SizedBox(height: 10),
+        Row(
+          children: [
+            raccourci(
+              Icons.local_offer_outlined,
+              'Promotions',
+              () => widget.ouvrirOnglet?.call(3),
+            ),
+            const SizedBox(width: 10),
+            raccourci(
+              Icons.language_rounded,
+              'Mon site web',
+              () => ouvrir(const MaVitrinePage()),
+            ),
+          ],
+        ),
+      ],
     );
   }
 
-  /// Dernières commandes, en liste ; « Voir tout » ouvre l'onglet Commandes.
+  /// Dernières commandes ; une ligne ouvre la commande, « Voir tout » l'onglet.
   Widget _buildRecentOrders() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -555,21 +750,32 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         if (_recentOrders.isEmpty)
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+            padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 16),
             decoration: decorationCarte(),
-            child: Text(
-              'Aucune commande pour le moment.',
-              textAlign: TextAlign.center,
-              style: texteDiscret(14),
+            child: Column(
+              children: [
+                const Icon(
+                  Icons.receipt_long_outlined,
+                  size: 32,
+                  color: AppColor.kGrayscale30,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Aucune commande pour le moment.',
+                  textAlign: TextAlign.center,
+                  style: texteDiscret(14),
+                ),
+              ],
             ),
           )
         else
           Container(
+            clipBehavior: Clip.antiAlias,
             decoration: decorationCarte(),
             child: Column(
               children: [
                 for (var i = 0; i < _recentOrders.length; i++) ...[
-                  if (i > 0) const Divider(height: 1, indent: 16),
+                  if (i > 0) const Divider(height: 1, indent: 68),
                   _ligneCommande(_recentOrders[i]),
                 ],
               ],
@@ -581,58 +787,92 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   Widget _ligneCommande(CommandeModel o) {
     final st = _statutInfo(o.statut);
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  o.acheteurNom ?? 'Client',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+    final nom = (o.acheteurNom ?? '').trim();
+    final initiales = initialesDe(nom);
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => Navigator.of(context).pushNamed(
+          AppRouter.commandeDetailRoute,
+          arguments: CommandeDetailArgs(o, isVendeur: true),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          child: Row(
+            children: [
+              CircleAvatar(
+                radius: 20,
+                backgroundColor: AppColor.kPrimaryLight,
+                child: Text(
+                  initiales.isEmpty ? '?' : initiales,
                   style: GoogleFonts.inter(
-                    fontSize: 14.5,
-                    fontWeight: FontWeight.w600,
-                    color: AppColor.kGrayscaleDark100,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: AppColor.kPrimary,
                   ),
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  'N° ${o.referenceCommande}, ${_timeAgo(o.createdAt)}',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: texteDiscret(12.5),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 8),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                '${_fmtNombre(o.montantTotal)} FCFA',
-                style: GoogleFonts.inter(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  color: AppColor.kGrayscaleDark100,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      nom.isEmpty ? 'Client' : nom,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.inter(
+                        fontSize: 14.5,
+                        fontWeight: FontWeight.w600,
+                        color: AppColor.kGrayscaleDark100,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      _timeAgo(o.createdAt),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: texteDiscret(12.5),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 2),
-              Text(
-                st.label,
-                style: GoogleFonts.inter(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: st.color,
-                ),
+              const SizedBox(width: 8),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    '${_fmtNombre(o.montantTotal)} FCFA',
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: AppColor.kGrayscaleDark100,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
+                    decoration: BoxDecoration(
+                      color: st.color.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      st.label,
+                      style: GoogleFonts.inter(
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w600,
+                        color: st.color,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
-        ],
+        ),
       ),
     );
   }

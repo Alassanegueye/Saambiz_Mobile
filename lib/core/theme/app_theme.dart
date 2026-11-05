@@ -46,24 +46,23 @@ class AppTheme {
 
       // AppBar blanche, titre et icônes au bleu de la marque
       appBarTheme: AppBarTheme(
-        backgroundColor: AppColor.kWhite,
-        foregroundColor: AppColor.kPrimary,
+        backgroundColor: AppColor.kPrimary,
+        foregroundColor: AppColor.kWhite,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
-        scrolledUnderElevation: 0.5,
-        shadowColor: AppColor.kPrimary.withValues(alpha: 0.15),
+        scrolledUnderElevation: 0,
         centerTitle: false,
-        // Fond clair : icônes de la barre d'état en sombre.
-        systemOverlayStyle: SystemUiOverlayStyle.dark.copyWith(
+        // Fond bleu foncé : icônes de la barre d'état en blanc.
+        systemOverlayStyle: SystemUiOverlayStyle.light.copyWith(
           statusBarColor: Colors.transparent,
         ),
-        iconTheme: const IconThemeData(color: AppColor.kPrimary, size: 22),
+        iconTheme: const IconThemeData(color: AppColor.kWhite, size: 22),
         actionsIconTheme: const IconThemeData(
-          color: AppColor.kPrimary,
+          color: AppColor.kWhite,
           size: 22,
         ),
         titleTextStyle: GoogleFonts.inter(
-          color: AppColor.kPrimary,
+          color: AppColor.kWhite,
           fontWeight: FontWeight.w600,
           fontSize: 17,
         ),

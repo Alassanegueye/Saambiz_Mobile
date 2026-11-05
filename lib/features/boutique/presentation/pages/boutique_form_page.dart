@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/libelle_obligatoire.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -122,9 +123,6 @@ class _BoutiqueFormViewState extends State<_BoutiqueFormView> {
     return Scaffold(
       backgroundColor: _C.bg,
       appBar: AppBar(
-        backgroundColor: _C.white,
-        elevation: 0.5,
-        foregroundColor: _C.black,
         title: Text(_isEdit ? 'Modifier ma boutique' : 'Créer ma boutique'),
       ),
       body: BlocConsumer<BoutiqueBloc, BoutiqueState>(
@@ -253,7 +251,7 @@ class _BoutiqueFormViewState extends State<_BoutiqueFormView> {
           ? '$label requis'
           : verifier?.call(v.trim()),
       decoration: InputDecoration(
-        labelText: label,
+        label: LibelleObligatoire(label),
         filled: true,
         fillColor: _C.white,
         contentPadding: const EdgeInsets.symmetric(

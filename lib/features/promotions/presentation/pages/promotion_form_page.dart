@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/libelle_obligatoire.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -153,9 +154,6 @@ class _PromotionFormViewState extends State<_PromotionFormView> {
     return Scaffold(
       backgroundColor: _C.bg,
       appBar: AppBar(
-        backgroundColor: _C.white,
-        elevation: 0.5,
-        foregroundColor: _C.black,
         title: Text(_isEdit ? 'Modifier la promotion' : 'Nouvelle promotion'),
       ),
       body: BlocConsumer<PromotionsBloc, PromotionsState>(
@@ -185,7 +183,7 @@ class _PromotionFormViewState extends State<_PromotionFormView> {
                           initialValue: _produitId,
                           isExpanded: true,
                           decoration: const InputDecoration(
-                            labelText: 'Produit',
+                            label: LibelleObligatoire('Produit'),
                           ),
                           items: _produits
                               .map(
@@ -275,7 +273,7 @@ class _PromotionFormViewState extends State<_PromotionFormView> {
       maxLines: maxLines,
       validator: (v) =>
           (v == null || v.trim().isEmpty) ? '$label requis' : null,
-      decoration: InputDecoration(labelText: label),
+      decoration: InputDecoration(label: LibelleObligatoire(label)),
     );
   }
 }

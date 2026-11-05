@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/onglets_conserves.dart';
 import 'package:flutter/material.dart';
 import 'package:saambiz/features/auth/domain/entities/user.dart';
 
@@ -37,10 +38,7 @@ class _MainVendeurPageState extends State<MainVendeurPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColor.kBackground,
-      body: TransitionOnglet(
-        index: _selectedIndex,
-        child: _pages[_selectedIndex],
-      ),
+      body: OngletsConserves(index: _selectedIndex, pages: _pages),
       bottomNavigationBar: BarreNavigationVerre(
         selectedIndex: _selectedIndex,
         onDestinationSelected: (i) => setState(() => _selectedIndex = i),

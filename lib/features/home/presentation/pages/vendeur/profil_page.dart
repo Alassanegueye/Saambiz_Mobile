@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/onglets_conserves.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:saambiz/features/auth/domain/entities/user.dart';
@@ -36,7 +37,10 @@ class ProfilPage extends StatefulWidget {
   State<ProfilPage> createState() => _ProfilPageState();
 }
 
-class _ProfilPageState extends State<ProfilPage> {
+class _ProfilPageState extends State<ProfilPage> with RetourSurOnglet {
+  @override
+  void surRetourOnglet() => _compteBloc.add(LoadCompte());
+
   late final CompteBloc _compteBloc = sl<CompteBloc>();
   User? _liveUser;
 

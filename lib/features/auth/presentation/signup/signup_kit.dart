@@ -193,6 +193,7 @@ class SbField extends StatelessWidget {
   final String? autofillHint;
   final void Function(String)? onSubmitted;
   final IconData? icon;
+  final bool obligatoire;
 
   const SbField({
     super.key,
@@ -208,6 +209,7 @@ class SbField extends StatelessWidget {
     this.autofillHint,
     this.onSubmitted,
     this.icon,
+    this.obligatoire = false,
   });
 
   @override
@@ -215,7 +217,7 @@ class SbField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        LibelleChamp(label),
+        LibelleChamp(label, obligatoire: obligatoire),
         TextField(
           controller: controller,
           keyboardType: keyboardType,

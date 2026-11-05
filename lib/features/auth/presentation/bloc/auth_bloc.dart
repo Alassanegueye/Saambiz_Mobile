@@ -1,3 +1,4 @@
+import 'package:saambiz/core/services/session_service.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../../../core/services/token_service.dart';
@@ -48,6 +49,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     try {
       final storage = sl<FlutterSecureStorage>();
 
+      await sl<SessionService>().revoquer();
       await sl<TokenService>().clearToken();
       await storage.delete(key: 'user_id');
       // Les goûts du compte restent au compte (sur le serveur) : l'invité

@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/onglets_conserves.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -10,10 +11,12 @@ import '../../../../../core/services/localisation_service.dart';
 import '../../../../../core/theme/app_color.dart';
 import '../../../../../core/widgets/barre_navigation_verre.dart'
     show kEspaceBarreBas;
+import '../../../../../core/widgets/avatar_utilisateur.dart';
 import '../../../../../core/widgets/ui_kit.dart';
 import '../../../../../core/widgets/animations.dart';
 import '../../../../../injection_container.dart';
 import '../../../../auth/domain/entities/user.dart';
+import '../../../../compte/domain/usecases/get_me.dart';
 import '../../../../auth/presentation/signup/interets_page.dart';
 import '../../../../catalogue/data/produit_catalogue.dart';
 import '../../../../categories/data/categorie.dart';
@@ -26,6 +29,7 @@ import '../../../../notifications/data/datasources/notifications_remote_datasour
 import '../../../../notifications/presentation/pages/notifications_page.dart';
 import '../../../../../core/routes/app_router.dart';
 import '../../../../../core/routes/observateur_routes.dart';
+import 'main_client_page.dart' show ongletAcheteurDemande;
 import '../../../data/datasources/accueil_remote_datasource.dart';
 import '../../../../../core/widgets/app_app_bar.dart';
 import '../../../../../core/widgets/empty_state.dart';
@@ -48,11 +52,15 @@ class AccueilBoutiquesPage extends StatefulWidget {
 }
 
 class _AccueilBoutiquesPageState extends State<AccueilBoutiquesPage>
-    with RouteAware {
+    with RouteAware, RetourSurOnglet {
   AccueilPersonnalise? _accueil;
   bool _chargement = true;
   String? _erreur;
   int _nonLues = 0;
+
+  // Profil relu sur le serveur : à la réouverture de l'application, la session
+  // est restaurée sans transmettre d'utilisateur à cette page.
+  User? _utilisateur;
 
   @override
   void didChangeDependencies() {
@@ -71,16 +79,31 @@ class _AccueilBoutiquesPageState extends State<AccueilBoutiquesPage>
   /// boutique) : ces gestes ont fait évoluer les recommandations, on les
   /// recalcule sans masquer l'écran actuel.
   @override
+  void surRetourOnglet() => didPopNext();
+
+  @override
   void didPopNext() {
     _charger();
     _chargerNonLues();
+    _chargerUtilisateur();
   }
 
   @override
   void initState() {
     super.initState();
+    _utilisateur = widget.user;
     _charger();
     _chargerNonLues();
+    _chargerUtilisateur();
+  }
+
+  /// Un invité n'a pas de profil. En cas d'échec, l'en-tête garde simplement
+  /// ce qu'il connaît déjà.
+  Future<void> _chargerUtilisateur() async {
+    if (widget.isGuest) return;
+    final resultat = await sl<GetMe>()();
+    if (!mounted) return;
+    resultat.fold((_) {}, (user) => setState(() => _utilisateur = user));
   }
 
   /// Pastille de la cloche : nombre de notifications non lues.
@@ -179,6 +202,7 @@ class _AccueilBoutiquesPageState extends State<AccueilBoutiquesPage>
               child: RefreshIndicator(
                 onRefresh: () async {
                   _chargerNonLues();
+                  _chargerUtilisateur();
                   await _charger();
                 },
                 color: AppColor.kPrimary,
@@ -199,6 +223,8 @@ class _AccueilBoutiquesPageState extends State<AccueilBoutiquesPage>
   }
 
   Widget _entete() {
+    final nomUtilisateur = _utilisateur?.nomAffiche ?? '';
+
     return Container(
       color: AppColor.kPrimary,
       child: SafeArea(
@@ -231,8 +257,34 @@ class _AccueilBoutiquesPageState extends State<AccueilBoutiquesPage>
                     ),
                   ),
                   const BoutonPanier(couleur: AppColor.kWhite),
+                  // Un invité n'a pas de compte : pas de rond à afficher.
+                  if (!widget.isGuest) ...[
+                    const SizedBox(width: 2),
+                    AvatarUtilisateur(
+                      utilisateur: _utilisateur,
+                      onTap: () => ongletAcheteurDemande.value = 4,
+                    ),
+                    const SizedBox(width: 4),
+                  ],
                 ],
               ),
+              if (nomUtilisateur.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(right: 10, top: 2),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'Bonjour, $nomUtilisateur',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.inter(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: AppColor.kWhite.withValues(alpha: 0.7),
+                      ),
+                    ),
+                  ),
+                ),
               const SizedBox(height: 6),
               Padding(
                 padding: const EdgeInsets.only(right: 10),

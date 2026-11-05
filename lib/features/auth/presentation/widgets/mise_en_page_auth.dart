@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/libelle_obligatoire.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -189,20 +190,23 @@ class CarteAuth extends StatelessWidget {
 /// Libellé d'un champ de formulaire.
 class LibelleChamp extends StatelessWidget {
   final String texte;
-  const LibelleChamp(this.texte, {super.key});
+  final bool obligatoire;
+  const LibelleChamp(this.texte, {super.key, this.obligatoire = false});
 
   @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.only(bottom: 8, left: 2),
-    child: Text(
-      texte,
-      style: GoogleFonts.inter(
-        fontWeight: FontWeight.w600,
-        fontSize: 13,
-        color: AppColor.kGrayscaleDark100,
-      ),
-    ),
-  );
+  Widget build(BuildContext context) {
+    final style = GoogleFonts.inter(
+      fontWeight: FontWeight.w600,
+      fontSize: 13,
+      color: AppColor.kGrayscaleDark100,
+    );
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8, left: 2),
+      child: obligatoire
+          ? LibelleObligatoire(texte, style: style)
+          : Text(texte, style: style),
+    );
+  }
 }
 
 /// Lien « Pas encore de compte ? » sous les cartes.
@@ -287,6 +291,7 @@ class ChampFormulaire extends StatelessWidget {
   final FormFieldValidator<String>? validator;
   final TextInputAction? action;
   final Iterable<String>? autofill;
+  final bool obligatoire;
 
   const ChampFormulaire({
     super.key,
@@ -298,6 +303,7 @@ class ChampFormulaire extends StatelessWidget {
     this.validator,
     this.action,
     this.autofill,
+    this.obligatoire = false,
   });
 
   @override
@@ -305,7 +311,7 @@ class ChampFormulaire extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        LibelleChamp(libelle),
+        LibelleChamp(libelle, obligatoire: obligatoire),
         TextFormField(
           controller: controller,
           keyboardType: clavier,

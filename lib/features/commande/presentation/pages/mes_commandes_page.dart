@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/onglets_conserves.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -45,7 +46,10 @@ class _Liste extends StatefulWidget {
   State<_Liste> createState() => _ListeState();
 }
 
-class _ListeState extends State<_Liste> {
+class _ListeState extends State<_Liste> with RetourSurOnglet {
+  @override
+  void surRetourOnglet() => _recharger();
+
   Timer? _polling;
 
   @override
@@ -53,7 +57,7 @@ class _ListeState extends State<_Liste> {
     super.initState();
     // Recharge régulière : les statuts changent côté vendeur.
     _polling = Timer.periodic(const Duration(seconds: 30), (_) {
-      if (mounted) context.read<CommandeBloc>().add(LoadMesCommandes());
+      if (mounted && OngletsConserves.estVisible(context)) _recharger();
     });
   }
 
@@ -71,6 +75,8 @@ class _ListeState extends State<_Liste> {
       backgroundColor: AppColor.kBackground,
       appBar: const AppAppBar(title: 'Mes commandes', implyLeading: false),
       body: BlocBuilder<CommandeBloc, CommandeState>(
+        buildWhen: (avant, apres) =>
+            !(apres is CommandeLoading && avant is CommandesLoaded),
         builder: (context, state) {
           if (state is CommandeLoading || state is CommandeInitial) {
             return const ShimmerList();

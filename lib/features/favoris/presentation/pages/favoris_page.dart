@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/onglets_conserves.dart';
 import 'package:flutter/material.dart';
 import 'package:saambiz/core/widgets/logo_boutique.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -29,7 +30,10 @@ class FavorisPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => sl<FavorisBloc>()..add(LoadFavoris()),
-      child: const _FavorisView(),
+      child: ActualiserAuRetour(
+        onRetour: (context) => context.read<FavorisBloc>().add(LoadFavoris()),
+        child: const _FavorisView(),
+      ),
     );
   }
 }
@@ -42,9 +46,6 @@ class _FavorisView extends StatelessWidget {
     return Scaffold(
       backgroundColor: _C.bg,
       appBar: AppBar(
-        backgroundColor: _C.white,
-        elevation: 0.5,
-        foregroundColor: _C.black,
         title: const Text('Mes favoris'),
       ),
       body: Column(
@@ -53,6 +54,8 @@ class _FavorisView extends StatelessWidget {
           const _ProduitsAimes(),
           Expanded(
             child: BlocConsumer<FavorisBloc, FavorisState>(
+              buildWhen: (avant, apres) =>
+                  !(apres is FavorisLoading && avant is FavorisLoaded),
               listener: (context, state) {
                 if (state is FavorisError) {
                   ScaffoldMessenger.of(context).showSnackBar(

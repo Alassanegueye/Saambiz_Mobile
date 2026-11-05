@@ -3,6 +3,8 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:jwt_decode/jwt_decode.dart';
 
 import '../../../../core/routes/app_router.dart';
+import '../../../../core/services/session_service.dart';
+import '../../data/models/user_model.dart';
 import '../../../../injection_container.dart';
 
 /// Écran de chargement, juste après l'écran de démarrage natif (pictogramme
@@ -45,29 +47,58 @@ class _AppBootstrapState extends State<AppBootstrap>
     }
   }
 
+  bool _expire(String token) {
+    try {
+      return Jwt.isExpired(token);
+    } catch (_) {
+      return false; // illisible : traité plus bas, comme sans session
+    }
+  }
+
   Future<void> _router() async {
     final lecture = _lireJeton();
     await Future.wait([
       lecture,
       Future.delayed(const Duration(milliseconds: 600)),
     ]);
-    final token = await lecture;
+    var token = await lecture;
+
+    // Jeton expiré : on tente d'en obtenir un autre avant de demander quoi que
+    // ce soit à l'utilisateur.
+    var sessionRefusee = false;
+    if (token != null && token.isNotEmpty && _expire(token)) {
+      final resultat = await sl<SessionService>().renouveler();
+      if (resultat == ResultatRenouvellement.renouvele) {
+        token = await _lireJeton();
+      } else if (resultat == ResultatRenouvellement.injoignable) {
+        // Hors ligne : la session reste valable, elle sera renouvelée au retour
+        // du réseau par la première requête. On entre quand même.
+      } else {
+        token = null;
+        sessionRefusee = true;
+      }
+    }
 
     if (!mounted) return;
+
+    if (sessionRefusee) {
+      Navigator.of(context).pushReplacementNamed(AppRouter.loginRoute);
+      return;
+    }
 
     // Session encore valide → on entre directement, selon le rôle.
     if (token != null && token.isNotEmpty) {
       try {
-        if (!Jwt.isExpired(token)) {
-          final role = (Jwt.parseJwt(token)['role'] ?? '').toString();
-          Navigator.of(context).pushReplacementNamed(
-            role == 'Vendeur'
-                ? AppRouter.vendeurRoute
-                : AppRouter.acheteurRoute,
-            arguments: role == 'Vendeur' ? null : const {'isGuest': false},
-          );
-          return;
-        }
+        // Le jeton porte déjà l'identité : les écrans la connaissent dès le
+        // premier affichage, sans attendre le serveur.
+        final user = UserModel.fromJson(Jwt.parseJwt(token));
+        Navigator.of(context).pushReplacementNamed(
+          user.role == 'Vendeur'
+              ? AppRouter.vendeurRoute
+              : AppRouter.acheteurRoute,
+          arguments: user,
+        );
+        return;
       } catch (_) {
         /* jeton illisible : on continue vers l'onboarding */
       }

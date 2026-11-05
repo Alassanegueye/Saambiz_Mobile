@@ -282,10 +282,6 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
     return Scaffold(
       backgroundColor: AppColor.kWhite,
       appBar: AppBar(
-        backgroundColor: AppColor.kWhite,
-        surfaceTintColor: AppColor.kWhite,
-        elevation: 0,
-        foregroundColor: AppColor.kGrayscaleDark100,
         actions: const [BoutonPanier(), SizedBox(width: 6)],
       ),
       body: RefreshIndicator(
@@ -905,10 +901,6 @@ class _SectionPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColor.kWhite,
       appBar: AppBar(
-        backgroundColor: AppColor.kWhite,
-        surfaceTintColor: AppColor.kWhite,
-        elevation: 0,
-        foregroundColor: AppColor.kGrayscaleDark100,
         title: Text(
           titre,
           style: GoogleFonts.inter(fontSize: 17, fontWeight: FontWeight.w700),

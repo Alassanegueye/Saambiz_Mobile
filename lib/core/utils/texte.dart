@@ -16,3 +16,31 @@ String plierTexte(String texte) {
 /// de la casse. Une recherche vide correspond à tout.
 bool contientRecherche(String texte, String recherche) =>
     plierTexte(texte).contains(plierTexte(recherche));
+
+/// « 12 mai 2024 ».
+String dateLongue(DateTime date) {
+  const mois = [
+    'janvier',
+    'février',
+    'mars',
+    'avril',
+    'mai',
+    'juin',
+    'juillet',
+    'août',
+    'septembre',
+    'octobre',
+    'novembre',
+    'décembre',
+  ];
+  return '${date.day} ${mois[date.month - 1]} ${date.year}';
+}
+
+/// Les deux premières initiales d'un nom : « Teranga Style » donne « TS ».
+String initialesDe(String nom) => nom
+    .trim()
+    .split(RegExp(r'\s+'))
+    .where((mot) => mot.isNotEmpty)
+    .take(2)
+    .map((mot) => String.fromCharCode(mot.runes.first).toUpperCase())
+    .join();

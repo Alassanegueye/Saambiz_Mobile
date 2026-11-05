@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/libelle_obligatoire.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -96,7 +97,7 @@ class _SelecteurCategoriesState extends State<SelecteurCategories> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
+        LibelleObligatoire(
           'Catégories de la boutique',
           style: GoogleFonts.inter(
             fontSize: 13,

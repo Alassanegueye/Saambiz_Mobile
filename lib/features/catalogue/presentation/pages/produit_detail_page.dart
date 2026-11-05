@@ -127,10 +127,6 @@ class _ProduitDetailPageState extends State<ProduitDetailPage> {
     return Scaffold(
       backgroundColor: AppColor.kBackground,
       appBar: AppBar(
-        backgroundColor: AppColor.kBackground,
-        surfaceTintColor: AppColor.kBackground,
-        elevation: 0,
-        foregroundColor: AppColor.kGrayscaleDark100,
         titleSpacing: 0,
         title: Text(
           p.nom,

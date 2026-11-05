@@ -29,8 +29,21 @@ class TokenService {
     _authController.add(auth);
   }
 
+  Future<String?> getRefreshToken() async {
+    return await secureStorage.read(key: 'refresh_token');
+  }
+
+  Future<void> setRefreshToken(String? token) async {
+    if (token == null || token.isEmpty) {
+      await secureStorage.delete(key: 'refresh_token');
+    } else {
+      await secureStorage.write(key: 'refresh_token', value: token);
+    }
+  }
+
   Future<void> clearToken() async {
     await secureStorage.delete(key: 'jwt_token');
+    await secureStorage.delete(key: 'refresh_token');
     _authController.add(false);
   }
 

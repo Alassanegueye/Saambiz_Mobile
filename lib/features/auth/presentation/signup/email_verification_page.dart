@@ -214,7 +214,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
       titre: 'Vérifiez votre e-mail',
       sousTitre: 'Code envoyé à ${widget.draft.email}',
       carte: [
-        const LibelleChamp('Code à 6 chiffres'),
+        const LibelleChamp('Code à 6 chiffres', obligatoire: true),
         Row(
           children: [
             for (var i = 0; i < _length; i++) ...[

@@ -9,9 +9,6 @@ class ConditionUtilisation extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FB),
       appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
         title: Text(
           'Conditions d’utilisation',
           style: GoogleFonts.inter(fontWeight: FontWeight.w700, fontSize: 18),

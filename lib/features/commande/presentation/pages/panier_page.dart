@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:saambiz/features/commande/presentation/widgets/commande_card.dart'
+    show montantFcfa;
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../injection_container.dart';
 import '../../../../core/routes/app_router.dart';
@@ -101,12 +103,7 @@ class PanierPage extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: _C.bg,
-      appBar: AppBar(
-        backgroundColor: _C.white,
-        elevation: 0.5,
-        foregroundColor: _C.black,
-        title: const Text('Mon panier'),
-      ),
+      appBar: AppBar(title: const Text('Mon panier')),
       body: ListenableBuilder(
         listenable: panier,
         builder: (context, _) {
@@ -173,7 +170,7 @@ class PanierPage extends StatelessWidget {
                                   ),
                                 const SizedBox(height: 4),
                                 Text(
-                                  '${item.prix.toStringAsFixed(0)} FCFA',
+                                  montantFcfa(item.prix),
                                   style: const TextStyle(
                                     color: _C.green,
                                     fontWeight: FontWeight.w700,
@@ -280,7 +277,7 @@ class _BarreTotal extends StatelessWidget {
                 children: [
                   const Text('Total', style: TextStyle(color: _C.sub)),
                   Text(
-                    '${total.toStringAsFixed(0)} FCFA',
+                    montantFcfa(total),
                     style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w800,

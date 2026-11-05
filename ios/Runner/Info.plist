@@ -26,6 +26,8 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>SaamBiz accède à vos photos pour que vous choisissiez une image de profil, un logo ou la photo d'un produit.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>SaamBiz utilise votre position pour vous proposer les boutiques proches de vous. Vous pouvez refuser : les boutiques vous seront alors proposées selon vos centres d'intérêt.</string>
 	<key>UIApplicationSceneManifest</key>

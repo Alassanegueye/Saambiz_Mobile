@@ -252,6 +252,7 @@ class _SignupFormPageState extends State<SignupFormPage> {
         : 'Pour préparer vos commandes.',
     champs: [
       SbField(
+        obligatoire: true,
         label: 'Nom complet',
         hint: 'Ex. Awa Diop',
         icon: Icons.person_outline_rounded,
@@ -270,6 +271,7 @@ class _SignupFormPageState extends State<SignupFormPage> {
     texte: 'Un code vous sera envoyé par e-mail.',
     champs: [
       SbField(
+        obligatoire: true,
         label: 'E-mail',
         hint: 'exemple@email.com',
         icon: Icons.mail_outline_rounded,
@@ -280,6 +282,7 @@ class _SignupFormPageState extends State<SignupFormPage> {
       ),
       const SizedBox(height: 16),
       SbField(
+        obligatoire: _isVendeur,
         label: _isVendeur ? 'WhatsApp' : 'Téléphone (facultatif)',
         hint: 'Ex. 77 123 45 67',
         icon: Icons.phone_outlined,
@@ -302,6 +305,7 @@ class _SignupFormPageState extends State<SignupFormPage> {
       texte: 'Protégez votre compte.',
       champs: [
         SbField(
+          obligatoire: true,
           label: 'Mot de passe',
           hint: 'Votre mot de passe',
           icon: Icons.lock_outline_rounded,

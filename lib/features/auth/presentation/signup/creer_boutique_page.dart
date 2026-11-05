@@ -179,6 +179,7 @@ class _CreerBoutiquePageState extends State<CreerBoutiquePage> {
           SbErrorBanner(_error),
           if (_page == 0)
             SbField(
+              obligatoire: true,
               label: 'Nom de la boutique',
               hint: 'Ex. Boutique Awa',
               icon: Icons.storefront_outlined,
@@ -249,7 +250,7 @@ class _Dropdown extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        LibelleChamp(label),
+        LibelleChamp(label, obligatoire: true),
         DropdownButtonFormField<String>(
           initialValue: value,
           isExpanded: true,

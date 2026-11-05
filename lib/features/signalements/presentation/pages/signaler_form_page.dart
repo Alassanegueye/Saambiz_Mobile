@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/libelle_obligatoire.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -71,9 +72,6 @@ class _SignalerFormViewState extends State<_SignalerFormView> {
     return Scaffold(
       backgroundColor: _C.bg,
       appBar: AppBar(
-        backgroundColor: _C.white,
-        elevation: 0.5,
-        foregroundColor: _C.black,
         title: Text(
           widget.type == 'boutique'
               ? 'Signaler cette boutique'
@@ -107,7 +105,9 @@ class _SignalerFormViewState extends State<_SignalerFormView> {
                   controller: _raisonCtrl,
                   validator: (v) =>
                       (v == null || v.trim().isEmpty) ? 'Raison requise' : null,
-                  decoration: const InputDecoration(labelText: 'Raison'),
+                  decoration: const InputDecoration(
+                    label: LibelleObligatoire('Raison'),
+                  ),
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
@@ -116,7 +116,9 @@ class _SignalerFormViewState extends State<_SignalerFormView> {
                   validator: (v) => (v == null || v.trim().isEmpty)
                       ? 'Description requise'
                       : null,
-                  decoration: const InputDecoration(labelText: 'Description'),
+                  decoration: const InputDecoration(
+                    label: LibelleObligatoire('Description'),
+                  ),
                 ),
                 const SizedBox(height: 24),
                 ElevatedButton(

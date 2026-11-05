@@ -132,6 +132,7 @@ class _LoginPageState extends State<LoginPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ChampFormulaire(
+          obligatoire: true,
           libelle: 'E-mail ou téléphone',
           hint: 'Votre e-mail ou numéro',
           controller: _identifiantController,
@@ -144,7 +145,7 @@ class _LoginPageState extends State<LoginPage> {
               : null,
         ),
         const SizedBox(height: 16),
-        const LibelleChamp('Mot de passe'),
+        const LibelleChamp('Mot de passe', obligatoire: true),
         ChampMotDePasse(
           controller: _passwordController,
           action: TextInputAction.done,

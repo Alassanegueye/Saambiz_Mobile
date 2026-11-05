@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/libelle_obligatoire.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -233,9 +234,6 @@ class _ProduitFormPageState extends State<ProduitFormPage> {
     return Scaffold(
       backgroundColor: _C.bg,
       appBar: AppBar(
-        backgroundColor: _C.white,
-        elevation: 0.5,
-        foregroundColor: _C.black,
         title: Text(_isEdit ? 'Modifier le produit' : 'Nouveau produit'),
       ),
       body: Form(
@@ -493,7 +491,8 @@ class _ProduitFormPageState extends State<ProduitFormPage> {
         child: LinearProgressIndicator(),
       );
     }
-    if (_erreurCats != null) {
+    // Une liste vide désactive le menu sans rien dire : on l'explique.
+    if (_erreurCats != null || _categories.isEmpty) {
       return Row(
         children: [
           const Expanded(child: Text('Catégories indisponibles')),
@@ -524,7 +523,7 @@ class _ProduitFormPageState extends State<ProduitFormPage> {
   }
 
   InputDecoration _decoration(String hint) => InputDecoration(
-    hintText: hint,
+    label: LibelleObligatoire(hint),
     filled: true,
     fillColor: _C.white,
     contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),

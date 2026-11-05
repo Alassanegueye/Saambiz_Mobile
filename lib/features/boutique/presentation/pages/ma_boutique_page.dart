@@ -1,3 +1,5 @@
+import 'package:saambiz/core/theme/app_color.dart';
+import 'package:saambiz/core/utils/texte.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -39,12 +41,7 @@ class _MaBoutiqueView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: _C.bg,
-      appBar: AppBar(
-        backgroundColor: _C.white,
-        elevation: 0.5,
-        foregroundColor: _C.black,
-        title: const Text('Ma boutique'),
-      ),
+      appBar: AppBar(title: const Text('Ma boutique')),
       body: BlocConsumer<BoutiqueBloc, BoutiqueState>(
         listener: (context, state) {
           if (state is BoutiqueError) {
@@ -102,128 +99,169 @@ class _MaBoutiqueView extends StatelessWidget {
           }
           if (state is BoutiqueLoaded) {
             final b = state.boutique;
+            Future<void> modifier() async {
+              await Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => BoutiqueFormPage(boutique: b),
+                ),
+              );
+              if (context.mounted) {
+                context.read<BoutiqueBloc>().add(LoadMaBoutique());
+              }
+            }
+
+            final telephone = b.telephone;
             return ListView(
-              padding: const EdgeInsets.all(16),
+              physics: const ClampingScrollPhysics(),
+              padding: const EdgeInsets.only(bottom: 24),
               children: [
+                // Identité sur le bleu de l'en-tête.
                 Container(
-                  decoration: BoxDecoration(
-                    color: _C.white,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: _C.border),
+                  padding: const EdgeInsets.fromLTRB(20, 4, 20, 22),
+                  decoration: const BoxDecoration(
+                    color: AppColor.kPrimary,
+                    borderRadius: BorderRadius.vertical(
+                      bottom: Radius.circular(24),
+                    ),
                   ),
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Row(
                     children: [
-                      Row(
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: (b.logo ?? '').isNotEmpty
-                                ? CachedNetworkImage(
-                                    imageUrl: imageOptimisee(b.logo!),
-                                    width: 64,
-                                    height: 64,
-                                    fit: BoxFit.cover,
-                                  )
-                                : Container(
-                                    width: 64,
-                                    height: 64,
-                                    color: _C.bg,
-                                    child: const Icon(
-                                      Icons.storefront_outlined,
-                                      color: _C.sub,
-                                    ),
-                                  ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  b.nom,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w800,
-                                    fontSize: 16,
-                                    color: _C.black,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 8,
-                                    vertical: 3,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: b.enPause
-                                        ? _C.orange.withOpacity(0.12)
-                                        : _C.green.withOpacity(0.12),
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: Text(
-                                    b.enPause ? 'En pause' : 'Active',
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w700,
-                                      color: b.enPause ? _C.orange : _C.green,
-                                    ),
-                                  ),
-                                ),
-                              ],
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: Container(
+                          width: 72,
+                          height: 72,
+                          color: _C.white,
+                          child: (b.logo ?? '').isNotEmpty
+                              ? CachedNetworkImage(
+                                  imageUrl: imageOptimisee(b.logo!),
+                                  fit: BoxFit.cover,
+                                  errorWidget: (_, __, ___) =>
+                                      _initiales(b.nom),
+                                )
+                              : _initiales(b.nom),
+                        ),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              b.nom,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w800,
+                                fontSize: 19,
+                                color: _C.white,
+                              ),
                             ),
-                          ),
-                        ],
+                            const SizedBox(height: 6),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 9,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: b.enPause
+                                    ? AppColor.kSecondary
+                                    : AppColor.kSuccesLight,
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Text(
+                                b.enPause ? 'En pause' : 'Ouverte',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  color: b.enPause
+                                      ? AppColor.kPrimary
+                                      : AppColor.kSucces,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                      const SizedBox(height: 12),
-                      Text(
-                        b.description,
-                        style: const TextStyle(color: _C.sub),
-                      ),
-                      const SizedBox(height: 8),
-                      _info(Icons.location_on_outlined, b.localisation),
-                      if (b.telephone != null)
-                        _info(Icons.phone_outlined, b.telephone!),
                     ],
                   ),
                 ),
-                const SizedBox(height: 16),
-                ElevatedButton.icon(
-                  onPressed: () async {
-                    await Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => BoutiqueFormPage(boutique: b),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: _C.white,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: _C.border),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _info(
+                              Icons.notes_rounded,
+                              'Description',
+                              b.description.trim().isEmpty
+                                  ? 'Non renseignée'
+                                  : b.description,
+                            ),
+                            _info(
+                              Icons.location_on_outlined,
+                              'Localisation',
+                              b.localisation,
+                            ),
+                            if (telephone != null && telephone.isNotEmpty)
+                              _info(
+                                Icons.phone_outlined,
+                                'Téléphone',
+                                telephone,
+                              ),
+                          ],
+                        ),
                       ),
-                    );
-                    if (context.mounted) {
-                      context.read<BoutiqueBloc>().add(LoadMaBoutique());
-                    }
-                  },
-                  icon: const Icon(Icons.edit_outlined),
-                  label: const Text('Modifier la boutique'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: _C.white,
-                    foregroundColor: _C.black,
-                    side: const BorderSide(color: _C.border),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                OutlinedButton.icon(
-                  onPressed: () {
-                    context.read<BoutiqueBloc>().add(
-                      b.enPause
-                          ? ReactiverBoutiqueRequested()
-                          : PauseBoutiqueRequested(),
-                    );
-                  },
-                  icon: Icon(b.enPause ? Icons.play_arrow : Icons.pause),
-                  label: Text(
-                    b.enPause ? 'Réactiver la boutique' : 'Mettre en pause',
-                  ),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: b.enPause ? _C.green : _C.orange,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
+                      const SizedBox(height: 16),
+                      FilledButton.icon(
+                        onPressed: modifier,
+                        icon: const Icon(Icons.edit_outlined, size: 20),
+                        label: const Text('Modifier la boutique'),
+                        style: FilledButton.styleFrom(
+                          backgroundColor: AppColor.kPrimary,
+                          padding: const EdgeInsets.symmetric(vertical: 15),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      TextButton.icon(
+                        onPressed: () {
+                          context.read<BoutiqueBloc>().add(
+                            b.enPause
+                                ? ReactiverBoutiqueRequested()
+                                : PauseBoutiqueRequested(),
+                          );
+                        },
+                        icon: Icon(
+                          b.enPause
+                              ? Icons.play_arrow_rounded
+                              : Icons.pause_rounded,
+                        ),
+                        label: Text(
+                          b.enPause
+                              ? 'Réactiver la boutique'
+                              : 'Mettre en pause',
+                        ),
+                        style: TextButton.styleFrom(
+                          foregroundColor: b.enPause
+                              ? AppColor.kSucces
+                              : AppColor.kSecondaryDark,
+                          padding: const EdgeInsets.symmetric(vertical: 13),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -235,14 +273,39 @@ class _MaBoutiqueView extends StatelessWidget {
     );
   }
 
-  Widget _info(IconData icon, String text) => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 3),
+  Widget _initiales(String nom) => Center(
+    child: Text(
+      initialesDe(nom),
+      style: const TextStyle(
+        fontSize: 24,
+        fontWeight: FontWeight.w800,
+        color: AppColor.kPrimary,
+      ),
+    ),
+  );
+
+  Widget _info(IconData icon, String libelle, String texte) => Padding(
+    padding: const EdgeInsets.symmetric(vertical: 7),
     child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 16, color: _C.sub),
-        const SizedBox(width: 8),
+        Icon(icon, size: 20, color: AppColor.kPrimaryMedium),
+        const SizedBox(width: 12),
         Expanded(
-          child: Text(text, style: const TextStyle(color: _C.black)),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                libelle,
+                style: const TextStyle(fontSize: 12.5, color: _C.sub),
+              ),
+              const SizedBox(height: 1),
+              Text(
+                texte,
+                style: const TextStyle(fontSize: 14, color: _C.black),
+              ),
+            ],
+          ),
         ),
       ],
     ),

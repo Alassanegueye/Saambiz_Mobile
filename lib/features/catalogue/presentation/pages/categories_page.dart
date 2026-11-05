@@ -76,7 +76,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
             child: ChampRecherche(
               controleur: _ctrl,
               indication: 'Rechercher une catégorie',

@@ -1,3 +1,6 @@
+import 'package:saambiz/core/theme/app_color.dart';
+import 'package:saambiz/core/utils/texte.dart';
+import 'package:saambiz/core/widgets/ui_kit.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -63,12 +66,7 @@ class _ConversationsViewState extends State<_ConversationsView> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: _C.bg,
-      appBar: AppBar(
-        backgroundColor: _C.white,
-        elevation: 0.5,
-        foregroundColor: _C.black,
-        title: const Text('Messages'),
-      ),
+      appBar: AppBar(title: const Text('Messages')),
       body: BlocConsumer<MessagerieBloc, MessagerieState>(
         listener: (context, state) {
           if (state is MessagerieError) {
@@ -87,9 +85,10 @@ class _ConversationsViewState extends State<_ConversationsView> {
           if (state is ConversationsLoaded) {
             if (state.conversations.isEmpty) {
               return const Center(
-                child: Text(
-                  'Aucune conversation pour le moment',
-                  style: TextStyle(color: _C.sub),
+                child: EtatVide(
+                  icone: Icons.chat_bubble_outline_rounded,
+                  titre: 'Aucune conversation',
+                  message: 'Vos échanges avec vos clients apparaîtront ici.',
                 ),
               );
             }
@@ -97,14 +96,20 @@ class _ConversationsViewState extends State<_ConversationsView> {
               onRefresh: () async =>
                   context.read<MessagerieBloc>().add(LoadConversations()),
               child: ListView.separated(
+                padding: const EdgeInsets.symmetric(vertical: 8),
                 itemCount: state.conversations.length,
                 separatorBuilder: (_, __) =>
-                    const Divider(height: 1, color: _C.border),
+                    const Divider(height: 1, indent: 72, color: _C.border),
                 itemBuilder: (context, i) {
                   final c = state.conversations[i];
                   return ListTile(
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 4,
+                    ),
                     leading: CircleAvatar(
-                      backgroundColor: _C.green.withOpacity(0.15),
+                      radius: 22,
+                      backgroundColor: AppColor.kPrimaryLight,
                       backgroundImage: (c.interlocuteurPhoto ?? '').isNotEmpty
                           ? CachedNetworkImageProvider(
                               imageOptimisee(c.interlocuteurPhoto!),
@@ -112,10 +117,13 @@ class _ConversationsViewState extends State<_ConversationsView> {
                           : null,
                       child: (c.interlocuteurPhoto ?? '').isEmpty
                           ? Text(
-                              c.interlocuteurNom.isNotEmpty
-                                  ? c.interlocuteurNom[0].toUpperCase()
-                                  : '?',
-                              style: const TextStyle(color: _C.green),
+                              c.interlocuteurNom.trim().isEmpty
+                                  ? '?'
+                                  : initialesDe(c.interlocuteurNom),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w700,
+                                color: AppColor.kPrimary,
+                              ),
                             )
                           : null,
                     ),

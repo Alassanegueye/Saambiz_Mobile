@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/libelle_obligatoire.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -5,13 +6,15 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:saambiz/core/utils/image_url.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/theme/app_color.dart';
+import '../../../../core/utils/texte.dart';
+import '../../../../core/utils/url_externe.dart';
 import '../../../../injection_container.dart';
 import '../../data/models/commande_model.dart';
 import '../bloc/commande_bloc.dart';
 import '../bloc/commande_event.dart';
 import '../bloc/commande_state.dart';
 import '../widgets/commande_card.dart'
-    show couleurStatutCommande, iconeStatutCommande;
+    show couleurStatutCommande, iconeStatutCommande, montantFcfa;
 
 /// Argument de navigation pour la page détail.
 class CommandeDetailArgs {
@@ -33,6 +36,8 @@ class _C {
 // Ordre du suivi (hors annulation)
 const _ordreStatuts = [
   'en_attente',
+  'acceptee',
+  'payee',
   'confirmee',
   'en_preparation',
   'prete',
@@ -42,6 +47,7 @@ const _ordreStatuts = [
 
 // Statut suivant possible pour le vendeur (simplifié)
 const Map<String, String> _statutSuivant = {
+  'payee': 'en_preparation',
   'confirmee': 'en_preparation',
   'en_preparation': 'prete',
   'prete': 'en_livraison',
@@ -69,14 +75,139 @@ class _DetailView extends StatefulWidget {
   State<_DetailView> createState() => _DetailViewState();
 }
 
-class _DetailViewState extends State<_DetailView> {
+class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
   late CommandeModel commande = widget.args.commande;
   bool get isVendeur => widget.args.isVendeur;
 
-  Future<void> _payer() async {
-    context.read<CommandeBloc>().add(
-      PayerCommande(commande.id, methode: 'orange_money'),
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  /// Retour de Wave ou d'Orange Money : le paiement a pu aboutir entre-temps.
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState etat) {
+    if (etat == AppLifecycleState.resumed) _actualiser();
+  }
+
+  /// Le client paie de son côté : le vendeur peut relire la commande en tirant
+  /// la page, et une commande sans réponse peut être annulée pour libérer le
+  /// stock réservé.
+  Future<void> _annulerParVendeur() async {
+    final bloc = context.read<CommandeBloc>();
+    final confirme = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Annuler cette commande ?'),
+        content: const Text(
+          'Le stock réservé sera rendu et le client sera prévenu.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Retour'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: TextButton.styleFrom(foregroundColor: AppColor.kErreur),
+            child: const Text('Annuler la commande'),
+          ),
+        ],
+      ),
     );
+    if (confirme != true) return;
+    // Le paiement a pu arriver depuis le dernier affichage : le serveur a le
+    // dernier mot, et on relit avant de décider.
+    await _actualiser();
+    if (!mounted) return;
+    if (commande.statutPaiement != 'non_paye' ||
+        commande.statut != 'acceptee') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Cette commande vient de changer : vérifiez son état.'),
+        ),
+      );
+      return;
+    }
+    bloc.add(ChangerStatutCommande(commande.id, 'annulee'));
+  }
+
+  Future<void> _actualiser() async {
+    try {
+      final aJour = await context.read<CommandeBloc>().repository.getCommande(
+        commande.id,
+      );
+      if (mounted) setState(() => commande = aJour);
+    } catch (_) {
+      /* la commande affichée reste valable */
+    }
+  }
+
+  Future<void> _payer() async {
+    final bloc = context.read<CommandeBloc>();
+    final methode = await showModalBottomSheet<String>(
+      context: context,
+      backgroundColor: _C.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (feuille) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.phone_iphone_rounded),
+              title: const Text('Wave'),
+              onTap: () => Navigator.pop(feuille, 'wave'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.phone_android_rounded),
+              title: const Text('Orange Money'),
+              onTap: () => Navigator.pop(feuille, 'orange_money'),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (methode != null) bloc.add(PayerCommande(commande.id, methode: methode));
+  }
+
+  void _accepter() {
+    context.read<CommandeBloc>().add(
+      ChangerStatutCommande(commande.id, 'acceptee'),
+    );
+  }
+
+  Future<void> _rejeter() async {
+    final bloc = context.read<CommandeBloc>();
+    final confirme = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Rejeter cette commande ?'),
+        content: const Text('Le client sera prévenu par e-mail.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Retour'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: TextButton.styleFrom(foregroundColor: AppColor.kErreur),
+            child: const Text('Rejeter'),
+          ),
+        ],
+      ),
+    );
+    if (confirme == true) {
+      bloc.add(ChangerStatutCommande(commande.id, 'rejetee'));
+    }
   }
 
   void _annuler() {
@@ -102,7 +233,7 @@ class _DetailViewState extends State<_DetailView> {
           controller: raisonCtrl,
           maxLines: 3,
           decoration: const InputDecoration(
-            hintText: 'Expliquez la raison du retour',
+            label: LibelleObligatoire('Raison du retour'),
             border: OutlineInputBorder(),
           ),
         ),
@@ -127,25 +258,36 @@ class _DetailViewState extends State<_DetailView> {
 
   @override
   Widget build(BuildContext context) {
-    final couleur = couleurStatutCommande(commande.statut);
     final annulable =
         !isVendeur &&
-        ['en_attente', 'confirmee', 'en_preparation'].contains(commande.statut);
+        [
+          'en_attente',
+          'acceptee',
+          'payee',
+          'confirmee',
+          'en_preparation',
+        ].contains(commande.statut);
     final payable =
         !isVendeur &&
+        commande.statut == 'acceptee' &&
         commande.statutPaiement == 'non_paye' &&
-        commande.modePaiement == 'en_ligne' &&
-        commande.statut != 'annulee';
-    final statutSuivant = _statutSuivant[commande.statut];
+        commande.modePaiement == 'en_ligne';
+    final aDecider = isVendeur && commande.statut == 'en_attente';
+    final annulableVendeur =
+        isVendeur &&
+        commande.statut == 'acceptee' &&
+        commande.statutPaiement == 'non_paye';
+    // Acceptée et réglée à la réception : le vendeur peut la préparer. Réglée en
+    // ligne, elle attend le paiement du client.
+    final statutSuivant =
+        commande.statut == 'acceptee' && commande.modePaiement != 'en_ligne'
+        ? 'en_preparation'
+        : _statutSuivant[commande.statut];
     final retournable = !isVendeur && commande.statut == 'livree';
 
     return Scaffold(
       backgroundColor: _C.bg,
       appBar: AppBar(
-        backgroundColor: _C.white,
-        surfaceTintColor: _C.white,
-        elevation: 0,
-        foregroundColor: _C.black,
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -158,7 +300,10 @@ class _DetailViewState extends State<_DetailView> {
             ),
             Text(
               '#${commande.referenceCommande}',
-              style: GoogleFonts.inter(fontSize: 11.5, color: _C.sub),
+              style: GoogleFonts.inter(
+                fontSize: 11.5,
+                color: _C.white.withValues(alpha: 0.7),
+              ),
             ),
           ],
         ),
@@ -182,12 +327,20 @@ class _DetailViewState extends State<_DetailView> {
               const SnackBar(content: Text('Demande de retour envoyée')),
             );
           } else if (state is PaiementInitie) {
-            final url = state.paymentUrl;
-            if (url != null && url.isNotEmpty) {
-              final uri = Uri.tryParse(url);
-              if (uri != null) {
+            final uri = Uri.tryParse(state.paymentUrl ?? '');
+            final ouvert =
+                uri != null &&
+                uri.hasScheme &&
                 await launchUrl(uri, mode: LaunchMode.externalApplication);
-              }
+            if (!ouvert && context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text(
+                    'Le paiement n\'a pas pu s\'ouvrir. Réessayez dans un instant.',
+                  ),
+                  backgroundColor: AppColor.kErreur,
+                ),
+              );
             }
           }
         },
@@ -195,51 +348,38 @@ class _DetailViewState extends State<_DetailView> {
           final loading = state is CommandeLoading;
           return Stack(
             children: [
-              ListView(
-                padding: const EdgeInsets.all(16),
-                children: [
-                  // Bandeau statut
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: couleur.withValues(alpha: 0.10),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: couleur.withValues(alpha: 0.3)),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          iconeStatutCommande(commande.statut),
-                          color: couleur,
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Text(
-                            kStatutCommandeLabels[commande.statut] ??
-                                commande.statut,
-                            style: GoogleFonts.inter(
-                              color: couleur,
-                              fontWeight: FontWeight.w800,
-                              fontSize: 15,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+              // Sans rebond : il ferait apparaître un trou clair sous l'en-tête.
+              RefreshIndicator(
+                color: AppColor.kPrimary,
+                onRefresh: _actualiser,
+                child: ListView(
+                  physics: const ClampingScrollPhysics(
+                    parent: AlwaysScrollableScrollPhysics(),
                   ),
-                  const SizedBox(height: 16),
-
-                  // Suivi (timeline) si non annulée
-                  if (commande.statut != 'annulee') _timeline(),
-
-                  const SizedBox(height: 16),
-                  _carte('Articles', _articles()),
-                  const SizedBox(height: 12),
-                  _carte('Récapitulatif', _recap()),
-                  const SizedBox(height: 12),
-                  _carte('Livraison', _livraison()),
-                  const SizedBox(height: 90),
-                ],
+                  padding: const EdgeInsets.only(bottom: 24),
+                  children: [
+                    _blocStatut(),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                      child: Column(
+                        children: [
+                          if (![
+                            'annulee',
+                            'rejetee',
+                          ].contains(commande.statut)) ...[
+                            _suivi(),
+                            const SizedBox(height: 12),
+                          ],
+                          _articles(),
+                          const SizedBox(height: 12),
+                          _contact(),
+                          const SizedBox(height: 12),
+                          _livraison(),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
               if (loading)
                 const Positioned.fill(
@@ -256,6 +396,8 @@ class _DetailViewState extends State<_DetailView> {
         payable: payable,
         annulable: annulable,
         statutSuivant: statutSuivant,
+        aDecider: aDecider,
+        annulableVendeur: annulableVendeur,
         retournable: retournable,
       ),
     );
@@ -266,8 +408,53 @@ class _DetailViewState extends State<_DetailView> {
     required bool annulable,
     required String? statutSuivant,
     required bool retournable,
+    required bool aDecider,
+    required bool annulableVendeur,
   }) {
     final boutons = <Widget>[];
+
+    if (annulableVendeur) {
+      boutons.add(
+        Expanded(
+          child: OutlinedButton(
+            onPressed: _annulerParVendeur,
+            style: OutlinedButton.styleFrom(
+              foregroundColor: AppColor.kErreur,
+              side: const BorderSide(color: AppColor.kErreur),
+            ),
+            child: const Text('Annuler la commande'),
+          ),
+        ),
+      );
+    }
+
+    if (aDecider) {
+      boutons.add(
+        Expanded(
+          child: OutlinedButton(
+            onPressed: _rejeter,
+            style: OutlinedButton.styleFrom(
+              foregroundColor: AppColor.kErreur,
+              side: const BorderSide(color: AppColor.kErreur),
+            ),
+            child: const Text('Rejeter'),
+          ),
+        ),
+      );
+      boutons.add(
+        Expanded(
+          flex: 2,
+          child: ElevatedButton(
+            onPressed: _accepter,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: _C.green,
+              foregroundColor: _C.white,
+            ),
+            child: const Text('Accepter'),
+          ),
+        ),
+      );
+    }
 
     if (payable) {
       boutons.add(
@@ -338,233 +525,468 @@ class _DetailViewState extends State<_DetailView> {
     );
   }
 
-  Widget _timeline() {
-    final idx = _ordreStatuts.indexOf(commande.statut);
-    return _carte(
-      'Suivi',
-      Column(
-        children: List.generate(_ordreStatuts.length, (i) {
-          final fait = i <= idx;
-          return Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Column(
-                children: [
-                  Container(
-                    width: 18,
-                    height: 18,
-                    decoration: BoxDecoration(
-                      color: fait ? _C.green : _C.bg,
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: fait ? _C.green : _C.border,
-                        width: 2,
-                      ),
-                    ),
-                    child: fait
-                        ? const Icon(Icons.check, size: 11, color: Colors.white)
-                        : null,
-                  ),
-                  if (i < _ordreStatuts.length - 1)
-                    Container(
-                      width: 2,
-                      height: 22,
-                      color: fait ? _C.green : _C.border,
-                    ),
-                ],
-              ),
-              const SizedBox(width: 12),
-              Padding(
-                padding: const EdgeInsets.only(top: 1),
-                child: Text(
-                  kStatutCommandeLabels[_ordreStatuts[i]] ?? _ordreStatuts[i],
-                  style: TextStyle(
-                    color: fait ? _C.black : _C.sub,
-                    fontWeight: fait ? FontWeight.w700 : FontWeight.w400,
-                  ),
-                ),
-              ),
-            ],
-          );
-        }),
+  /// Le statut, le total et ce qu'il faut retenir, sur le bleu de l'en-tête.
+  Widget _blocStatut() {
+    final date = commande.createdAt?.toLocal();
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(20, 6, 20, 22),
+      decoration: const BoxDecoration(
+        color: AppColor.kPrimary,
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(24)),
       ),
-    );
-  }
-
-  Widget _articles() {
-    return Column(
-      children: commande.lignes.map((l) {
-        final defaut = Container(
-          color: AppColor.kSurface,
-          child: const Icon(
-            Icons.shopping_bag_outlined,
-            size: 20,
-            color: AppColor.kGrayscale30,
-          ),
-        );
-        final image = l.imageProduit;
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 6),
-          child: Row(
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: SizedBox(
-                  width: 52,
-                  height: 52,
-                  child: image != null && image.isNotEmpty
-                      ? CachedNetworkImage(
-                          imageUrl: imageOptimisee(image, largeur: 160),
-                          fit: BoxFit.cover,
-                          errorWidget: (_, __, ___) => defaut,
-                        )
-                      : defaut,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      l.nomProduit,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.inter(
-                        color: _C.black,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 13.5,
-                      ),
-                    ),
-                    // Taille, couleur, parfum… choisis par le client.
-                    if (l.libelleOptions.isNotEmpty)
-                      Text(
-                        l.libelleOptions,
-                        style: GoogleFonts.inter(color: _C.sub, fontSize: 12),
-                      ),
-                    Text(
-                      '${l.prixUnitaire.toStringAsFixed(0)} FCFA × ${l.quantite}',
-                      style: GoogleFonts.inter(color: _C.sub, fontSize: 12),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                '${l.sousTotal.toStringAsFixed(0)} FCFA',
-                style: GoogleFonts.inter(
-                  fontWeight: FontWeight.w700,
-                  color: _C.black,
-                ),
-              ),
-            ],
-          ),
-        );
-      }).toList(),
-    );
-  }
-
-  Widget _recap() {
-    Widget ligne(String l, String v, {bool fort = false}) => Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(l, style: const TextStyle(color: _C.sub)),
+          Container(
+            padding: const EdgeInsets.fromLTRB(8, 5, 12, 5),
+            decoration: BoxDecoration(
+              color: _C.white,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  iconeStatutCommande(commande.statut),
+                  size: 16,
+                  color: couleurStatutCommande(commande.statut),
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  kStatutCommandeLabels[commande.statut] ?? commande.statut,
+                  style: GoogleFonts.inter(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w700,
+                    color: couleurStatutCommande(commande.statut),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 14),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              montantFcfa(commande.montantTotal),
+              style: GoogleFonts.inter(
+                fontSize: 30,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.4,
+                color: _C.white,
+              ),
+            ),
+          ),
+          if (date != null) ...[
+            const SizedBox(height: 2),
+            Text(
+              'Passée le ${dateLongue(date)}',
+              style: GoogleFonts.inter(
+                fontSize: 13,
+                color: _C.white.withValues(alpha: 0.7),
+              ),
+            ),
+          ],
+          const SizedBox(height: 12),
           Text(
-            v,
-            style: TextStyle(
-              fontWeight: fort ? FontWeight.w800 : FontWeight.w600,
-              color: fort ? _C.green : _C.black,
+            messageStatutCommande(
+              commande.statut,
+              modePaiement: commande.modePaiement,
+              isVendeur: isVendeur,
+            ),
+            style: GoogleFonts.inter(
+              fontSize: 14,
+              height: 1.4,
+              fontWeight: FontWeight.w500,
+              color: _C.white,
             ),
           ),
         ],
       ),
     );
-    return Column(
-      children: [
-        ligne(
-          'Produits',
-          '${commande.montantProduits.toStringAsFixed(0)} FCFA',
-        ),
-        ligne(
-          'Livraison',
-          '${commande.fraisLivraison.toStringAsFixed(0)} FCFA',
-        ),
-        const Divider(),
-        ligne(
-          'Total',
-          '${commande.montantTotal.toStringAsFixed(0)} FCFA',
-          fort: true,
-        ),
-      ],
+  }
+
+  /// Le suivi tient sur une barre : où en est la commande, et ce qui vient.
+  Widget _suivi() {
+    final etapes = etapesSuiviCommande(
+      commande.statut,
+      modePaiement: commande.modePaiement,
+    );
+    final idx = etapes.indexOf(commande.statut);
+    final suivante = idx >= 0 && idx < etapes.length - 1
+        ? kStatutCommandeLabels[etapes[idx + 1]]
+        : null;
+    return _carte(
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(child: _titre('Suivi')),
+              Text(
+                'Étape ${idx + 1} sur ${etapes.length}',
+                style: GoogleFonts.inter(fontSize: 12.5, color: _C.sub),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              for (var i = 0; i < etapes.length; i++) ...[
+                if (i > 0) const SizedBox(width: 4),
+                Expanded(
+                  child: Container(
+                    height: 6,
+                    decoration: BoxDecoration(
+                      color: i <= idx ? _C.green : _C.border,
+                      borderRadius: BorderRadius.circular(3),
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+          if (suivante != null) ...[
+            const SizedBox(height: 10),
+            Text(
+              'Prochaine étape : $suivante',
+              style: GoogleFonts.inter(fontSize: 13, color: _C.sub),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  /// Les articles et le détail du prix, réunis : on lit l'un puis l'autre.
+  Widget _articles() {
+    Widget ligne(String libelle, String valeur, {bool fort = false}) => Padding(
+      padding: const EdgeInsets.only(top: 6),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            libelle,
+            style: GoogleFonts.inter(
+              fontSize: fort ? 15 : 13.5,
+              fontWeight: fort ? FontWeight.w700 : FontWeight.w400,
+              color: fort ? _C.black : _C.sub,
+            ),
+          ),
+          Text(
+            valeur,
+            style: GoogleFonts.inter(
+              fontSize: fort ? 16 : 13.5,
+              fontWeight: fort ? FontWeight.w800 : FontWeight.w500,
+              color: _C.black,
+            ),
+          ),
+        ],
+      ),
+    );
+
+    final nbArticles = commande.lignes.fold<int>(0, (n, l) => n + l.quantite);
+    return _carte(
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _titre('$nbArticles article${nbArticles > 1 ? 's' : ''}'),
+          const SizedBox(height: 8),
+          for (final l in commande.lignes) _ligneArticle(l),
+          const Divider(height: 20),
+          ligne('Produits', montantFcfa(commande.montantProduits)),
+          // Un retrait en boutique n'a pas de livraison à « offrir ».
+          if (commande.modeLivraison != 'retrait')
+            ligne(
+              'Livraison',
+              commande.fraisLivraison > 0
+                  ? montantFcfa(commande.fraisLivraison)
+                  : 'Offerte',
+            ),
+          const SizedBox(height: 4),
+          ligne('Total', montantFcfa(commande.montantTotal), fort: true),
+        ],
+      ),
+    );
+  }
+
+  Widget _ligneArticle(LigneCommandeModel l) {
+    final defaut = Container(
+      color: AppColor.kSurface,
+      child: const Icon(
+        Icons.shopping_bag_outlined,
+        size: 22,
+        color: AppColor.kGrayscale30,
+      ),
+    );
+    final image = l.imageProduit;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: SizedBox(
+              width: 56,
+              height: 56,
+              child: image != null && image.isNotEmpty
+                  ? CachedNetworkImage(
+                      imageUrl: imageOptimisee(image, largeur: 160),
+                      fit: BoxFit.cover,
+                      errorWidget: (_, __, ___) => defaut,
+                    )
+                  : defaut,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l.nomProduit,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.inter(
+                    color: _C.black,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                  ),
+                ),
+                // Taille, couleur, parfum… choisis par le client.
+                if (l.libelleOptions.isNotEmpty)
+                  Text(
+                    l.libelleOptions,
+                    style: GoogleFonts.inter(color: _C.sub, fontSize: 12.5),
+                  ),
+                const SizedBox(height: 2),
+                Text(
+                  'Quantité : ${l.quantite}',
+                  style: GoogleFonts.inter(color: _C.sub, fontSize: 12.5),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            montantFcfa(l.sousTotal),
+            style: GoogleFonts.inter(
+              fontSize: 13.5,
+              fontWeight: FontWeight.w700,
+              color: _C.black,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// La personne en face, et comment la joindre.
+  Widget _contact() {
+    final nom = ((isVendeur ? commande.acheteurNom : commande.vendeurNom) ?? '')
+        .trim();
+    final telephone = isVendeur
+        ? (commande.acheteurTelephone ?? commande.numeroTelephone)
+        : commande.vendeurTelephone;
+    final initiales = initialesDe(nom);
+    return _carte(
+      Row(
+        children: [
+          CircleAvatar(
+            radius: 22,
+            backgroundColor: AppColor.kPrimaryLight,
+            child: Text(
+              initiales.isEmpty ? '?' : initiales,
+              style: GoogleFonts.inter(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                color: _C.green,
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  isVendeur ? 'Client' : 'Vendeur',
+                  style: GoogleFonts.inter(fontSize: 12.5, color: _C.sub),
+                ),
+                Text(
+                  nom.isEmpty ? 'Non renseigné' : nom,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.inter(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: _C.black,
+                  ),
+                ),
+                if (telephone != null && telephone.isNotEmpty)
+                  Text(
+                    telephone,
+                    style: GoogleFonts.inter(fontSize: 13, color: _C.sub),
+                  ),
+              ],
+            ),
+          ),
+          if (telephone != null && telephone.isNotEmpty)
+            IconButton.filledTonal(
+              tooltip: 'Appeler',
+              onPressed: () => UrlExterne.lancer('tel:$telephone'),
+              style: IconButton.styleFrom(
+                backgroundColor: AppColor.kPrimaryLight,
+                foregroundColor: _C.green,
+              ),
+              icon: const Icon(Icons.call_outlined, size: 20),
+            ),
+        ],
+      ),
     );
   }
 
   Widget _livraison() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _info(
-          'Mode',
-          commande.modeLivraison == 'retrait' ? 'Retrait' : 'Livraison',
-        ),
-        if (commande.adresseLivraison != null &&
-            commande.adresseLivraison!.isNotEmpty)
-          _info('Adresse', commande.adresseLivraison!),
-        if (commande.numeroTelephone != null)
-          _info('Téléphone', commande.numeroTelephone!),
-        _info(
-          isVendeur ? 'Client' : 'Vendeur',
-          (isVendeur ? commande.acheteurNom : commande.vendeurNom) ??
-              'Non renseigné',
-        ),
-        if (commande.note != null && commande.note!.isNotEmpty)
-          _info('Note', commande.note!),
-      ],
-    );
-  }
-
-  Widget _info(String l, String v) => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 3),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(
-          width: 90,
-          child: Text(l, style: const TextStyle(color: _C.sub)),
-        ),
-        Expanded(
-          child: Text(v, style: const TextStyle(color: _C.black)),
-        ),
-      ],
-    ),
-  );
-
-  Widget _carte(String titre, Widget child) {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: _C.white,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: _C.border),
-      ),
-      padding: const EdgeInsets.all(16),
-      child: Column(
+    final retrait = commande.modeLivraison == 'retrait';
+    final adresse = commande.adresseLivraison;
+    final note = commande.note;
+    Widget info(IconData icone, String libelle, String valeur) => Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            titre,
-            style: GoogleFonts.inter(
-              fontWeight: FontWeight.w800,
-              color: _C.black,
-              fontSize: 15,
+          Icon(icone, size: 20, color: AppColor.kPrimaryMedium),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  libelle,
+                  style: GoogleFonts.inter(fontSize: 12.5, color: _C.sub),
+                ),
+                Text(
+                  valeur,
+                  style: GoogleFonts.inter(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: _C.black,
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 12),
-          child,
         ],
       ),
     );
+    return _carte(
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _titre('Réception et paiement'),
+          const SizedBox(height: 6),
+          info(
+            retrait ? Icons.storefront_outlined : Icons.local_shipping_outlined,
+            'Réception',
+            retrait ? 'Retrait en boutique' : 'Livraison',
+          ),
+          if (adresse != null && adresse.isNotEmpty)
+            info(Icons.location_on_outlined, 'Adresse', adresse),
+          info(
+            Icons.payments_outlined,
+            'Paiement',
+            commande.modePaiement == 'en_ligne'
+                ? 'Wave ou Orange Money'
+                : 'À la réception',
+          ),
+          if (note != null && note.isNotEmpty)
+            info(Icons.sticky_note_2_outlined, 'Note du client', note),
+        ],
+      ),
+    );
+  }
+
+  Widget _titre(String texte) => Text(
+    texte,
+    style: GoogleFonts.inter(
+      fontWeight: FontWeight.w700,
+      color: _C.black,
+      fontSize: 15,
+    ),
+  );
+
+  Widget _carte(Widget child) => Container(
+    width: double.infinity,
+    decoration: BoxDecoration(
+      color: _C.white,
+      borderRadius: BorderRadius.circular(16),
+      border: Border.all(color: _C.border),
+    ),
+    padding: const EdgeInsets.all(16),
+    child: child,
+  );
+}
+
+/// Les étapes de CETTE commande : pas de « Payée » pour un règlement à la
+/// réception, pas d'« Acceptée » pour une ancienne commande « Confirmée ».
+List<String> etapesSuiviCommande(
+  String statut, {
+  required String modePaiement,
+}) {
+  final ancienne = statut == 'confirmee';
+  return _ordreStatuts.where((s) {
+    if (s == 'confirmee') return ancienne;
+    if (s == 'acceptee') return !ancienne;
+    if (s == 'payee') return modePaiement == 'en_ligne' && !ancienne;
+    return true;
+  }).toList();
+}
+
+/// Ce que le statut veut dire, pour la personne qui regarde.
+String messageStatutCommande(
+  String statut, {
+  required String modePaiement,
+  required bool isVendeur,
+}) {
+  final enLigne = modePaiement == 'en_ligne';
+  switch (statut) {
+    case 'en_attente':
+      return isVendeur
+          ? 'À vous de décider : acceptez ou rejetez cette commande.'
+          : 'Le vendeur doit encore accepter votre commande.';
+    case 'acceptee':
+      if (isVendeur) {
+        return enLigne
+            ? 'Le client doit payer. Vous serez notifié dès que c\'est fait.'
+            : 'Acceptée. Le client réglera à la réception.';
+      }
+      return enLigne
+          ? 'Acceptée par le vendeur. Vous pouvez la payer.'
+          : 'Acceptée par le vendeur. Vous réglerez à la réception.';
+    case 'rejetee':
+      return isVendeur
+          ? 'Vous avez rejeté cette commande.'
+          : 'Le vendeur a rejeté cette commande. Vous n\'êtes pas débité.';
+    case 'payee':
+      return isVendeur
+          ? 'Le client a payé. Vous pouvez préparer la commande.'
+          : 'Paiement reçu. Le vendeur va préparer votre commande.';
+    case 'confirmee':
+      return 'Commande confirmée.';
+    case 'en_preparation':
+      return isVendeur
+          ? 'Commande en cours de préparation.'
+          : 'Le vendeur prépare votre commande.';
+    case 'prete':
+      return 'La commande est prête.';
+    case 'en_livraison':
+      return 'La commande est en cours de livraison.';
+    case 'livree':
+      return 'La commande a été livrée.';
+    case 'annulee':
+      return 'Cette commande a été annulée.';
+    default:
+      return kStatutCommandeLabels[statut] ?? statut;
   }
 }

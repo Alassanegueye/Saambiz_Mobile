@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../theme/app_color.dart';
-import 'animations.dart';
 
 /// Espace à laisser en bas des listes d'un onglet. La barre est posée sous
 /// le contenu (elle ne flotte plus) : une simple respiration suffit.
@@ -72,31 +71,6 @@ class BarreNavigationVerre extends StatelessWidget {
           destinations: destinations,
         ),
       ),
-    );
-  }
-}
-
-/// Corps d'un espace à onglets : l'onglet choisi apparaît en fondu au lieu
-/// de remplacer brutalement le précédent.
-class TransitionOnglet extends StatelessWidget {
-  final int index;
-  final Widget child;
-  const TransitionOnglet({super.key, required this.index, required this.child});
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedSwitcher(
-      duration: Mouvement.normal,
-      switchInCurve: Mouvement.courbe,
-      switchOutCurve: Curves.easeIn,
-      // L'onglet sortant s'efface sous l'entrant, sans décaler la mise en page.
-      layoutBuilder: (actuel, precedents) => Stack(
-        fit: StackFit.expand,
-        children: [...precedents, if (actuel != null) actuel],
-      ),
-      transitionBuilder: (enfant, anim) =>
-          FadeTransition(opacity: anim, child: enfant),
-      child: KeyedSubtree(key: ValueKey(index), child: child),
     );
   }
 }

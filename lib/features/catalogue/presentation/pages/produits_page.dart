@@ -162,10 +162,6 @@ class _ProduitsPageState extends State<ProduitsPage> {
     return Scaffold(
       backgroundColor: AppColor.kBackground,
       appBar: AppBar(
-        backgroundColor: AppColor.kWhite,
-        surfaceTintColor: AppColor.kWhite,
-        elevation: 0,
-        foregroundColor: AppColor.kGrayscaleDark100,
         titleSpacing: 0,
         title: Row(
           children: [
@@ -197,7 +193,7 @@ class _ProduitsPageState extends State<ProduitsPage> {
                   if (!_chargement)
                     Text(
                       '$_total produit${_total > 1 ? 's' : ''}',
-                      style: texteDiscret(11.5),
+                      style: texteDiscret(11.5).copyWith(color: Colors.white70),
                     ),
                 ],
               ),

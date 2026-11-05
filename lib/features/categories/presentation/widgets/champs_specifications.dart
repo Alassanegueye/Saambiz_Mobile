@@ -1,3 +1,4 @@
+import 'package:saambiz/core/theme/app_color.dart';
 import 'package:flutter/material.dart';
 
 import '../../data/specification.dart';
@@ -131,7 +132,7 @@ class _ChampsSpecificationsState extends State<ChampsSpecifications> {
                         if (s.obligatoire)
                           const TextSpan(
                             text: ' *',
-                            style: TextStyle(color: Colors.red),
+                            style: TextStyle(color: AppColor.kErreur),
                           ),
                       ],
                     ),

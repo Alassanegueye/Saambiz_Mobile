@@ -123,17 +123,13 @@ class _CategorieBoutiquesPageState extends State<CategorieBoutiquesPage> {
     return Scaffold(
       backgroundColor: _C.bg,
       appBar: AppBar(
-        backgroundColor: _C.bg,
-        surfaceTintColor: _C.bg,
-        elevation: 0,
-        foregroundColor: _C.navy,
         titleSpacing: 0,
         title: Text(
           c.nom,
           style: GoogleFonts.inter(
             fontSize: 17,
             fontWeight: FontWeight.w700,
-            color: _C.navy,
+            color: Colors.white,
           ),
         ),
       ),

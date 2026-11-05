@@ -13,6 +13,9 @@ abstract class ProduitRemoteDataSource {
   Future<List<ProduitModel>> rechercher(String query);
   Future<List<ProduitModel>> filtrerVille(String ville);
   Future<List<BoutiqueModel>> getBoutiques();
+
+  /// La boutique du vendeur connecté, ou `null` s'il n'en a pas encore.
+  Future<BoutiqueModel?> getMaBoutique();
   Future<List<ProduitModel>> getProduitsByBoutique(String boutiqueId);
   Future<String> getWhatsappUrl(String produitId);
   Future<Map<String, dynamic>> getAvisBoutique(String boutiqueId);
@@ -136,6 +139,23 @@ class ProduitRemoteDataSourceImpl implements ProduitRemoteDataSource {
           .map((e) => BoutiqueModel.fromJson(e as Map<String, dynamic>))
           .toList();
     } catch (e) {
+      _handleAuthError(e);
+      rethrow;
+    }
+  }
+
+  @override
+  Future<BoutiqueModel?> getMaBoutique() async {
+    try {
+      final response = await dio.get(
+        BoutiqueEndpoints.maBoutique,
+        options: await _getOptions(),
+      );
+      return BoutiqueModel.fromJson(
+        response.data['boutique'] as Map<String, dynamic>,
+      );
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 404) return null;
       _handleAuthError(e);
       rethrow;
     }

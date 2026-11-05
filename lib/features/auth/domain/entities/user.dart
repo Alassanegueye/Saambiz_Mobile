@@ -23,6 +23,15 @@ class User extends Equatable {
     this.photoProfil,
   });
 
+  /// Le nom à montrer à l'écran : prénom et nom, sinon l'e-mail, sinon le
+  /// téléphone (un compte peut n'avoir renseigné qu'un identifiant).
+  String get nomAffiche {
+    final complet = '${prenom.trim()} ${nom.trim()}'.trim();
+    if (complet.isNotEmpty) return complet;
+    final mail = email.trim();
+    return mail.isNotEmpty ? mail : telephone.trim();
+  }
+
   Map<String, dynamic> toJson() => {
     'id': id,
     'nom': nom,

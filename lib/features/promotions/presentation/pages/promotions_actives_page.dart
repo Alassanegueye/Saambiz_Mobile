@@ -40,9 +40,6 @@ class _PromotionsActivesView extends StatelessWidget {
     return Scaffold(
       backgroundColor: _C.bg,
       appBar: AppBar(
-        backgroundColor: _C.white,
-        elevation: 0.5,
-        foregroundColor: _C.black,
         title: const Text('Promotions'),
       ),
       body: BlocConsumer<PromotionsBloc, PromotionsState>(
