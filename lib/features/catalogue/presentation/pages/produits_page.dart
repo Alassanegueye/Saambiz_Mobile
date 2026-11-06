@@ -1,11 +1,11 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart';
+import 'package:saambiz/core/widgets/image_reseau.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:saambiz/core/theme/police.dart';
 
 import '../../../../core/theme/app_color.dart';
-import '../../../../core/utils/image_url.dart';
 import '../../../../core/widgets/ui_kit.dart';
+import '../../../../core/widgets/degrade_fond.dart';
 import '../../../../injection_container.dart';
 import '../../../categories/data/categorie.dart';
 import '../../../categories/presentation/icones_categories.dart';
@@ -185,7 +185,7 @@ class _ProduitsPageState extends State<ProduitsPage> {
                     widget.titre,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.inter(
+                    style: TextStyle(fontFamily: kPolice, 
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
                     ),
@@ -202,29 +202,31 @@ class _ProduitsPageState extends State<ProduitsPage> {
         ),
         actions: const [BoutonPanier(), SizedBox(width: 6)],
       ),
-      body: RefreshIndicator(
-        color: AppColor.kPrimary,
-        onRefresh: _charger,
-        child: CustomScrollView(
-          controller: _scroll,
-          physics: const AlwaysScrollableScrollPhysics(),
-          slivers: [
-            SliverToBoxAdapter(child: _barreOutils()),
-            ..._contenu(),
-            SliverToBoxAdapter(
-              child: _suite
-                  ? const Padding(
-                      padding: EdgeInsets.all(20),
-                      child: Center(
-                        child: CircularProgressIndicator(
-                          color: AppColor.kPrimary,
-                          strokeWidth: 2,
+      body: FondDegradeSubtil(
+        child: RefreshIndicator(
+          color: AppColor.kPrimary,
+          onRefresh: _charger,
+          child: CustomScrollView(
+            controller: _scroll,
+            physics: const AlwaysScrollableScrollPhysics(),
+            slivers: [
+              SliverToBoxAdapter(child: _barreOutils()),
+              ..._contenu(),
+              SliverToBoxAdapter(
+                child: _suite
+                    ? const Padding(
+                        padding: EdgeInsets.all(20),
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            color: AppColor.kPrimary,
+                            strokeWidth: 2,
+                          ),
                         ),
-                      ),
-                    )
-                  : const SizedBox(height: 24),
-            ),
-          ],
+                      )
+                    : const SizedBox(height: 24),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -367,7 +369,7 @@ class _ProduitsPageState extends State<ProduitsPage> {
     ];
   }
 
-  static final _styleTitreSection = GoogleFonts.inter(
+  static final _styleTitreSection = TextStyle(fontFamily: kPolice, 
     fontSize: 15,
     fontWeight: FontWeight.w700,
     color: AppColor.kGrayscaleDark100,
@@ -437,12 +439,7 @@ class _CarteBoutique extends StatelessWidget {
                     width: 44,
                     height: 44,
                     child: logo != null && logo.isNotEmpty
-                        ? CachedNetworkImage(
-                            imageUrl: imageOptimisee(logo, largeur: 120),
-                            fit: BoxFit.cover,
-                            errorWidget: (_, __, ___) =>
-                                const PastilleIcone(Icons.storefront_outlined),
-                          )
+                        ? ImageReseau(logo, largeurServeur: 120, fit: BoxFit.cover, repli: const PastilleIcone(Icons.storefront_outlined))
                         : const PastilleIcone(Icons.storefront_outlined),
                   ),
                 ),
@@ -451,7 +448,7 @@ class _CarteBoutique extends StatelessWidget {
                   donnees['nom']?.toString() ?? 'Boutique',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.inter(
+                  style: TextStyle(fontFamily: kPolice, 
                     fontSize: 13.5,
                     fontWeight: FontWeight.w700,
                     color: AppColor.kGrayscaleDark100,

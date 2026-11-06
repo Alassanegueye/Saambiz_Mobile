@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:saambiz/core/widgets/image_reseau.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../injection_container.dart';
 import '../bloc/promotions_bloc.dart';
 import '../bloc/promotions_event.dart';
 import '../bloc/promotions_state.dart';
-import 'package:saambiz/core/utils/image_url.dart';
 
 class _C {
   static const green = Color(0xFF01154B);
@@ -87,12 +86,7 @@ class _PromotionsActivesView extends StatelessWidget {
                         ClipRRect(
                           borderRadius: BorderRadius.circular(12),
                           child: (p.produitImage ?? '').isNotEmpty
-                              ? CachedNetworkImage(
-                                  imageUrl: imageOptimisee(p.produitImage!),
-                                  width: 60,
-                                  height: 60,
-                                  fit: BoxFit.cover,
-                                )
+                              ? ImageReseau(p.produitImage!, width: 60, height: 60, fit: BoxFit.cover)
                               : Container(
                                   width: 60,
                                   height: 60,

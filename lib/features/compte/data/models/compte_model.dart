@@ -13,6 +13,7 @@ class CompteModel extends User {
     required super.telephone,
     required super.role,
     super.photoProfil,
+    super.soldeDisponible,
   });
 
   factory CompteModel.fromJson(Map<String, dynamic> json) {
@@ -28,6 +29,7 @@ class CompteModel extends User {
       telephone: data['telephone'] ?? '',
       role: data['role'] ?? '',
       photoProfil: data['photoProfil'],
+      soldeDisponible: montantDepuisJson(data['soldeDisponible']),
     );
   }
 }

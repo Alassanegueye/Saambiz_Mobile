@@ -1,7 +1,7 @@
 import 'package:saambiz/core/widgets/libelle_obligatoire.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:saambiz/core/theme/police.dart';
 
 import '../../../../injection_container.dart';
 import '../../data/categorie.dart';
@@ -99,7 +99,7 @@ class _SelecteurCategoriesState extends State<SelecteurCategories> {
       children: [
         LibelleObligatoire(
           'Catégories de la boutique',
-          style: GoogleFonts.inter(
+          style: TextStyle(fontFamily: kPolice, 
             fontSize: 13,
             fontWeight: FontWeight.w600,
             color: _navy,
@@ -108,7 +108,7 @@ class _SelecteurCategoriesState extends State<SelecteurCategories> {
         const SizedBox(height: 4),
         Text(
           'Choisissez 1 à ${widget.maximum} catégories. La première est la principale.',
-          style: GoogleFonts.inter(fontSize: 12, color: _textLight),
+          style: TextStyle(fontFamily: kPolice, fontSize: 12, color: _textLight),
         ),
         const SizedBox(height: 10),
         Wrap(
@@ -120,7 +120,7 @@ class _SelecteurCategoriesState extends State<SelecteurCategories> {
           const SizedBox(height: 8),
           Text(
             widget.erreur!,
-            style: GoogleFonts.inter(fontSize: 12, color: _erreur),
+            style: TextStyle(fontFamily: kPolice, fontSize: 12, color: _erreur),
           ),
         ],
       ],
@@ -158,7 +158,7 @@ class _SelecteurCategoriesState extends State<SelecteurCategories> {
               const SizedBox(width: 6),
               Text(
                 c.nom,
-                style: GoogleFonts.inter(
+                style: TextStyle(fontFamily: kPolice, 
                   fontSize: 12.5,
                   fontWeight: FontWeight.w600,
                   color: _navy,

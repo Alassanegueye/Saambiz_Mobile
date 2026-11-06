@@ -145,7 +145,7 @@ class SignupRemoteDataSource {
 
   // Le backend répond { message } (ou { errors: [...] } via le validateur).
   String _message(DioException e, String fallback) {
-    logDebug('❌ signup: ${e.response?.statusCode} ${e.response?.data}');
+    logDebug('signup: ${e.response?.statusCode} ${e.response?.data}');
     final data = e.response?.data;
     if (data is Map) {
       final message = data['message'];

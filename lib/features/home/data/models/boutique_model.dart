@@ -9,7 +9,7 @@ class BoutiqueModel {
   final String vendeurNom;
   final String vendeurPrenom;
   final String vendeurNumero;
-  // 🔔 Cloche active pour cette boutique suivie (renseigné via /favoris).
+  //  Cloche active pour cette boutique suivie (renseigné via /favoris).
   final bool clocheActive;
   // ⭐ Note moyenne (0 si aucun avis) + nombre d'avis (renseignés par le backend).
   final double note;

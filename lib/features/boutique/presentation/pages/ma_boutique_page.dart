@@ -1,15 +1,14 @@
 import 'package:saambiz/core/theme/app_color.dart';
+import 'package:saambiz/core/widgets/image_reseau.dart';
 import 'package:saambiz/core/utils/texte.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 
 import '../../../../injection_container.dart';
 import '../bloc/boutique_bloc.dart';
 import '../bloc/boutique_event.dart';
 import '../bloc/boutique_state.dart';
 import 'boutique_form_page.dart';
-import 'package:saambiz/core/utils/image_url.dart';
 
 class _C {
   static const green = Color(0xFF01154B);
@@ -133,12 +132,7 @@ class _MaBoutiqueView extends StatelessWidget {
                           height: 72,
                           color: _C.white,
                           child: (b.logo ?? '').isNotEmpty
-                              ? CachedNetworkImage(
-                                  imageUrl: imageOptimisee(b.logo!),
-                                  fit: BoxFit.cover,
-                                  errorWidget: (_, __, ___) =>
-                                      _initiales(b.nom),
-                                )
+                              ? ImageReseau(b.logo!, fit: BoxFit.cover, repli: _initiales(b.nom))
                               : _initiales(b.nom),
                         ),
                       ),

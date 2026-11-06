@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:saambiz/core/widgets/image_reseau.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:saambiz/core/theme/police.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:saambiz/features/auth/domain/entities/user.dart';
 import '../../bloc/produit_bloc.dart';
@@ -9,8 +10,6 @@ import '../../bloc/produit_state.dart';
 import '../../../data/datasources/produit_remote_datasource.dart';
 import '../../../data/models/produit_model.dart';
 import '../../../../../injection_container.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:saambiz/core/utils/image_url.dart';
 
 class _C {
   static const green = Color(0xFF01154B);
@@ -67,7 +66,7 @@ class _ProduitPageState extends State<ProduitPage> {
 
   // Appel WhatsApp
   Future<void> _contactWhatsapp(String produitId) async {
-    if (_dataSource == null) return; // ✅ _dataSource pas widget.dataSource
+    if (_dataSource == null) return; //  _dataSource pas widget.dataSource
 
     try {
       final url = await _dataSource!.getWhatsappUrl(produitId);
@@ -80,7 +79,7 @@ class _ProduitPageState extends State<ProduitPage> {
             SnackBar(
               content: Text(
                 'WhatsApp non disponible',
-                style: GoogleFonts.inter(color: _C.white),
+                style: TextStyle(fontFamily: kPolice, color: _C.white),
               ),
               backgroundColor: _C.orange,
               behavior: SnackBarBehavior.floating,
@@ -94,7 +93,7 @@ class _ProduitPageState extends State<ProduitPage> {
           SnackBar(
             content: Text(
               'Erreur: ${e.toString()}',
-              style: GoogleFonts.inter(color: _C.white),
+              style: TextStyle(fontFamily: kPolice, color: _C.white),
             ),
             backgroundColor: _C.orange,
             behavior: SnackBarBehavior.floating,
@@ -189,7 +188,7 @@ class _ProduitPageState extends State<ProduitPage> {
                   children: [
                     TextSpan(
                       text: 'Les ',
-                      style: GoogleFonts.inter(
+                      style: TextStyle(fontFamily: kPolice, 
                         fontSize: 20,
                         fontWeight: FontWeight.w800,
                         color: _C.white,
@@ -198,7 +197,7 @@ class _ProduitPageState extends State<ProduitPage> {
                     ),
                     TextSpan(
                       text: 'Produits',
-                      style: GoogleFonts.inter(
+                      style: TextStyle(fontFamily: kPolice, 
                         fontSize: 20,
                         fontWeight: FontWeight.w800,
                         color: _C.green,
@@ -217,11 +216,11 @@ class _ProduitPageState extends State<ProduitPage> {
             child: TextField(
               controller: _searchCtrl,
               onChanged: (v) => setState(() => _search = v),
-              style: GoogleFonts.inter(fontSize: 15, color: _C.white),
+              style: TextStyle(fontFamily: kPolice, fontSize: 15, color: _C.white),
               cursorColor: _C.green,
               decoration: InputDecoration(
                 hintText: 'Rechercher un produit...',
-                hintStyle: GoogleFonts.inter(
+                hintStyle: TextStyle(fontFamily: kPolice, 
                   fontSize: 15,
                   color: Colors.white.withOpacity(0.4),
                 ),
@@ -275,7 +274,7 @@ class _ProduitPageState extends State<ProduitPage> {
         children: [
           Text(
             'Produits',
-            style: GoogleFonts.inter(
+            style: TextStyle(fontFamily: kPolice, 
               fontSize: 14,
               fontWeight: FontWeight.w700,
               color: _C.black,
@@ -287,7 +286,7 @@ class _ProduitPageState extends State<ProduitPage> {
               children: [
                 Text(
                   'Actualiser',
-                  style: GoogleFonts.inter(
+                  style: TextStyle(fontFamily: kPolice, 
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                     color: _C.green,
@@ -335,7 +334,7 @@ class _ProduitPageState extends State<ProduitPage> {
                   padding: const EdgeInsets.symmetric(horizontal: 32),
                   child: Text(
                     'Erreur: ${state.message}',
-                    style: GoogleFonts.inter(color: _C.orange),
+                    style: TextStyle(fontFamily: kPolice, color: _C.orange),
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -353,7 +352,7 @@ class _ProduitPageState extends State<ProduitPage> {
                     ),
                     child: Text(
                       'Réessayer',
-                      style: GoogleFonts.inter(
+                      style: TextStyle(fontFamily: kPolice, 
                         color: _C.white,
                         fontWeight: FontWeight.w600,
                       ),
@@ -381,7 +380,7 @@ class _ProduitPageState extends State<ProduitPage> {
                   const SizedBox(height: 12),
                   Text(
                     'Aucun produit trouvé',
-                    style: GoogleFonts.inter(
+                    style: TextStyle(fontFamily: kPolice, 
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
                       color: _C.label,
@@ -445,9 +444,7 @@ class _ProduitPageState extends State<ProduitPage> {
                   ),
                   image: p.image.isNotEmpty
                       ? DecorationImage(
-                          image: CachedNetworkImageProvider(
-                            imageOptimisee(p.image),
-                          ),
+                          image: fournisseurImageReseau(p.image),
                           fit: BoxFit.cover,
                         )
                       : null,
@@ -473,7 +470,7 @@ class _ProduitPageState extends State<ProduitPage> {
                 children: [
                   Text(
                     p.nom,
-                    style: GoogleFonts.inter(
+                    style: TextStyle(fontFamily: kPolice, 
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
                       color: _C.black,
@@ -484,7 +481,7 @@ class _ProduitPageState extends State<ProduitPage> {
                   const SizedBox(height: 2),
                   Text(
                     p.ville,
-                    style: GoogleFonts.inter(fontSize: 10, color: _C.label),
+                    style: TextStyle(fontFamily: kPolice, fontSize: 10, color: _C.label),
                   ),
                   const SizedBox(height: 8),
                   Row(
@@ -495,7 +492,7 @@ class _ProduitPageState extends State<ProduitPage> {
                           children: [
                             TextSpan(
                               text: p.prix,
-                              style: GoogleFonts.inter(
+                              style: TextStyle(fontFamily: kPolice, 
                                 fontSize: 13,
                                 fontWeight: FontWeight.w800,
                                 color: _C.black,
@@ -503,7 +500,7 @@ class _ProduitPageState extends State<ProduitPage> {
                             ),
                             TextSpan(
                               text: ' F',
-                              style: GoogleFonts.inter(
+                              style: TextStyle(fontFamily: kPolice, 
                                 fontSize: 10,
                                 color: _C.label,
                               ),
@@ -610,7 +607,7 @@ class _ProduitModalState extends State<_ProduitModal> {
             SnackBar(
               content: Text(
                 'WhatsApp non disponible',
-                style: GoogleFonts.inter(color: _C.white),
+                style: TextStyle(fontFamily: kPolice, color: _C.white),
               ),
               backgroundColor: _C.black,
             ),
@@ -623,7 +620,7 @@ class _ProduitModalState extends State<_ProduitModal> {
           SnackBar(
             content: Text(
               'Erreur: ${e.toString()}',
-              style: GoogleFonts.inter(color: _C.white),
+              style: TextStyle(fontFamily: kPolice, color: _C.white),
             ),
             backgroundColor: _C.orange,
           ),
@@ -672,9 +669,7 @@ class _ProduitModalState extends State<_ProduitModal> {
                       borderRadius: BorderRadius.circular(20),
                       image: p.image.isNotEmpty
                           ? DecorationImage(
-                              image: CachedNetworkImageProvider(
-                                imageOptimisee(p.image),
-                              ),
+                              image: fournisseurImageReseau(p.image),
                               fit: BoxFit.cover,
                             )
                           : null,
@@ -724,7 +719,7 @@ class _ProduitModalState extends State<_ProduitModal> {
                             Expanded(
                               child: Text(
                                 p.nom,
-                                style: GoogleFonts.inter(
+                                style: TextStyle(fontFamily: kPolice, 
                                   fontSize: 20,
                                   fontWeight: FontWeight.w800,
                                   color: _C.black,
@@ -776,7 +771,7 @@ class _ProduitModalState extends State<_ProduitModal> {
                             ),
                             child: Text(
                               p.categorie!,
-                              style: GoogleFonts.inter(
+                              style: TextStyle(fontFamily: kPolice, 
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
                                 color: _C.green,
@@ -803,7 +798,7 @@ class _ProduitModalState extends State<_ProduitModal> {
                             const SizedBox(width: 8),
                             Text(
                               p.ville,
-                              style: GoogleFonts.inter(
+                              style: TextStyle(fontFamily: kPolice, 
                                 fontSize: 13,
                                 color: _C.label,
                               ),
@@ -818,7 +813,7 @@ class _ProduitModalState extends State<_ProduitModal> {
                             padding: const EdgeInsets.only(bottom: 16),
                             child: Text(
                               p.description!,
-                              style: GoogleFonts.inter(
+                              style: TextStyle(fontFamily: kPolice, 
                                 fontSize: 13,
                                 color: _C.sub,
                               ),
@@ -847,7 +842,7 @@ class _ProduitModalState extends State<_ProduitModal> {
                                 const SizedBox(width: 8),
                                 Text(
                                   'Stock disponible : ${p.quantite}',
-                                  style: GoogleFonts.inter(
+                                  style: TextStyle(fontFamily: kPolice, 
                                     fontSize: 13,
                                     color: _C.label,
                                   ),
@@ -885,7 +880,7 @@ class _ProduitModalState extends State<_ProduitModal> {
                                   children: [
                                     Text(
                                       p.vendeurNom,
-                                      style: GoogleFonts.inter(
+                                      style: TextStyle(fontFamily: kPolice, 
                                         fontSize: 14,
                                         fontWeight: FontWeight.w700,
                                         color: _C.black,
@@ -894,7 +889,7 @@ class _ProduitModalState extends State<_ProduitModal> {
                                     const SizedBox(height: 2),
                                     Text(
                                       'Vendeur',
-                                      style: GoogleFonts.inter(
+                                      style: TextStyle(fontFamily: kPolice, 
                                         fontSize: 11,
                                         color: _C.label,
                                       ),
@@ -921,7 +916,7 @@ class _ProduitModalState extends State<_ProduitModal> {
                                     const SizedBox(width: 4),
                                     Text(
                                       p.vendeurNumero,
-                                      style: GoogleFonts.inter(
+                                      style: TextStyle(fontFamily: kPolice, 
                                         fontSize: 12,
                                         fontWeight: FontWeight.w600,
                                         color: _C.green,
@@ -950,7 +945,7 @@ class _ProduitModalState extends State<_ProduitModal> {
                                   children: [
                                     Text(
                                       'PRIX UNITAIRE',
-                                      style: GoogleFonts.inter(
+                                      style: TextStyle(fontFamily: kPolice, 
                                         fontSize: 9.5,
                                         fontWeight: FontWeight.w700,
                                         color: _C.label,
@@ -963,7 +958,7 @@ class _ProduitModalState extends State<_ProduitModal> {
                                         children: [
                                           TextSpan(
                                             text: '$prixUnitaire ',
-                                            style: GoogleFonts.inter(
+                                            style: TextStyle(fontFamily: kPolice, 
                                               fontSize: 22,
                                               fontWeight: FontWeight.w800,
                                               color: _C.black,
@@ -971,7 +966,7 @@ class _ProduitModalState extends State<_ProduitModal> {
                                           ),
                                           TextSpan(
                                             text: 'FCFA',
-                                            style: GoogleFonts.inter(
+                                            style: TextStyle(fontFamily: kPolice, 
                                               fontSize: 12,
                                               color: _C.label,
                                             ),
@@ -1035,7 +1030,7 @@ class _ProduitModalState extends State<_ProduitModal> {
                       child: Center(
                         child: Text(
                           'Fermer',
-                          style: GoogleFonts.inter(
+                          style: TextStyle(fontFamily: kPolice, 
                             color: _C.white,
                             fontWeight: FontWeight.w600,
                           ),

@@ -1,10 +1,9 @@
 import 'package:saambiz/core/widgets/libelle_obligatoire.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+import 'package:saambiz/core/widgets/image_reseau.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:saambiz/core/theme/police.dart';
 import 'package:intl/intl.dart';
-import 'package:saambiz/core/utils/image_url.dart';
 
 import '../../../../core/theme/app_color.dart';
 import '../../../../injection_container.dart';
@@ -225,7 +224,7 @@ class _NouvelleCampagnePageState extends State<NouvelleCampagnePage> {
           _type == TypeCampagne.promotion
               ? 'Nouvelle promotion'
               : 'Informer mes clients',
-          style: GoogleFonts.inter(fontSize: 17, fontWeight: FontWeight.w700),
+          style: TextStyle(fontFamily: kPolice, fontSize: 17, fontWeight: FontWeight.w700),
         ),
       ),
       // Le bouton fait partie du corps : un `bottomNavigationBar` reste sous le
@@ -314,7 +313,7 @@ class _NouvelleCampagnePageState extends State<NouvelleCampagnePage> {
                     _type == TypeCampagne.promotion
                         ? 'Créer et notifier'
                         : 'Envoyer',
-                    style: GoogleFonts.inter(
+                    style: TextStyle(fontFamily: kPolice, 
                       fontSize: 15.5,
                       fontWeight: FontWeight.w700,
                     ),
@@ -388,13 +387,7 @@ class _NouvelleCampagnePageState extends State<NouvelleCampagnePage> {
                           width: 44,
                           height: 44,
                           child: p.image.isNotEmpty
-                              ? CachedNetworkImage(
-                                  imageUrl: imageOptimisee(
-                                    p.image,
-                                    largeur: 120,
-                                  ),
-                                  fit: BoxFit.cover,
-                                )
+                              ? ImageReseau(p.image, largeurServeur: 120, fit: BoxFit.cover)
                               : Container(
                                   color: AppColor.kPrimaryLight,
                                   child: const Icon(
@@ -408,7 +401,7 @@ class _NouvelleCampagnePageState extends State<NouvelleCampagnePage> {
                         p.nom,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.inter(
+                        style: TextStyle(fontFamily: kPolice, 
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                         ),
@@ -432,7 +425,7 @@ class _NouvelleCampagnePageState extends State<NouvelleCampagnePage> {
                             ),
                           ],
                         ),
-                        style: GoogleFonts.inter(fontSize: 12),
+                        style: TextStyle(fontFamily: kPolice, fontSize: 12),
                       ),
                     ),
                 ],
@@ -510,7 +503,7 @@ class _NouvelleCampagnePageState extends State<NouvelleCampagnePage> {
             contentPadding: EdgeInsets.zero,
             title: Text(
               'Tous mes abonnés',
-              style: GoogleFonts.inter(fontWeight: FontWeight.w600),
+              style: TextStyle(fontFamily: kPolice, fontWeight: FontWeight.w600),
             ),
             subtitle: Text(
               abonnes == null
@@ -526,7 +519,7 @@ class _NouvelleCampagnePageState extends State<NouvelleCampagnePage> {
             contentPadding: EdgeInsets.zero,
             title: Text(
               'Choisir les clients',
-              style: GoogleFonts.inter(fontWeight: FontWeight.w600),
+              style: TextStyle(fontFamily: kPolice, fontWeight: FontWeight.w600),
             ),
           ),
           if (!_tous && abonnes != null)
@@ -544,7 +537,7 @@ class _NouvelleCampagnePageState extends State<NouvelleCampagnePage> {
                 controlAffinity: ListTileControlAffinity.leading,
                 title: Text(
                   a.nomComplet,
-                  style: GoogleFonts.inter(fontSize: 14),
+                  style: TextStyle(fontFamily: kPolice, fontSize: 14),
                 ),
                 subtitle: a.clocheActive
                     ? null
@@ -565,7 +558,7 @@ class _NouvelleCampagnePageState extends State<NouvelleCampagnePage> {
 
   // Petits outils
   TextStyle _discret() =>
-      GoogleFonts.inter(fontSize: 12, color: AppColor.kGrayscale40);
+      TextStyle(fontFamily: kPolice, fontSize: 12, color: AppColor.kGrayscale40);
 
   InputDecoration _deco(String libelle, String indication) => InputDecoration(
     label: LibelleObligatoire(libelle),
@@ -592,7 +585,7 @@ class _NouvelleCampagnePageState extends State<NouvelleCampagnePage> {
       children: [
         Text(
           titre,
-          style: GoogleFonts.inter(
+          style: TextStyle(fontFamily: kPolice, 
             fontSize: 15,
             fontWeight: FontWeight.w700,
             color: AppColor.kGrayscaleDark100,

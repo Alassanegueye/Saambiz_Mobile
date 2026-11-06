@@ -11,6 +11,7 @@ class UserModel extends User {
     required super.telephone,
     required super.role,
     super.photoProfil,
+    super.soldeDisponible,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -24,6 +25,7 @@ class UserModel extends User {
       telephone: json['telephone'] ?? '',
       role: json['role'] ?? '',
       photoProfil: json['photoProfil'],
+      soldeDisponible: montantDepuisJson(json['soldeDisponible']),
     );
   }
 
@@ -38,6 +40,7 @@ class UserModel extends User {
       'telephone': telephone,
       'role': role,
       'photoProfil': photoProfil,
+      'soldeDisponible': soldeDisponible,
     };
   }
 }

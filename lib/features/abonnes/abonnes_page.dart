@@ -1,9 +1,8 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart';
+import 'package:saambiz/core/widgets/image_reseau.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:saambiz/core/utils/image_url.dart';
+import 'package:saambiz/core/theme/police.dart';
 
 import '../../core/theme/app_color.dart';
 import '../../core/utils/texte.dart';
@@ -111,7 +110,7 @@ class _AbonnesPageState extends State<AbonnesPage> {
       appBar: AppBar(
         title: Text(
           liste == null ? 'Mes abonnés' : 'Mes abonnés (${liste.length})',
-          style: GoogleFonts.inter(
+          style: TextStyle(fontFamily: kPolice, 
             fontSize: 17,
             fontWeight: FontWeight.w700,
             color: AppColor.kWhite,
@@ -129,7 +128,7 @@ class _AbonnesPageState extends State<AbonnesPage> {
                     child: Text(
                       _erreur!,
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.inter(color: AppColor.kGrayscale40),
+                      style: TextStyle(fontFamily: kPolice, color: AppColor.kGrayscale40),
                     ),
                   ),
                 ],
@@ -156,7 +155,7 @@ class _AbonnesPageState extends State<AbonnesPage> {
                         const SizedBox(height: 12),
                         Text(
                           'Aucun abonné pour l\'instant',
-                          style: GoogleFonts.inter(
+                          style: TextStyle(fontFamily: kPolice, 
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
                             color: AppColor.kGrayscaleDark100,
@@ -166,7 +165,7 @@ class _AbonnesPageState extends State<AbonnesPage> {
                         Text(
                           'Les clients qui suivent votre boutique apparaîtront ici.',
                           textAlign: TextAlign.center,
-                          style: GoogleFonts.inter(
+                          style: TextStyle(fontFamily: kPolice, 
                             fontSize: 13,
                             color: AppColor.kGrayscale40,
                           ),
@@ -199,7 +198,7 @@ class _AbonnesPageState extends State<AbonnesPage> {
                           Expanded(
                             child: Text(
                               '$avecCloche sur ${liste.length} ont activé la cloche : ce sont eux qui reçoivent vos promotions et messages.',
-                              style: GoogleFonts.inter(
+                              style: TextStyle(fontFamily: kPolice, 
                                 fontSize: 12.5,
                                 color: AppColor.kPrimary,
                                 height: 1.4,
@@ -244,7 +243,7 @@ class _LigneAbonne extends StatelessWidget {
                   a.nomComplet,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.inter(
+                  style: TextStyle(fontFamily: kPolice, 
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
                     color: AppColor.kGrayscaleDark100,
@@ -274,7 +273,7 @@ class _LigneAbonne extends StatelessWidget {
           if (a.depuis != null)
             Text(
               'Abonné depuis le ${dateLongue(a.depuis!)}',
-              style: GoogleFonts.inter(
+              style: TextStyle(fontFamily: kPolice, 
                 fontSize: 13,
                 color: AppColor.kGrayscale40,
               ),
@@ -309,7 +308,7 @@ class _Info extends StatelessWidget {
       child: Text.rich(
         TextSpan(
           text: '$libelle : ',
-          style: GoogleFonts.inter(
+          style: TextStyle(fontFamily: kPolice, 
             fontSize: 13,
             fontWeight: FontWeight.w600,
             color: AppColor.kGrayscaleDark100,
@@ -317,7 +316,7 @@ class _Info extends StatelessWidget {
           children: [
             TextSpan(
               text: valeur,
-              style: GoogleFonts.inter(
+              style: TextStyle(fontFamily: kPolice, 
                 fontWeight: FontWeight.w400,
                 color: AppColor.kGrayscale40,
               ),
@@ -345,12 +344,12 @@ class AvatarAbonne extends StatelessWidget {
       radius: rayon,
       backgroundColor: AppColor.kPrimaryLight,
       backgroundImage: photo != null
-          ? CachedNetworkImageProvider(imageOptimisee(photo, largeur: 128))
+          ? fournisseurImageReseau(photo, largeurServeur: 128)
           : null,
       child: photo == null
           ? Text(
               initiale,
-              style: GoogleFonts.inter(
+              style: TextStyle(fontFamily: kPolice, 
                 fontSize: rayon * 0.8,
                 fontWeight: FontWeight.w800,
                 color: AppColor.kPrimary,

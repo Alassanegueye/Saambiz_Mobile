@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:saambiz/core/widgets/image_reseau.dart';
 
 import 'package:saambiz/core/widgets/libelle_obligatoire.dart';
 import 'package:flutter/material.dart';
@@ -10,8 +11,6 @@ import '../../../auth/domain/entities/user.dart';
 import '../bloc/compte_bloc.dart';
 import '../bloc/compte_event.dart';
 import '../bloc/compte_state.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:saambiz/core/utils/image_url.dart';
 
 class _C {
   static const green = Color(0xFF01154B);
@@ -84,7 +83,7 @@ class _EditProfileViewState extends State<_EditProfileView> {
     final ImageProvider? image = _photoPath != null
         ? FileImage(File(_photoPath!))
         : (actuelle != null && actuelle.isNotEmpty)
-        ? CachedNetworkImageProvider(imageOptimisee(actuelle))
+        ? fournisseurImageReseau(actuelle)
         : null;
     return GestureDetector(
       onTap: _choisirPhoto,

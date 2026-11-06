@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:saambiz/core/theme/police.dart';
 
 import '../../../../core/constants/infos_app.dart';
 import '../../../../core/theme/app_color.dart';
@@ -59,7 +59,7 @@ class AidePage extends StatelessWidget {
               padding: const EdgeInsets.only(left: 4, bottom: 10),
               child: Text(
                 'Questions fréquentes',
-                style: GoogleFonts.inter(
+                style: TextStyle(fontFamily: kPolice, 
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
                   color: AppColor.kGrayscale40,
@@ -89,7 +89,7 @@ class AidePage extends StatelessWidget {
                         collapsedIconColor: AppColor.kGrayscale30,
                         title: Text(
                           _faq[i].$1,
-                          style: GoogleFonts.inter(
+                          style: TextStyle(fontFamily: kPolice, 
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
                             color: AppColor.kGrayscaleDark100,
@@ -100,7 +100,7 @@ class AidePage extends StatelessWidget {
                             alignment: Alignment.centerLeft,
                             child: Text(
                               _faq[i].$2,
-                              style: GoogleFonts.inter(
+                              style: TextStyle(fontFamily: kPolice, 
                                 fontSize: 13.5,
                                 height: 1.55,
                                 color: AppColor.kGrayscale40,

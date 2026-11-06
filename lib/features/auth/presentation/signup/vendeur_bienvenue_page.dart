@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:saambiz/core/theme/police.dart';
 
 import '../../../../core/routes/app_router.dart';
 import '../../domain/entities/user.dart';
@@ -97,7 +97,7 @@ class _ActionTile extends StatelessWidget {
               Expanded(
                 child: Text(
                   title,
-                  style: GoogleFonts.inter(
+                  style: TextStyle(fontFamily: kPolice, 
                     fontSize: 14.5,
                     fontWeight: FontWeight.w600,
                     color: Sb.navy,

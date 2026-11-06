@@ -31,7 +31,7 @@ class ProduitRemoteDataSourceImpl implements ProduitRemoteDataSource {
 
   ProduitRemoteDataSourceImpl(this.dio);
 
-  // 🔐 Gestion centralisée erreur token
+  //  Gestion centralisée erreur token
   void _handleAuthError(dynamic e) {
     if (e is DioException) {
       final data = e.response?.data;
@@ -53,7 +53,7 @@ class ProduitRemoteDataSourceImpl implements ProduitRemoteDataSource {
     }
   }
 
-  // 📦 Extract list helper
+  //  Extract list helper
   List<dynamic> _extractList(dynamic raw) {
     if (raw is List) return raw;
 
@@ -83,7 +83,7 @@ class ProduitRemoteDataSourceImpl implements ProduitRemoteDataSource {
     throw Exception('Impossible d\'extraire une liste');
   }
 
-  // 🔐 Token
+  //  Token
   Future<String?> _getToken() async {
     return await sl<TokenService>().getToken();
   }
@@ -104,7 +104,7 @@ class ProduitRemoteDataSourceImpl implements ProduitRemoteDataSource {
     );
   }
 
-  // 🛍️ Produits
+  //  Produits
   @override
   Future<List<ProduitModel>> getProduits() async {
     try {
@@ -124,7 +124,7 @@ class ProduitRemoteDataSourceImpl implements ProduitRemoteDataSource {
     }
   }
 
-  // 🏪 Boutiques
+  //  Boutiques
   @override
   Future<List<BoutiqueModel>> getBoutiques() async {
     try {
@@ -161,7 +161,7 @@ class ProduitRemoteDataSourceImpl implements ProduitRemoteDataSource {
     }
   }
 
-  // 🔍 Recherche
+  //  Recherche
   @override
   Future<List<ProduitModel>> rechercher(String query) async {
     try {
@@ -182,7 +182,7 @@ class ProduitRemoteDataSourceImpl implements ProduitRemoteDataSource {
     }
   }
 
-  // 🏙️ Filtrer ville
+  //  Filtrer ville
   @override
   Future<List<ProduitModel>> filtrerVille(String ville) async {
     try {
@@ -203,7 +203,7 @@ class ProduitRemoteDataSourceImpl implements ProduitRemoteDataSource {
     }
   }
 
-  // 🏪 Produits par boutique
+  //  Produits par boutique
   @override
   Future<List<ProduitModel>> getProduitsByBoutique(String boutiqueId) async {
     try {
@@ -227,7 +227,7 @@ class ProduitRemoteDataSourceImpl implements ProduitRemoteDataSource {
     }
   }
 
-  // 💬 WhatsApp, contacter vendeur
+  //  WhatsApp, contacter vendeur
   @override
   Future<String> getWhatsappUrl(String produitId) async {
     try {
@@ -237,11 +237,11 @@ class ProduitRemoteDataSourceImpl implements ProduitRemoteDataSource {
       );
 
       final data = response.data;
-      logDebug('📩 Réponse brute WhatsApp: $data'); // LOG complet
+      logDebug('Réponse brute WhatsApp: $data'); // LOG complet
 
       if (data is Map<String, dynamic>) {
-        final url = data['whatsappUrl']; // ✅ Ici on prend le bon champ
-        logDebug('🔗 URL WhatsApp extraite: $url'); // LOG URL
+        final url = data['whatsappUrl']; //  Ici on prend le bon champ
+        logDebug('URL WhatsApp extraite: $url'); // LOG URL
 
         if (url is String && url.isNotEmpty) {
           return url;
@@ -250,7 +250,7 @@ class ProduitRemoteDataSourceImpl implements ProduitRemoteDataSource {
 
       throw Exception('URL WhatsApp introuvable dans la réponse');
     } catch (e) {
-      logDebug('❌ Erreur WhatsApp: $e');
+      logDebug('Erreur WhatsApp: $e');
       _handleAuthError(e);
       rethrow;
     }

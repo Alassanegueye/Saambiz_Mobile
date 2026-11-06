@@ -209,7 +209,7 @@ class CategoriesRemoteDataSource {
       _chargeeLe = DateTime.now();
       return liste;
     } on DioException catch (e) {
-      logDebug('⚠️ catégories: ${e.response?.statusCode}');
+      logDebug('catégories: ${e.response?.statusCode}');
       return cache ?? kCategoriesSecours;
     } catch (_) {
       return cache ?? kCategoriesSecours;

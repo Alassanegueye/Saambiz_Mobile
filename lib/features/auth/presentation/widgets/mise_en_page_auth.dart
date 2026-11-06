@@ -1,13 +1,13 @@
-import 'package:saambiz/core/widgets/libelle_obligatoire.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:saambiz/core/theme/police.dart';
+import 'package:saambiz/core/widgets/libelle_obligatoire.dart';
 
 import '../../../../core/theme/app_color.dart';
 
-/// Mise en page commune des écrans d'authentification (connexion, mot de
-/// passe oublié…) : page blanche, logo, titre et sous-titre, puis le
-/// formulaire, le tout dans un seul défilement.
+/// Mise en page commune des ecrans d'authentification (connexion, mot de
+/// passe oublie) : en-tete bleu marine (pictogramme, titre, sous-titre), puis
+/// le contenu pose a cheval sur l'en-tete, le tout dans un seul defilement.
 class MiseEnPageAuth extends StatelessWidget {
   final String titre;
   final String sousTitre;
@@ -22,13 +22,13 @@ class MiseEnPageAuth extends StatelessWidget {
     this.icone,
   });
 
-  /// Chevauchement du contenu sur l'en-tête.
-  static const double chevauchement = 0;
+  /// Chevauchement du contenu sur l'en-tete.
+  static const double chevauchement = 36;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColor.kWhite,
+      backgroundColor: AppColor.kBackground,
       body: CorpsAuth(
         titre: titre,
         sousTitre: sousTitre,
@@ -39,8 +39,8 @@ class MiseEnPageAuth extends StatelessWidget {
   }
 }
 
-/// Contenu de [MiseEnPageAuth] sans Scaffold, pour les écrans qui ont déjà le
-/// leur (écoute d'un bloc, par exemple).
+/// Contenu de [MiseEnPageAuth] sans Scaffold, pour les ecrans qui ont deja le
+/// leur (ecoute d'un bloc, par exemple).
 class CorpsAuth extends StatelessWidget {
   final String titre;
   final String sousTitre;
@@ -57,17 +57,20 @@ class CorpsAuth extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Page claire : icônes de la barre d'état en sombre.
+    // En-tete bleu : icones de la barre d'etat en blanc.
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.dark,
+      value: SystemUiOverlayStyle.light,
       child: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
         child: Column(
           children: [
             _EnteteAuth(titre: titre, sousTitre: sousTitre, icone: icone),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Column(children: enfants),
+            Transform.translate(
+              offset: const Offset(0, -MiseEnPageAuth.chevauchement),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Column(children: enfants),
+              ),
             ),
           ],
         ),
@@ -85,109 +88,91 @@ class _EnteteAuth extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      bottom: false,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(8, 4, 24, 24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (Navigator.of(context).canPop())
-              IconButton(
-                tooltip: 'Retour',
-                icon: const Icon(
-                  Icons.arrow_back_ios_new_rounded,
-                  color: AppColor.kPrimary,
-                  size: 20,
+    return Container(
+      width: double.infinity,
+      decoration: const BoxDecoration(
+        color: AppColor.kPrimary,
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(32)),
+      ),
+      child: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(8, 4, 24, MiseEnPageAuth.chevauchement + 28),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (Navigator.of(context).canPop())
+                IconButton(
+                  tooltip: 'Retour',
+                  icon: const Icon(
+                    Icons.arrow_back_ios_new_rounded,
+                    color: AppColor.kWhite,
+                    size: 20,
+                  ),
+                  onPressed: () => Navigator.of(context).maybePop(),
+                )
+              else
+                const SizedBox(height: 48),
+              const SizedBox(height: 8),
+              Padding(
+                padding: const EdgeInsets.only(left: 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Logo pose directement sur le bleu : version claire
+                    // (cadenas blanc, barres dorees), sans cadre blanc.
+                    if (icone == null)
+                      Image.asset(
+                        'assets/images/picto_clair.png',
+                        height: 52,
+                        fit: BoxFit.contain,
+                        semanticLabel: 'SaamBiz',
+                      )
+                    else
+                      Container(
+                        width: 52,
+                        height: 52,
+                        decoration: BoxDecoration(
+                          color: AppColor.kWhite.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: AppColor.kWhite.withValues(alpha: 0.18),
+                          ),
+                        ),
+                        child: Icon(icone, color: AppColor.kSecondary, size: 26),
+                      ),
+                    const SizedBox(height: 26),
+                    Text(
+                      titre,
+                      style: const TextStyle(
+                        fontFamily: kPolice,
+                        fontSize: 28,
+                        fontWeight: FontWeight.w700,
+                        color: AppColor.kWhite,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      sousTitre,
+                      style: TextStyle(
+                        fontFamily: kPolice,
+                        fontSize: 14,
+                        color: AppColor.kWhite.withValues(alpha: 0.7),
+                        height: 1.4,
+                      ),
+                    ),
+                  ],
                 ),
-                onPressed: () => Navigator.of(context).maybePop(),
-              )
-            else
-              const SizedBox(height: 48),
-            Padding(
-              padding: const EdgeInsets.only(left: 12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (icone == null)
-                    Image.asset(
-                      'assets/images/logo.png',
-                      height: 34,
-                      fit: BoxFit.contain,
-                      semanticLabel: 'SaamBiz',
-                    )
-                  else
-                    Icon(icone, color: AppColor.kPrimary, size: 34),
-                  const SizedBox(height: 28),
-                  Text(
-                    titre,
-                    style: GoogleFonts.inter(
-                      fontSize: 26,
-                      fontWeight: FontWeight.w700,
-                      color: AppColor.kGrayscaleDark100,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    sousTitre,
-                    style: GoogleFonts.inter(
-                      fontSize: 15,
-                      height: 1.45,
-                      color: AppColor.kGrayscale40,
-                    ),
-                  ),
-                ],
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
-/// Bloc d'un formulaire d'authentification, posé à même la page.
-class CarteAuth extends StatelessWidget {
-  final String? titre;
-  final IconData? icone;
-  final Widget child;
-
-  const CarteAuth({super.key, this.titre, this.icone, required this.child});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (titre != null) ...[
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    titre!,
-                    style: GoogleFonts.inter(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                      color: AppColor.kGrayscaleDark100,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-          ],
-          child,
-        ],
-      ),
-    );
-  }
-}
-
-/// Libellé d'un champ de formulaire.
+/// Libelle au-dessus d'un champ avec asterisque rouge optionnel.
 class LibelleChamp extends StatelessWidget {
   final String texte;
   final bool obligatoire;
@@ -195,7 +180,8 @@ class LibelleChamp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final style = GoogleFonts.inter(
+    const style = TextStyle(
+      fontFamily: kPolice,
       fontWeight: FontWeight.w600,
       fontSize: 13,
       color: AppColor.kGrayscaleDark100,
@@ -209,7 +195,33 @@ class LibelleChamp extends StatelessWidget {
   }
 }
 
-/// Lien « Pas encore de compte ? » sous les cartes.
+/// Carte blanche posee sur le bleu de l'en-tete.
+class CarteAuth extends StatelessWidget {
+  final Widget child;
+  const CarteAuth({super.key, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(22),
+      decoration: BoxDecoration(
+        color: AppColor.kWhite,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: AppColor.kPrimary.withValues(alpha: 0.08),
+            blurRadius: 28,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: child,
+    );
+  }
+}
+
+/// Lien sous la carte ("Pas encore de compte ? Creer un compte").
 class LienAuth extends StatelessWidget {
   final String question;
   final String action;
@@ -223,37 +235,44 @@ class LienAuth extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.only(top: 4),
-    child: Wrap(
-      alignment: WrapAlignment.center,
-      crossAxisAlignment: WrapCrossAlignment.center,
-      children: [
-        Text(
-          question,
-          style: GoogleFonts.inter(color: AppColor.kGrayscale40, fontSize: 14),
-        ),
-        TextButton(
-          onPressed: onTap,
-          style: TextButton.styleFrom(
-            padding: const EdgeInsets.symmetric(horizontal: 4),
-          ),
-          child: Text(
-            action,
-            style: GoogleFonts.inter(
-              color: AppColor.kPrimary,
-              fontWeight: FontWeight.w700,
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 20),
+      child: Wrap(
+        alignment: WrapAlignment.center,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [
+          Text(
+            question,
+            style: const TextStyle(
+              fontFamily: kPolice,
+              color: AppColor.kGrayscale40,
               fontSize: 14,
             ),
           ),
-        ),
-      ],
-    ),
-  );
+          TextButton(
+            onPressed: onTap,
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+            ),
+            child: Text(
+              action,
+              style: const TextStyle(
+                fontFamily: kPolice,
+                color: AppColor.kPrimary,
+                fontWeight: FontWeight.w700,
+                fontSize: 14,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
-/// Décoration commune des champs : surface gris-bleu, coins arrondis, contour
-/// bleu à la saisie, rouge en erreur.
+/// Decoration commune des champs : surface gris-bleu, coins arrondis, contour
+/// bleu a la saisie, rouge en erreur.
 InputDecoration decorationChampAuth({
   required String hint,
   Widget? prefixe,
@@ -265,7 +284,11 @@ InputDecoration decorationChampAuth({
   );
   return InputDecoration(
     hintText: hint,
-    hintStyle: GoogleFonts.inter(color: AppColor.kGrayscale30, fontSize: 14),
+    hintStyle: const TextStyle(
+      fontFamily: kPolice,
+      color: AppColor.kGrayscale30,
+      fontSize: 14,
+    ),
     filled: true,
     fillColor: AppColor.kSurface,
     isDense: true,
@@ -277,11 +300,15 @@ InputDecoration decorationChampAuth({
     focusedBorder: bord(AppColor.kPrimary, 1.5),
     errorBorder: bord(AppColor.kErreur),
     focusedErrorBorder: bord(AppColor.kErreur, 1.5),
-    errorStyle: GoogleFonts.inter(fontSize: 12, color: AppColor.kErreur),
+    errorStyle: const TextStyle(
+      fontFamily: kPolice,
+      fontSize: 12,
+      color: AppColor.kErreur,
+    ),
   );
 }
 
-/// Champ de formulaire complet : libellé au-dessus, saisie au style SaamBiz.
+/// Champ de formulaire complet : libelle au-dessus, saisie au style SaamBiz.
 class ChampFormulaire extends StatelessWidget {
   final String libelle;
   final String hint;
@@ -319,7 +346,8 @@ class ChampFormulaire extends StatelessWidget {
           autofillHints: autofill,
           validator: validator,
           cursorColor: AppColor.kPrimary,
-          style: GoogleFonts.inter(
+          style: const TextStyle(
+            fontFamily: kPolice,
             fontSize: 15,
             color: AppColor.kGrayscaleDark100,
           ),
@@ -335,7 +363,7 @@ class ChampFormulaire extends StatelessWidget {
   }
 }
 
-/// Champ mot de passe : œil pour afficher / masquer la saisie.
+/// Champ mot de passe : oeil pour afficher / masquer la saisie.
 class ChampMotDePasse extends StatefulWidget {
   final TextEditingController controller;
   final String hint;
@@ -369,7 +397,8 @@ class _ChampMotDePasseState extends State<ChampMotDePasse> {
       validator: widget.validator,
       autofillHints: const [AutofillHints.password],
       cursorColor: AppColor.kPrimary,
-      style: GoogleFonts.inter(
+      style: const TextStyle(
+        fontFamily: kPolice,
         fontSize: 15,
         color: AppColor.kGrayscaleDark100,
       ),
@@ -381,9 +410,7 @@ class _ChampMotDePasseState extends State<ChampMotDePasse> {
           size: 20,
         ),
         suffixe: IconButton(
-          tooltip: _masque
-              ? 'Afficher le mot de passe'
-              : 'Masquer le mot de passe',
+          tooltip: _masque ? 'Afficher le mot de passe' : 'Masquer le mot de passe',
           icon: Icon(
             _masque ? Icons.visibility_outlined : Icons.visibility_off_outlined,
             color: AppColor.kGrayscale40,
@@ -396,8 +423,8 @@ class _ChampMotDePasseState extends State<ChampMotDePasse> {
   }
 }
 
-/// Bouton principal des écrans d'authentification : bleu marine plein,
-/// indicateur de chargement à la place du libellé.
+/// Bouton principal des ecrans d'authentification : bleu marine plein,
+/// indicateur de chargement a la place du libelle.
 class BoutonAuth extends StatelessWidget {
   final String texte;
   final VoidCallback? onPressed;
@@ -425,7 +452,8 @@ class BoutonAuth extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
           ),
-          textStyle: GoogleFonts.inter(
+          textStyle: const TextStyle(
+            fontFamily: kPolice,
             fontSize: 15,
             fontWeight: FontWeight.w700,
           ),

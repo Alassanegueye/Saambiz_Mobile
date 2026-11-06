@@ -1,7 +1,7 @@
 import 'package:saambiz/core/theme/app_color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:saambiz/core/theme/police.dart';
 
 class PrimaryTextFormField extends StatelessWidget {
   const PrimaryTextFormField({
@@ -49,7 +49,7 @@ class PrimaryTextFormField extends StatelessWidget {
         controller: controller,
         maxLines: maxLines,
         keyboardType: keyboardType,
-        style: GoogleFonts.inter(
+        style: TextStyle(fontFamily: kPolice, 
           color: AppColor.kGrayscaleDark100,
           fontSize: 14,
           fontWeight: FontWeight.w500,
@@ -64,7 +64,7 @@ class PrimaryTextFormField extends StatelessWidget {
           filled: true,
           fillColor: Colors.transparent, // Le Container gère la couleur
           hintText: hintText,
-          hintStyle: GoogleFonts.inter(
+          hintStyle: TextStyle(fontFamily: kPolice, 
             color: AppColor.kGrayscale40,
             fontWeight: FontWeight.w500,
             fontSize: 14,

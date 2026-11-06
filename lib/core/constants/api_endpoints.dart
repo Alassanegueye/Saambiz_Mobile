@@ -136,7 +136,7 @@ class FavorisEndpoints {
 
   static const favoris = '/favoris';
   static String parId(String boutiqueId) => '/favoris/$boutiqueId';
-  // 🔔 Cloche : activer/désactiver les notifications d'une boutique suivie
+  //  Cloche : activer/désactiver les notifications d'une boutique suivie
   static String cloche(String boutiqueId) => '/favoris/$boutiqueId/cloche';
   // État de suivi (suivi ? cloche active ?)
   static String statut(String boutiqueId) => '/favoris/$boutiqueId/statut';

@@ -3,6 +3,8 @@ import 'package:saambiz/core/widgets/ui_kit.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import '../../../../core/widgets/app_app_bar.dart';
+import '../../../../core/widgets/degrade_fond.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
@@ -64,8 +66,8 @@ class _NotificationsViewState extends State<_NotificationsView> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: _C.bg,
-      appBar: AppBar(
-        title: const Text('Notifications'),
+      appBar: AppAppBar(
+        title: 'Notifications',
         actions: [
           IconButton(
             icon: const Icon(Icons.done_all),
@@ -75,7 +77,8 @@ class _NotificationsViewState extends State<_NotificationsView> {
           ),
         ],
       ),
-      body: BlocConsumer<NotificationsBloc, NotificationsState>(
+      body: FondDegradeSubtil(
+        child: BlocConsumer<NotificationsBloc, NotificationsState>(
         listener: (context, state) {
           if (state is NotificationsError) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -187,6 +190,7 @@ class _NotificationsViewState extends State<_NotificationsView> {
           }
           return const SizedBox.shrink();
         },
+      ),
       ),
     );
   }

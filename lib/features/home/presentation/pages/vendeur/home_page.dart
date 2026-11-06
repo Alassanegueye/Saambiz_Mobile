@@ -1,10 +1,11 @@
 import 'package:saambiz/core/widgets/onglets_conserves.dart';
+import 'package:saambiz/core/widgets/image_reseau.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:dio/dio.dart';
 import '../../../../../core/widgets/logo_boutique.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:saambiz/core/theme/police.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:saambiz/features/auth/domain/entities/user.dart';
 import '../../bloc/produit_bloc.dart';
@@ -26,14 +27,12 @@ import '../../../../commande/presentation/widgets/commande_card.dart'
     show couleurStatutCommande;
 import '../../../../notifications/presentation/pages/notifications_page.dart';
 import '../../../../abonnes/abonnes_page.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:saambiz/core/utils/image_url.dart';
 import '../../../../../core/theme/app_color.dart';
 import '../../../../../core/utils/texte.dart';
 import '../../../../../core/widgets/avatar_utilisateur.dart';
 import '../../../../../core/widgets/ui_kit.dart';
 import '../../../../vendeur/presentation/pages/produit_form_page.dart';
-import '../../../../vitrine/presentation/pages/ma_vitrine_page.dart';
+import 'profil_page.dart';
 
 class _C {
   static const green = Color(0xFF01154B); // navy (héritage de nom)
@@ -83,7 +82,7 @@ class _HomePageState extends State<HomePage>
   String _visites = '0';
   String _clients = '0';
   int _commandesCount = 0;
-  int _notifNonLues = 0; // 🔔 notifications non lues (via dashboard)
+  int _notifNonLues = 0; //  notifications non lues (via dashboard)
   List<CommandeModel> _recentOrders = [];
   int _aTraiter = 0; // commandes en attente d'une décision du vendeur
 
@@ -372,7 +371,7 @@ class _HomePageState extends State<HomePage>
                           'Bonjour, $nom',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.inter(
+                          style: TextStyle(fontFamily: kPolice, 
                             fontSize: 12.5,
                             color: AppColor.kWhite.withValues(alpha: 0.7),
                           ),
@@ -384,7 +383,7 @@ class _HomePageState extends State<HomePage>
                               boutique?.nom ?? 'Ma boutique',
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: GoogleFonts.inter(
+                              style: TextStyle(fontFamily: kPolice, 
                                 fontSize: 17,
                                 fontWeight: FontWeight.w700,
                                 color: AppColor.kWhite,
@@ -403,24 +402,57 @@ class _HomePageState extends State<HomePage>
                   ),
                 ),
               ),
-              IconButton(
-                tooltip: 'Notifications',
-                onPressed: _openNotifications,
-                icon: Badge(
-                  isLabelVisible: _notifNonLues > 0,
-                  backgroundColor: AppColor.kSecondary,
-                  textColor: AppColor.kPrimary,
-                  label: Text(_notifNonLues > 99 ? '99+' : '$_notifNonLues'),
-                  child: const Icon(
-                    Icons.notifications_none_rounded,
-                    color: AppColor.kWhite,
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: Material(
+                    color: Colors.white.withValues(alpha: 0.12),
+                    child: InkWell(
+                      onTap: _openNotifications,
+                      child: Container(
+                        width: 40,
+                        height: 40,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.22),
+                          ),
+                        ),
+                        child: Badge(
+                          isLabelVisible: _notifNonLues > 0,
+                          backgroundColor: AppColor.kSecondary,
+                          textColor: AppColor.kPrimary,
+                          label: Text(
+                            _notifNonLues > 99 ? '99+' : '$_notifNonLues',
+                            style: const TextStyle(
+                              fontFamily: kPolice,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 10,
+                            ),
+                          ),
+                          child: const Icon(
+                            Icons.notifications_none_rounded,
+                            color: AppColor.kWhite,
+                            size: 21,
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ),
               const SizedBox(width: 2),
               AvatarUtilisateur(
                 utilisateur: _utilisateur,
-                onTap: () => widget.ouvrirOnglet?.call(4),
+                // Le compte n'est plus un onglet : il s'ouvre ici, en haut,
+                // et se referme sur l'écran d'où il a été appelé.
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => ProfilPage(user: _utilisateur),
+                  ),
+                ),
               ),
             ],
           ),
@@ -437,7 +469,7 @@ class _HomePageState extends State<HomePage>
         : Center(
             child: Text(
               initialesDe(boutique.nom),
-              style: GoogleFonts.inter(
+              style: TextStyle(fontFamily: kPolice, 
                 fontSize: 16,
                 fontWeight: FontWeight.w800,
                 color: AppColor.kPrimary,
@@ -451,11 +483,7 @@ class _HomePageState extends State<HomePage>
         height: 44,
         color: AppColor.kWhite,
         child: logo != null && logo.isNotEmpty
-            ? CachedNetworkImage(
-                imageUrl: imageOptimisee(logo),
-                fit: BoxFit.cover,
-                errorWidget: (_, __, ___) => initiales,
-              )
+            ? ImageReseau(logo, fit: BoxFit.cover, repli: initiales)
             : initiales,
       ),
     );
@@ -466,15 +494,22 @@ class _HomePageState extends State<HomePage>
   Widget _buildBlocChiffres() {
     return Stack(
       children: [
-        const Positioned(
+        Positioned(
           top: 0,
           left: 0,
           right: 0,
           bottom: 44,
-          child: DecoratedBox(
+          child: Container(
             decoration: BoxDecoration(
               color: AppColor.kPrimary,
-              borderRadius: BorderRadius.vertical(bottom: Radius.circular(24)),
+              borderRadius: const BorderRadius.vertical(bottom: Radius.circular(32)),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColor.kPrimary.withValues(alpha: 0.20),
+                  blurRadius: 18,
+                  offset: const Offset(0, 8),
+                ),
+              ],
             ),
           ),
         ),
@@ -490,7 +525,7 @@ class _HomePageState extends State<HomePage>
                   children: [
                     Text(
                       'Chiffre d’affaires',
-                      style: GoogleFonts.inter(
+                      style: TextStyle(fontFamily: kPolice, 
                         fontSize: 13,
                         color: AppColor.kWhite.withValues(alpha: 0.7),
                       ),
@@ -505,7 +540,7 @@ class _HomePageState extends State<HomePage>
                           children: [
                             TextSpan(
                               text: ' FCFA',
-                              style: GoogleFonts.inter(
+                              style: TextStyle(fontFamily: kPolice, 
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
                                 color: AppColor.kSecondary,
@@ -513,7 +548,7 @@ class _HomePageState extends State<HomePage>
                             ),
                           ],
                         ),
-                        style: GoogleFonts.inter(
+                        style: TextStyle(fontFamily: kPolice, 
                           fontSize: 36,
                           fontWeight: FontWeight.w800,
                           letterSpacing: -0.5,
@@ -553,7 +588,7 @@ class _HomePageState extends State<HomePage>
                 const SizedBox(height: 6),
                 Text(
                   valeur,
-                  style: GoogleFonts.inter(
+                  style: TextStyle(fontFamily: kPolice, 
                     fontSize: 20,
                     fontWeight: FontWeight.w700,
                     color: AppColor.kGrayscaleDark100,
@@ -572,12 +607,22 @@ class _HomePageState extends State<HomePage>
     Widget separateur() =>
         Container(width: 1, height: 44, color: AppColor.kLine);
 
-    return Material(
-      color: AppColor.kWhite,
-      elevation: 3,
-      shadowColor: AppColor.kPrimary.withValues(alpha: 0.18),
-      borderRadius: BorderRadius.circular(16),
-      child: Row(
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColor.kWhite,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.white, width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: AppColor.kPrimary.withValues(alpha: 0.10),
+            blurRadius: 18,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: Row(
         children: [
           chiffre(
             Icons.receipt_long_outlined,
@@ -598,6 +643,7 @@ class _HomePageState extends State<HomePage>
             ).push(MaterialPageRoute(builder: (_) => const AbonnesPage())),
           ),
         ],
+      ),
       ),
     );
   }
@@ -627,7 +673,7 @@ class _HomePageState extends State<HomePage>
                   children: [
                     Text(
                       '$_aTraiter commande${pluriel ? 's' : ''} à traiter',
-                      style: GoogleFonts.inter(
+                      style: TextStyle(fontFamily: kPolice, 
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
                         color: AppColor.kGrayscaleDark100,
@@ -681,7 +727,7 @@ class _HomePageState extends State<HomePage>
                       libelle,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.inter(
+                      style: TextStyle(fontFamily: kPolice, 
                         fontSize: 13.5,
                         fontWeight: FontWeight.w600,
                         color: AppColor.kGrayscaleDark100,
@@ -707,7 +753,7 @@ class _HomePageState extends State<HomePage>
             backgroundColor: AppColor.kSecondary,
             foregroundColor: AppColor.kPrimary,
             padding: const EdgeInsets.symmetric(vertical: 15),
-            textStyle: GoogleFonts.inter(
+            textStyle: TextStyle(fontFamily: kPolice, 
               fontSize: 15,
               fontWeight: FontWeight.w700,
             ),
@@ -722,13 +768,13 @@ class _HomePageState extends State<HomePage>
             raccourci(
               Icons.local_offer_outlined,
               'Promotions',
-              () => widget.ouvrirOnglet?.call(3),
+              () => widget.ouvrirOnglet?.call(4),
             ),
             const SizedBox(width: 10),
             raccourci(
-              Icons.language_rounded,
-              'Mon site web',
-              () => ouvrir(const MaVitrinePage()),
+              Icons.storefront_outlined,
+              'Ma boutique',
+              () => widget.ouvrirOnglet?.call(2),
             ),
           ],
         ),
@@ -805,7 +851,7 @@ class _HomePageState extends State<HomePage>
                 backgroundColor: AppColor.kPrimaryLight,
                 child: Text(
                   initiales.isEmpty ? '?' : initiales,
-                  style: GoogleFonts.inter(
+                  style: TextStyle(fontFamily: kPolice, 
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
                     color: AppColor.kPrimary,
@@ -821,7 +867,7 @@ class _HomePageState extends State<HomePage>
                       nom.isEmpty ? 'Client' : nom,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.inter(
+                      style: TextStyle(fontFamily: kPolice, 
                         fontSize: 14.5,
                         fontWeight: FontWeight.w600,
                         color: AppColor.kGrayscaleDark100,
@@ -843,7 +889,7 @@ class _HomePageState extends State<HomePage>
                 children: [
                   Text(
                     '${_fmtNombre(o.montantTotal)} FCFA',
-                    style: GoogleFonts.inter(
+                    style: TextStyle(fontFamily: kPolice, 
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
                       color: AppColor.kGrayscaleDark100,
@@ -861,7 +907,7 @@ class _HomePageState extends State<HomePage>
                     ),
                     child: Text(
                       st.label,
-                      style: GoogleFonts.inter(
+                      style: TextStyle(fontFamily: kPolice, 
                         fontSize: 11.5,
                         fontWeight: FontWeight.w600,
                         color: st.color,
@@ -959,7 +1005,7 @@ class _HomePageState extends State<HomePage>
                                     return Center(
                                       child: Text(
                                         initiales,
-                                        style: GoogleFonts.inter(
+                                        style: TextStyle(fontFamily: kPolice, 
                                           fontSize: 16,
                                           fontWeight: FontWeight.w800,
                                           color: _C.green,
@@ -971,7 +1017,7 @@ class _HomePageState extends State<HomePage>
                               : Center(
                                   child: Text(
                                     initiales,
-                                    style: GoogleFonts.inter(
+                                    style: TextStyle(fontFamily: kPolice, 
                                       fontSize: 16,
                                       fontWeight: FontWeight.w800,
                                       color: _C.green,
@@ -987,7 +1033,7 @@ class _HomePageState extends State<HomePage>
                           children: [
                             Text(
                               '$prenom ${widget.user?.nom ?? ''}',
-                              style: GoogleFonts.inter(
+                              style: TextStyle(fontFamily: kPolice, 
                                 fontSize: 18,
                                 fontWeight: FontWeight.w800,
                                 color: _C.white,
@@ -1005,7 +1051,7 @@ class _HomePageState extends State<HomePage>
                                 const SizedBox(width: 4),
                                 Text(
                                   widget.user?.email ?? 'email@exemple.com',
-                                  style: GoogleFonts.inter(
+                                  style: TextStyle(fontFamily: kPolice, 
                                     fontSize: 11,
                                     fontWeight: FontWeight.w500,
                                     color: _C.white.withOpacity(0.6),
@@ -1069,7 +1115,7 @@ class _HomePageState extends State<HomePage>
                       ),
                       child: Text(
                         'OFFRE SPÉCIALE',
-                        style: GoogleFonts.inter(
+                        style: TextStyle(fontFamily: kPolice, 
                           fontSize: 10,
                           fontWeight: FontWeight.w700,
                           color: _C.green,
@@ -1083,7 +1129,7 @@ class _HomePageState extends State<HomePage>
                         children: [
                           TextSpan(
                             text: 'Livraison ',
-                            style: GoogleFonts.inter(
+                            style: TextStyle(fontFamily: kPolice, 
                               fontSize: 15,
                               fontWeight: FontWeight.w800,
                               color: _C.white,
@@ -1091,7 +1137,7 @@ class _HomePageState extends State<HomePage>
                           ),
                           TextSpan(
                             text: 'offerte\n',
-                            style: GoogleFonts.inter(
+                            style: TextStyle(fontFamily: kPolice, 
                               fontSize: 15,
                               fontWeight: FontWeight.w800,
                               color: _C.green,
@@ -1099,7 +1145,7 @@ class _HomePageState extends State<HomePage>
                           ),
                           TextSpan(
                             text: 'ce week-end !',
-                            style: GoogleFonts.inter(
+                            style: TextStyle(fontFamily: kPolice, 
                               fontSize: 15,
                               fontWeight: FontWeight.w800,
                               color: _C.white,
@@ -1111,7 +1157,7 @@ class _HomePageState extends State<HomePage>
                     const SizedBox(height: 4),
                     Text(
                       'Sur toutes vos commandes',
-                      style: GoogleFonts.inter(fontSize: 11, color: _C.label),
+                      style: TextStyle(fontFamily: kPolice, fontSize: 11, color: _C.label),
                     ),
                   ],
                 ),
@@ -1127,7 +1173,7 @@ class _HomePageState extends State<HomePage>
                 ),
                 child: Text(
                   'En profiter',
-                  style: GoogleFonts.inter(
+                  style: TextStyle(fontFamily: kPolice, 
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
                     color: _C.white,
@@ -1205,7 +1251,7 @@ class _HomePageState extends State<HomePage>
           const SizedBox(height: 6),
           Text(
             value,
-            style: GoogleFonts.inter(
+            style: TextStyle(fontFamily: kPolice, 
               fontSize: 18,
               fontWeight: FontWeight.w800,
               color: _C.black,
@@ -1213,7 +1259,7 @@ class _HomePageState extends State<HomePage>
           ),
           Text(
             label,
-            style: GoogleFonts.inter(
+            style: TextStyle(fontFamily: kPolice, 
               fontSize: 10,
               color: _C.label,
               fontWeight: FontWeight.w500,
@@ -1233,7 +1279,7 @@ class _HomePageState extends State<HomePage>
         children: [
           Text(
             title,
-            style: GoogleFonts.inter(
+            style: TextStyle(fontFamily: kPolice, 
               fontSize: 15,
               fontWeight: FontWeight.w700,
               color: _C.black,
@@ -1241,7 +1287,7 @@ class _HomePageState extends State<HomePage>
           ),
           Text(
             'Voir tout',
-            style: GoogleFonts.inter(
+            style: TextStyle(fontFamily: kPolice, 
               fontSize: 12,
               fontWeight: FontWeight.w600,
               color: _C.green,
@@ -1271,7 +1317,7 @@ class _HomePageState extends State<HomePage>
             const SizedBox(height: 8),
             Text(
               'Erreur: $_boutiquesError',
-              style: GoogleFonts.inter(color: _C.orange),
+              style: TextStyle(fontFamily: kPolice, color: _C.orange),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 12),
@@ -1288,7 +1334,7 @@ class _HomePageState extends State<HomePage>
                 ),
                 child: Text(
                   'Réessayer',
-                  style: GoogleFonts.inter(
+                  style: TextStyle(fontFamily: kPolice, 
                     color: _C.white,
                     fontWeight: FontWeight.w600,
                   ),
@@ -1305,7 +1351,7 @@ class _HomePageState extends State<HomePage>
         child: Center(
           child: Text(
             'Aucune boutique disponible',
-            style: GoogleFonts.inter(color: _C.label),
+            style: TextStyle(fontFamily: kPolice, color: _C.label),
           ),
         ),
       );
@@ -1344,9 +1390,7 @@ class _HomePageState extends State<HomePage>
                 borderRadius: BorderRadius.circular(12),
                 image: hasLogo
                     ? DecorationImage(
-                        image: CachedNetworkImageProvider(
-                          imageOptimisee(boutique.logo!),
-                        ),
+                        image: fournisseurImageReseau(boutique.logo!),
                         fit: BoxFit.cover,
                       )
                     : null,
@@ -1360,7 +1404,7 @@ class _HomePageState extends State<HomePage>
                 children: [
                   Text(
                     boutique.nom,
-                    style: GoogleFonts.inter(
+                    style: TextStyle(fontFamily: kPolice, 
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
                       color: _C.black,
@@ -1368,7 +1412,7 @@ class _HomePageState extends State<HomePage>
                   ),
                   Text(
                     sousTitre,
-                    style: GoogleFonts.inter(fontSize: 11, color: _C.label),
+                    style: TextStyle(fontFamily: kPolice, fontSize: 11, color: _C.label),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -1384,7 +1428,7 @@ class _HomePageState extends State<HomePage>
                         const SizedBox(width: 3),
                         Text(
                           horaires,
-                          style: GoogleFonts.inter(
+                          style: TextStyle(fontFamily: kPolice, 
                             fontSize: 10,
                             color: _C.green,
                           ),
@@ -1403,7 +1447,7 @@ class _HomePageState extends State<HomePage>
               ),
               child: Text(
                 boutique.vendeurNomComplet,
-                style: GoogleFonts.inter(
+                style: TextStyle(fontFamily: kPolice, 
                   fontSize: 10,
                   fontWeight: FontWeight.w600,
                   color: _C.sub,
@@ -1470,7 +1514,7 @@ class _HomePageState extends State<HomePage>
                   padding: const EdgeInsets.all(32),
                   child: Text(
                     'Aucun produit disponible',
-                    style: GoogleFonts.inter(color: _C.label),
+                    style: TextStyle(fontFamily: kPolice, color: _C.label),
                   ),
                 ),
               );
@@ -1501,7 +1545,7 @@ class _HomePageState extends State<HomePage>
                     const SizedBox(height: 8),
                     Text(
                       'Erreur: ${state.message}',
-                      style: GoogleFonts.inter(color: _C.orange),
+                      style: TextStyle(fontFamily: kPolice, color: _C.orange),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 12),
@@ -1518,7 +1562,7 @@ class _HomePageState extends State<HomePage>
                         ),
                         child: Text(
                           'Réessayer',
-                          style: GoogleFonts.inter(
+                          style: TextStyle(fontFamily: kPolice, 
                             color: _C.white,
                             fontWeight: FontWeight.w600,
                           ),
@@ -1555,9 +1599,7 @@ class _HomePageState extends State<HomePage>
                 ),
                 image: produit.image.isNotEmpty
                     ? DecorationImage(
-                        image: CachedNetworkImageProvider(
-                          imageOptimisee(produit.image),
-                        ),
+                        image: fournisseurImageReseau(produit.image),
                         fit: BoxFit.cover,
                       )
                     : null,
@@ -1592,7 +1634,7 @@ class _HomePageState extends State<HomePage>
               children: [
                 Text(
                   produit.nom,
-                  style: GoogleFonts.inter(
+                  style: TextStyle(fontFamily: kPolice, 
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
                     color: _C.black,
@@ -1603,7 +1645,7 @@ class _HomePageState extends State<HomePage>
                 const SizedBox(height: 2),
                 Text(
                   produit.ville,
-                  style: GoogleFonts.inter(fontSize: 10, color: _C.label),
+                  style: TextStyle(fontFamily: kPolice, fontSize: 10, color: _C.label),
                 ),
                 const SizedBox(height: 8),
                 Row(
@@ -1614,7 +1656,7 @@ class _HomePageState extends State<HomePage>
                         children: [
                           TextSpan(
                             text: produit.prix,
-                            style: GoogleFonts.inter(
+                            style: TextStyle(fontFamily: kPolice, 
                               fontSize: 13,
                               fontWeight: FontWeight.w800,
                               color: _C.black,
@@ -1622,7 +1664,7 @@ class _HomePageState extends State<HomePage>
                           ),
                           TextSpan(
                             text: ' F',
-                            style: GoogleFonts.inter(
+                            style: TextStyle(fontFamily: kPolice, 
                               fontSize: 10,
                               color: _C.label,
                             ),
@@ -1745,24 +1787,24 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
     if (widget.dataSource == null) return;
 
     try {
-      // 1️⃣ Récupère l'URL depuis le backend
+      // 1. Récupère l'URL depuis le backend
       final url = await widget.dataSource!.getWhatsappUrl(produitId);
-      logDebug('🔗 URL WhatsApp finale: $url');
+      logDebug('URL WhatsApp finale: $url');
 
-      // 2️⃣ Parse l'URL
+      // 2. Parse l'URL
       final uri = Uri.parse(url);
 
-      // 3️⃣ Vérifie si l'appareil peut ouvrir le lien
+      // 3. Vérifie si l'appareil peut ouvrir le lien
       if (await canLaunchUrl(uri)) {
         await launchUrl(uri, mode: LaunchMode.externalApplication);
       } else {
-        // 4️⃣ Affiche un message si WhatsApp n'est pas installé
+        // 4. Affiche un message si WhatsApp n'est pas installé
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
                 'Impossible d\'ouvrir WhatsApp. Veuillez vérifier que l\'application est installée.',
-                style: GoogleFonts.inter(color: _C.white),
+                style: TextStyle(fontFamily: kPolice, color: _C.white),
               ),
               backgroundColor: _C.orange,
               behavior: SnackBarBehavior.floating,
@@ -1776,7 +1818,7 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
           SnackBar(
             content: Text(
               'Erreur: ${e.toString()}',
-              style: GoogleFonts.inter(color: _C.white),
+              style: TextStyle(fontFamily: kPolice, color: _C.white),
             ),
             backgroundColor: _C.orange,
             behavior: SnackBarBehavior.floating,
@@ -1828,9 +1870,7 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
                       borderRadius: BorderRadius.circular(14),
                       image: hasLogo
                           ? DecorationImage(
-                              image: CachedNetworkImageProvider(
-                                imageOptimisee(widget.boutique.logo!),
-                              ),
+                              image: fournisseurImageReseau(widget.boutique.logo!),
                               fit: BoxFit.cover,
                             )
                           : null,
@@ -1846,7 +1886,7 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
                       children: [
                         Text(
                           widget.boutique.nom,
-                          style: GoogleFonts.inter(
+                          style: TextStyle(fontFamily: kPolice, 
                             fontSize: 16,
                             fontWeight: FontWeight.w800,
                             color: _C.black,
@@ -1863,7 +1903,7 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
                               const SizedBox(width: 3),
                               Text(
                                 widget.boutique.localisation,
-                                style: GoogleFonts.inter(
+                                style: TextStyle(fontFamily: kPolice, 
                                   fontSize: 11,
                                   color: _C.label,
                                 ),
@@ -1881,7 +1921,7 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
                               const SizedBox(width: 3),
                               Text(
                                 widget.boutique.horaires,
-                                style: GoogleFonts.inter(
+                                style: TextStyle(fontFamily: kPolice, 
                                   fontSize: 11,
                                   color: _C.green,
                                 ),
@@ -1901,7 +1941,7 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
                               const SizedBox(width: 3),
                               Text(
                                 '${widget.boutique.vendeurNomComplet} (${widget.boutique.vendeurNumero})',
-                                style: GoogleFonts.inter(
+                                style: TextStyle(fontFamily: kPolice, 
                                   fontSize: 11,
                                   color: _C.label,
                                 ),
@@ -1944,7 +1984,7 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
                   children: [
                     Text(
                       '${_produits.length} produit${_produits.length > 1 ? 's' : ''}',
-                      style: GoogleFonts.inter(
+                      style: TextStyle(fontFamily: kPolice, 
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
                         color: _C.black,
@@ -1981,7 +2021,7 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
                               const SizedBox(width: 4),
                               Text(
                                 '$_nbAbonnes abonné${_nbAbonnes! > 1 ? 's' : ''}',
-                                style: GoogleFonts.inter(
+                                style: TextStyle(fontFamily: kPolice, 
                                   fontSize: 11.5,
                                   fontWeight: FontWeight.w700,
                                   color: _C.green,
@@ -2008,7 +2048,7 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
                       ),
                       child: Text(
                         'En stock',
-                        style: GoogleFonts.inter(
+                        style: TextStyle(fontFamily: kPolice, 
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
                           color: _C.green,
@@ -2065,7 +2105,7 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
             padding: const EdgeInsets.symmetric(horizontal: 32),
             child: Text(
               _error!,
-              style: GoogleFonts.inter(color: _C.orange),
+              style: TextStyle(fontFamily: kPolice, color: _C.orange),
               textAlign: TextAlign.center,
             ),
           ),
@@ -2086,7 +2126,7 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
               ),
               child: Text(
                 'Réessayer',
-                style: GoogleFonts.inter(
+                style: TextStyle(fontFamily: kPolice, 
                   color: _C.white,
                   fontWeight: FontWeight.w600,
                 ),
@@ -2107,7 +2147,7 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
           const SizedBox(height: 12),
           Text(
             'Aucun produit dans cette boutique',
-            style: GoogleFonts.inter(fontSize: 14, color: _C.label),
+            style: TextStyle(fontFamily: kPolice, fontSize: 14, color: _C.label),
           ),
         ],
       ),
@@ -2135,9 +2175,7 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
                 ),
                 image: produit.image.isNotEmpty
                     ? DecorationImage(
-                        image: CachedNetworkImageProvider(
-                          imageOptimisee(produit.image),
-                        ),
+                        image: fournisseurImageReseau(produit.image),
                         fit: BoxFit.cover,
                       )
                     : null,
@@ -2173,7 +2211,7 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
               children: [
                 Text(
                   produit.nom,
-                  style: GoogleFonts.inter(
+                  style: TextStyle(fontFamily: kPolice, 
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
                     color: _C.black,
@@ -2184,7 +2222,7 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
                 const SizedBox(height: 2),
                 Text(
                   produit.ville,
-                  style: GoogleFonts.inter(fontSize: 10, color: _C.label),
+                  style: TextStyle(fontFamily: kPolice, fontSize: 10, color: _C.label),
                 ),
                 const SizedBox(height: 8),
                 Row(
@@ -2195,7 +2233,7 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
                         children: [
                           TextSpan(
                             text: produit.prix,
-                            style: GoogleFonts.inter(
+                            style: TextStyle(fontFamily: kPolice, 
                               fontSize: 13,
                               fontWeight: FontWeight.w800,
                               color: _C.black,
@@ -2203,7 +2241,7 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
                           ),
                           TextSpan(
                             text: ' F',
-                            style: GoogleFonts.inter(
+                            style: TextStyle(fontFamily: kPolice, 
                               fontSize: 10,
                               color: _C.label,
                             ),

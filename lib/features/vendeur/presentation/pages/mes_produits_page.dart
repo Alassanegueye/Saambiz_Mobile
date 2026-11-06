@@ -1,18 +1,18 @@
 import 'package:saambiz/core/widgets/onglets_conserves.dart';
+import 'package:saambiz/core/widgets/image_reseau.dart';
 import 'package:flutter/material.dart';
+import '../../../../core/widgets/degrade_fond.dart';
 import 'package:flutter/services.dart';
 import 'package:saambiz/core/theme/app_color.dart';
 import 'package:saambiz/core/widgets/ui_kit.dart';
 import '../../../catalogue/presentation/widgets/produit_card.dart'
     show formaterPrix;
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:saambiz/core/theme/police.dart';
 import '../../../../injection_container.dart';
 import '../../../home/data/models/produit_model.dart';
 import '../bloc/vendeur_produit_bloc.dart';
 import 'produit_form_page.dart';
-import 'package:saambiz/core/utils/image_url.dart';
 import 'package:saambiz/core/utils/texte.dart';
 
 class _C {
@@ -79,16 +79,17 @@ class _MesProduitsViewState extends State<_MesProduitsView> {
         icon: const Icon(Icons.add_rounded),
         label: Text(
           'Ajouter',
-          style: GoogleFonts.inter(fontWeight: FontWeight.w700),
+          style: TextStyle(fontFamily: kPolice, fontWeight: FontWeight.w700),
         ),
       ),
-      body: SafeArea(
-        top: false,
-        bottom: false,
-        child: Column(
-          children: [
-            _buildTopBar(context),
-            Expanded(
+      body: FondDegradeSubtil(
+        child: SafeArea(
+          top: false,
+          bottom: false,
+          child: Column(
+            children: [
+              _buildTopBar(context),
+              Expanded(
               child: BlocConsumer<VendeurProduitBloc, VendeurProduitState>(
                 buildWhen: (avant, apres) =>
                     !(apres is VendeurProduitLoading &&
@@ -165,6 +166,7 @@ class _MesProduitsViewState extends State<_MesProduitsView> {
             ),
           ],
         ),
+        ),
       ),
     );
   }
@@ -193,13 +195,13 @@ class _MesProduitsViewState extends State<_MesProduitsView> {
                           autofocus: true,
                           onChanged: (v) => setState(() => _recherche = v),
                           cursorColor: AppColor.kSecondary,
-                          style: GoogleFonts.inter(
+                          style: TextStyle(fontFamily: kPolice, 
                             fontSize: 15,
                             color: AppColor.kWhite,
                           ),
                           decoration: InputDecoration(
                             hintText: 'Rechercher un produit',
-                            hintStyle: GoogleFonts.inter(
+                            hintStyle: TextStyle(fontFamily: kPolice, 
                               color: AppColor.kWhite.withValues(alpha: 0.6),
                             ),
                             isDense: true,
@@ -211,7 +213,7 @@ class _MesProduitsViewState extends State<_MesProduitsView> {
                         )
                       : Text(
                           'Mes produits',
-                          style: GoogleFonts.inter(
+                          style: TextStyle(fontFamily: kPolice, 
                             fontSize: 17,
                             fontWeight: FontWeight.w600,
                             color: AppColor.kWhite,
@@ -282,13 +284,7 @@ class _MesProduitsViewState extends State<_MesProduitsView> {
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
             child: p.image.isNotEmpty
-                ? CachedNetworkImage(
-                    imageUrl: imageOptimisee(p.image),
-                    width: 64,
-                    height: 64,
-                    fit: BoxFit.cover,
-                    errorWidget: (_, __, ___) => _imgFallback(),
-                  )
+                ? ImageReseau(p.image, width: 64, height: 64, fit: BoxFit.cover, repli: _imgFallback())
                 : _imgFallback(),
           ),
           const SizedBox(width: 12),
@@ -300,7 +296,7 @@ class _MesProduitsViewState extends State<_MesProduitsView> {
                   p.nom,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.inter(
+                  style: TextStyle(fontFamily: kPolice, 
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
                     color: _C.black,
@@ -309,7 +305,7 @@ class _MesProduitsViewState extends State<_MesProduitsView> {
                 const SizedBox(height: 3),
                 Text(
                   formaterPrix(double.tryParse(p.prix) ?? 0),
-                  style: GoogleFonts.inter(
+                  style: TextStyle(fontFamily: kPolice, 
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
                     color: _C.green,
@@ -320,7 +316,7 @@ class _MesProduitsViewState extends State<_MesProduitsView> {
                   enLigne
                       ? 'En ligne · ${p.quantite} en stock'
                       : 'Hors ligne · rupture de stock',
-                  style: GoogleFonts.inter(
+                  style: TextStyle(fontFamily: kPolice, 
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
                     color: enLigne ? _C.success : _C.sub,
@@ -365,7 +361,7 @@ class _MesProduitsViewState extends State<_MesProduitsView> {
           const SizedBox(height: 12),
           Text(
             'Aucun produit ici',
-            style: GoogleFonts.inter(fontSize: 14, color: _C.sub),
+            style: TextStyle(fontFamily: kPolice, fontSize: 14, color: _C.sub),
           ),
         ],
       ),
@@ -384,7 +380,7 @@ class _MesProduitsViewState extends State<_MesProduitsView> {
             child: Text(
               message,
               textAlign: TextAlign.center,
-              style: GoogleFonts.inter(color: _C.sub),
+              style: TextStyle(fontFamily: kPolice, color: _C.sub),
             ),
           ),
           const SizedBox(height: 12),
@@ -393,7 +389,7 @@ class _MesProduitsViewState extends State<_MesProduitsView> {
                 context.read<VendeurProduitBloc>().add(LoadMesProduits()),
             child: Text(
               'Réessayer',
-              style: GoogleFonts.inter(
+              style: TextStyle(fontFamily: kPolice, 
                 color: _C.green,
                 fontWeight: FontWeight.w700,
               ),

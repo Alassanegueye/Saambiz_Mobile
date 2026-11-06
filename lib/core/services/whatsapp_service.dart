@@ -6,7 +6,7 @@ class WhatsAppService {
     if (await canLaunchUrl(Uri.parse(url))) {
       await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
     } else {
-      debugPrint('❌ Impossible d’ouvrir WhatsApp avec ce lien: $url');
+      debugPrint(' Impossible d’ouvrir WhatsApp avec ce lien: $url');
       throw 'Impossible d’ouvrir WhatsApp';
     }
   }

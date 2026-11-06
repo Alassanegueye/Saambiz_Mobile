@@ -1,5 +1,8 @@
 import 'package:saambiz/core/widgets/onglets_conserves.dart';
 import 'package:flutter/material.dart';
+import '../../../../core/widgets/app_app_bar.dart';
+import '../../../../core/widgets/degrade_fond.dart';
+import '../../../../core/theme/police.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
@@ -84,8 +87,9 @@ class _MesPromotionsView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: _C.bg,
-      appBar: AppBar(
-        title: const Text('Mes promotions'),
+      appBar: AppAppBar(
+        title: 'Mes promotions',
+        implyLeading: false,
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 12),
@@ -99,7 +103,7 @@ class _MesPromotionsView extends StatelessWidget {
                 foregroundColor: AppColor.kPrimary,
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 visualDensity: VisualDensity.compact,
-                textStyle: const TextStyle(fontWeight: FontWeight.w700),
+                textStyle: const TextStyle(fontFamily: kPolice, fontWeight: FontWeight.w700),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -108,7 +112,8 @@ class _MesPromotionsView extends StatelessWidget {
           ),
         ],
       ),
-      body: Column(
+      body: FondDegradeSubtil(
+        child: Column(
         children: [
           _lienInformer(context),
           Expanded(
@@ -213,6 +218,7 @@ class _MesPromotionsView extends StatelessWidget {
             ),
           ),
         ],
+      ),
       ),
     );
   }

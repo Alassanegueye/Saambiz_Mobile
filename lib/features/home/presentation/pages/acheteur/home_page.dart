@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:saambiz/core/widgets/image_reseau.dart';
 import 'package:dio/dio.dart';
 import '../../../../../core/widgets/logo_boutique.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:saambiz/core/theme/police.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:saambiz/features/auth/domain/entities/user.dart';
 import '../../bloc/produit_bloc.dart';
@@ -24,8 +25,6 @@ import '../../../../catalogue/data/produit_catalogue.dart' show BoutiqueResume;
 import '../../../../catalogue/presentation/pages/boutique_publique_page.dart';
 import '../../../../notifications/presentation/pages/notifications_page.dart';
 import '../../../../notifications/data/datasources/notifications_remote_datasource.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:saambiz/core/utils/image_url.dart';
 
 class _C {
   static const green = Color(0xFF01154B); // navy (héritage de nom)
@@ -57,7 +56,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   bool _loading = false;
   int _nbCommandes = 0;
   int _nbFavoris = 0;
-  int _nonLues = 0; // 🔔 notifications non lues
+  int _nonLues = 0; //  notifications non lues
 
   List<BoutiqueModel> _boutiques = [];
   bool _boutiquesLoad = false;
@@ -101,7 +100,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     _loadNonLues();
   }
 
-  // 🔔 Nombre de notifications non lues (ignoré si non connecté)
+  //  Nombre de notifications non lues (ignoré si non connecté)
   Future<void> _loadNonLues() async {
     if (widget.isGuest) return;
     try {
@@ -330,7 +329,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                     return Center(
                                       child: Text(
                                         initiales,
-                                        style: GoogleFonts.inter(
+                                        style: TextStyle(fontFamily: kPolice, 
                                           fontSize: 16,
                                           fontWeight: FontWeight.w800,
                                           color: _C.green,
@@ -342,7 +341,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                               : Center(
                                   child: Text(
                                     initiales,
-                                    style: GoogleFonts.inter(
+                                    style: TextStyle(fontFamily: kPolice, 
                                       fontSize: 16,
                                       fontWeight: FontWeight.w800,
                                       color: _C.green,
@@ -358,9 +357,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                           children: [
                             Text(
                               widget.isGuest
-                                  ? 'Bienvenue 👋'
+                                  ? 'Bienvenue'
                                   : '$prenom ${widget.user?.nom ?? ''}',
-                              style: GoogleFonts.inter(
+                              style: TextStyle(fontFamily: kPolice, 
                                 fontSize: 18,
                                 fontWeight: FontWeight.w800,
                                 color: _C.white,
@@ -383,7 +382,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                       ? 'Explorez la boutique'
                                       : (widget.user?.email ??
                                             'email@exemple.com'),
-                                  style: GoogleFonts.inter(
+                                  style: TextStyle(fontFamily: kPolice, 
                                     fontSize: 11,
                                     fontWeight: FontWeight.w500,
                                     color: _C.white.withOpacity(0.6),
@@ -454,7 +453,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             const SizedBox(width: 5),
             Text(
               'Se connecter',
-              style: GoogleFonts.inter(
+              style: TextStyle(fontFamily: kPolice, 
                 fontSize: 12.5,
                 fontWeight: FontWeight.w700,
                 color: _C.black,
@@ -523,7 +522,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 child: Text(
                   _nonLues > 99 ? '99+' : '$_nonLues',
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.inter(
+                  style: TextStyle(fontFamily: kPolice, 
                     fontSize: 10,
                     fontWeight: FontWeight.w800,
                     color: Colors.white,
@@ -570,7 +569,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   Expanded(
                     child: Text(
                       'Rechercher une boutique, un produit...',
-                      style: GoogleFonts.inter(
+                      style: TextStyle(fontFamily: kPolice, 
                         fontSize: 13.5,
                         color: _C.label,
                       ),
@@ -610,7 +609,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         padding: const EdgeInsets.symmetric(horizontal: 20),
         child: Text(
           'Aucune boutique disponible',
-          style: GoogleFonts.inter(color: _C.label),
+          style: TextStyle(fontFamily: kPolice, color: _C.label),
         ),
       );
     }
@@ -649,12 +648,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               ),
               clipBehavior: Clip.antiAlias,
               child: (b.logo != null && b.logo!.isNotEmpty)
-                  ? CachedNetworkImage(
-                      imageUrl: imageOptimisee(b.logo!),
-                      fit: BoxFit.cover,
-                      errorWidget: (_, __, ___) =>
-                          const LogoBoutiqueParDefaut(),
-                    )
+                  ? ImageReseau(b.logo!, fit: BoxFit.cover, repli: const LogoBoutiqueParDefaut())
                   : const LogoBoutiqueParDefaut(),
             ),
             const SizedBox(height: 10),
@@ -662,7 +656,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               b.nom,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: GoogleFonts.inter(
+              style: TextStyle(fontFamily: kPolice, 
                 fontSize: 13.5,
                 fontWeight: FontWeight.w700,
                 color: _C.black,
@@ -673,7 +667,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               b.localisation.isNotEmpty ? b.localisation : 'Boutique',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: GoogleFonts.inter(fontSize: 11.5, color: _C.sub),
+              style: TextStyle(fontFamily: kPolice, fontSize: 11.5, color: _C.sub),
             ),
             const SizedBox(height: 6),
             Row(
@@ -688,7 +682,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 const SizedBox(width: 3),
                 Text(
                   b.nombreAvis > 0 ? b.note.toStringAsFixed(1) : 'Nouveau',
-                  style: GoogleFonts.inter(
+                  style: TextStyle(fontFamily: kPolice, 
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
                     color: _C.black,
@@ -735,7 +729,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               const SizedBox(height: 8),
               Text(
                 c[1] as String,
-                style: GoogleFonts.inter(
+                style: TextStyle(fontFamily: kPolice, 
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
                   color: _C.black,
@@ -770,7 +764,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   children: [
                     Text(
                       'Promotions actives',
-                      style: GoogleFonts.inter(
+                      style: TextStyle(fontFamily: kPolice, 
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
                         color: _C.black,
@@ -784,7 +778,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       ),
                       child: Text(
                         'Tout voir',
-                        style: GoogleFonts.inter(
+                        style: TextStyle(fontFamily: kPolice, 
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
                           color: _C.green,
@@ -817,7 +811,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                               promo.titre,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: GoogleFonts.inter(
+                              style: TextStyle(fontFamily: kPolice, 
                                 fontSize: 13,
                                 fontWeight: FontWeight.w700,
                                 color: _C.white,
@@ -828,14 +822,14 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                 promo.produitNom!,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: GoogleFonts.inter(
+                                style: TextStyle(fontFamily: kPolice, 
                                   fontSize: 11,
                                   color: _C.label,
                                 ),
                               ),
                             Text(
                               '${promo.prixPromo.toStringAsFixed(0)} FCFA',
-                              style: GoogleFonts.inter(
+                              style: TextStyle(fontFamily: kPolice, 
                                 fontSize: 14,
                                 fontWeight: FontWeight.w800,
                                 color: _C.green,
@@ -901,7 +895,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                             ),
                             TextSpan(
                               text: '-30%',
-                              style: GoogleFonts.inter(
+                              style: TextStyle(fontFamily: kPolice, 
                                 fontSize: 30,
                                 fontWeight: FontWeight.w800,
                                 color: _C.gold,
@@ -909,7 +903,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                               ),
                             ),
                           ],
-                          style: GoogleFonts.inter(
+                          style: TextStyle(fontFamily: kPolice, 
                             fontSize: 15,
                             fontWeight: FontWeight.w600,
                             color: _C.white,
@@ -920,7 +914,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       const SizedBox(height: 4),
                       Text(
                         'sur une sélection\nde produits',
-                        style: GoogleFonts.inter(
+                        style: TextStyle(fontFamily: kPolice, 
                           fontSize: 13,
                           color: _C.white.withOpacity(0.85),
                           height: 1.35,
@@ -938,7 +932,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                         ),
                         child: Text(
                           'Voir les promos',
-                          style: GoogleFonts.inter(
+                          style: TextStyle(fontFamily: kPolice, 
                             fontSize: 13,
                             fontWeight: FontWeight.w700,
                             color: _C.navyDk,
@@ -1026,7 +1020,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           const SizedBox(height: 6),
           Text(
             value,
-            style: GoogleFonts.inter(
+            style: TextStyle(fontFamily: kPolice, 
               fontSize: 18,
               fontWeight: FontWeight.w800,
               color: _C.black,
@@ -1034,7 +1028,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           ),
           Text(
             label,
-            style: GoogleFonts.inter(
+            style: TextStyle(fontFamily: kPolice, 
               fontSize: 10,
               color: _C.label,
               fontWeight: FontWeight.w500,
@@ -1054,7 +1048,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         children: [
           Text(
             title,
-            style: GoogleFonts.inter(
+            style: TextStyle(fontFamily: kPolice, 
               fontSize: 15,
               fontWeight: FontWeight.w700,
               color: _C.black,
@@ -1062,7 +1056,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           ),
           Text(
             'Voir tout',
-            style: GoogleFonts.inter(
+            style: TextStyle(fontFamily: kPolice, 
               fontSize: 12,
               fontWeight: FontWeight.w600,
               color: _C.green,
@@ -1092,7 +1086,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             const SizedBox(height: 8),
             Text(
               'Erreur: $_boutiquesError',
-              style: GoogleFonts.inter(color: _C.orange),
+              style: TextStyle(fontFamily: kPolice, color: _C.orange),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 12),
@@ -1109,7 +1103,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 ),
                 child: Text(
                   'Réessayer',
-                  style: GoogleFonts.inter(
+                  style: TextStyle(fontFamily: kPolice, 
                     color: _C.white,
                     fontWeight: FontWeight.w600,
                   ),
@@ -1126,7 +1120,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         child: Center(
           child: Text(
             'Aucune boutique disponible',
-            style: GoogleFonts.inter(color: _C.label),
+            style: TextStyle(fontFamily: kPolice, color: _C.label),
           ),
         ),
       );
@@ -1165,9 +1159,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 borderRadius: BorderRadius.circular(12),
                 image: hasLogo
                     ? DecorationImage(
-                        image: CachedNetworkImageProvider(
-                          imageOptimisee(boutique.logo!),
-                        ),
+                        image: fournisseurImageReseau(boutique.logo!),
                         fit: BoxFit.cover,
                       )
                     : null,
@@ -1181,7 +1173,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 children: [
                   Text(
                     boutique.nom,
-                    style: GoogleFonts.inter(
+                    style: TextStyle(fontFamily: kPolice, 
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
                       color: _C.black,
@@ -1189,7 +1181,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   ),
                   Text(
                     sousTitre,
-                    style: GoogleFonts.inter(fontSize: 11, color: _C.label),
+                    style: TextStyle(fontFamily: kPolice, fontSize: 11, color: _C.label),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -1205,7 +1197,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                         const SizedBox(width: 3),
                         Text(
                           horaires,
-                          style: GoogleFonts.inter(
+                          style: TextStyle(fontFamily: kPolice, 
                             fontSize: 10,
                             color: _C.green,
                           ),
@@ -1224,7 +1216,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               ),
               child: Text(
                 boutique.vendeurNomComplet,
-                style: GoogleFonts.inter(
+                style: TextStyle(fontFamily: kPolice, 
                   fontSize: 10,
                   fontWeight: FontWeight.w600,
                   color: _C.sub,
@@ -1291,7 +1283,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   padding: const EdgeInsets.all(32),
                   child: Text(
                     'Aucun produit disponible',
-                    style: GoogleFonts.inter(color: _C.label),
+                    style: TextStyle(fontFamily: kPolice, color: _C.label),
                   ),
                 ),
               );
@@ -1322,7 +1314,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     const SizedBox(height: 8),
                     Text(
                       'Erreur: ${state.message}',
-                      style: GoogleFonts.inter(color: _C.orange),
+                      style: TextStyle(fontFamily: kPolice, color: _C.orange),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 12),
@@ -1339,7 +1331,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                         ),
                         child: Text(
                           'Réessayer',
-                          style: GoogleFonts.inter(
+                          style: TextStyle(fontFamily: kPolice, 
                             color: _C.white,
                             fontWeight: FontWeight.w600,
                           ),
@@ -1376,9 +1368,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 ),
                 image: produit.image.isNotEmpty
                     ? DecorationImage(
-                        image: CachedNetworkImageProvider(
-                          imageOptimisee(produit.image),
-                        ),
+                        image: fournisseurImageReseau(produit.image),
                         fit: BoxFit.cover,
                       )
                     : null,
@@ -1413,7 +1403,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               children: [
                 Text(
                   produit.nom,
-                  style: GoogleFonts.inter(
+                  style: TextStyle(fontFamily: kPolice, 
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
                     color: _C.black,
@@ -1424,7 +1414,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 const SizedBox(height: 2),
                 Text(
                   produit.ville,
-                  style: GoogleFonts.inter(fontSize: 10, color: _C.label),
+                  style: TextStyle(fontFamily: kPolice, fontSize: 10, color: _C.label),
                 ),
                 const SizedBox(height: 8),
                 Row(
@@ -1435,7 +1425,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                         children: [
                           TextSpan(
                             text: produit.prix,
-                            style: GoogleFonts.inter(
+                            style: TextStyle(fontFamily: kPolice, 
                               fontSize: 13,
                               fontWeight: FontWeight.w800,
                               color: _C.black,
@@ -1443,7 +1433,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                           ),
                           TextSpan(
                             text: ' F',
-                            style: GoogleFonts.inter(
+                            style: TextStyle(fontFamily: kPolice, 
                               fontSize: 10,
                               color: _C.label,
                             ),
@@ -1560,24 +1550,24 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
     if (widget.dataSource == null) return;
 
     try {
-      // 1️⃣ Récupère l'URL depuis le backend
+      // 1. Récupère l'URL depuis le backend
       final url = await widget.dataSource!.getWhatsappUrl(produitId);
-      logDebug('🔗 URL WhatsApp finale: $url');
+      logDebug('URL WhatsApp finale: $url');
 
-      // 2️⃣ Parse l'URL
+      // 2. Parse l'URL
       final uri = Uri.parse(url);
 
-      // 3️⃣ Vérifie si l'appareil peut ouvrir le lien
+      // 3. Vérifie si l'appareil peut ouvrir le lien
       if (await canLaunchUrl(uri)) {
         await launchUrl(uri, mode: LaunchMode.externalApplication);
       } else {
-        // 4️⃣ Affiche un message si WhatsApp n'est pas installé
+        // 4. Affiche un message si WhatsApp n'est pas installé
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
                 'Impossible d\'ouvrir WhatsApp. Veuillez vérifier que l\'application est installée.',
-                style: GoogleFonts.inter(color: _C.white),
+                style: TextStyle(fontFamily: kPolice, color: _C.white),
               ),
               backgroundColor: _C.orange,
               behavior: SnackBarBehavior.floating,
@@ -1591,7 +1581,7 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
           SnackBar(
             content: Text(
               'Erreur: ${e.toString()}',
-              style: GoogleFonts.inter(color: _C.white),
+              style: TextStyle(fontFamily: kPolice, color: _C.white),
             ),
             backgroundColor: _C.orange,
             behavior: SnackBarBehavior.floating,
@@ -1643,9 +1633,7 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
                       borderRadius: BorderRadius.circular(14),
                       image: hasLogo
                           ? DecorationImage(
-                              image: CachedNetworkImageProvider(
-                                imageOptimisee(widget.boutique.logo!),
-                              ),
+                              image: fournisseurImageReseau(widget.boutique.logo!),
                               fit: BoxFit.cover,
                             )
                           : null,
@@ -1661,7 +1649,7 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
                       children: [
                         Text(
                           widget.boutique.nom,
-                          style: GoogleFonts.inter(
+                          style: TextStyle(fontFamily: kPolice, 
                             fontSize: 16,
                             fontWeight: FontWeight.w800,
                             color: _C.black,
@@ -1678,7 +1666,7 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
                               const SizedBox(width: 3),
                               Text(
                                 widget.boutique.localisation,
-                                style: GoogleFonts.inter(
+                                style: TextStyle(fontFamily: kPolice, 
                                   fontSize: 11,
                                   color: _C.label,
                                 ),
@@ -1696,7 +1684,7 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
                               const SizedBox(width: 3),
                               Text(
                                 widget.boutique.horaires,
-                                style: GoogleFonts.inter(
+                                style: TextStyle(fontFamily: kPolice, 
                                   fontSize: 11,
                                   color: _C.green,
                                 ),
@@ -1716,7 +1704,7 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
                               const SizedBox(width: 3),
                               Text(
                                 '${widget.boutique.vendeurNomComplet} (${widget.boutique.vendeurNumero})',
-                                style: GoogleFonts.inter(
+                                style: TextStyle(fontFamily: kPolice, 
                                   fontSize: 11,
                                   color: _C.label,
                                 ),
@@ -1759,7 +1747,7 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
                   children: [
                     Text(
                       '${_produits.length} produit${_produits.length > 1 ? 's' : ''}',
-                      style: GoogleFonts.inter(
+                      style: TextStyle(fontFamily: kPolice, 
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
                         color: _C.black,
@@ -1777,7 +1765,7 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
                       ),
                       child: Text(
                         'En stock',
-                        style: GoogleFonts.inter(
+                        style: TextStyle(fontFamily: kPolice, 
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
                           color: _C.green,
@@ -1834,7 +1822,7 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
             padding: const EdgeInsets.symmetric(horizontal: 32),
             child: Text(
               _error!,
-              style: GoogleFonts.inter(color: _C.orange),
+              style: TextStyle(fontFamily: kPolice, color: _C.orange),
               textAlign: TextAlign.center,
             ),
           ),
@@ -1855,7 +1843,7 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
               ),
               child: Text(
                 'Réessayer',
-                style: GoogleFonts.inter(
+                style: TextStyle(fontFamily: kPolice, 
                   color: _C.white,
                   fontWeight: FontWeight.w600,
                 ),
@@ -1876,7 +1864,7 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
           const SizedBox(height: 12),
           Text(
             'Aucun produit dans cette boutique',
-            style: GoogleFonts.inter(fontSize: 14, color: _C.label),
+            style: TextStyle(fontFamily: kPolice, fontSize: 14, color: _C.label),
           ),
         ],
       ),
@@ -1904,9 +1892,7 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
                 ),
                 image: produit.image.isNotEmpty
                     ? DecorationImage(
-                        image: CachedNetworkImageProvider(
-                          imageOptimisee(produit.image),
-                        ),
+                        image: fournisseurImageReseau(produit.image),
                         fit: BoxFit.cover,
                       )
                     : null,
@@ -1942,7 +1928,7 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
               children: [
                 Text(
                   produit.nom,
-                  style: GoogleFonts.inter(
+                  style: TextStyle(fontFamily: kPolice, 
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
                     color: _C.black,
@@ -1953,7 +1939,7 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
                 const SizedBox(height: 2),
                 Text(
                   produit.ville,
-                  style: GoogleFonts.inter(fontSize: 10, color: _C.label),
+                  style: TextStyle(fontFamily: kPolice, fontSize: 10, color: _C.label),
                 ),
                 const SizedBox(height: 8),
                 Row(
@@ -1964,7 +1950,7 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
                         children: [
                           TextSpan(
                             text: produit.prix,
-                            style: GoogleFonts.inter(
+                            style: TextStyle(fontFamily: kPolice, 
                               fontSize: 13,
                               fontWeight: FontWeight.w800,
                               color: _C.black,
@@ -1972,7 +1958,7 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
                           ),
                           TextSpan(
                             text: ' F',
-                            style: GoogleFonts.inter(
+                            style: TextStyle(fontFamily: kPolice, 
                               fontSize: 10,
                               color: _C.label,
                             ),

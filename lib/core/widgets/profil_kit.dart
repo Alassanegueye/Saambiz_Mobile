@@ -1,6 +1,6 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:saambiz/core/widgets/image_reseau.dart';
+import 'package:saambiz/core/theme/police.dart';
 
 import '../constants/infos_app.dart';
 import '../theme/app_color.dart';
@@ -59,14 +59,7 @@ class CarteEnteteProfil extends StatelessWidget {
                 backgroundColor: AppColor.kPrimary,
                 child: aUnePhoto
                     ? ClipOval(
-                        child: CachedNetworkImage(
-                          imageUrl: photo!,
-                          width: 56,
-                          height: 56,
-                          fit: BoxFit.cover,
-                          placeholder: (_, __) => _initiales(),
-                          errorWidget: (_, __, ___) => _initiales(),
-                        ),
+                        child: ImageReseau(photo!, width: 56, height: 56, fit: BoxFit.cover, repli: _initiales()),
                       )
                     : _initiales(),
               ),
@@ -79,7 +72,7 @@ class CarteEnteteProfil extends StatelessWidget {
                       nom,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.inter(
+                      style: TextStyle(fontFamily: kPolice, 
                         fontSize: 17,
                         fontWeight: FontWeight.w700,
                         color: AppColor.kGrayscaleDark100,
@@ -90,7 +83,7 @@ class CarteEnteteProfil extends StatelessWidget {
                         email,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.inter(
+                        style: TextStyle(fontFamily: kPolice, 
                           fontSize: 13,
                           color: AppColor.kGrayscale40,
                         ),
@@ -106,7 +99,7 @@ class CarteEnteteProfil extends StatelessWidget {
                   minimumSize: const Size(0, 36),
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   side: const BorderSide(color: AppColor.kGrayscale20),
-                  textStyle: GoogleFonts.inter(
+                  textStyle: TextStyle(fontFamily: kPolice, 
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                   ),
@@ -142,7 +135,7 @@ class CarteEnteteProfil extends StatelessWidget {
 
   Widget _initiales() => Text(
     initiales,
-    style: GoogleFonts.inter(
+    style: TextStyle(fontFamily: kPolice, 
       fontSize: 19,
       fontWeight: FontWeight.w700,
       color: AppColor.kWhite,
@@ -161,7 +154,7 @@ class _Compteur extends StatelessWidget {
       children: [
         Text(
           valeur,
-          style: GoogleFonts.inter(
+          style: TextStyle(fontFamily: kPolice, 
             fontSize: 17,
             fontWeight: FontWeight.w700,
             color: AppColor.kGrayscaleDark100,
@@ -169,7 +162,7 @@ class _Compteur extends StatelessWidget {
         ),
         Text(
           libelle,
-          style: GoogleFonts.inter(fontSize: 12, color: AppColor.kGrayscale40),
+          style: TextStyle(fontFamily: kPolice, fontSize: 12, color: AppColor.kGrayscale40),
         ),
       ],
     );
@@ -190,7 +183,7 @@ class BadgeTypeProfil extends StatelessWidget {
     };
     return Text(
       libelle,
-      style: GoogleFonts.inter(
+      style: TextStyle(fontFamily: kPolice, 
         fontSize: 12,
         fontWeight: FontWeight.w600,
         color: AppColor.kSecondaryDark,
@@ -216,7 +209,7 @@ class SectionProfil extends StatelessWidget {
             padding: const EdgeInsets.only(left: 6, bottom: 10),
             child: Text(
               titre,
-              style: GoogleFonts.inter(
+              style: TextStyle(fontFamily: kPolice, 
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
                 color: AppColor.kGrayscale40,
@@ -287,7 +280,7 @@ class LigneProfil extends StatelessWidget {
         libelle,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
-        style: GoogleFonts.inter(
+        style: TextStyle(fontFamily: kPolice, 
           fontSize: 15,
           fontWeight: FontWeight.w500,
           color: danger ? AppColor.kErreur : AppColor.kGrayscaleDark100,
@@ -340,7 +333,7 @@ Future<bool> confirmerAction(
             Text(
               titre,
               textAlign: TextAlign.center,
-              style: GoogleFonts.inter(
+              style: TextStyle(fontFamily: kPolice, 
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
                 color: AppColor.kGrayscaleDark100,
@@ -350,7 +343,7 @@ Future<bool> confirmerAction(
             Text(
               message,
               textAlign: TextAlign.center,
-              style: GoogleFonts.inter(
+              style: TextStyle(fontFamily: kPolice, 
                 fontSize: 14,
                 height: 1.55,
                 color: AppColor.kGrayscale40,
@@ -369,7 +362,7 @@ Future<bool> confirmerAction(
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  textStyle: GoogleFonts.inter(
+                  textStyle: TextStyle(fontFamily: kPolice, 
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
                   ),
@@ -382,7 +375,7 @@ Future<bool> confirmerAction(
               onPressed: () => Navigator.pop(ctx, false),
               child: Text(
                 'Annuler',
-                style: GoogleFonts.inter(
+                style: TextStyle(fontFamily: kPolice, 
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
                   color: AppColor.kGrayscale40,
@@ -412,7 +405,7 @@ class BoutonDeconnexion extends StatelessWidget {
         backgroundColor: AppColor.kWhite,
         minimumSize: const Size(double.infinity, 48),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        textStyle: GoogleFonts.inter(
+        textStyle: TextStyle(fontFamily: kPolice, 
           fontSize: 15,
           fontWeight: FontWeight.w700,
         ),
@@ -431,7 +424,7 @@ class VersionApp extends StatelessWidget {
   Widget build(BuildContext context) => Center(
     child: Text(
       '${InfosApp.nom} v${InfosApp.version}',
-      style: GoogleFonts.inter(
+      style: TextStyle(fontFamily: kPolice, 
         fontSize: 11,
         fontWeight: FontWeight.w500,
         color: AppColor.kGrayscale40,

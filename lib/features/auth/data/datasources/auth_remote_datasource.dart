@@ -44,13 +44,13 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         data = {'telephone': identifiant, 'mot_de_passe': motDePasse};
       }
 
-      logDebug('📤 DATA ENVOYÉE: $data');
+      logDebug('DATA ENVOYÉE: $data');
 
       final response = await dio.post(_loginPath, data: data);
 
       return AuthResponseModel.fromJson(response.data);
     } on DioException catch (e) {
-      logDebug('❌ ERROR: ${e.response?.data}');
+      logDebug('ERROR: ${e.response?.data}');
       rethrow;
     }
   }

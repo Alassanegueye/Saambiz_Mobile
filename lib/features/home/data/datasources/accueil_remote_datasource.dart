@@ -96,7 +96,7 @@ class AccueilRemoteDataSource {
         Map<String, dynamic>.from(res.data as Map),
       );
     } on DioException catch (e) {
-      logDebug('❌ accueil: ${e.response?.statusCode} ${e.response?.data}');
+      logDebug('accueil: ${e.response?.statusCode} ${e.response?.data}');
       rethrow;
     }
   }
@@ -125,7 +125,7 @@ class AccueilRemoteDataSource {
         'titre': json['titre'] ?? '',
       });
     } on DioException catch (e) {
-      logDebug('❌ section $cle: ${e.response?.statusCode} ${e.response?.data}');
+      logDebug('section $cle: ${e.response?.statusCode} ${e.response?.data}');
       rethrow;
     }
   }
@@ -138,7 +138,7 @@ class AccueilRemoteDataSource {
       final liste = (res.data as Map)['interets'];
       return liste is List ? liste.map((e) => e.toString()).toList() : const [];
     } on DioException catch (e) {
-      logDebug('⚠️ préférences non lues: ${e.response?.statusCode}');
+      logDebug('préférences non lues: ${e.response?.statusCode}');
       return null;
     }
   }
@@ -163,7 +163,7 @@ class AccueilRemoteDataSource {
       );
     } on DioException catch (e) {
       // Non bloquant : la personnalisation se fera au prochain passage.
-      logDebug('⚠️ préférences non enregistrées: ${e.response?.statusCode}');
+      logDebug('préférences non enregistrées: ${e.response?.statusCode}');
     }
   }
 }

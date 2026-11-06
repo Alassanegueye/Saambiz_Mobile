@@ -21,7 +21,7 @@ class SupprimerFavori extends FavorisEvent {
   List<Object?> get props => [boutiqueId];
 }
 
-/// 🔔 Active/désactive la cloche de notifications d'une boutique suivie.
+///  Active/désactive la cloche de notifications d'une boutique suivie.
 class ToggleClocheFavori extends FavorisEvent {
   final String boutiqueId;
   final bool active;

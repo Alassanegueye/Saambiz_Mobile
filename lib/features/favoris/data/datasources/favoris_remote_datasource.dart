@@ -8,7 +8,7 @@ abstract class FavorisRemoteDataSource {
   Future<void> supprimer(String boutiqueId);
   Future<List<BoutiqueModel>> mesFavoris();
 
-  /// 🔔 Active/désactive la cloche. Retourne l'état final (true = activée).
+  ///  Active/désactive la cloche. Retourne l'état final (true = activée).
   Future<bool> toggleCloche(String boutiqueId, bool active);
 
   /// État de suivi d'une boutique : { 'suivi': bool, 'clocheActive': bool }.

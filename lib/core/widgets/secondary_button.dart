@@ -1,6 +1,6 @@
 import 'package:saambiz/core/theme/app_color.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:saambiz/core/theme/police.dart';
 
 class SecondaryButton extends StatefulWidget {
   final VoidCallback onTap;
@@ -96,7 +96,7 @@ class _SecondaryButtonState extends State<SecondaryButton>
               if (icon != null) ...[icon, const SizedBox(width: 12)],
               Text(
                 widget.text,
-                style: GoogleFonts.inter(
+                style: TextStyle(fontFamily: kPolice, 
                   fontSize: widget.fontSize ?? 14,
                   fontWeight: FontWeight.w600,
                   color: widget.textColor,

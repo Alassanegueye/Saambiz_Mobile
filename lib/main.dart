@@ -26,12 +26,12 @@ void main() async {
       // sur un service de crash reporting (Crashlytics/Sentry) si besoin.
       FlutterError.onError = (FlutterErrorDetails details) {
         FlutterError.presentError(details);
-        logDebug('💥 FlutterError: ${details.exceptionAsString()}');
+        logDebug('FlutterError: ${details.exceptionAsString()}');
       };
 
       // Erreurs asynchrones non capturées (hors du framework Flutter).
       PlatformDispatcher.instance.onError = (error, stack) {
-        logDebug('💥 Erreur non interceptée: $error');
+        logDebug('Erreur non interceptée: $error');
         return true; // empêche le crash du process
       };
 
@@ -61,7 +61,7 @@ void main() async {
       runApp(const MyApp());
     },
     (error, stack) {
-      logDebug('💥 Erreur non gérée (zone racine): $error\n$stack');
+      logDebug('Erreur non gérée (zone racine): $error\n$stack');
     },
   );
 }

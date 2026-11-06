@@ -1,14 +1,15 @@
 import 'package:saambiz/core/widgets/onglets_conserves.dart';
+import 'package:saambiz/core/widgets/image_reseau.dart';
 import 'package:flutter/material.dart';
+import '../../../../core/widgets/app_app_bar.dart';
+import '../../../../core/widgets/degrade_fond.dart';
 import 'package:saambiz/core/widgets/logo_boutique.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 
 import '../../../../injection_container.dart';
 import '../bloc/favoris_bloc.dart';
 import '../bloc/favoris_event.dart';
 import '../bloc/favoris_state.dart';
-import 'package:saambiz/core/utils/image_url.dart';
 
 import '../../../catalogue/data/favoris_produits.dart';
 import '../../../catalogue/presentation/widgets/produit_card.dart';
@@ -17,7 +18,6 @@ class _C {
   static const green = Color(0xFF01154B);
   static const black = Color(0xFF01154B);
   static const white = Color(0xFFFFFFFF);
-  static const bg = Color(0xFFF4F5F8);
   static const sub = Color(0xFF5B6C8A);
   static const border = Color(0xFFE3E8F0);
 }
@@ -43,12 +43,16 @@ class _FavorisView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: _C.bg,
-      appBar: AppBar(
-        title: const Text('Mes favoris'),
-      ),
-      body: Column(
+    return FondDegradeSubtil(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: const AppAppBar(
+          title: 'Mes favoris',
+          centerTitle: true,
+          implyLeading: false,
+          couleurFond: Colors.transparent,
+        ),
+        body: Column(
         children: [
           // Produits aimés (cœur des cartes produits), puis boutiques suivies.
           const _ProduitsAimes(),
@@ -100,14 +104,7 @@ class _FavorisView extends StatelessWidget {
                               ClipRRect(
                                 borderRadius: BorderRadius.circular(12),
                                 child: (b.logo ?? '').isNotEmpty
-                                    ? CachedNetworkImage(
-                                        imageUrl: imageOptimisee(b.logo!),
-                                        width: 56,
-                                        height: 56,
-                                        fit: BoxFit.cover,
-                                        errorWidget: (_, __, ___) =>
-                                            _fallback(),
-                                      )
+                                    ? ImageReseau(b.logo!, width: 56, height: 56, fit: BoxFit.cover, repli: _fallback())
                                     : _fallback(),
                               ),
                               const SizedBox(width: 12),
@@ -136,7 +133,7 @@ class _FavorisView extends StatelessWidget {
                                   ],
                                 ),
                               ),
-                              // 🔔 Cloche : notifications nouveaux produits / promos
+                              //  Cloche : notifications nouveaux produits / promos
                               IconButton(
                                 tooltip: b.clocheActive
                                     ? 'Désactiver les notifications'
@@ -173,6 +170,7 @@ class _FavorisView extends StatelessWidget {
             ),
           ),
         ],
+      ),
       ),
     );
   }

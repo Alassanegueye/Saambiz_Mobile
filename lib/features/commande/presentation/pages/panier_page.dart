@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
+import '../../../../core/widgets/app_app_bar.dart';
+import '../../../../core/widgets/degrade_fond.dart';
+import 'package:saambiz/core/widgets/image_reseau.dart';
 import 'package:saambiz/features/commande/presentation/widgets/commande_card.dart'
     show montantFcfa;
-import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../injection_container.dart';
 import '../../../../core/routes/app_router.dart';
 import '../../../../core/services/token_service.dart';
 import '../../../../core/theme/app_color.dart';
 import '../../data/services/panier_service.dart';
-import 'package:saambiz/core/utils/image_url.dart';
 
 class _C {
   static const green = AppColor.kPrimary;
@@ -103,8 +104,9 @@ class PanierPage extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: _C.bg,
-      appBar: AppBar(title: const Text('Mon panier')),
-      body: ListenableBuilder(
+      appBar: const AppAppBar(title: 'Mon panier'),
+      body: FondDegradeSubtil(
+        child: ListenableBuilder(
         listenable: panier,
         builder: (context, _) {
           if (panier.estVide) {
@@ -131,14 +133,7 @@ class PanierPage extends StatelessWidget {
                           ClipRRect(
                             borderRadius: BorderRadius.circular(12),
                             child: item.image.isNotEmpty
-                                ? CachedNetworkImage(
-                                    imageUrl: imageOptimisee(item.image),
-                                    width: 64,
-                                    height: 64,
-                                    fit: BoxFit.cover,
-                                    errorWidget: (_, __, ___) =>
-                                        const _ImgFallback(),
-                                  )
+                                ? ImageReseau(item.image, width: 64, height: 64, fit: BoxFit.cover, repli: const _ImgFallback())
                                 : const _ImgFallback(),
                           ),
                           const SizedBox(width: 12),
@@ -203,6 +198,7 @@ class PanierPage extends StatelessWidget {
             ],
           );
         },
+        ),
       ),
     );
   }

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:saambiz/core/theme/police.dart';
 
 class PolitiqueConfidentialite extends StatelessWidget {
   const PolitiqueConfidentialite({super.key});
@@ -11,7 +11,7 @@ class PolitiqueConfidentialite extends StatelessWidget {
       appBar: AppBar(
         title: Text(
           'Politique de confidentialité',
-          style: GoogleFonts.inter(fontWeight: FontWeight.w700, fontSize: 18),
+          style: TextStyle(fontFamily: kPolice, fontWeight: FontWeight.w700, fontSize: 18),
         ),
         centerTitle: true,
       ),
@@ -87,7 +87,7 @@ class PolitiqueConfidentialite extends StatelessWidget {
               Center(
                 child: Text(
                   'Dernière mise à jour : 2026',
-                  style: GoogleFonts.inter(fontSize: 12, color: Colors.grey),
+                  style: TextStyle(fontFamily: kPolice, fontSize: 12, color: Colors.grey),
                 ),
               ),
             ],
@@ -102,7 +102,7 @@ class PolitiqueConfidentialite extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 16),
       child: Text(
         text,
-        style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w800),
+        style: TextStyle(fontFamily: kPolice, fontSize: 20, fontWeight: FontWeight.w800),
       ),
     );
   }
@@ -112,7 +112,7 @@ class PolitiqueConfidentialite extends StatelessWidget {
       padding: const EdgeInsets.only(top: 20, bottom: 8),
       child: Text(
         text,
-        style: GoogleFonts.inter(
+        style: TextStyle(fontFamily: kPolice, 
           fontSize: 16,
           fontWeight: FontWeight.w700,
           color: Colors.black87,
@@ -125,7 +125,7 @@ class PolitiqueConfidentialite extends StatelessWidget {
     return Text(
       text,
       textAlign: TextAlign.justify,
-      style: GoogleFonts.inter(
+      style: TextStyle(fontFamily: kPolice, 
         fontSize: 14,
         height: 1.6,
         color: Colors.black54,

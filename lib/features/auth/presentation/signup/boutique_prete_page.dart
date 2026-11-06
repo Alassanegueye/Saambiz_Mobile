@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:saambiz/core/theme/police.dart';
 
 import '../../../../core/routes/app_router.dart';
 import '../../../vendeur/presentation/pages/produit_form_page.dart';
@@ -58,7 +58,7 @@ class BoutiquePretePage extends StatelessWidget {
                 nomBoutique,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: GoogleFonts.inter(
+                style: TextStyle(fontFamily: kPolice, 
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                   color: Sb.navy,

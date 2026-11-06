@@ -1,17 +1,17 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:saambiz/core/theme/police.dart';
 
 import '../../../../core/routes/app_router.dart';
 import '../../../../injection_container.dart';
 import '../../data/datasources/signup_remote_datasource.dart';
 import 'signup_kit.dart';
 
-/// Données transportées d'un écran à l'autre pendant l'inscription.
-/// Le mot de passe est conservé le temps du parcours pour connecter
-/// l'utilisateur automatiquement une fois son email vérifié, il n'est jamais
-/// écrit sur le disque.
+/// Donnees transportees d'un ecran a l'autre pendant l'inscription.
+/// Le mot de passe est conserve le temps du parcours pour connecter
+/// l'utilisateur automatiquement une fois son email verifie, il n'est jamais
+/// ecrit sur le disque.
 class SignupDraft {
   final String role; // 'Acheteur' ou 'Vendeur'
   final String prenom;
@@ -32,18 +32,18 @@ class SignupDraft {
   bool get isVendeur => role == 'Vendeur';
 }
 
-/// Inscription en plusieurs pages, une question à la fois, adaptées au profil
+/// Inscription en plusieurs pages, une question a la fois, adaptees au profil
 /// choisi :
 ///
-///   1. Vous         , le nom
-///   2. Contact      , l'e-mail, et le téléphone (WhatsApp, obligatoire
-///                      pour un vendeur : c'est là que ses clients l'écrivent)
-///   3. Sécurité     , le mot de passe, règles cochées en direct
-///   4. Vérification , le code reçu par e-mail (EmailVerificationPage)
-///   5. Centres d'intérêt (client) ou Votre boutique (vendeur)
+///   1. Vous         : le nom
+///   2. Contact      : l'e-mail, et le telephone (WhatsApp, obligatoire
+///                     pour un vendeur : c'est la que ses clients l'ecrivent)
+///   3. Securite     : le mot de passe, regles cochees en direct
+///   4. Verification : le code recu par e-mail (EmailVerificationPage)
+///   5. Centres d'interet (client) ou Votre boutique (vendeur)
 ///
-/// Chaque page ne demande qu'une chose : moins de champs à l'écran, moins
-/// d'abandons. La flèche retour ramène à la page précédente du parcours.
+/// Chaque page ne demande qu'une chose : moins de champs a l'ecran, moins
+/// d'abandons. La fleche retour ramene a la page precedente du parcours.
 class SignupFormPage extends StatefulWidget {
   final String role;
   const SignupFormPage({super.key, required this.role});
@@ -74,7 +74,7 @@ class _SignupFormPageState extends State<SignupFormPage> {
   @override
   void initState() {
     super.initState();
-    // Les règles du mot de passe se cochent au fil de la saisie.
+    // Les regles du mot de passe se cochent au fil de la saisie.
     _passCtrl.addListener(() => setState(() => _passError = null));
   }
 
@@ -87,7 +87,7 @@ class _SignupFormPageState extends State<SignupFormPage> {
     super.dispose();
   }
 
-  /// « Alassane Gueye » → prénom « Alassane », nom « Gueye ».
+  /// « Alassane Gueye » -> prenom « Alassane », nom « Gueye ».
   (String prenom, String nom) _splitName(String value) {
     final parts = value.trim().split(RegExp(r'\s+'));
     if (parts.length == 1) return (parts.first, parts.first);
@@ -165,8 +165,8 @@ class _SignupFormPageState extends State<SignupFormPage> {
     final email = _emailCtrl.text.trim().toLowerCase();
 
     try {
-      // Le compte n'est PAS créé ici : on demande d'abord un code à l'adresse
-      // saisie. Il ne naîtra qu'une fois ce code validé, à l'écran suivant.
+      // Le compte n'est PAS cree ici : on demande d'abord un code a l'adresse
+      // saisie. Il ne naitra qu'une fois ce code valide, a l'ecran suivant.
       await SignupRemoteDataSource(
         sl<Dio>(),
       ).envoyerCode(email: email, prenom: prenom);
@@ -243,7 +243,7 @@ class _SignupFormPageState extends State<SignupFormPage> {
     );
   }
 
-  // Étapes
+  // Etapes
   _Etape _etapeNom() => _Etape(
     icone: _isVendeur ? Icons.badge_outlined : Icons.person_outline_rounded,
     titre: 'Votre nom',
@@ -339,7 +339,7 @@ class _SignupFormPageState extends State<SignupFormPage> {
   }
 }
 
-/// Contenu d'une étape : en-tête (pictogramme, titre, texte) et champs.
+/// Contenu d'une etape : en-tete (pictogramme, titre, texte) et champs.
 class _Etape {
   final IconData icone;
   final String titre;
@@ -354,7 +354,7 @@ class _Etape {
   });
 }
 
-/// Règle du mot de passe, cochée dès qu'elle est respectée.
+/// Regle du mot de passe, cochee des qu'elle est respectee.
 class _Regle extends StatelessWidget {
   final String texte;
   final bool ok;
@@ -382,10 +382,11 @@ class _Regle extends StatelessWidget {
           const SizedBox(width: 10),
           Text(
             texte,
-            style: GoogleFonts.inter(
+            style: const TextStyle(
+              fontFamily: kPolice,
               fontSize: 13,
-              fontWeight: ok ? FontWeight.w600 : FontWeight.w500,
-              color: ok ? Sb.navy : Sb.textMid,
+              fontWeight: FontWeight.w600,
+              color: Sb.navy,
             ),
           ),
         ],

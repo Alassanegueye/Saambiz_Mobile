@@ -1,9 +1,8 @@
 import 'package:saambiz/core/widgets/libelle_obligatoire.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+import 'package:saambiz/core/widgets/image_reseau.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:saambiz/core/utils/image_url.dart';
+import 'package:saambiz/core/theme/police.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/theme/app_color.dart';
 import '../../../../core/utils/texte.dart';
@@ -293,14 +292,14 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
           children: [
             Text(
               'Commande',
-              style: GoogleFonts.inter(
+              style: TextStyle(fontFamily: kPolice, 
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
               ),
             ),
             Text(
               '#${commande.referenceCommande}',
-              style: GoogleFonts.inter(
+              style: TextStyle(fontFamily: kPolice, 
                 fontSize: 11.5,
                 color: _C.white.withValues(alpha: 0.7),
               ),
@@ -555,7 +554,7 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
                 const SizedBox(width: 6),
                 Text(
                   kStatutCommandeLabels[commande.statut] ?? commande.statut,
-                  style: GoogleFonts.inter(
+                  style: TextStyle(fontFamily: kPolice, 
                     fontSize: 12.5,
                     fontWeight: FontWeight.w700,
                     color: couleurStatutCommande(commande.statut),
@@ -570,7 +569,7 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
             alignment: Alignment.centerLeft,
             child: Text(
               montantFcfa(commande.montantTotal),
-              style: GoogleFonts.inter(
+              style: TextStyle(fontFamily: kPolice, 
                 fontSize: 30,
                 fontWeight: FontWeight.w800,
                 letterSpacing: -0.4,
@@ -582,7 +581,7 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
             const SizedBox(height: 2),
             Text(
               'Passée le ${dateLongue(date)}',
-              style: GoogleFonts.inter(
+              style: TextStyle(fontFamily: kPolice, 
                 fontSize: 13,
                 color: _C.white.withValues(alpha: 0.7),
               ),
@@ -595,7 +594,7 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
               modePaiement: commande.modePaiement,
               isVendeur: isVendeur,
             ),
-            style: GoogleFonts.inter(
+            style: TextStyle(fontFamily: kPolice, 
               fontSize: 14,
               height: 1.4,
               fontWeight: FontWeight.w500,
@@ -626,7 +625,7 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
               Expanded(child: _titre('Suivi')),
               Text(
                 'Étape ${idx + 1} sur ${etapes.length}',
-                style: GoogleFonts.inter(fontSize: 12.5, color: _C.sub),
+                style: TextStyle(fontFamily: kPolice, fontSize: 12.5, color: _C.sub),
               ),
             ],
           ),
@@ -651,7 +650,7 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
             const SizedBox(height: 10),
             Text(
               'Prochaine étape : $suivante',
-              style: GoogleFonts.inter(fontSize: 13, color: _C.sub),
+              style: TextStyle(fontFamily: kPolice, fontSize: 13, color: _C.sub),
             ),
           ],
         ],
@@ -668,7 +667,7 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
         children: [
           Text(
             libelle,
-            style: GoogleFonts.inter(
+            style: TextStyle(fontFamily: kPolice, 
               fontSize: fort ? 15 : 13.5,
               fontWeight: fort ? FontWeight.w700 : FontWeight.w400,
               color: fort ? _C.black : _C.sub,
@@ -676,7 +675,7 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
           ),
           Text(
             valeur,
-            style: GoogleFonts.inter(
+            style: TextStyle(fontFamily: kPolice, 
               fontSize: fort ? 16 : 13.5,
               fontWeight: fort ? FontWeight.w800 : FontWeight.w500,
               color: _C.black,
@@ -731,11 +730,7 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
               width: 56,
               height: 56,
               child: image != null && image.isNotEmpty
-                  ? CachedNetworkImage(
-                      imageUrl: imageOptimisee(image, largeur: 160),
-                      fit: BoxFit.cover,
-                      errorWidget: (_, __, ___) => defaut,
-                    )
+                  ? ImageReseau(image, largeurServeur: 160, fit: BoxFit.cover, repli: defaut)
                   : defaut,
             ),
           ),
@@ -748,7 +743,7 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
                   l.nomProduit,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.inter(
+                  style: TextStyle(fontFamily: kPolice, 
                     color: _C.black,
                     fontWeight: FontWeight.w600,
                     fontSize: 14,
@@ -758,12 +753,12 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
                 if (l.libelleOptions.isNotEmpty)
                   Text(
                     l.libelleOptions,
-                    style: GoogleFonts.inter(color: _C.sub, fontSize: 12.5),
+                    style: TextStyle(fontFamily: kPolice, color: _C.sub, fontSize: 12.5),
                   ),
                 const SizedBox(height: 2),
                 Text(
                   'Quantité : ${l.quantite}',
-                  style: GoogleFonts.inter(color: _C.sub, fontSize: 12.5),
+                  style: TextStyle(fontFamily: kPolice, color: _C.sub, fontSize: 12.5),
                 ),
               ],
             ),
@@ -771,7 +766,7 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
           const SizedBox(width: 8),
           Text(
             montantFcfa(l.sousTotal),
-            style: GoogleFonts.inter(
+            style: TextStyle(fontFamily: kPolice, 
               fontSize: 13.5,
               fontWeight: FontWeight.w700,
               color: _C.black,
@@ -798,7 +793,7 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
             backgroundColor: AppColor.kPrimaryLight,
             child: Text(
               initiales.isEmpty ? '?' : initiales,
-              style: GoogleFonts.inter(
+              style: TextStyle(fontFamily: kPolice, 
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
                 color: _C.green,
@@ -812,13 +807,13 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
               children: [
                 Text(
                   isVendeur ? 'Client' : 'Vendeur',
-                  style: GoogleFonts.inter(fontSize: 12.5, color: _C.sub),
+                  style: TextStyle(fontFamily: kPolice, fontSize: 12.5, color: _C.sub),
                 ),
                 Text(
                   nom.isEmpty ? 'Non renseigné' : nom,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.inter(
+                  style: TextStyle(fontFamily: kPolice, 
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
                     color: _C.black,
@@ -827,7 +822,7 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
                 if (telephone != null && telephone.isNotEmpty)
                   Text(
                     telephone,
-                    style: GoogleFonts.inter(fontSize: 13, color: _C.sub),
+                    style: TextStyle(fontFamily: kPolice, fontSize: 13, color: _C.sub),
                   ),
               ],
             ),
@@ -864,11 +859,11 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
               children: [
                 Text(
                   libelle,
-                  style: GoogleFonts.inter(fontSize: 12.5, color: _C.sub),
+                  style: TextStyle(fontFamily: kPolice, fontSize: 12.5, color: _C.sub),
                 ),
                 Text(
                   valeur,
-                  style: GoogleFonts.inter(
+                  style: TextStyle(fontFamily: kPolice, 
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
                     color: _C.black,
@@ -909,7 +904,7 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
 
   Widget _titre(String texte) => Text(
     texte,
-    style: GoogleFonts.inter(
+    style: TextStyle(fontFamily: kPolice, 
       fontWeight: FontWeight.w700,
       color: _C.black,
       fontSize: 15,

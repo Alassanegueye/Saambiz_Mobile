@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'app_color.dart';
+
 /// Espacements, rayons et tailles.
 ///
 /// Une échelle plutôt que des valeurs libres : sans elle, on trouve dans le
@@ -18,13 +20,15 @@ class AppDim {
   static const double xxxl = 48;
 
   /// Marge latérale des écrans. Toutes les pages s'alignent dessus.
-  static const double margeEcran = 20;
+  static const double margeEcran = 16;
 
-  // Rayons
-  static const double rayonPetit = 10;
-  static const double rayonMoyen = 14;
-  static const double rayonGrand = 20;
-  static const double rayonCarte = 22;
+  // Rayons : petits éléments (puces, pastilles), contrôles (champs,
+  // boutons), cartes, feuilles du bas.
+  static const double rayonPetit = 8;
+  static const double rayonMoyen = 12;
+  static const double rayonGrand = 16;
+  static const double rayonCarte = 18;
+  static const double rayonFeuille = 24;
   static const double rayonPastille = 999;
 
   static BorderRadius get brPetit => BorderRadius.circular(rayonPetit);
@@ -43,20 +47,21 @@ class AppDim {
   /// Cible tactile minimale recommandée par les deux plateformes.
   static const double cibleTactileMin = 48;
 
-  // Ombres
+  // Ombres : une seule douceur bleutée pour les cartes, une plus marquée
+  // pour ce qui flotte (barre de navigation, bouton d'action).
   static List<BoxShadow> get ombreCarte => [
     BoxShadow(
-      color: const Color(0xFF01154B).withValues(alpha: 0.05),
-      blurRadius: 20,
-      offset: const Offset(0, 8),
+      color: AppColor.kPrimary.withValues(alpha: 0.06),
+      blurRadius: 18,
+      offset: const Offset(0, 6),
     ),
   ];
 
   static List<BoxShadow> get ombreFlottante => [
     BoxShadow(
-      color: const Color(0xFF01154B).withValues(alpha: 0.16),
-      blurRadius: 28,
-      offset: const Offset(0, 10),
+      color: AppColor.kPrimary.withValues(alpha: 0.12),
+      blurRadius: 24,
+      offset: const Offset(0, 8),
     ),
   ];
 }

@@ -1,6 +1,6 @@
 import 'package:saambiz/core/theme/app_color.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:saambiz/core/theme/police.dart';
 
 class PrimaryTextButton extends StatelessWidget {
   const PrimaryTextButton({
@@ -27,7 +27,7 @@ class PrimaryTextButton extends StatelessWidget {
         titre,
         style:
             style ??
-            GoogleFonts.inter(
+            TextStyle(fontFamily: kPolice, 
               color: AppColor.kPrimary,
               fontWeight: FontWeight.w600,
               fontSize: 14,

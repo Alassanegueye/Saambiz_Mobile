@@ -1,9 +1,9 @@
 import 'package:saambiz/core/widgets/libelle_obligatoire.dart';
+import 'package:saambiz/core/widgets/image_reseau.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 
 import '../../../../injection_container.dart';
 import '../../../categories/presentation/widgets/selecteur_categories.dart';
@@ -11,7 +11,6 @@ import '../../domain/entities/boutique.dart';
 import '../bloc/boutique_bloc.dart';
 import '../bloc/boutique_event.dart';
 import '../bloc/boutique_state.dart';
-import 'package:saambiz/core/utils/image_url.dart';
 
 class _C {
   static const green = Color(0xFF01154B);
@@ -211,10 +210,7 @@ class _BoutiqueFormViewState extends State<_BoutiqueFormView> {
     if (_logoPath != null) {
       content = Image.file(File(_logoPath!), fit: BoxFit.cover);
     } else if (_isEdit && (widget.boutique!.logo ?? '').isNotEmpty) {
-      content = CachedNetworkImage(
-        imageUrl: imageOptimisee(widget.boutique!.logo!),
-        fit: BoxFit.cover,
-      );
+      content = ImageReseau(widget.boutique!.logo!, fit: BoxFit.cover);
     } else {
       content = const Center(
         child: Icon(Icons.storefront_outlined, color: _C.sub, size: 32),

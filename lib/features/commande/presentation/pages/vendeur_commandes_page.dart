@@ -1,5 +1,7 @@
 import 'package:saambiz/core/widgets/onglets_conserves.dart';
 import 'package:flutter/material.dart';
+import '../../../../core/widgets/app_app_bar.dart';
+import '../../../../core/widgets/degrade_fond.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../injection_container.dart';
 import '../../../../core/theme/app_color.dart';
@@ -24,8 +26,9 @@ class VendeurCommandesPage extends StatelessWidget {
             context.read<CommandeBloc>().add(LoadCommandesVendeur()),
         child: Scaffold(
           backgroundColor: AppColor.kBackground,
-          appBar: AppBar(title: const Text('Commandes reçues')),
-          body: BlocBuilder<CommandeBloc, CommandeState>(
+          appBar: const AppAppBar(title: 'Commandes reçues', implyLeading: false),
+          body: FondDegradeSubtil(
+            child: BlocBuilder<CommandeBloc, CommandeState>(
             buildWhen: (avant, apres) =>
                 !(apres is CommandeLoading && avant is CommandesLoaded),
             builder: (context, state) {
@@ -57,6 +60,7 @@ class VendeurCommandesPage extends StatelessWidget {
               }
               return const SizedBox.shrink();
             },
+            ),
           ),
         ),
       ),

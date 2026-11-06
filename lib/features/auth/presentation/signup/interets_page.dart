@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:saambiz/core/theme/police.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../core/routes/app_router.dart';
@@ -296,7 +296,7 @@ class _CategoryTile extends StatelessWidget {
                       child: Text(
                         label,
                         textAlign: TextAlign.center,
-                        style: GoogleFonts.inter(
+                        style: TextStyle(fontFamily: kPolice, 
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
                           color: Sb.navy,

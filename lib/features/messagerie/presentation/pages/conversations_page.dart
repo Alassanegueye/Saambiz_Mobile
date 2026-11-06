@@ -1,4 +1,5 @@
 import 'package:saambiz/core/theme/app_color.dart';
+import 'package:saambiz/core/widgets/image_reseau.dart';
 import 'package:saambiz/core/utils/texte.dart';
 import 'package:saambiz/core/widgets/ui_kit.dart';
 import 'dart:async';
@@ -13,8 +14,6 @@ import '../bloc/messagerie_bloc.dart';
 import '../bloc/messagerie_event.dart';
 import '../bloc/messagerie_state.dart';
 import 'chat_page.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:saambiz/core/utils/image_url.dart';
 
 class _C {
   static const green = Color(0xFF01154B);
@@ -111,9 +110,7 @@ class _ConversationsViewState extends State<_ConversationsView> {
                       radius: 22,
                       backgroundColor: AppColor.kPrimaryLight,
                       backgroundImage: (c.interlocuteurPhoto ?? '').isNotEmpty
-                          ? CachedNetworkImageProvider(
-                              imageOptimisee(c.interlocuteurPhoto!),
-                            )
+                          ? fournisseurImageReseau(c.interlocuteurPhoto!)
                           : null,
                       child: (c.interlocuteurPhoto ?? '').isEmpty
                           ? Text(

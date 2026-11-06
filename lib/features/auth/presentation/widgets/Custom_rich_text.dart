@@ -1,6 +1,6 @@
 import 'package:saambiz/core/theme/app_color.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:saambiz/core/theme/police.dart';
 
 class CustomRichText extends StatelessWidget {
   const CustomRichText({
@@ -23,7 +23,7 @@ class CustomRichText extends StatelessWidget {
         textAlign: TextAlign.center,
         text: TextSpan(
           text: textePrincipal,
-          style: GoogleFonts.inter(
+          style: TextStyle(fontFamily: kPolice, 
             color: AppColor.kGrayscale40,
             fontWeight: FontWeight.w600,
             fontSize: 14,

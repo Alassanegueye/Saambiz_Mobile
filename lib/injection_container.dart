@@ -204,19 +204,19 @@ Future<void> init() async {
       InterceptorsWrapper(
         onRequest: (options, handler) async {
           // Logging des requêtes
-          _log('🌐 [REQUEST] ${options.method} ${options.path}');
+          _log('[REQUEST] ${options.method} ${options.path}');
           if (options.data != null) {
             if (options.data is FormData) {
               final formData = options.data as FormData;
-              _log('📦 FormData fields:');
+              _log('FormData fields:');
               formData.fields.forEach((field) {
-                _log('  ${field.key}: ${field.value}');
+                _log('${field.key}: ${field.value}');
               });
               formData.files.forEach((file) {
-                _log('  ${file.key}: ${file.value.filename}');
+                _log('${file.key}: ${file.value.filename}');
               });
             } else {
-              _log('📦 Body: ${options.data}');
+              _log('Body: ${options.data}');
             }
           }
 
@@ -239,10 +239,10 @@ Future<void> init() async {
 
               if (token != null && token.isNotEmpty) {
                 options.headers['Authorization'] = 'Bearer $token';
-                _log('🔑 Token ajouté à la requête');
+                _log('Token ajouté à la requête');
               }
             } catch (e) {
-              _log('⚠️ Erreur lors de la récupération du token: $e');
+              _log('Erreur lors de la récupération du token: $e');
             }
           }
 
@@ -250,15 +250,15 @@ Future<void> init() async {
         },
         onResponse: (response, handler) {
           _log(
-            '✅ [RESPONSE] ${response.statusCode} ${response.requestOptions.path}',
+            ' [RESPONSE] ${response.statusCode} ${response.requestOptions.path}',
           );
           if (response.data != null && response.data is Map) {
-            _log('📥 Data: ${response.data}');
+            _log('Data: ${response.data}');
           }
           return handler.next(response);
         },
         onError: (DioException e, handler) async {
-          _log('❌ [ERROR] ${e.type} ${e.requestOptions.path}');
+          _log('[ERROR] ${e.type} ${e.requestOptions.path}');
           // Jeton expiré : on en obtient un autre et on rejoue la requête, sans
           // que l'utilisateur s'en aperçoive.
           final requete = e.requestOptions;
@@ -285,10 +285,10 @@ Future<void> init() async {
                   );
             }
           }
-          _log('📝 Message: ${e.message}');
+          _log('Message: ${e.message}');
           if (e.response != null) {
-            _log('📊 Status: ${e.response!.statusCode}');
-            _log('📋 Data: ${e.response!.data}');
+            _log('Status: ${e.response!.statusCode}');
+            _log('Data: ${e.response!.data}');
           }
           return handler.next(e);
         },
@@ -600,7 +600,7 @@ void _validateEnvVariables() {
     );
   }
 
-  _log('✅ Toutes les variables d\'environnement sont configurées');
+  _log('Toutes les variables d\'environnement sont configurées');
 
   // L'adresse RÉELLEMENT utilisée par Dio, et non celle du .env.
   //
@@ -612,9 +612,9 @@ void _validateEnvVariables() {
   //
   // La provenance est indiquée, parce que c'est la question suivante.
   _log(
-    '🌐 API Base URL: ${Env.apiBaseUrlEffective}'
+    ' API Base URL: ${Env.apiBaseUrlEffective}'
     '${Env.apiBaseUrlCompilee ? ' (--dart-define)' : ' (.env)'}',
   );
-  _log('🔑 Auth Login Path: ${dotenv.get('AUTH_LOGIN_PATH')}');
-  _log('📝 Auth Register Path: ${dotenv.get('AUTH_REGISTER_PATH')}');
+  _log('Auth Login Path: ${dotenv.get('AUTH_LOGIN_PATH')}');
+  _log('Auth Register Path: ${dotenv.get('AUTH_REGISTER_PATH')}');
 }

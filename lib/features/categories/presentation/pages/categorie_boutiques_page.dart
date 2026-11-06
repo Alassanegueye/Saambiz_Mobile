@@ -1,9 +1,8 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart';
+import 'package:saambiz/core/widgets/image_reseau.dart';
 import 'package:flutter/material.dart';
 import 'package:saambiz/core/widgets/logo_boutique.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:saambiz/core/utils/image_url.dart';
+import 'package:saambiz/core/theme/police.dart';
 
 import '../../../../core/services/localisation_service.dart';
 import '../../../../injection_container.dart';
@@ -126,7 +125,7 @@ class _CategorieBoutiquesPageState extends State<CategorieBoutiquesPage> {
         titleSpacing: 0,
         title: Text(
           c.nom,
-          style: GoogleFonts.inter(
+          style: TextStyle(fontFamily: kPolice, 
             fontSize: 17,
             fontWeight: FontWeight.w700,
             color: Colors.white,
@@ -155,7 +154,7 @@ class _CategorieBoutiquesPageState extends State<CategorieBoutiquesPage> {
           Text(
             _erreur!,
             textAlign: TextAlign.center,
-            style: GoogleFonts.inter(fontSize: 14, color: _C.textMid),
+            style: TextStyle(fontFamily: kPolice, fontSize: 14, color: _C.textMid),
           ),
           const SizedBox(height: 20),
           Center(
@@ -217,7 +216,7 @@ class _CategorieBoutiquesPageState extends State<CategorieBoutiquesPage> {
                 _total > 1
                     ? '$_total boutiques'
                     : (_total == 1 ? '1 boutique' : 'Aucune boutique'),
-                style: GoogleFonts.inter(
+                style: TextStyle(fontFamily: kPolice, 
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
                   color: _C.navy,
@@ -230,7 +229,7 @@ class _CategorieBoutiquesPageState extends State<CategorieBoutiquesPage> {
                     c.description!,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.inter(
+                    style: TextStyle(fontFamily: kPolice, 
                       fontSize: 12.5,
                       color: _C.textMid,
                     ),
@@ -253,13 +252,13 @@ class _CategorieBoutiquesPageState extends State<CategorieBoutiquesPage> {
           Text(
             'Pas encore de boutique dans cette catégorie.',
             textAlign: TextAlign.center,
-            style: GoogleFonts.inter(fontSize: 14, color: _C.textMid),
+            style: TextStyle(fontFamily: kPolice, fontSize: 14, color: _C.textMid),
           ),
           const SizedBox(height: 4),
           Text(
             'Revenez bientôt : de nouvelles boutiques ouvrent chaque semaine.',
             textAlign: TextAlign.center,
-            style: GoogleFonts.inter(fontSize: 12.5, color: _C.textLight),
+            style: TextStyle(fontFamily: kPolice, fontSize: 12.5, color: _C.textLight),
           ),
         ],
       ),
@@ -307,11 +306,7 @@ class _LigneBoutique extends StatelessWidget {
                 width: 60,
                 height: 60,
                 child: logo != null && logo.isNotEmpty
-                    ? CachedNetworkImage(
-                        imageUrl: imageOptimisee(logo),
-                        fit: BoxFit.cover,
-                        errorWidget: (_, __, ___) => const _LogoParDefaut(),
-                      )
+                    ? ImageReseau(logo, fit: BoxFit.cover, repli: const _LogoParDefaut())
                     : const _LogoParDefaut(),
               ),
             ),
@@ -327,7 +322,7 @@ class _LigneBoutique extends StatelessWidget {
                           donnees['nom']?.toString() ?? 'Boutique',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.inter(
+                          style: TextStyle(fontFamily: kPolice, 
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
                             color: _C.navy,
@@ -351,7 +346,7 @@ class _LigneBoutique extends StatelessWidget {
                         slogan,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.inter(
+                        style: TextStyle(fontFamily: kPolice, 
                           fontSize: 12,
                           color: _C.textMid,
                         ),
@@ -374,7 +369,7 @@ class _LigneBoutique extends StatelessWidget {
                           ].where((e) => e != null && e.isNotEmpty).join(', '),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.inter(
+                          style: TextStyle(fontFamily: kPolice, 
                             fontSize: 11.5,
                             color: _C.textLight,
                           ),

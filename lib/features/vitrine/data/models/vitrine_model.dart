@@ -34,6 +34,29 @@ Map<String, bool> _versBooleens(dynamic v) {
   return out;
 }
 
+/// Les rayons du vendeur. Une section sans titre est écartée : le serveur la
+/// refuserait de toute façon, autant ne pas la faire remonter dans l'écran.
+List<SectionBoutique> _versSections(dynamic v) {
+  if (v is! List) return const [];
+  final out = <SectionBoutique>[];
+  for (final e in v) {
+    if (e is! Map) continue;
+    final titre = '${e['titre'] ?? ''}'.trim();
+    if (titre.isEmpty) continue;
+    out.add(
+      SectionBoutique(
+        id: '${e['id'] ?? ''}',
+        titre: titre,
+        produitIds: (e['produitIds'] as List? ?? const [])
+            .map((x) => '$x')
+            .where((x) => x.isNotEmpty)
+            .toList(),
+      ),
+    );
+  }
+  return out;
+}
+
 class VitrineModel extends Vitrine {
   const VitrineModel({
     required super.slug,
@@ -50,6 +73,7 @@ class VitrineModel extends Vitrine {
     super.logoForme,
     super.reseaux,
     super.sections,
+    super.sectionsPerso,
     super.commande,
     super.paiementLivraison,
     super.vues,
@@ -80,6 +104,7 @@ class VitrineModel extends Vitrine {
       logoForme: '${v['logoForme'] ?? 'libre'}',
       reseaux: _versTexte(v['reseaux']),
       sections: _versBooleens(v['sections']),
+      sectionsPerso: _versSections(v['sectionsPerso']),
       commande: v['commande'] != false,
       paiementLivraison: v['paiementLivraison'] != false,
       vues: (v['vues'] as num?)?.toInt() ?? 0,

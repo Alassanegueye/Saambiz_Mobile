@@ -1,11 +1,12 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:saambiz/core/theme/app_color.dart';
+import 'package:saambiz/core/theme/police.dart';
 
-/// Couleurs des promotions : orange sur fond pêche.
-const Color kPromoFond = Color(0xFFFFF1E6);
-const Color kPromoEncre = Color(0xFFEF7D22);
+/// Couleurs des promotions, celles de la marque : marine sur or pâle.
+const Color kPromoFond = AppColor.kSecondaryLight;
+const Color kPromoEncre = AppColor.kPrimary;
 
 /// Compte à rebours jusqu'à la fin d'une promotion, mis à jour chaque
 /// seconde. Disparaît de lui-même quand la promotion est terminée.
@@ -77,20 +78,24 @@ class _CompteAReboursState extends State<CompteARebours> {
           ? '${j}j ${_deux(h)}h ${_deux(m)}m'
           : '${_deux(h)}:${_deux(m)}:${_deux(s)}';
       return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3.5),
         decoration: BoxDecoration(
-          color: kPromoEncre,
+          color: AppColor.kPrimary.withValues(alpha: 0.88),
           borderRadius: BorderRadius.circular(20),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.timer_outlined, size: 11, color: Colors.white),
+            const Icon(
+              Icons.timer_outlined,
+              size: 11,
+              color: AppColor.kSecondary,
+            ),
             const SizedBox(width: 3),
             Text(
               texte,
-              style: GoogleFonts.inter(
-                fontSize: 9.5,
+              style: TextStyle(fontFamily: kPolice, 
+                fontSize: 10,
                 fontWeight: FontWeight.w800,
                 color: Colors.white,
                 fontFeatures: const [FontFeature.tabularFigures()],
@@ -112,7 +117,7 @@ class _CompteAReboursState extends State<CompteARebours> {
           children: [
             TextSpan(
               text: valeur,
-              style: GoogleFonts.inter(
+              style: TextStyle(fontFamily: kPolice, 
                 fontSize: 15,
                 fontWeight: FontWeight.w800,
                 color: kPromoEncre,
@@ -121,7 +126,7 @@ class _CompteAReboursState extends State<CompteARebours> {
             ),
             TextSpan(
               text: unite,
-              style: GoogleFonts.inter(
+              style: TextStyle(fontFamily: kPolice, 
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
                 color: kPromoEncre,
@@ -148,7 +153,7 @@ class _CompteAReboursState extends State<CompteARebours> {
               const SizedBox(width: 6),
               Text(
                 'Fin de la promotion dans',
-                style: GoogleFonts.inter(
+                style: TextStyle(fontFamily: kPolice, 
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
                   color: kPromoEncre,

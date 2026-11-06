@@ -1,6 +1,7 @@
 import 'package:saambiz/core/widgets/onglets_conserves.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:saambiz/core/theme/police.dart';
 import 'package:saambiz/features/auth/domain/entities/user.dart';
 import 'package:saambiz/core/routes/app_router.dart';
 
@@ -25,7 +26,8 @@ import '../../../../abonnement/presentation/pages/mon_abonnement_page.dart';
 import '../../../../boutique/presentation/pages/ma_boutique_page.dart';
 import '../../../../messagerie/presentation/pages/conversations_page.dart';
 import '../../../../notifications/presentation/pages/notifications_page.dart';
-import '../../../../vitrine/presentation/pages/ma_vitrine_page.dart';
+import '../../../../catalogue/presentation/widgets/produit_card.dart'
+    show formaterPrix;
 
 /// Onglet « Compte » du vendeur : carte bleue d'en-tête, puis des groupes
 /// d’entrées dans des cartes blanches.
@@ -130,6 +132,8 @@ class _ProfilPageState extends State<ProfilPage> with RetourSurOnglet {
           physics: const BouncingScrollPhysics(),
           padding: const EdgeInsets.fromLTRB(20, 8, 20, kEspaceBarreBas),
           children: [
+            _CarteSolde(montant: _user?.soldeDisponible ?? 0),
+            const SizedBox(height: 14),
             CarteEnteteProfil(
               nom: _nomComplet,
               initiales: _initiales,
@@ -147,12 +151,6 @@ class _ProfilPageState extends State<ProfilPage> with RetourSurOnglet {
                   libelle: 'Ma boutique',
                   sousTitre: 'Nom, logo, catégories, pause',
                   onTap: () => _ouvrir(const MaBoutiquePage()),
-                ),
-                LigneProfil(
-                  icone: Icons.public_rounded,
-                  libelle: 'Mon site web',
-                  sousTitre: 'Votre lien saambiz.com à partager',
-                  onTap: () => _ouvrir(const MaVitrinePage()),
                 ),
                 LigneProfil(
                   icone: Icons.workspace_premium_outlined,
@@ -230,6 +228,70 @@ class _ProfilPageState extends State<ProfilPage> with RetourSurOnglet {
             const VersionApp(),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Montant disponible sur le compte du vendeur, en tete de l'onglet Compte.
+///
+/// Rien ne l'alimente encore : le serveur expose la colonne, les reversements
+/// seront traites plus tard. D'ou l'absence de bouton de retrait — afficher
+/// une action qui ne fait rien serait pire que de n'en afficher aucune — et la
+/// ligne qui explique pourquoi le montant est a zero.
+class _CarteSolde extends StatelessWidget {
+  final double montant;
+  const _CarteSolde({required this.montant});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(18, 16, 18, 17),
+      decoration: BoxDecoration(
+        color: AppColor.kPrimary,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.account_balance_wallet_outlined,
+                color: AppColor.kSecondary,
+                size: 18,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Montant disponible',
+                style: TextStyle(fontFamily: kPolice, 
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w600,
+                  color: AppColor.kWhite.withValues(alpha: 0.75),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 9),
+          Text(
+            formaterPrix(montant),
+            style: TextStyle(fontFamily: kPolice, 
+              fontSize: 26,
+              fontWeight: FontWeight.w800,
+              color: AppColor.kWhite,
+              height: 1.1,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Vos encaissements apparaîtront ici.',
+            style: TextStyle(fontFamily: kPolice, 
+              fontSize: 11.8,
+              color: AppColor.kWhite.withValues(alpha: 0.6),
+            ),
+          ),
+        ],
       ),
     );
   }

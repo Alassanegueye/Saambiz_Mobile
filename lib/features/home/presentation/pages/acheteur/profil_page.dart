@@ -5,9 +5,9 @@ import 'package:saambiz/features/auth/domain/entities/user.dart';
 import 'package:saambiz/core/routes/app_router.dart';
 
 import '../../../../../core/constants/infos_app.dart';
-import '../../../../../core/theme/app_color.dart';
 import '../../../../../core/utils/url_externe.dart';
 import '../../../../../core/widgets/app_app_bar.dart';
+import '../../../../../core/widgets/degrade_fond.dart';
 import '../../../../../core/widgets/barre_navigation_verre.dart'
     show kEspaceBarreBas;
 import '../../../../../core/widgets/profil_kit.dart';
@@ -157,12 +157,18 @@ class _ProfilPageState extends State<ProfilPage>
           ).showSnackBar(SnackBar(content: Text(state.message)));
         }
       },
-      child: Scaffold(
-        backgroundColor: AppColor.kBackground,
-        appBar: AppAppBar(title: 'Compte', implyLeading: false),
-        body: FadeTransition(
-          opacity: _fadeAnim,
-          child: ListView(
+      child: FondDegradeSubtil(
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          appBar: const AppAppBar(
+            title: 'Compte',
+            centerTitle: true,
+            implyLeading: false,
+            couleurFond: Colors.transparent,
+          ),
+          body: FadeTransition(
+            opacity: _fadeAnim,
+            child: ListView(
             physics: const BouncingScrollPhysics(),
             padding: const EdgeInsets.fromLTRB(20, 8, 20, kEspaceBarreBas),
             children: [
@@ -269,6 +275,7 @@ class _ProfilPageState extends State<ProfilPage>
               const VersionApp(),
             ],
           ),
+        ),
         ),
       ),
     );

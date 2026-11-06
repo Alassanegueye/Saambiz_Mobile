@@ -74,10 +74,10 @@ class SocketService {
     );
 
     _socket!
-      ..onConnect((_) => logDebug('🔌 Socket connecté'))
-      ..onDisconnect((_) => logDebug('🔌 Socket déconnecté'))
-      ..onConnectError((e) => logDebug('⚠️ Socket erreur connexion: $e'))
-      ..onError((e) => logDebug('⚠️ Socket erreur: $e'))
+      ..onConnect((_) => logDebug('Socket connecté'))
+      ..onDisconnect((_) => logDebug('Socket déconnecté'))
+      ..onConnectError((e) => logDebug('Socket erreur connexion: $e'))
+      ..onError((e) => logDebug('Socket erreur: $e'))
       ..on('message:new', (data) {
         if (data is Map) {
           _onNewMessageCtrl.add(Map<String, dynamic>.from(data));
