@@ -32,7 +32,9 @@ class AidePage extends StatelessWidget {
     ),
     (
       'Quels moyens de paiement sont acceptés ?',
-      'Wave, Orange Money, Free Money et les cartes bancaires.',
+      'Orange Money et Wave pour le paiement en ligne, ou le paiement à la '
+          'livraison. Free Money et les cartes bancaires ne sont pas encore '
+          'acceptés.',
     ),
     (
       'Comment suivre une commande ?',

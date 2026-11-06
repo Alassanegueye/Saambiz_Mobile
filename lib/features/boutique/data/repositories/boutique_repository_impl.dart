@@ -5,20 +5,13 @@ import '../../../../core/errors/failure.dart';
 import '../../domain/entities/boutique.dart';
 import '../../domain/repositories/boutique_repository.dart';
 import '../datasources/boutique_remote_datasource.dart';
+import '../../../../core/errors/message_erreur.dart';
 
 class BoutiqueRepositoryImpl implements BoutiqueRepository {
   final BoutiqueRemoteDataSource remoteDataSource;
   BoutiqueRepositoryImpl({required this.remoteDataSource});
 
-  String _errorMessage(Object e) {
-    if (e is DioException) {
-      final data = e.response?.data;
-      if (data is Map && data['message'] != null)
-        return data['message'].toString();
-      return e.message ?? 'Une erreur est survenue';
-    }
-    return e.toString();
-  }
+  String _errorMessage(Object e) => messageErreurReseau(e);
 
   int? _statusCode(Object e) =>
       e is DioException ? e.response?.statusCode : null;

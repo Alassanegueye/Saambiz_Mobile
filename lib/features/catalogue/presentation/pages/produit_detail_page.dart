@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:saambiz/core/widgets/image_reseau.dart';
 import 'package:flutter/material.dart';
@@ -57,10 +59,15 @@ class _ProduitDetailPageState extends State<ProduitDetailPage> {
   /// Fiche complète (galerie, prix à jour) et similaires. La carte ouverte
   /// reste affichée pendant le chargement.
   Future<void> _charger() async {
+    final source = CatalogueRemoteDataSource(sl<Dio>());
+
+    // Comptabilise l'ouverture de la fiche. Lancé sans `await` : le compteur
+    // du vendeur ne doit pas retarder l'affichage, et son échec ne doit rien
+    // casser.
+    unawaited(source.signalerVue(widget.produit.id));
+
     try {
-      final res = await CatalogueRemoteDataSource(
-        sl<Dio>(),
-      ).detail(widget.produit.id);
+      final res = await source.detail(widget.produit.id);
       if (!mounted) return;
       setState(() {
         p = res.produit;

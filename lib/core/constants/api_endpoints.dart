@@ -23,8 +23,10 @@ class AuthEndpoints {
   // avant l'inscription en deux temps.
   static const verifyEmail = '/auth/verify-email';
 
-  /// Renvoi d'un nouveau code de vérification (POST { email }).
-  static const resendVerification = '/auth/resend-verification';
+  // `/auth/resend-verification` n'est pas déclarée ici : l'inscription en deux
+  // temps renvoie un code par `envoyerCodeInscription`, et cette constante
+  // n'était appelée nulle part. La route existe toujours côté backend pour les
+  // comptes ouverts avant ce changement.
 }
 
 /// Produits/boutiques côté acheteur (feature `home`).
@@ -180,6 +182,21 @@ class SignalementsEndpoints {
 
   static const signalements = '/signalements';
   static const mesSignalements = '/signalements/mes-signalements';
+}
+
+/// Réglages publics du backend, servis sans authentification.
+///
+/// Deux routes que l'application n'appelait pas alors qu'elles existaient :
+/// le prix de l'abonnement était donc inconnu côté mobile, et l'app ne voyait
+/// ni les mises en maintenance ni les versions minimales exigées.
+class ConfigEndpoints {
+  ConfigEndpoints._();
+
+  /// `{ prix: 2000, devise: 'FCFA' }`
+  static const prixAbonnement = '/prix-abonnement';
+
+  /// `{ minVersionAndroid, minVersionIos, maintenance, message }`
+  static const appConfig = '/app/config';
 }
 
 /// Dashboard / statistiques vendeur.

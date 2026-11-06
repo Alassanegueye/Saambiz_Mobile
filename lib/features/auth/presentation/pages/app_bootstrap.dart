@@ -3,6 +3,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:jwt_decode/jwt_decode.dart';
 
 import '../../../../core/routes/app_router.dart';
+import '../../../../core/services/config_publique_service.dart';
 import '../../../../core/services/session_service.dart';
 import '../../data/models/user_model.dart';
 import '../../../../injection_container.dart';
@@ -57,11 +58,30 @@ class _AppBootstrapState extends State<AppBootstrap>
 
   Future<void> _router() async {
     final lecture = _lireJeton();
+    // Lancé en parallèle de la lecture du jeton : la vérification n'ajoute
+    // donc aucune attente au démarrage, et une panne du serveur la laisse
+    // simplement sans réponse (`null`), sans bloquer l'entrée dans l'app.
+    final etatService = sl<ConfigPubliqueService>().configApp();
     await Future.wait([
       lecture,
       Future.delayed(const Duration(milliseconds: 600)),
     ]);
     var token = await lecture;
+
+    // `/app/config` existait côté backend sans que personne ne l'appelle :
+    // une mise en maintenance n'atteignait pas les téléphones, qui
+    // continuaient de frapper une API arrêtée et affichaient des erreurs
+    // réseau incompréhensibles.
+    final etat = await etatService;
+    if (!mounted) return;
+    if (etat != null && etat.maintenance) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (_) => _EcranMaintenance(message: etat.message),
+        ),
+      );
+      return;
+    }
 
     // Jeton expiré : on tente d'en obtenir un autre avant de demander quoi que
     // ce soit à l'utilisateur.
@@ -161,6 +181,57 @@ class _Chargement extends StatelessWidget {
             minHeight: 4,
             color: Color(0xFF01154B),
             backgroundColor: Color(0xFFFEF3D6),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Affiché quand le backend se déclare en maintenance.
+///
+/// Sans cet écran, l'application entrait normalement puis échouait requête
+/// après requête, et l'utilisateur ne pouvait pas distinguer une coupure
+/// annoncée d'une panne de son téléphone.
+class _EcranMaintenance extends StatelessWidget {
+  final String? message;
+  const _EcranMaintenance({this.message});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.build_outlined,
+                size: 56,
+                color: Color(0xFF01154B),
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                'SaamBiz est en maintenance',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF01154B),
+                ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                message?.trim().isNotEmpty == true
+                    ? message!.trim()
+                    : 'Le service est momentanément indisponible. '
+                          'Réessayez dans quelques minutes.',
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 15, color: Colors.black54),
+              ),
+            ],
           ),
         ),
       ),

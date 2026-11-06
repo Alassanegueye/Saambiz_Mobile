@@ -17,8 +17,23 @@
 /// l'arbre de code est même éliminé à la compilation.
 library;
 
+import 'package:flutter/widgets.dart';
+
+import '../widgets/image_reseau.dart';
+
 /// Vrai uniquement avec `--dart-define=DEMO=true`.
 const bool modeDemo = bool.fromEnvironment('DEMO');
+
+/// Fait pointer les photos des produits de démonstration sur des images
+/// embarquées plutôt que sur le réseau.
+///
+/// [ImageReseau] expose déjà ce point d'entrée pour le banc d'aperçu ; on le
+/// réutilise ici. Rien n'est téléchargé, les captures sont donc identiques à
+/// chaque fois et ne dépendent pas de l'état du serveur d'images.
+void installerImagesDemo() {
+  // ignore: invalid_use_of_visible_for_testing_member
+  ImageReseau.substitut = (url) => AssetImage('assets/images/$url');
+}
 
 const Map<String, dynamic> _vendeurDemo = {
   'id': 'demo-vendeur',
@@ -37,13 +52,15 @@ Map<String, dynamic> _produit(
   int prix,
   int quantite,
   String categorie,
+  String photo,
 ) => {
   'id': id,
   'nom': nom,
   'description': description,
   'prix': prix,
   'quantite': quantite,
-  'image': '',
+  // Résolu en AssetImage par installerImagesDemo().
+  'image': photo,
   'vendeur': _vendeurDemo,
   'categorie': {'id': 'cat-$id', 'nom': categorie},
 };
@@ -51,11 +68,12 @@ Map<String, dynamic> _produit(
 List<Map<String, dynamic>> produitsDemo() => [
   _produit(
     '1',
-    'Ensemble bazin riche brodé',
-    'Bazin riche getzner, broderie main, coupe sur mesure.',
-    45000,
-    8,
+    'Chemise en wax cousue main',
+    'Wax authentique, coupe droite, finitions à la main.',
+    22000,
+    14,
     'Mode',
+    'demo-chemise.jpg',
   ),
   _produit(
     '2',
@@ -64,6 +82,7 @@ List<Map<String, dynamic>> produitsDemo() => [
     32000,
     12,
     'Chaussures',
+    'demo-baskets.jpg',
   ),
   _produit(
     '3',
@@ -72,6 +91,7 @@ List<Map<String, dynamic>> produitsDemo() => [
     28500,
     5,
     'Accessoires',
+    'demo-sac.jpg',
   ),
   _produit(
     '4',
@@ -80,6 +100,7 @@ List<Map<String, dynamic>> produitsDemo() => [
     18000,
     20,
     'Électronique',
+    'demo-casque.jpg',
   ),
   _produit(
     '5',
@@ -88,14 +109,16 @@ List<Map<String, dynamic>> produitsDemo() => [
     25000,
     7,
     'Accessoires',
+    'demo-montre.jpg',
   ),
   _produit(
     '6',
-    'Parfum oriental 100 ml',
-    'Notes de oud et de vanille, tenue longue durée.',
-    15000,
-    30,
+    'Savon artisanal au karité',
+    'Karité brut et huile de coco, fabriqué à Thiès.',
+    3500,
+    42,
     'Beauté',
+    'demo-savon.jpg',
   ),
 ];
 
@@ -115,6 +138,7 @@ Map<String, dynamic> _commande(
   String prenom,
   String nom,
   String produit,
+  String photo,
   int prix,
   int quantite,
   String statut,
@@ -142,6 +166,7 @@ Map<String, dynamic> _commande(
         'id': 'ligne-$id',
         'produitId': id,
         'nomProduit': produit,
+        'imageProduit': photo,
         'prixUnitaire': prix,
         'quantite': quantite,
         'sousTotal': sousTotal,
@@ -156,8 +181,9 @@ List<Map<String, dynamic>> commandesDemo() => [
     'SB-2026-0231',
     'Awa',
     'Diop',
-    'Ensemble bazin riche brodé',
-    45000,
+    'Chemise en wax cousue main',
+    'demo-chemise.jpg',
+    22000,
     1,
     'confirmee',
     const Duration(minutes: 18),
@@ -168,6 +194,7 @@ List<Map<String, dynamic>> commandesDemo() => [
     'Mamadou',
     'Sow',
     'Baskets cuir blanches',
+    'demo-baskets.jpg',
     32000,
     2,
     'en_preparation',
@@ -179,6 +206,7 @@ List<Map<String, dynamic>> commandesDemo() => [
     'Fatou',
     'Ba',
     'Sac à main cousu main',
+    'demo-sac.jpg',
     28500,
     1,
     'en_livraison',
@@ -190,6 +218,7 @@ List<Map<String, dynamic>> commandesDemo() => [
     'Ibrahima',
     'Fall',
     'Casque audio sans fil',
+    'demo-casque.jpg',
     18000,
     1,
     'livree',

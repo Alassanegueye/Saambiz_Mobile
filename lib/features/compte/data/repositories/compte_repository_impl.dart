@@ -1,25 +1,17 @@
 import 'package:dartz/dartz.dart';
-import 'package:dio/dio.dart';
 
 import '../../../../core/errors/failure.dart';
 import '../../../auth/domain/entities/user.dart';
 import '../../domain/repositories/compte_repository.dart';
 import '../datasources/compte_remote_datasource.dart';
+import '../../../../core/errors/message_erreur.dart';
 
 class CompteRepositoryImpl implements CompteRepository {
   final CompteRemoteDataSource remoteDataSource;
 
   CompteRepositoryImpl({required this.remoteDataSource});
 
-  String _errorMessage(Object e) {
-    if (e is DioException) {
-      final data = e.response?.data;
-      if (data is Map && data['message'] != null)
-        return data['message'].toString();
-      return e.message ?? 'Une erreur est survenue';
-    }
-    return e.toString();
-  }
+  String _errorMessage(Object e) => messageErreurReseau(e);
 
   @override
   Future<Either<Failure, User>> getMe() async {

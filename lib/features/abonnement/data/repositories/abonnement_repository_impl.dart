@@ -1,7 +1,7 @@
 import 'package:dartz/dartz.dart';
-import 'package:dio/dio.dart';
 
 import '../../../../core/errors/failure.dart';
+import '../../../../core/errors/message_erreur.dart';
 import '../../domain/entities/abonnement.dart';
 import '../../domain/entities/paiement.dart';
 import '../../domain/repositories/abonnement_repository.dart';
@@ -11,15 +11,9 @@ class AbonnementRepositoryImpl implements AbonnementRepository {
   final AbonnementRemoteDataSource remoteDataSource;
   AbonnementRepositoryImpl({required this.remoteDataSource});
 
-  String _errorMessage(Object e) {
-    if (e is DioException) {
-      final data = e.response?.data;
-      if (data is Map && data['message'] != null)
-        return data['message'].toString();
-      return e.message ?? 'Une erreur est survenue';
-    }
-    return e.toString();
-  }
+  // Renvoyait `e.message` pour toute erreur sans corps : sur une coupure de
+  // réseau l'utilisateur lisait le texte anglais de Dio.
+  String _errorMessage(Object e) => messageErreurReseau(e);
 
   @override
   Future<Either<Failure, Abonnement>> monAbonnement() async {

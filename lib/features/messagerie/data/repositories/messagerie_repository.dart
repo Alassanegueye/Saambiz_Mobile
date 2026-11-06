@@ -1,24 +1,16 @@
 import 'package:dartz/dartz.dart';
-import 'package:dio/dio.dart';
 
 import '../../../../core/errors/failure.dart';
 import '../datasources/messagerie_remote_datasource.dart';
 import '../models/message_model.dart';
+import '../../../../core/errors/message_erreur.dart';
 
 /// Repository messagerie, try/catch → Either<Failure, T> au-dessus du datasource.
 class MessagerieRepository {
   final MessagerieRemoteDataSource remote;
   MessagerieRepository(this.remote);
 
-  String _msg(Object e) {
-    if (e is DioException) {
-      final data = e.response?.data;
-      if (data is Map && data['message'] != null)
-        return data['message'].toString();
-      return e.message ?? 'Erreur réseau';
-    }
-    return e.toString();
-  }
+  String _msg(Object e) => messageErreurReseau(e);
 
   Future<Either<Failure, MessageModel>> envoyerMessage({
     required String destinataireId,

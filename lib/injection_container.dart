@@ -95,6 +95,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:saambiz/core/config/env.dart';
+import 'core/services/config_publique_service.dart';
 import 'core/services/token_service.dart';
 import 'core/services/socket_service.dart';
 
@@ -151,6 +152,7 @@ Future<void> init() async {
 
   // Services
   sl.registerLazySingleton(() => TokenService(secureStorage: sl()));
+  sl.registerLazySingleton(() => ConfigPubliqueService(sl()));
   sl.registerLazySingleton(
     () => SessionService(
       jetons: sl(),
