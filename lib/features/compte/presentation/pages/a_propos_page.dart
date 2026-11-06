@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:saambiz/core/theme/police.dart';
 
 import '../../../../core/constants/infos_app.dart';
 import '../../../../core/theme/app_color.dart';
@@ -34,7 +34,7 @@ class AProposPage extends StatelessWidget {
                 const SizedBox(height: 14),
                 Text(
                   InfosApp.nom,
-                  style: GoogleFonts.inter(
+                  style: TextStyle(fontFamily: kPolice, 
                     fontSize: 20,
                     fontWeight: FontWeight.w700,
                     color: AppColor.kPrimary,
@@ -43,7 +43,7 @@ class AProposPage extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   'Version ${InfosApp.version}',
-                  style: GoogleFonts.inter(
+                  style: TextStyle(fontFamily: kPolice, 
                     fontSize: 13,
                     color: AppColor.kGrayscale40,
                   ),
@@ -52,7 +52,7 @@ class AProposPage extends StatelessWidget {
                 Text(
                   'L\'application qui met la boutique des commerçants sénégalais en ligne.',
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.inter(
+                  style: TextStyle(fontFamily: kPolice, 
                     fontSize: 13.5,
                     height: 1.5,
                     color: AppColor.kGrayscale40,

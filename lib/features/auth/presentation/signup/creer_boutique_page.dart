@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:saambiz/core/theme/police.dart';
 
 import '../../../../core/routes/app_router.dart';
 import '../../../../injection_container.dart';
@@ -169,7 +169,7 @@ class _CreerBoutiquePageState extends State<CreerBoutiquePage> {
             padding: const EdgeInsets.only(bottom: 14),
             child: Text(
               'Page ${_page + 1} sur 3',
-              style: GoogleFonts.inter(
+              style: TextStyle(fontFamily: kPolice, 
                 fontSize: 12.5,
                 fontWeight: FontWeight.w600,
                 color: Sb.textMid,
@@ -179,6 +179,7 @@ class _CreerBoutiquePageState extends State<CreerBoutiquePage> {
           SbErrorBanner(_error),
           if (_page == 0)
             SbField(
+              obligatoire: true,
               label: 'Nom de la boutique',
               hint: 'Ex. Boutique Awa',
               icon: Icons.storefront_outlined,
@@ -249,7 +250,7 @@ class _Dropdown extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        LibelleChamp(label),
+        LibelleChamp(label, obligatoire: true),
         DropdownButtonFormField<String>(
           initialValue: value,
           isExpanded: true,
@@ -257,7 +258,7 @@ class _Dropdown extends StatelessWidget {
             Icons.keyboard_arrow_down_rounded,
             color: Sb.textMid,
           ),
-          style: GoogleFonts.inter(fontSize: 15, color: Sb.text),
+          style: TextStyle(fontFamily: kPolice, fontSize: 15, color: Sb.text),
           decoration: InputDecoration(
             filled: true,
             fillColor: Sb.surface,

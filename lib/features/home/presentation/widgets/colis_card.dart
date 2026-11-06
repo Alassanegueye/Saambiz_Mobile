@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:saambiz/core/theme/police.dart';
 import 'package:saambiz/core/theme/app_color.dart';
 import '../../domain/entities/colis.dart';
 import '../../domain/entities/personne.dart';
@@ -60,7 +60,7 @@ Widget buildColisCard({required Colis colis, required bool isReception}) {
                     Expanded(
                       child: Text(
                         colis.destination,
-                        style: GoogleFonts.inter(
+                        style: TextStyle(fontFamily: kPolice, 
                           fontWeight: FontWeight.w700,
                           fontSize: 16,
                           color: AppColor.kGrayscaleDark100,
@@ -83,7 +83,7 @@ Widget buildColisCard({required Colis colis, required bool isReception}) {
                 ),
                 child: Text(
                   colis.statut,
-                  style: GoogleFonts.inter(
+                  style: TextStyle(fontFamily: kPolice, 
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                     color: statusColor,
@@ -113,14 +113,14 @@ Widget buildColisCard({required Colis colis, required bool isReception}) {
                   children: [
                     Text(
                       personneLabel,
-                      style: GoogleFonts.inter(
+                      style: TextStyle(fontFamily: kPolice, 
                         fontSize: 12,
                         color: AppColor.kGrayscale60,
                       ),
                     ),
                     Text(
                       personneNom,
-                      style: GoogleFonts.inter(
+                      style: TextStyle(fontFamily: kPolice, 
                         fontWeight: FontWeight.w600,
                         fontSize: 15,
                         color: AppColor.kGrayscaleDark100,
@@ -130,7 +130,7 @@ Widget buildColisCard({required Colis colis, required bool isReception}) {
                     if (personne?.email != null && personne!.email.isNotEmpty)
                       Text(
                         personne.email,
-                        style: GoogleFonts.inter(
+                        style: TextStyle(fontFamily: kPolice, 
                           fontSize: 12,
                           color: AppColor.kGrayscale40,
                         ),
@@ -156,7 +156,7 @@ Widget buildColisCard({required Colis colis, required bool isReception}) {
               const Spacer(),
               Text(
                 formatDate(colis.createdAt),
-                style: GoogleFonts.inter(
+                style: TextStyle(fontFamily: kPolice, 
                   fontSize: 12,
                   color: AppColor.kGrayscale40,
                 ),

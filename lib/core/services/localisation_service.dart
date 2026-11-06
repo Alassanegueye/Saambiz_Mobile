@@ -42,7 +42,7 @@ class LocalisationService {
       await _memoriser(position.latitude, position.longitude);
       return position;
     } catch (e) {
-      logDebug('⚠️ localisation indisponible: $e');
+      logDebug('localisation indisponible: $e');
       return null;
     }
   }

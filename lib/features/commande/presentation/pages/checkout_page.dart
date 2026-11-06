@@ -1,6 +1,9 @@
+import 'package:saambiz/core/widgets/libelle_obligatoire.dart';
 import 'package:flutter/material.dart';
+import 'package:saambiz/core/theme/app_color.dart';
+import 'package:saambiz/features/commande/presentation/widgets/commande_card.dart'
+    show montantFcfa;
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../../../../injection_container.dart';
 import '../../../../core/routes/app_router.dart';
 import '../../data/services/panier_service.dart';
@@ -43,7 +46,6 @@ class _CheckoutViewState extends State<_CheckoutView> {
 
   String _modeLivraison = 'livraison';
   String _modePaiement = 'en_ligne';
-  String _methode = 'orange_money';
 
   final _panier = sl<PanierService>();
 
@@ -71,25 +73,11 @@ class _CheckoutViewState extends State<_CheckoutView> {
     );
   }
 
-  Future<void> _ouvrirPaiement(String? url) async {
-    if (url != null && url.isNotEmpty) {
-      final uri = Uri.tryParse(url);
-      if (uri != null) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: _C.bg,
-      appBar: AppBar(
-        backgroundColor: _C.white,
-        elevation: 0.5,
-        foregroundColor: _C.black,
-        title: const Text('Validation de la commande'),
-      ),
+      appBar: AppBar(title: const Text('Validation de la commande')),
       body: BlocConsumer<CommandeBloc, CommandeState>(
         listener: (context, state) async {
           if (state is CommandeError) {
@@ -100,23 +88,19 @@ class _CheckoutViewState extends State<_CheckoutView> {
               ),
             );
           } else if (state is CommandeCreee) {
-            // Paiement à la livraison → terminé. En ligne → on lance le paiement.
-            if (state.commande.modePaiement == 'a_la_livraison') {
-              await _panier.vider();
-              if (context.mounted) _allerMesCommandes(context);
-            } else {
-              context.read<CommandeBloc>().add(
-                PayerCommande(
-                  state.commande.id,
-                  methode: _methode,
-                  numeroTelephone: _telCtrl.text.trim(),
-                ),
-              );
-            }
-          } else if (state is PaiementInitie) {
-            await _ouvrirPaiement(state.paymentUrl);
+            // Le client paie plus tard, une fois la commande acceptée.
             await _panier.vider();
-            if (context.mounted) _allerMesCommandes(context);
+            if (!context.mounted) return;
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  state.commande.modePaiement == 'en_ligne'
+                      ? 'Commande envoyée. Vous pourrez la payer dès que le vendeur l\'aura acceptée.'
+                      : 'Commande envoyée au vendeur.',
+                ),
+              ),
+            );
+            _allerMesCommandes(context);
           }
         },
         builder: (context, state) {
@@ -132,7 +116,10 @@ class _CheckoutViewState extends State<_CheckoutView> {
                   _choix(
                     ['livraison', 'retrait'],
                     _modeLivraison,
-                    {'livraison': 'Livraison', 'retrait': 'Retrait'},
+                    {
+                      'livraison': (Icons.local_shipping_outlined, 'Livraison'),
+                      'retrait': (Icons.storefront_outlined, 'Retrait'),
+                    },
                     (v) => setState(() => _modeLivraison = v),
                   ),
                   if (_modeLivraison == 'livraison') ...[
@@ -140,6 +127,7 @@ class _CheckoutViewState extends State<_CheckoutView> {
                     _input(
                       _adresseCtrl,
                       'Adresse de livraison',
+                      obligatoire: true,
                       validator: (v) =>
                           (_modeLivraison == 'livraison' &&
                               (v == null || v.trim().isEmpty))
@@ -151,6 +139,7 @@ class _CheckoutViewState extends State<_CheckoutView> {
                   _input(
                     _telCtrl,
                     'Téléphone',
+                    obligatoire: true,
                     keyboard: TextInputType.phone,
                     validator: (v) => (v == null || v.trim().isEmpty)
                         ? 'Téléphone requis'
@@ -162,20 +151,25 @@ class _CheckoutViewState extends State<_CheckoutView> {
                     ['en_ligne', 'a_la_livraison'],
                     _modePaiement,
                     {
-                      'en_ligne': 'En ligne',
-                      'a_la_livraison': 'À la livraison',
+                      'en_ligne': (
+                        Icons.phone_iphone_rounded,
+                        'Wave ou Orange Money',
+                      ),
+                      'a_la_livraison': (
+                        Icons.payments_outlined,
+                        'À la réception',
+                      ),
                     },
                     (v) => setState(() => _modePaiement = v),
                   ),
-                  if (_modePaiement == 'en_ligne') ...[
-                    const SizedBox(height: 12),
-                    _choix(
-                      ['orange_money', 'wave'],
-                      _methode,
-                      {'orange_money': 'Orange Money', 'wave': 'Wave'},
-                      (v) => setState(() => _methode = v),
+                  if (_modePaiement == 'en_ligne')
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Text(
+                        'Vous paierez une fois la commande acceptée par le vendeur.',
+                        style: TextStyle(fontSize: 12.5, color: _C.sub),
+                      ),
                     ),
-                  ],
                   const SizedBox(height: 20),
                   _section('Note (optionnel)'),
                   _input(
@@ -204,7 +198,9 @@ class _CheckoutViewState extends State<_CheckoutView> {
                             ),
                           )
                         : Text(
-                            'Confirmer (${_panier.total.toStringAsFixed(0)} FCFA + livraison)',
+                            _modeLivraison == 'livraison'
+                                ? 'Confirmer · ${montantFcfa(_panier.total)} + livraison'
+                                : 'Confirmer · ${montantFcfa(_panier.total)}',
                             style: const TextStyle(fontWeight: FontWeight.w700),
                           ),
                   ),
@@ -239,6 +235,7 @@ class _CheckoutViewState extends State<_CheckoutView> {
   Widget _input(
     TextEditingController c,
     String hint, {
+    bool obligatoire = false,
     TextInputType? keyboard,
     int maxLines = 1,
     String? Function(String?)? validator,
@@ -249,7 +246,8 @@ class _CheckoutViewState extends State<_CheckoutView> {
       maxLines: maxLines,
       validator: validator,
       decoration: InputDecoration(
-        hintText: hint,
+        hintText: obligatoire ? null : hint,
+        label: obligatoire ? LibelleObligatoire(hint) : null,
         filled: true,
         fillColor: _C.white,
         contentPadding: const EdgeInsets.symmetric(
@@ -275,38 +273,58 @@ class _CheckoutViewState extends State<_CheckoutView> {
   Widget _choix(
     List<String> valeurs,
     String selected,
-    Map<String, String> labels,
+    Map<String, (IconData, String)> options,
     ValueChanged<String> onSelect,
   ) {
     return Row(
-      children: valeurs.map((v) {
-        final sel = v == selected;
-        return Expanded(
-          child: Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: InkWell(
-              onTap: () => onSelect(v),
-              borderRadius: BorderRadius.circular(12),
-              child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                decoration: BoxDecoration(
-                  color: sel ? _C.green.withValues(alpha: 0.10) : _C.white,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: sel ? _C.green : _C.border),
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  labels[v] ?? v,
-                  style: TextStyle(
-                    color: sel ? _C.green : _C.sub,
-                    fontWeight: FontWeight.w700,
-                  ),
+      children: [
+        for (var i = 0; i < valeurs.length; i++) ...[
+          if (i > 0) const SizedBox(width: 10),
+          Expanded(child: _option(valeurs[i], selected, options, onSelect)),
+        ],
+      ],
+    );
+  }
+
+  Widget _option(
+    String v,
+    String selected,
+    Map<String, (IconData, String)> options,
+    ValueChanged<String> onSelect,
+  ) {
+    final sel = v == selected;
+    final (icone, libelle) = options[v]!;
+    return Material(
+      color: sel ? AppColor.kPrimaryLight : _C.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(14),
+        side: BorderSide(
+          color: sel ? _C.green : _C.border,
+          width: sel ? 1.5 : 1,
+        ),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () => onSelect(v),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
+          child: Column(
+            children: [
+              Icon(icone, size: 22, color: sel ? _C.green : _C.sub),
+              const SizedBox(height: 6),
+              Text(
+                libelle,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 13.5,
+                  color: sel ? _C.green : _C.sub,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
-            ),
+            ],
           ),
-        );
-      }).toList(),
+        ),
+      ),
     );
   }
 }

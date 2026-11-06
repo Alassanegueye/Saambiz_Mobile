@@ -1,3 +1,4 @@
+import 'package:saambiz/core/theme/app_color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -109,9 +110,6 @@ class _MonAbonnementViewState extends State<_MonAbonnementView> {
     return Scaffold(
       backgroundColor: _C.bg,
       appBar: AppBar(
-        backgroundColor: _C.white,
-        elevation: 0.5,
-        foregroundColor: _C.black,
         title: const Text('Mon abonnement'),
         actions: [
           IconButton(
@@ -160,75 +158,110 @@ class _MonAbonnementViewState extends State<_MonAbonnementView> {
   Widget _abonnementView(BuildContext context, AbonnementLoaded state) {
     final a = state.abonnement;
     final actif = a.statut == 'actif';
+    final fin = a.dateFin;
+    final joursRestants = fin?.difference(DateTime.now()).inDays;
     return ListView(
-      padding: const EdgeInsets.all(16),
+      physics: const ClampingScrollPhysics(),
+      padding: const EdgeInsets.only(bottom: 24),
       children: [
+        // La question qui compte, sur le bleu de l'en-tête : jusqu'à quand ?
         Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: _C.white,
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: _C.border),
+          padding: const EdgeInsets.fromLTRB(20, 4, 20, 22),
+          decoration: const BoxDecoration(
+            color: AppColor.kPrimary,
+            borderRadius: BorderRadius.vertical(bottom: Radius.circular(24)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    libelle(a.type, vide: 'Abonnement'),
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w800,
-                      fontSize: 18,
-                      color: _C.black,
-                    ),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: actif ? AppColor.kSuccesLight : AppColor.kSecondary,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  libelle(a.statut),
+                  style: TextStyle(
+                    color: actif ? AppColor.kSucces : AppColor.kPrimary,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 12,
                   ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: (actif ? _C.green : _C.orange).withOpacity(0.12),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Text(
-                      libelle(a.statut),
-                      style: TextStyle(
-                        color: actif ? _C.green : _C.orange,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ),
-                ],
+                ),
               ),
-              const SizedBox(height: 16),
-              if (a.dateDebut != null)
-                _row('Début', _dateFmt.format(a.dateDebut!)),
-              if (a.dateFin != null) _row('Fin', _dateFmt.format(a.dateFin!)),
-              _row('Montant', '${a.montant.toStringAsFixed(0)} FCFA'),
+              const SizedBox(height: 12),
+              Text(
+                libelle(a.type, vide: 'Abonnement'),
+                style: const TextStyle(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 26,
+                  color: _C.white,
+                ),
+              ),
+              if (joursRestants != null) ...[
+                const SizedBox(height: 4),
+                Text(
+                  joursRestants >= 0
+                      ? 'Encore $joursRestants jour${joursRestants > 1 ? 's' : ''}'
+                      : 'Votre abonnement est expiré',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: _C.white.withValues(alpha: 0.8),
+                  ),
+                ),
+              ],
             ],
           ),
         ),
-        const SizedBox(height: 20),
-        ElevatedButton.icon(
-          onPressed: () => _renouveler(context),
-          icon: const Icon(Icons.autorenew),
-          label: const Text('Renouveler mon abonnement'),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: _C.green,
-            foregroundColor: _C.white,
-            padding: const EdgeInsets.symmetric(vertical: 14),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: _C.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: _C.border),
+                ),
+                child: Column(
+                  children: [
+                    if (a.dateDebut != null)
+                      _row('Début', _dateFmt.format(a.dateDebut!)),
+                    if (fin != null) _row('Fin', _dateFmt.format(fin)),
+                    _row('Montant', '${a.montant.toStringAsFixed(0)} FCFA'),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              FilledButton.icon(
+                onPressed: () => _renouveler(context),
+                icon: const Icon(Icons.autorenew_rounded, size: 20),
+                label: const Text('Renouveler mon abonnement'),
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppColor.kSecondary,
+                  foregroundColor: AppColor.kPrimary,
+                  padding: const EdgeInsets.symmetric(vertical: 15),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              TextButton.icon(
+                onPressed: () => context.read<AbonnementBloc>().add(
+                  LoadHistoriquePaiements(),
+                ),
+                icon: const Icon(Icons.history_rounded, size: 20),
+                label: const Text('Historique des paiements'),
+                style: TextButton.styleFrom(foregroundColor: AppColor.kPrimary),
+              ),
+            ],
           ),
-        ),
-        const SizedBox(height: 10),
-        OutlinedButton.icon(
-          onPressed: () =>
-              context.read<AbonnementBloc>().add(LoadHistoriquePaiements()),
-          icon: const Icon(Icons.history),
-          label: const Text('Voir l\'historique des paiements'),
         ),
       ],
     );

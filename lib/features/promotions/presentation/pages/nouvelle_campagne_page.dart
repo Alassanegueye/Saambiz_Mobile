@@ -1,9 +1,9 @@
-import 'package:cached_network_image/cached_network_image.dart';
+import 'package:saambiz/core/widgets/libelle_obligatoire.dart';
+import 'package:saambiz/core/widgets/image_reseau.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:saambiz/core/theme/police.dart';
 import 'package:intl/intl.dart';
-import 'package:saambiz/core/utils/image_url.dart';
 
 import '../../../../core/theme/app_color.dart';
 import '../../../../injection_container.dart';
@@ -220,107 +220,117 @@ class _NouvelleCampagnePageState extends State<NouvelleCampagnePage> {
     return Scaffold(
       backgroundColor: AppColor.kBackground,
       appBar: AppBar(
-        backgroundColor: AppColor.kWhite,
-        surfaceTintColor: AppColor.kWhite,
-        elevation: 0.5,
-        foregroundColor: AppColor.kGrayscaleDark100,
         title: Text(
           _type == TypeCampagne.promotion
               ? 'Nouvelle promotion'
               : 'Informer mes clients',
-          style: GoogleFonts.inter(fontSize: 17, fontWeight: FontWeight.w700),
+          style: TextStyle(fontFamily: kPolice, fontSize: 17, fontWeight: FontWeight.w700),
         ),
       ),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 120),
+      // Le bouton fait partie du corps : un `bottomNavigationBar` reste sous le
+      // clavier, et il devenait impossible d'envoyer.
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          SegmentedButton<TypeCampagne>(
-            segments: const [
-              ButtonSegment(
-                value: TypeCampagne.promotion,
-                icon: Icon(Icons.local_offer_outlined),
-                label: Text('Promotion'),
-              ),
-              ButtonSegment(
-                value: TypeCampagne.information,
-                icon: Icon(Icons.campaign_outlined),
-                label: Text('Information'),
-              ),
-            ],
-            selected: {_type},
-            onSelectionChanged: (s) => setState(() {
-              _type = s.first;
-              _appliquerModele();
-            }),
-          ),
-          const SizedBox(height: 16),
-          if (_type == TypeCampagne.promotion)
-            ..._sectionPromotion()
-          else
-            _sectionInformation(),
-          _carte(
-            titre: 'Votre message',
-            enfant: Column(
+          Expanded(
+            child: ListView(
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
               children: [
-                TextField(
-                  controller: _titre,
-                  maxLength: 80,
-                  decoration: _deco('Titre', 'Ex. : Soldes de fin de mois'),
+                SegmentedButton<TypeCampagne>(
+                  segments: const [
+                    ButtonSegment(
+                      value: TypeCampagne.promotion,
+                      icon: Icon(Icons.local_offer_outlined),
+                      label: Text('Promotion'),
+                    ),
+                    ButtonSegment(
+                      value: TypeCampagne.information,
+                      icon: Icon(Icons.campaign_outlined),
+                      label: Text('Information'),
+                    ),
+                  ],
+                  selected: {_type},
+                  onSelectionChanged: (s) => setState(() {
+                    _type = s.first;
+                    _appliquerModele();
+                  }),
                 ),
-                const SizedBox(height: 10),
-                TextField(
-                  controller: _message,
-                  maxLength: 500,
-                  minLines: 3,
-                  maxLines: 6,
-                  decoration: _deco(
-                    'Message',
-                    'Ce que vos clients liront dans la notification',
+                const SizedBox(height: 16),
+                if (_type == TypeCampagne.promotion)
+                  ..._sectionPromotion()
+                else
+                  _sectionInformation(),
+                _carte(
+                  titre: 'Votre message',
+                  enfant: Column(
+                    children: [
+                      TextField(
+                        controller: _titre,
+                        maxLength: 80,
+                        decoration: _deco(
+                          'Titre',
+                          'Ex. : Soldes de fin de mois',
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      TextField(
+                        controller: _message,
+                        maxLength: 500,
+                        minLines: 3,
+                        maxLines: 6,
+                        decoration: _deco(
+                          'Message',
+                          'Ce que vos clients liront dans la notification',
+                        ),
+                      ),
+                    ],
                   ),
                 ),
+                _sectionDestinataires(),
               ],
             ),
           ),
-          _sectionDestinataires(),
-        ],
-      ),
-      bottomNavigationBar: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-          child: SizedBox(
-            height: 52,
-            child: ElevatedButton.icon(
-              onPressed: _envoi ? null : _envoyer,
-              icon: _envoi
-                  ? const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: AppColor.kWhite,
-                      ),
-                    )
-                  : const Icon(Icons.send_rounded, size: 20),
-              label: Text(
-                _type == TypeCampagne.promotion
-                    ? 'Créer et notifier'
-                    : 'Envoyer',
-                style: GoogleFonts.inter(
-                  fontSize: 15.5,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColor.kPrimary,
-                foregroundColor: AppColor.kWhite,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
+          SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+              child: SizedBox(
+                height: 52,
+                child: ElevatedButton.icon(
+                  onPressed: _envoi ? null : _envoyer,
+                  icon: _envoi
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: AppColor.kWhite,
+                          ),
+                        )
+                      : const Icon(Icons.send_rounded, size: 20),
+                  label: Text(
+                    _type == TypeCampagne.promotion
+                        ? 'Créer et notifier'
+                        : 'Envoyer',
+                    style: TextStyle(fontFamily: kPolice, 
+                      fontSize: 15.5,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColor.kPrimary,
+                    foregroundColor: AppColor.kWhite,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
                 ),
               ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -377,13 +387,7 @@ class _NouvelleCampagnePageState extends State<NouvelleCampagnePage> {
                           width: 44,
                           height: 44,
                           child: p.image.isNotEmpty
-                              ? CachedNetworkImage(
-                                  imageUrl: imageOptimisee(
-                                    p.image,
-                                    largeur: 120,
-                                  ),
-                                  fit: BoxFit.cover,
-                                )
+                              ? ImageReseau(p.image, largeurServeur: 120, fit: BoxFit.cover)
                               : Container(
                                   color: AppColor.kPrimaryLight,
                                   child: const Icon(
@@ -397,7 +401,7 @@ class _NouvelleCampagnePageState extends State<NouvelleCampagnePage> {
                         p.nom,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.inter(
+                        style: TextStyle(fontFamily: kPolice, 
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                         ),
@@ -421,7 +425,7 @@ class _NouvelleCampagnePageState extends State<NouvelleCampagnePage> {
                             ),
                           ],
                         ),
-                        style: GoogleFonts.inter(fontSize: 12),
+                        style: TextStyle(fontFamily: kPolice, fontSize: 12),
                       ),
                     ),
                 ],
@@ -499,7 +503,7 @@ class _NouvelleCampagnePageState extends State<NouvelleCampagnePage> {
             contentPadding: EdgeInsets.zero,
             title: Text(
               'Tous mes abonnés',
-              style: GoogleFonts.inter(fontWeight: FontWeight.w600),
+              style: TextStyle(fontFamily: kPolice, fontWeight: FontWeight.w600),
             ),
             subtitle: Text(
               abonnes == null
@@ -515,7 +519,7 @@ class _NouvelleCampagnePageState extends State<NouvelleCampagnePage> {
             contentPadding: EdgeInsets.zero,
             title: Text(
               'Choisir les clients',
-              style: GoogleFonts.inter(fontWeight: FontWeight.w600),
+              style: TextStyle(fontFamily: kPolice, fontWeight: FontWeight.w600),
             ),
           ),
           if (!_tous && abonnes != null)
@@ -533,7 +537,7 @@ class _NouvelleCampagnePageState extends State<NouvelleCampagnePage> {
                 controlAffinity: ListTileControlAffinity.leading,
                 title: Text(
                   a.nomComplet,
-                  style: GoogleFonts.inter(fontSize: 14),
+                  style: TextStyle(fontFamily: kPolice, fontSize: 14),
                 ),
                 subtitle: a.clocheActive
                     ? null
@@ -554,10 +558,10 @@ class _NouvelleCampagnePageState extends State<NouvelleCampagnePage> {
 
   // Petits outils
   TextStyle _discret() =>
-      GoogleFonts.inter(fontSize: 12, color: AppColor.kGrayscale40);
+      TextStyle(fontFamily: kPolice, fontSize: 12, color: AppColor.kGrayscale40);
 
   InputDecoration _deco(String libelle, String indication) => InputDecoration(
-    labelText: libelle,
+    label: LibelleObligatoire(libelle),
     hintText: indication,
     filled: true,
     fillColor: AppColor.kWhite,
@@ -581,7 +585,7 @@ class _NouvelleCampagnePageState extends State<NouvelleCampagnePage> {
       children: [
         Text(
           titre,
-          style: GoogleFonts.inter(
+          style: TextStyle(fontFamily: kPolice, 
             fontSize: 15,
             fontWeight: FontWeight.w700,
             color: AppColor.kGrayscaleDark100,

@@ -1,6 +1,6 @@
 import 'package:saambiz/core/theme/app_color.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:saambiz/core/theme/police.dart';
 
 class PrimaryButton extends StatefulWidget {
   final VoidCallback onTap;
@@ -86,7 +86,7 @@ class _PrimaryButtonState extends State<PrimaryButton>
                 Text(
                   widget.text,
                   style:
-                      GoogleFonts.inter(
+                      TextStyle(fontFamily: kPolice, 
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
                         color: AppColor.kWhite,

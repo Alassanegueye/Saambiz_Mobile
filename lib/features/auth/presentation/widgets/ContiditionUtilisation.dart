@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:saambiz/core/theme/police.dart';
 
 class ConditionUtilisation extends StatelessWidget {
   const ConditionUtilisation({super.key});
@@ -9,12 +9,9 @@ class ConditionUtilisation extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FB),
       appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
         title: Text(
           'Conditions d’utilisation',
-          style: GoogleFonts.inter(fontWeight: FontWeight.w700, fontSize: 18),
+          style: TextStyle(fontFamily: kPolice, fontWeight: FontWeight.w700, fontSize: 18),
         ),
         centerTitle: true,
       ),
@@ -110,7 +107,7 @@ class ConditionUtilisation extends StatelessWidget {
               Center(
                 child: Text(
                   'Dernière mise à jour : 2026',
-                  style: GoogleFonts.inter(fontSize: 12, color: Colors.grey),
+                  style: TextStyle(fontFamily: kPolice, fontSize: 12, color: Colors.grey),
                 ),
               ),
             ],
@@ -125,7 +122,7 @@ class ConditionUtilisation extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 16),
       child: Text(
         text,
-        style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w800),
+        style: TextStyle(fontFamily: kPolice, fontSize: 20, fontWeight: FontWeight.w800),
       ),
     );
   }
@@ -135,7 +132,7 @@ class ConditionUtilisation extends StatelessWidget {
       padding: const EdgeInsets.only(top: 20, bottom: 8),
       child: Text(
         text,
-        style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w700),
+        style: TextStyle(fontFamily: kPolice, fontSize: 16, fontWeight: FontWeight.w700),
       ),
     );
   }
@@ -146,7 +143,7 @@ class ConditionUtilisation extends StatelessWidget {
       child: Text(
         text,
         textAlign: TextAlign.justify,
-        style: GoogleFonts.inter(
+        style: TextStyle(fontFamily: kPolice, 
           fontSize: 14,
           height: 1.6,
           color: Colors.black54,
@@ -165,7 +162,7 @@ class ConditionUtilisation extends StatelessWidget {
           Expanded(
             child: Text(
               text,
-              style: GoogleFonts.inter(
+              style: TextStyle(fontFamily: kPolice, 
                 fontSize: 14,
                 height: 1.5,
                 color: Colors.black54,

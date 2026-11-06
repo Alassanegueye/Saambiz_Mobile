@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:saambiz/core/widgets/image_reseau.dart';
+import 'package:saambiz/core/theme/police.dart';
 import '../../../data/models/boutique_model.dart';
 import '../../../data/models/produit_model.dart';
 import '../../../data/datasources/produit_remote_datasource.dart';
 import '../../../../../injection_container.dart';
 import '../../../../promotions/data/datasources/promotions_remote_datasource.dart';
 import '../../../../promotions/data/models/promotion_model.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:saambiz/core/utils/image_url.dart';
 
 class _C {
   static const green = Color(0xFF01154B);
@@ -164,11 +163,7 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
               child: (hasLogo)
                   ? Opacity(
                       opacity: 0.25,
-                      child: CachedNetworkImage(
-                        imageUrl: imageOptimisee(b.logo!),
-                        fit: BoxFit.cover,
-                        errorWidget: (_, __, ___) => const SizedBox(),
-                      ),
+                      child: ImageReseau(b.logo!, fit: BoxFit.cover, repli: const SizedBox()),
                     )
                   : null,
             ),
@@ -186,7 +181,7 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
                       child: Text(
                         'Boutique',
                         textAlign: TextAlign.center,
-                        style: GoogleFonts.inter(
+                        style: TextStyle(fontFamily: kPolice, 
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
                           color: _C.white,
@@ -221,15 +216,11 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
                 ),
                 clipBehavior: Clip.antiAlias,
                 child: hasLogo
-                    ? CachedNetworkImage(
-                        imageUrl: imageOptimisee(b.logo!),
-                        fit: BoxFit.cover,
-                        errorWidget: (_, __, ___) => const Icon(
+                    ? ImageReseau(b.logo!, fit: BoxFit.cover, repli: const Icon(
                           Icons.storefront_rounded,
                           color: _C.green,
                           size: 36,
-                        ),
-                      )
+                        ))
                     : const Icon(
                         Icons.storefront_rounded,
                         color: _C.green,
@@ -249,7 +240,7 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
             children: [
               Text(
                 b.nom,
-                style: GoogleFonts.inter(
+                style: TextStyle(fontFamily: kPolice, 
                   fontSize: 20,
                   fontWeight: FontWeight.w800,
                   color: _C.black,
@@ -263,7 +254,7 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
                     const SizedBox(width: 3),
                     Text(
                       _effNote.toStringAsFixed(1),
-                      style: GoogleFonts.inter(
+                      style: TextStyle(fontFamily: kPolice, 
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
                         color: _C.black,
@@ -272,7 +263,7 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
                     const SizedBox(width: 4),
                     Text(
                       '($_effTotal avis)',
-                      style: GoogleFonts.inter(fontSize: 13, color: _C.sub),
+                      style: TextStyle(fontFamily: kPolice, fontSize: 13, color: _C.sub),
                     ),
                   ] else ...[
                     const Icon(
@@ -283,14 +274,14 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
                     const SizedBox(width: 3),
                     Text(
                       'Nouveau',
-                      style: GoogleFonts.inter(fontSize: 13, color: _C.sub),
+                      style: TextStyle(fontFamily: kPolice, fontSize: 13, color: _C.sub),
                     ),
                   ],
                   if (b.localisation.isNotEmpty) ...[
                     const SizedBox(width: 6),
                     Text(
                       '•',
-                      style: GoogleFonts.inter(fontSize: 13, color: _C.label),
+                      style: TextStyle(fontFamily: kPolice, fontSize: 13, color: _C.label),
                     ),
                     const SizedBox(width: 6),
                     Flexible(
@@ -298,7 +289,7 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
                         b.localisation,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.inter(fontSize: 13, color: _C.sub),
+                        style: TextStyle(fontFamily: kPolice, fontSize: 13, color: _C.sub),
                       ),
                     ),
                   ],
@@ -308,7 +299,7 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
                 const SizedBox(height: 8),
                 Text(
                   b.description,
-                  style: GoogleFonts.inter(
+                  style: TextStyle(fontFamily: kPolice, 
                     fontSize: 13.5,
                     height: 1.4,
                     color: _C.sub,
@@ -327,7 +318,7 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
                       ),
                       label: Text(
                         'Message',
-                        style: GoogleFonts.inter(
+                        style: TextStyle(fontFamily: kPolice, 
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
                         ),
@@ -352,7 +343,7 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
                       ),
                       label: Text(
                         _suivi ? 'Suivi' : 'Suivre',
-                        style: GoogleFonts.inter(
+                        style: TextStyle(fontFamily: kPolice, 
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
                         ),
@@ -417,7 +408,7 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
                 child: Text(
                   tabs[i],
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.inter(
+                  style: TextStyle(fontFamily: kPolice, 
                     fontSize: 14,
                     fontWeight: active ? FontWeight.w700 : FontWeight.w500,
                     color: active ? _C.green : _C.sub,
@@ -456,7 +447,7 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
       return Padding(
         padding: const EdgeInsets.all(28),
         child: Center(
-          child: Text(_error!, style: GoogleFonts.inter(color: _C.sub)),
+          child: Text(_error!, style: TextStyle(fontFamily: kPolice, color: _C.sub)),
         ),
       );
     }
@@ -469,7 +460,7 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
             child: Text(
               'Aucun produit disponible',
-              style: GoogleFonts.inter(color: _C.label),
+              style: TextStyle(fontFamily: kPolice, color: _C.label),
             ),
           )
         else
@@ -511,9 +502,7 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
                 ),
                 image: p.image.isNotEmpty
                     ? DecorationImage(
-                        image: CachedNetworkImageProvider(
-                          imageOptimisee(p.image),
-                        ),
+                        image: fournisseurImageReseau(p.image),
                         fit: BoxFit.cover,
                       )
                     : null,
@@ -529,7 +518,7 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
                   p.nom,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.inter(
+                  style: TextStyle(fontFamily: kPolice, 
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
                     color: _C.black,
@@ -538,7 +527,7 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
                 const SizedBox(height: 4),
                 Text(
                   '${p.prix} FCFA',
-                  style: GoogleFonts.inter(
+                  style: TextStyle(fontFamily: kPolice, 
                     fontSize: 12.5,
                     fontWeight: FontWeight.w700,
                     color: _C.green,
@@ -572,7 +561,7 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
               const SizedBox(height: 12),
               Text(
                 'Aucune promotion en cours',
-                style: GoogleFonts.inter(fontSize: 14, color: _C.sub),
+                style: TextStyle(fontFamily: kPolice, fontSize: 14, color: _C.sub),
               ),
             ],
           ),
@@ -599,7 +588,7 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
                     children: [
                       Text(
                         promo.titre,
-                        style: GoogleFonts.inter(
+                        style: TextStyle(fontFamily: kPolice, 
                           fontSize: 17,
                           fontWeight: FontWeight.w800,
                           color: _C.gold,
@@ -609,7 +598,7 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
                         const SizedBox(height: 4),
                         Text(
                           promo.produitNom!,
-                          style: GoogleFonts.inter(
+                          style: TextStyle(fontFamily: kPolice, 
                             fontSize: 13,
                             color: _C.white.withOpacity(0.9),
                           ),
@@ -618,7 +607,7 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
                       const SizedBox(height: 6),
                       Text(
                         '${promo.prixPromo.toStringAsFixed(0)} FCFA',
-                        style: GoogleFonts.inter(
+                        style: TextStyle(fontFamily: kPolice, 
                           fontSize: 15,
                           fontWeight: FontWeight.w800,
                           color: _C.white,
@@ -636,7 +625,7 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
                         ),
                         child: Text(
                           "Profiter de l'offre",
-                          style: GoogleFonts.inter(
+                          style: TextStyle(fontFamily: kPolice, 
                             fontSize: 12.5,
                             fontWeight: FontWeight.w700,
                             color: _C.navyDk,
@@ -671,7 +660,7 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
             children: [
               Text(
                 _effTotal > 0 ? _effNote.toStringAsFixed(1) : '0',
-                style: GoogleFonts.inter(
+                style: TextStyle(fontFamily: kPolice, 
                   fontSize: 34,
                   fontWeight: FontWeight.w800,
                   color: _C.black,
@@ -696,7 +685,7 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
                   const SizedBox(height: 2),
                   Text(
                     '$_effTotal avis',
-                    style: GoogleFonts.inter(fontSize: 13, color: _C.sub),
+                    style: TextStyle(fontFamily: kPolice, fontSize: 13, color: _C.sub),
                   ),
                 ],
               ),
@@ -714,7 +703,7 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
                   ),
                   child: Text(
                     'Donner mon avis',
-                    style: GoogleFonts.inter(
+                    style: TextStyle(fontFamily: kPolice, 
                       fontSize: 12.5,
                       fontWeight: FontWeight.w700,
                       color: _C.white,
@@ -731,7 +720,7 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
               child: Center(
                 child: Text(
                   'Aucun avis pour le moment. Soyez le premier !',
-                  style: GoogleFonts.inter(fontSize: 14, color: _C.sub),
+                  style: TextStyle(fontFamily: kPolice, fontSize: 14, color: _C.sub),
                 ),
               ),
             )
@@ -777,7 +766,7 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
               Expanded(
                 child: Text(
                   nom.isEmpty ? 'Client' : nom,
-                  style: GoogleFonts.inter(
+                  style: TextStyle(fontFamily: kPolice, 
                     fontSize: 13.5,
                     fontWeight: FontWeight.w700,
                     color: _C.black,
@@ -800,7 +789,7 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
             const SizedBox(height: 8),
             Text(
               commentaire,
-              style: GoogleFonts.inter(
+              style: TextStyle(fontFamily: kPolice, 
                 fontSize: 13,
                 height: 1.4,
                 color: _C.sub,
@@ -821,7 +810,7 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
         builder: (ctx, setLocal) => AlertDialog(
           title: Text(
             'Votre avis',
-            style: GoogleFonts.inter(fontWeight: FontWeight.w700),
+            style: TextStyle(fontFamily: kPolice, fontWeight: FontWeight.w700),
           ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -897,7 +886,7 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
         children: [
           Text(
             title,
-            style: GoogleFonts.inter(
+            style: TextStyle(fontFamily: kPolice, 
               fontSize: 15,
               fontWeight: FontWeight.w700,
               color: _C.black,
@@ -905,7 +894,7 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
           ),
           Text(
             'Voir tout',
-            style: GoogleFonts.inter(
+            style: TextStyle(fontFamily: kPolice, 
               fontSize: 12.5,
               fontWeight: FontWeight.w600,
               color: _C.green,

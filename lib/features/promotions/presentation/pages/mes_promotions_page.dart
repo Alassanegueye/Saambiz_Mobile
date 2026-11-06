@@ -1,7 +1,12 @@
+import 'package:saambiz/core/widgets/onglets_conserves.dart';
 import 'package:flutter/material.dart';
+import '../../../../core/widgets/app_app_bar.dart';
+import '../../../../core/widgets/degrade_fond.dart';
+import '../../../../core/theme/police.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/theme/app_color.dart';
 import '../../../../injection_container.dart';
 import '../bloc/promotions_bloc.dart';
 import '../bloc/promotions_event.dart';
@@ -26,7 +31,10 @@ class MesPromotionsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => sl<PromotionsBloc>()..add(LoadMesPromotions()),
-      child: const _MesPromotionsView(),
+      child: ActualiserAuRetour(
+        onRetour: (context) => context.read<PromotionsBloc>().add(LoadMesPromotions()),
+        child: const _MesPromotionsView(),
+      ),
     );
   }
 }
@@ -55,47 +63,22 @@ class _MesPromotionsView extends StatelessWidget {
     if (res == true) bloc.add(LoadMesPromotions());
   }
 
-  Widget _boutonsCreation(BuildContext context) {
-    return Container(
-      color: _C.white,
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-      child: Row(
-        children: [
-          Expanded(
-            child: ElevatedButton.icon(
-              onPressed: () =>
-                  _nouvelleCampagne(context, TypeCampagne.promotion),
-              icon: const Icon(Icons.local_offer_outlined, size: 18),
-              label: const Text('Ajouter une promotion'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: _C.green,
-                foregroundColor: _C.white,
-                elevation: 0,
-                padding: const EdgeInsets.symmetric(vertical: 13),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: OutlinedButton.icon(
-              onPressed: () =>
-                  _nouvelleCampagne(context, TypeCampagne.information),
-              icon: const Icon(Icons.campaign_outlined, size: 18),
-              label: const Text('Informer mes clients'),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: _C.green,
-                side: const BorderSide(color: _C.green),
-                padding: const EdgeInsets.symmetric(vertical: 13),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            ),
-          ),
-        ],
+  /// Action secondaire, volontairement discrète : un message libre aux abonnés
+  /// (boutique ouverte, nouveautés…).
+  Widget _lienInformer(BuildContext context) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: TextButton.icon(
+        onPressed: () => _nouvelleCampagne(context, TypeCampagne.information),
+        icon: const Icon(Icons.campaign_outlined, size: 20),
+        label: const Text(
+          'Informer les abonnés',
+          style: TextStyle(fontWeight: FontWeight.w600),
+        ),
+        style: TextButton.styleFrom(
+          foregroundColor: _C.green,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        ),
       ),
     );
   }
@@ -104,19 +87,39 @@ class _MesPromotionsView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: _C.bg,
-      appBar: AppBar(
-        backgroundColor: _C.white,
-        elevation: 0.5,
-        foregroundColor: _C.black,
-        title: const Text('Mes promotions'),
+      appBar: AppAppBar(
+        title: 'Mes promotions',
+        implyLeading: false,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: FilledButton.icon(
+              onPressed: () =>
+                  _nouvelleCampagne(context, TypeCampagne.promotion),
+              icon: const Icon(Icons.add_rounded, size: 18),
+              label: const Text('Créer une promo'),
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColor.kSecondary,
+                foregroundColor: AppColor.kPrimary,
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                visualDensity: VisualDensity.compact,
+                textStyle: const TextStyle(fontFamily: kPolice, fontWeight: FontWeight.w700),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
-      body: Column(
+      body: FondDegradeSubtil(
+        child: Column(
         children: [
-          // Créer une promotion (remise sur des produits) ou informer ses
-          // clients (boutique ouverte, nouveautés, message libre).
-          _boutonsCreation(context),
+          _lienInformer(context),
           Expanded(
             child: BlocConsumer<PromotionsBloc, PromotionsState>(
+              buildWhen: (avant, apres) =>
+                  !(apres is PromotionsLoading && avant is PromotionsLoaded),
               listener: (context, state) {
                 if (state is PromotionsError) {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -133,12 +136,7 @@ class _MesPromotionsView extends StatelessWidget {
                 }
                 if (state is PromotionsLoaded) {
                   if (state.promotions.isEmpty) {
-                    return const Center(
-                      child: Text(
-                        'Aucune promotion créée pour le moment',
-                        style: TextStyle(color: _C.sub),
-                      ),
-                    );
+                    return const _AucunePromotion();
                   }
                   return RefreshIndicator(
                     onRefresh: () async =>
@@ -220,6 +218,72 @@ class _MesPromotionsView extends StatelessWidget {
             ),
           ),
         ],
+      ),
+      ),
+    );
+  }
+}
+
+/// État vide : le message, et un conseil sur ce qu'il faut faire ensuite.
+class _AucunePromotion extends StatelessWidget {
+  const _AucunePromotion();
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(24, 0, 24, 48),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'Aucune promotion en cours pour le moment.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w500,
+                color: _C.black,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: _C.green,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Row(
+                children: [
+                  Icon(
+                    Icons.campaign_outlined,
+                    color: AppColor.kSecondary,
+                    size: 24,
+                  ),
+                  SizedBox(width: 12),
+                  Expanded(
+                    child: Text.rich(
+                      TextSpan(
+                        text: 'Pensez à informer vos abonnés ',
+                        children: [
+                          TextSpan(
+                            text:
+                                'après avoir créé votre promotion pour booster vos ventes !',
+                            style: TextStyle(fontWeight: FontWeight.w700),
+                          ),
+                        ],
+                      ),
+                      style: TextStyle(
+                        fontSize: 13,
+                        height: 1.4,
+                        color: _C.white,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

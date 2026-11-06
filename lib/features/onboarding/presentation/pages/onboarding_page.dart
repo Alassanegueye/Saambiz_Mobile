@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:saambiz/core/theme/police.dart';
 import 'package:saambiz/core/routes/app_router.dart';
 
 import '../../../../core/theme/app_color.dart';
@@ -110,7 +110,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                       onPressed: isLast ? null : _finish,
                       child: Text(
                         'Passer',
-                        style: GoogleFonts.inter(
+                        style: TextStyle(fontFamily: kPolice, 
                           color: AppColor.kGrayscale40,
                           fontWeight: FontWeight.w600,
                           fontSize: 14,
@@ -165,7 +165,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
             children: [
               Text(
                 'Suivant',
-                style: GoogleFonts.inter(
+                style: TextStyle(fontFamily: kPolice, 
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
                 ),
@@ -201,7 +201,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
             ),
             child: Text(
               'Commencer',
-              style: GoogleFonts.inter(
+              style: TextStyle(fontFamily: kPolice, 
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
               ),
@@ -258,7 +258,7 @@ class _PageSlide extends StatelessWidget {
               Text(
                 slide.titre,
                 textAlign: TextAlign.center,
-                style: GoogleFonts.inter(
+                style: TextStyle(fontFamily: kPolice, 
                   fontSize: 24,
                   fontWeight: FontWeight.w700,
                   height: 1.25,
@@ -269,7 +269,7 @@ class _PageSlide extends StatelessWidget {
               Text(
                 slide.texte,
                 textAlign: TextAlign.center,
-                style: GoogleFonts.inter(
+                style: TextStyle(fontFamily: kPolice, 
                   fontSize: 15,
                   height: 1.55,
                   color: AppColor.kGrayscale40,

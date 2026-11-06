@@ -1,13 +1,13 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart';
+import 'package:saambiz/core/widgets/image_reseau.dart';
 import 'package:flutter/material.dart';
 import 'package:saambiz/core/widgets/logo_boutique.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:saambiz/core/utils/image_url.dart';
+import 'package:saambiz/core/theme/police.dart';
 
 import '../../../../core/theme/app_color.dart';
 import '../../../../core/utils/url_externe.dart';
 import '../../../../core/widgets/ui_kit.dart';
+import '../../../../core/widgets/degrade_fond.dart';
 import '../../../../injection_container.dart';
 import '../../data/catalogue_remote_datasource.dart';
 import '../../data/produit_catalogue.dart';
@@ -127,32 +127,30 @@ class _ProduitDetailPageState extends State<ProduitDetailPage> {
     return Scaffold(
       backgroundColor: AppColor.kBackground,
       appBar: AppBar(
-        backgroundColor: AppColor.kBackground,
-        surfaceTintColor: AppColor.kBackground,
-        elevation: 0,
-        foregroundColor: AppColor.kGrayscaleDark100,
         titleSpacing: 0,
         title: Text(
           p.nom,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w700),
+          style: TextStyle(fontFamily: kPolice, fontSize: 16, fontWeight: FontWeight.w700),
         ),
         actions: const [BoutonPanier(), SizedBox(width: 6)],
       ),
-      body: RefreshIndicator(
-        color: AppColor.kPrimary,
-        onRefresh: _charger,
-        child: ListView(
-          padding: const EdgeInsets.only(bottom: 20),
-          children: [
-            _blocGalerie(),
-            _blocPrincipal(),
-            if (p.caracteristiques.isNotEmpty) _blocCaracteristiques(),
-            if (p.description.trim().isNotEmpty) _blocDescription(),
-            if (p.boutique != null) _blocBoutique(),
-            _blocSimilaires(),
-          ],
+      body: FondDegradeSubtil(
+        child: RefreshIndicator(
+          color: AppColor.kPrimary,
+          onRefresh: _charger,
+          child: ListView(
+            padding: const EdgeInsets.only(bottom: 20),
+            children: [
+              _blocGalerie(),
+              _blocPrincipal(),
+              if (p.caracteristiques.isNotEmpty) _blocCaracteristiques(),
+              if (p.description.trim().isNotEmpty) _blocDescription(),
+              if (p.boutique != null) _blocBoutique(),
+              _blocSimilaires(),
+            ],
+          ),
         ),
       ),
       bottomNavigationBar: _barreAchat(),
@@ -186,15 +184,10 @@ class _ProduitDetailPageState extends State<ProduitDetailPage> {
               onPageChanged: (i) => setState(() => _page = i),
               itemBuilder: (_, i) => Padding(
                 padding: const EdgeInsets.all(12),
-                child: CachedNetworkImage(
-                  memCacheWidth: 1080,
-                  imageUrl: imageOptimisee(images[i]),
-                  fit: BoxFit.contain,
-                  errorWidget: (_, __, ___) => const Icon(
+                child: ImageReseau(images[i], fit: BoxFit.contain, repli: const Icon(
                     Icons.image_outlined,
                     color: AppColor.kGrayscale30,
-                  ),
-                ),
+                  )),
               ),
             ),
           if (images.length > 1)
@@ -239,7 +232,7 @@ class _ProduitDetailPageState extends State<ProduitDetailPage> {
               Expanded(
                 child: Text(
                   p.nom,
-                  style: GoogleFonts.inter(
+                  style: TextStyle(fontFamily: kPolice, 
                     fontSize: 19,
                     fontWeight: FontWeight.w700,
                     color: AppColor.kGrayscaleDark100,
@@ -264,7 +257,7 @@ class _ProduitDetailPageState extends State<ProduitDetailPage> {
             children: [
               Text(
                 formaterPrix(p.prixPaye),
-                style: GoogleFonts.inter(
+                style: TextStyle(fontFamily: kPolice, 
                   fontSize: 24,
                   fontWeight: FontWeight.w800,
                   color: AppColor.kPrimary,
@@ -275,7 +268,7 @@ class _ProduitDetailPageState extends State<ProduitDetailPage> {
                   padding: const EdgeInsets.only(bottom: 3),
                   child: Text(
                     formaterPrix(p.prixBarre!),
-                    style: GoogleFonts.inter(
+                    style: TextStyle(fontFamily: kPolice, 
                       fontSize: 14,
                       color: AppColor.kGrayscale40,
                       decoration: TextDecoration.lineThrough,
@@ -298,14 +291,14 @@ class _ProduitDetailPageState extends State<ProduitDetailPage> {
                   if (_choix[option.libelle] != null)
                     TextSpan(
                       text: '  ${_choix[option.libelle]}',
-                      style: GoogleFonts.inter(
+                      style: TextStyle(fontFamily: kPolice, 
                         fontWeight: FontWeight.w500,
                         color: AppColor.kGrayscale40,
                       ),
                     ),
                 ],
               ),
-              style: GoogleFonts.inter(
+              style: TextStyle(fontFamily: kPolice, 
                 fontSize: 13.5,
                 fontWeight: FontWeight.w700,
                 color: _choixManquant && !_choix.containsKey(option.libelle)
@@ -341,7 +334,7 @@ class _ProduitDetailPageState extends State<ProduitDetailPage> {
               ),
               child: Text(
                 p.categorie!.nom,
-                style: GoogleFonts.inter(
+                style: TextStyle(fontFamily: kPolice, 
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
                   color: AppColor.kPrimary,
@@ -373,7 +366,7 @@ class _ProduitDetailPageState extends State<ProduitDetailPage> {
         child: Text(
           texte,
           textAlign: TextAlign.center,
-          style: GoogleFonts.inter(
+          style: TextStyle(fontFamily: kPolice, 
             fontSize: 13,
             fontWeight: FontWeight.w600,
             color: choisie ? AppColor.kWhite : AppColor.kGrayscaleDark100,
@@ -406,7 +399,7 @@ class _ProduitDetailPageState extends State<ProduitDetailPage> {
       children: [
         Text(
           'Quantité',
-          style: GoogleFonts.inter(
+          style: TextStyle(fontFamily: kPolice, 
             fontSize: 13.5,
             fontWeight: FontWeight.w600,
             color: AppColor.kGrayscaleDark100,
@@ -422,7 +415,7 @@ class _ProduitDetailPageState extends State<ProduitDetailPage> {
           child: Text(
             '$_quantite',
             textAlign: TextAlign.center,
-            style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w700),
+            style: TextStyle(fontFamily: kPolice, fontSize: 15, fontWeight: FontWeight.w700),
           ),
         ),
         bouton(
@@ -436,7 +429,7 @@ class _ProduitDetailPageState extends State<ProduitDetailPage> {
             alignment: Alignment.centerRight,
             child: Text(
               formaterPrix(p.prixPaye * _quantite),
-              style: GoogleFonts.inter(
+              style: TextStyle(fontFamily: kPolice, 
                 fontSize: 15,
                 fontWeight: FontWeight.w700,
                 color: AppColor.kPrimary,
@@ -470,7 +463,7 @@ class _ProduitDetailPageState extends State<ProduitDetailPage> {
                     child: Text(
                       c.valeur,
                       textAlign: TextAlign.right,
-                      style: GoogleFonts.inter(
+                      style: TextStyle(fontFamily: kPolice, 
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
                         color: AppColor.kGrayscaleDark100,
@@ -498,7 +491,7 @@ class _ProduitDetailPageState extends State<ProduitDetailPage> {
           const SizedBox(height: 10),
           Text(
             p.description,
-            style: GoogleFonts.inter(
+            style: TextStyle(fontFamily: kPolice, 
               fontSize: 13.5,
               color: AppColor.kGrayscale40,
               height: 1.6,
@@ -529,12 +522,7 @@ class _ProduitDetailPageState extends State<ProduitDetailPage> {
                 width: 48,
                 height: 48,
                 child: (b.logo ?? '').isNotEmpty
-                    ? CachedNetworkImage(
-                        imageUrl: imageOptimisee(b.logo!, largeur: 200),
-                        fit: BoxFit.cover,
-                        errorWidget: (_, __, ___) =>
-                            const LogoBoutiqueParDefaut(),
-                      )
+                    ? ImageReseau(b.logo!, largeurServeur: 200, fit: BoxFit.cover, repli: const LogoBoutiqueParDefaut())
                     : const LogoBoutiqueParDefaut(),
               ),
             ),
@@ -550,7 +538,7 @@ class _ProduitDetailPageState extends State<ProduitDetailPage> {
                           b.nom,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.inter(
+                          style: TextStyle(fontFamily: kPolice, 
                             fontSize: 14.5,
                             fontWeight: FontWeight.w700,
                           ),
@@ -573,7 +561,7 @@ class _ProduitDetailPageState extends State<ProduitDetailPage> {
             ),
             Text(
               'Voir la boutique',
-              style: GoogleFonts.inter(
+              style: TextStyle(fontFamily: kPolice, 
                 fontSize: 12.5,
                 fontWeight: FontWeight.w700,
                 color: AppColor.kPrimary,
@@ -683,7 +671,7 @@ class _ProduitDetailPageState extends State<ProduitDetailPage> {
                           : p.enRupture
                           ? 'Rupture de stock'
                           : 'Ajouter au panier',
-                      style: GoogleFonts.inter(
+                      style: TextStyle(fontFamily: kPolice, 
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
                       ),

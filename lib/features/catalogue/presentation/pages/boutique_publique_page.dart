@@ -1,9 +1,8 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart';
+import 'package:saambiz/core/widgets/image_reseau.dart';
 import 'package:flutter/material.dart';
 import 'package:saambiz/core/widgets/logo_boutique.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:saambiz/core/utils/image_url.dart';
+import 'package:saambiz/core/theme/police.dart';
 
 import '../../../../core/services/token_service.dart';
 import '../../../../core/theme/app_color.dart';
@@ -197,7 +196,7 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
       _message(
         avant
             ? 'Vous ne suivez plus cette boutique.'
-            : 'Vous suivez cette boutique. Activez la cloche 🔔 pour recevoir ses promotions et nouveautés.',
+            : 'Vous suivez cette boutique. Activez la cloche pour recevoir ses promotions et nouveautés.',
       );
     } catch (_) {
       if (mounted) setState(() => _suivi = avant);
@@ -282,10 +281,6 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
     return Scaffold(
       backgroundColor: AppColor.kWhite,
       appBar: AppBar(
-        backgroundColor: AppColor.kWhite,
-        surfaceTintColor: AppColor.kWhite,
-        elevation: 0,
-        foregroundColor: AppColor.kGrayscaleDark100,
         actions: const [BoutonPanier(), SizedBox(width: 6)],
       ),
       body: RefreshIndicator(
@@ -356,7 +351,7 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
             const SizedBox(width: 3),
             Text(
               '$note',
-              style: GoogleFonts.inter(
+              style: TextStyle(fontFamily: kPolice, 
                 fontSize: 13.5,
                 fontWeight: FontWeight.w700,
                 color: _encre,
@@ -373,7 +368,7 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
             const SizedBox(width: 5),
             Text(
               'Vente en ligne depuis $depuis',
-              style: GoogleFonts.inter(fontSize: 13, color: _encre),
+              style: TextStyle(fontFamily: kPolice, fontSize: 13, color: _encre),
             ),
           ],
         ),
@@ -390,7 +385,7 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
                   adresse,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.inter(fontSize: 13, color: _encre),
+                  style: TextStyle(fontFamily: kPolice, fontSize: 13, color: _encre),
                 ),
               ),
             ],
@@ -434,12 +429,7 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
                 ),
                 clipBehavior: Clip.antiAlias,
                 child: logo.isNotEmpty
-                    ? CachedNetworkImage(
-                        imageUrl: imageOptimisee(logo, largeur: 256),
-                        fit: BoxFit.cover,
-                        errorWidget: (_, __, ___) =>
-                            const LogoBoutiqueParDefaut(),
-                      )
+                    ? ImageReseau(logo, largeurServeur: 256, fit: BoxFit.cover, repli: const LogoBoutiqueParDefaut())
                     : const LogoBoutiqueParDefaut(),
               ),
               const SizedBox(width: 16),
@@ -454,7 +444,7 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
                             nom,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.inter(
+                            style: TextStyle(fontFamily: kPolice, 
                               fontSize: 22,
                               fontWeight: FontWeight.w800,
                               color: _encre,
@@ -507,7 +497,7 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
                     ),
                     label: Text(
                       _suivi ? 'Suivie' : 'Suivre',
-                      style: GoogleFonts.inter(
+                      style: TextStyle(fontFamily: kPolice, 
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
                         color: _accent,
@@ -584,7 +574,7 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
                 children: [
                   Text(
                     'Suivez-nous',
-                    style: GoogleFonts.inter(
+                    style: TextStyle(fontFamily: kPolice, 
                       fontSize: 13.5,
                       fontWeight: FontWeight.w600,
                       color: AppColor.kGrayscale40,
@@ -657,7 +647,7 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
                   children: [
                     Text(
                       titre,
-                      style: GoogleFonts.inter(
+                      style: TextStyle(fontFamily: kPolice, 
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
                         color: _encre,
@@ -693,7 +683,7 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
               titre,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: GoogleFonts.inter(
+              style: TextStyle(fontFamily: kPolice, 
                 fontSize: 22,
                 fontWeight: FontWeight.w800,
                 color: _encre,
@@ -708,7 +698,7 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
                 children: [
                   Text(
                     'Voir tout',
-                    style: GoogleFonts.inter(
+                    style: TextStyle(fontFamily: kPolice, 
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
                       color: _accent,
@@ -843,7 +833,7 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
                   Text(
                     (a['titre'] ?? '').toString(),
                     textAlign: TextAlign.center,
-                    style: GoogleFonts.inter(
+                    style: TextStyle(fontFamily: kPolice, 
                       fontSize: 13.5,
                       fontWeight: FontWeight.w600,
                       color: _encre,
@@ -873,7 +863,7 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
         children: [
           Text(
             'À propos',
-            style: GoogleFonts.inter(
+            style: TextStyle(fontFamily: kPolice, 
               fontSize: 20,
               fontWeight: FontWeight.w800,
               color: _encre,
@@ -882,7 +872,7 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
           const SizedBox(height: 8),
           Text(
             texte,
-            style: GoogleFonts.inter(
+            style: TextStyle(fontFamily: kPolice, 
               fontSize: 14,
               height: 1.55,
               color: AppColor.kGrayscale40,
@@ -905,13 +895,9 @@ class _SectionPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColor.kWhite,
       appBar: AppBar(
-        backgroundColor: AppColor.kWhite,
-        surfaceTintColor: AppColor.kWhite,
-        elevation: 0,
-        foregroundColor: AppColor.kGrayscaleDark100,
         title: Text(
           titre,
-          style: GoogleFonts.inter(fontSize: 17, fontWeight: FontWeight.w700),
+          style: TextStyle(fontFamily: kPolice, fontSize: 17, fontWeight: FontWeight.w700),
         ),
         actions: const [BoutonPanier(), SizedBox(width: 6)],
       ),

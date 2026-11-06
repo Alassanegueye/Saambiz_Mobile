@@ -30,6 +30,7 @@ class AuthRepositoryImpl implements AuthRepository {
       );
 
       await sl<TokenService>().setToken(authResponse.token);
+      await sl<TokenService>().setRefreshToken(authResponse.refreshToken);
 
       await sl<FlutterSecureStorage>().write(
         key: 'user_id',

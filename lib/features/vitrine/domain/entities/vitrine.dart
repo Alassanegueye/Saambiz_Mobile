@@ -1,5 +1,43 @@
 import 'package:equatable/equatable.dart';
 
+/// Un rayon de la boutique, composé par le vendeur : « Nouveautés »,
+/// « Promos du mois »… Il ne contient que des produits qu'il a DÉJÀ créés
+/// depuis « Produits » : on choisit ici parmi l'existant, on ne crée rien.
+///
+/// Le serveur écarte sans broncher tout identifiant qui n'est pas un produit
+/// du vendeur, et refuse une section sans titre.
+class SectionBoutique extends Equatable {
+  /// Donné par le serveur à l'enregistrement. Vide pour une section qui
+  /// n'a pas encore été envoyée.
+  final String id;
+
+  final String titre;
+  final List<String> produitIds;
+
+  const SectionBoutique({
+    this.id = '',
+    required this.titre,
+    this.produitIds = const [],
+  });
+
+  SectionBoutique copyWith({String? titre, List<String>? produitIds}) =>
+      SectionBoutique(
+        id: id,
+        titre: titre ?? this.titre,
+        produitIds: produitIds ?? this.produitIds,
+      );
+
+  /// Forme attendue par `PUT /vendeurs/ma-vitrine`.
+  Map<String, dynamic> versJson() => {
+    if (id.isNotEmpty) 'id': id,
+    'titre': titre,
+    'produitIds': produitIds,
+  };
+
+  @override
+  List<Object?> get props => [id, titre, produitIds];
+}
+
 /// Le site web public de la boutique : `saambiz.com/b/<slug>`.
 ///
 /// À ne pas confondre avec l'affichage de la boutique DANS l'application, qui
@@ -29,6 +67,12 @@ class Vitrine extends Equatable {
   final String logoForme; // 'rond' | 'carre' | 'bandeau' | 'libre'
   final Map<String, String> reseaux;
   final Map<String, bool> sections;
+
+  /// Les rayons composés par le vendeur, dans leur ordre d'affichage.
+  /// À ne pas confondre avec [sections], qui ne fait qu'allumer ou éteindre
+  /// les blocs prévus par le modèle de site.
+  final List<SectionBoutique> sectionsPerso;
+
   final bool commande;
   final bool paiementLivraison;
   final int vues;
@@ -58,6 +102,7 @@ class Vitrine extends Equatable {
     this.logoForme = 'libre',
     this.reseaux = const {},
     this.sections = const {},
+    this.sectionsPerso = const [],
     this.commande = true,
     this.paiementLivraison = true,
     this.vues = 0,
@@ -81,6 +126,7 @@ class Vitrine extends Equatable {
     logoForme,
     reseaux,
     sections,
+    sectionsPerso,
     commande,
     paiementLivraison,
     vues,

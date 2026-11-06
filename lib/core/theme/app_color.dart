@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 
-/// Palette SaamBiz, relevée sur le logo : bleu marine #01154B et or #FBB900.
+/// Palette SaamBiz, relevée sur le logo et l'icône de l'application :
+/// bleu marine #01154B et or #FBB900.
 ///
-/// Fond gris clair neutre, surfaces blanches : le marine porte la structure
-/// (en-têtes, textes, boutons), l'or signale ce qui compte (onglet actif,
-/// remises, action principale). Le rouge et le vert restent réservés aux
-/// erreurs et aux succès.
+/// Fonds blancs et gris bleuté très clair, comme le design d'origine : le
+/// marine porte la structure (titres, boutons, icônes), l'or ne sert qu'à ce
+/// qui doit attirer l'œil (remises, onglet actif, action principale sur fond
+/// marine). Le rouge et le vert restent réservés aux erreurs et aux succès.
 class AppColor {
   AppColor._();
 
@@ -14,16 +15,18 @@ class AppColor {
   static const Color kSecondary = Color(0xFFFBB900);
 
   // Déclinaisons du bleu
-  static const Color kPrimaryDark = Color(0xFF000B30);
-  static const Color kPrimaryMedium = Color(0xFF1D3F9E);
+  static const Color kPrimaryDark = Color(0xFF000C33);
 
-  /// Fond doux des pastilles d'icônes et des cartes sélectionnées : bleu
-  /// très pâle.
-  static const Color kPrimaryLight = Color(0xFFEDF0F8);
+  /// Bleu plus clair : liens, valeurs secondaires, icônes d'information.
+  static const Color kPrimaryMedium = Color(0xFF2B4A9C);
+
+  /// Fond des pastilles d'icônes et des éléments sélectionnés.
+  static const Color kPrimaryLight = Color(0xFFEDF1FA);
 
   // Déclinaisons de l'or
-  static const Color kSecondaryDark = Color(0xFF9A6B00);
-  static const Color kSecondaryLight = Color(0xFFFFF4D1);
+  /// Or foncé, lisible sur fond clair (texte, icône).
+  static const Color kSecondaryDark = Color(0xFF8A5F00);
+  static const Color kSecondaryLight = Color(0xFFFFF5D6);
 
   /// Anciens noms, conservés pour les écrans qui les utilisent encore.
   static const Color kAccent = kSecondary;
@@ -31,35 +34,46 @@ class AppColor {
   static const Color kAccentSoft = kPrimaryLight;
 
   // États
-  static const Color kSucces = Color(0xFF13804A);
-  static const Color kErreur = Color(0xFFC6382B);
-  static const Color kSuccesLight = Color(0xFFDDF5E6);
-  static const Color kErreurLight = Color(0xFFFBECE8);
+  static const Color kSucces = Color(0xFF12805C);
+  static const Color kErreur = Color(0xFFC8372D);
+  static const Color kSuccesLight = Color(0xFFE2F5EC);
+  static const Color kErreurLight = Color(0xFFFCEDEA);
   static const Color kAlerte = kSecondaryDark;
   static const Color kInfo = kPrimaryMedium;
 
-  // Neutres
+  // Neutres, légèrement bleutés pour rester dans la famille du marine
   static const Color kWhite = Color(0xFFFFFFFF);
-  static const Color kBlack = Color(0xFF0B1220);
-  static const Color kGrayscaleDark100 = Color(0xFF0E1A3A);
-  static const Color kGrayscale80 = Color(0xFF2F3A52);
-  static const Color kGrayscale60 = Color(0xFF4B5568);
-  static const Color kGrayscale40 = Color(0xFF667085);
-  static const Color kGrayscale30 = Color(0xFF98A2B3);
-  static const Color kGrayscale20 = Color(0xFFD9DEE7);
-  static const Color kLine = Color(0xFFE6E9EF);
+  static const Color kBlack = Color(0xFF0A1330);
+
+  /// Titres et texte fort.
+  static const Color kGrayscaleDark100 = Color(0xFF0B1638);
+
+  /// Texte courant.
+  static const Color kGrayscale80 = Color(0xFF2E3A55);
+  static const Color kGrayscale60 = Color(0xFF4A5672);
+
+  /// Texte secondaire (dates, villes, mentions).
+  static const Color kGrayscale40 = Color(0xFF66708A);
+
+  /// Texte désactivé, icônes discrètes, indications de champ.
+  static const Color kGrayscale30 = Color(0xFF9AA3B8);
+  static const Color kGrayscale20 = Color(0xFFDAE0EA);
+
+  /// Filets et séparateurs.
+  static const Color kLine = Color(0xFFE8ECF3);
 
   /// Surface des champs et des lignes d'information dans une carte blanche.
-  static const Color kSurface = Color(0xFFF7F8FA);
+  static const Color kSurface = Color(0xFFF5F7FB);
 
   /// Contour bleu clair (puces, cartes sélectionnées).
-  static const Color kPrimaryBorder = Color(0xFFC9D2EA);
-  static const Color kErreurBorder = Color(0xFFF2C9C1);
+  static const Color kPrimaryBorder = Color(0xFFC9D3EC);
+  static const Color kErreurBorder = Color(0xFFF2C9C2);
 
   static const Color kWhatsapp = Color(0xFF25D366);
 
-  /// Fond des écrans : gris clair neutre.
-  static const Color kBackground = Color(0xFFF4F5F8);
-  static const Color kBackground2 = Color(0xFFEBEEF3);
+  /// Fond des écrans : blanc à peine bleuté, sur lequel les cartes blanches
+  /// se détachent sans contour.
+  static const Color kBackground = Color(0xFFF5F7FB);
+  static const Color kBackground2 = Color(0xFFECF0F7);
   static const Color kOnBoardingColor = kWhite;
 }

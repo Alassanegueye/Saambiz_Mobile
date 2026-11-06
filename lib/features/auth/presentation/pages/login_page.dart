@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:saambiz/core/theme/police.dart';
 import 'package:toastification/toastification.dart';
 
 import '../../../../core/routes/app_router.dart';
@@ -11,9 +11,9 @@ import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
 import '../widgets/mise_en_page_auth.dart';
 
-/// Connexion par e-mail ou téléphone : en-tête bleu marine, carte blanche
-/// posée à cheval sur l'en-tête, lien vers l'inscription (parcours en
-/// plusieurs étapes : choix du profil, formulaire, code reçu par e-mail…).
+/// Connexion par e-mail ou telephone : en-tete bleu marine, carte blanche
+/// posee a cheval sur l'en-tete, lien vers l'inscription (parcours en
+/// plusieurs etapes : choix du profil, formulaire, code recu par e-mail...).
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
@@ -37,7 +37,7 @@ class _LoginPageState extends State<LoginPage> {
     FocusScope.of(context).unfocus();
     if (!_formKey.currentState!.validate()) return;
     final input = _identifiantController.text.trim();
-    // E-mail ou téléphone : le serveur attend l'un ou l'autre.
+    // E-mail ou telephone : le serveur attend l'un ou l'autre.
     final isEmail = RegExp(r'\S+@\S+\.\S+').hasMatch(input);
     context.read<AuthBloc>().add(
       LoginRequested(
@@ -55,7 +55,7 @@ class _LoginPageState extends State<LoginPage> {
       body: BlocConsumer<AuthBloc, AuthState>(
         listenWhen: (prev, curr) => prev != curr,
         listener: (context, state) {
-          // AuthBloc est global : cette page ne réagit que lorsqu'elle est la
+          // AuthBloc est global : cette page ne reagit que lorsqu'elle est la
           // route visible.
           if (ModalRoute.of(context)?.isCurrent != true) return;
 
@@ -75,8 +75,6 @@ class _LoginPageState extends State<LoginPage> {
               );
               return;
             }
-            // Toast avant la navigation : la page de connexion est ensuite
-            // retirée de la pile.
             showToast(
               context,
               'Connexion réussie',
@@ -132,6 +130,7 @@ class _LoginPageState extends State<LoginPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ChampFormulaire(
+          obligatoire: true,
           libelle: 'E-mail ou téléphone',
           hint: 'Votre e-mail ou numéro',
           controller: _identifiantController,
@@ -144,7 +143,7 @@ class _LoginPageState extends State<LoginPage> {
               : null,
         ),
         const SizedBox(height: 16),
-        const LibelleChamp('Mot de passe'),
+        const LibelleChamp('Mot de passe', obligatoire: true),
         ChampMotDePasse(
           controller: _passwordController,
           action: TextInputAction.done,
@@ -157,9 +156,10 @@ class _LoginPageState extends State<LoginPage> {
           child: TextButton(
             onPressed: () =>
                 Navigator.of(context).pushNamed(AppRouter.forgotPasswordRoute),
-            child: Text(
+            child: const Text(
               'Mot de passe oublié ?',
-              style: GoogleFonts.inter(
+              style: TextStyle(
+                fontFamily: kPolice,
                 color: AppColor.kPrimary,
                 fontWeight: FontWeight.w600,
                 fontSize: 13,

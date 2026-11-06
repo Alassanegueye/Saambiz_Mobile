@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:saambiz/core/theme/police.dart';
 
 import '../../../../core/routes/app_router.dart';
 import '../../../../injection_container.dart';
@@ -214,7 +214,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
       titre: 'Vérifiez votre e-mail',
       sousTitre: 'Code envoyé à ${widget.draft.email}',
       carte: [
-        const LibelleChamp('Code à 6 chiffres'),
+        const LibelleChamp('Code à 6 chiffres', obligatoire: true),
         Row(
           children: [
             for (var i = 0; i < _length; i++) ...[
@@ -246,7 +246,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                 Expanded(
                   child: Text(
                     _info!,
-                    style: GoogleFonts.inter(
+                    style: TextStyle(fontFamily: kPolice, 
                       fontSize: 13,
                       color: const Color(0xFF15803D),
                     ),
@@ -274,7 +274,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                   onPressed: _renvoyer,
                   child: Text(
                     'Renvoyer le code',
-                    style: GoogleFonts.inter(
+                    style: TextStyle(fontFamily: kPolice, 
                       fontSize: 13.5,
                       fontWeight: FontWeight.w700,
                       color: Sb.navy,
@@ -319,7 +319,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
           // Une seule case n'accepte qu'un chiffre, mais on laisse passer un
           // collage plus long pour le remplissage automatique du code.
           inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-          style: GoogleFonts.inter(
+          style: TextStyle(fontFamily: kPolice, 
             fontSize: 21,
             fontWeight: FontWeight.w700,
             color: Sb.navy,

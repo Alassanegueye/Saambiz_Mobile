@@ -1,14 +1,18 @@
+import 'package:saambiz/core/widgets/onglets_conserves.dart';
+import 'package:saambiz/core/widgets/image_reseau.dart';
 import 'package:flutter/material.dart';
+import '../../../../core/widgets/degrade_fond.dart';
+import 'package:flutter/services.dart';
+import 'package:saambiz/core/theme/app_color.dart';
+import 'package:saambiz/core/widgets/ui_kit.dart';
 import '../../../catalogue/presentation/widgets/produit_card.dart'
     show formaterPrix;
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:saambiz/core/theme/police.dart';
 import '../../../../injection_container.dart';
 import '../../../home/data/models/produit_model.dart';
 import '../bloc/vendeur_produit_bloc.dart';
 import 'produit_form_page.dart';
-import 'package:saambiz/core/utils/image_url.dart';
 import 'package:saambiz/core/utils/texte.dart';
 
 class _C {
@@ -32,7 +36,11 @@ class MesProduitsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => sl<VendeurProduitBloc>()..add(LoadMesProduits()),
-      child: const _MesProduitsView(),
+      child: ActualiserAuRetour(
+        onRetour: (context) =>
+            context.read<VendeurProduitBloc>().add(LoadMesProduits()),
+        child: const _MesProduitsView(),
+      ),
     );
   }
 }
@@ -64,13 +72,28 @@ class _MesProduitsViewState extends State<_MesProduitsView> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: _C.bg,
-      body: SafeArea(
-        bottom: false,
-        child: Column(
-          children: [
-            _buildTopBar(context),
-            Expanded(
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => _ouvrirForm(context),
+        backgroundColor: AppColor.kSecondary,
+        foregroundColor: AppColor.kPrimary,
+        icon: const Icon(Icons.add_rounded),
+        label: Text(
+          'Ajouter',
+          style: TextStyle(fontFamily: kPolice, fontWeight: FontWeight.w700),
+        ),
+      ),
+      body: FondDegradeSubtil(
+        child: SafeArea(
+          top: false,
+          bottom: false,
+          child: Column(
+            children: [
+              _buildTopBar(context),
+              Expanded(
               child: BlocConsumer<VendeurProduitBloc, VendeurProduitState>(
+                buildWhen: (avant, apres) =>
+                    !(apres is VendeurProduitLoading &&
+                        avant is VendeurProduitLoaded),
                 listener: (context, state) {
                   if (state is VendeurProduitError) {
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -100,9 +123,7 @@ class _MesProduitsViewState extends State<_MesProduitsView> {
                                 : _tab == 2
                                 ? horsLigne
                                 : all)
-                            .where(
-                              (p) => contientRecherche(p.nom, _recherche),
-                            )
+                            .where((p) => contientRecherche(p.nom, _recherche))
                             .toList();
 
                     return Column(
@@ -121,11 +142,12 @@ class _MesProduitsViewState extends State<_MesProduitsView> {
                                       .read<VendeurProduitBloc>()
                                       .add(LoadMesProduits()),
                                   child: ListView.separated(
+                                    // Le bas laisse la place au bouton Ajouter.
                                     padding: const EdgeInsets.fromLTRB(
-                                      20,
                                       16,
-                                      20,
-                                      20,
+                                      4,
+                                      16,
+                                      88,
                                     ),
                                     itemCount: shown.length,
                                     separatorBuilder: (_, __) =>
@@ -142,111 +164,107 @@ class _MesProduitsViewState extends State<_MesProduitsView> {
                 },
               ),
             ),
-            _buildAddButton(context),
           ],
+        ),
         ),
       ),
     );
   }
 
-  // Barre du haut : titre + recherche
+  // Barre du haut, bleu foncé comme les autres écrans : titre + recherche
   Widget _buildTopBar(BuildContext context) {
-    return Container(
-      color: _C.white,
-      padding: const EdgeInsets.fromLTRB(8, 8, 12, 10),
-      child: Row(
-        children: [
-          if (Navigator.of(context).canPop())
-            IconButton(
-              onPressed: () => Navigator.of(context).pop(),
-              icon: const Icon(
-                Icons.arrow_back_ios_new_rounded,
-                size: 18,
-                color: _C.black,
-              ),
-            )
-          else
-            const SizedBox(width: 12),
-          Expanded(
-            child: _rechercheOuverte
-                ? TextField(
-                    autofocus: true,
-                    onChanged: (v) => setState(() => _recherche = v),
-                    style: GoogleFonts.inter(fontSize: 15, color: _C.black),
-                    decoration: const InputDecoration(
-                      hintText: 'Rechercher un produit',
-                      isDense: true,
-                      filled: false,
-                      border: InputBorder.none,
-                      enabledBorder: InputBorder.none,
-                      focusedBorder: InputBorder.none,
-                    ),
-                  )
-                : Text(
-                    'Mes produits',
-                    style: GoogleFonts.inter(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                      color: _C.black,
-                    ),
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light.copyWith(
+        statusBarColor: Colors.transparent,
+      ),
+      child: Container(
+        color: AppColor.kPrimary,
+        child: SafeArea(
+          bottom: false,
+          child: SizedBox(
+            height: kToolbarHeight,
+            child: Row(
+              children: [
+                if (Navigator.of(context).canPop())
+                  const BackButton(color: AppColor.kWhite)
+                else
+                  const SizedBox(width: 16),
+                Expanded(
+                  child: _rechercheOuverte
+                      ? TextField(
+                          autofocus: true,
+                          onChanged: (v) => setState(() => _recherche = v),
+                          cursorColor: AppColor.kSecondary,
+                          style: TextStyle(fontFamily: kPolice, 
+                            fontSize: 15,
+                            color: AppColor.kWhite,
+                          ),
+                          decoration: InputDecoration(
+                            hintText: 'Rechercher un produit',
+                            hintStyle: TextStyle(fontFamily: kPolice, 
+                              color: AppColor.kWhite.withValues(alpha: 0.6),
+                            ),
+                            isDense: true,
+                            filled: false,
+                            border: InputBorder.none,
+                            enabledBorder: InputBorder.none,
+                            focusedBorder: InputBorder.none,
+                          ),
+                        )
+                      : Text(
+                          'Mes produits',
+                          style: TextStyle(fontFamily: kPolice, 
+                            fontSize: 17,
+                            fontWeight: FontWeight.w600,
+                            color: AppColor.kWhite,
+                          ),
+                        ),
+                ),
+                IconButton(
+                  tooltip: _rechercheOuverte
+                      ? 'Fermer la recherche'
+                      : 'Rechercher',
+                  onPressed: () => setState(() {
+                    _rechercheOuverte = !_rechercheOuverte;
+                    if (!_rechercheOuverte) _recherche = '';
+                  }),
+                  icon: Icon(
+                    _rechercheOuverte
+                        ? Icons.close_rounded
+                        : Icons.search_rounded,
+                    color: AppColor.kWhite,
                   ),
-          ),
-          IconButton(
-            tooltip: _rechercheOuverte ? 'Fermer la recherche' : 'Rechercher',
-            onPressed: () => setState(() {
-              _rechercheOuverte = !_rechercheOuverte;
-              if (!_rechercheOuverte) _recherche = '';
-            }),
-            icon: Icon(
-              _rechercheOuverte ? Icons.close_rounded : Icons.search_rounded,
-              color: _C.black,
+                ),
+              ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }
 
-  // Onglets Tous / En ligne / Hors ligne
+  // Filtres Tous / En ligne / Hors ligne
   Widget _buildTabs(int total, int enLigne, int horsLigne) {
-    final tabs = [
+    final filtres = [
       'Tous ($total)',
       'En ligne ($enLigne)',
       'Hors ligne ($horsLigne)',
     ];
-    return Container(
-      color: _C.white,
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      child: Row(
-        children: List.generate(tabs.length, (i) {
-          final active = _tab == i;
-          return Expanded(
-            child: GestureDetector(
+    return SizedBox(
+      height: 56,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+        children: [
+          for (var i = 0; i < filtres.length; i++) ...[
+            PuceFiltre(
+              libelle: filtres[i],
+              active: _tab == i,
               onTap: () => setState(() => _tab = i),
-              behavior: HitTestBehavior.opaque,
-              child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 13),
-                decoration: BoxDecoration(
-                  border: Border(
-                    bottom: BorderSide(
-                      color: active ? _C.green : Colors.transparent,
-                      width: 2.5,
-                    ),
-                  ),
-                ),
-                child: Text(
-                  tabs[i],
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.inter(
-                    fontSize: 13,
-                    fontWeight: active ? FontWeight.w700 : FontWeight.w500,
-                    color: active ? _C.green : _C.sub,
-                  ),
-                ),
-              ),
             ),
-          );
-        }),
+            const SizedBox(width: 8),
+          ],
+        ],
       ),
     );
   }
@@ -255,10 +273,10 @@ class _MesProduitsViewState extends State<_MesProduitsView> {
   Widget _buildCard(BuildContext context, ProduitModel p) {
     final enLigne = _enLigne(p);
     return Container(
-      padding: const EdgeInsets.all(10),
+      padding: const EdgeInsets.fromLTRB(12, 12, 4, 12),
       decoration: BoxDecoration(
         color: _C.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(14),
         border: Border.all(color: _C.border),
       ),
       child: Row(
@@ -266,13 +284,7 @@ class _MesProduitsViewState extends State<_MesProduitsView> {
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
             child: p.image.isNotEmpty
-                ? CachedNetworkImage(
-                    imageUrl: imageOptimisee(p.image),
-                    width: 58,
-                    height: 58,
-                    fit: BoxFit.cover,
-                    errorWidget: (_, __, ___) => _imgFallback(),
-                  )
+                ? ImageReseau(p.image, width: 64, height: 64, fit: BoxFit.cover, repli: _imgFallback())
                 : _imgFallback(),
           ),
           const SizedBox(width: 12),
@@ -284,7 +296,7 @@ class _MesProduitsViewState extends State<_MesProduitsView> {
                   p.nom,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.inter(
+                  style: TextStyle(fontFamily: kPolice, 
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
                     color: _C.black,
@@ -293,18 +305,20 @@ class _MesProduitsViewState extends State<_MesProduitsView> {
                 const SizedBox(height: 3),
                 Text(
                   formaterPrix(double.tryParse(p.prix) ?? 0),
-                  style: GoogleFonts.inter(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: _C.sub,
+                  style: TextStyle(fontFamily: kPolice, 
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: _C.green,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 3),
                 Text(
-                  enLigne ? 'En ligne' : 'Hors ligne',
-                  style: GoogleFonts.inter(
+                  enLigne
+                      ? 'En ligne · ${p.quantite} en stock'
+                      : 'Hors ligne · rupture de stock',
+                  style: TextStyle(fontFamily: kPolice, 
                     fontSize: 12,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w500,
                     color: enLigne ? _C.success : _C.sub,
                   ),
                 ),
@@ -338,42 +352,6 @@ class _MesProduitsViewState extends State<_MesProduitsView> {
     );
   }
 
-  // Bouton « Ajouter un produit »
-  Widget _buildAddButton(BuildContext context) {
-    return Container(
-      color: _C.white,
-      padding: EdgeInsets.fromLTRB(
-        20,
-        12,
-        20,
-        12 + MediaQuery.of(context).padding.bottom,
-      ),
-      child: SizedBox(
-        width: double.infinity,
-        child: ElevatedButton.icon(
-          onPressed: () => _ouvrirForm(context),
-          icon: const Icon(Icons.add_rounded, size: 20),
-          label: Text(
-            'Ajouter un produit',
-            style: GoogleFonts.inter(
-              fontSize: 15,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: _C.green,
-            foregroundColor: _C.white,
-            elevation: 0,
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _buildEmpty() {
     return Center(
       child: Column(
@@ -383,7 +361,7 @@ class _MesProduitsViewState extends State<_MesProduitsView> {
           const SizedBox(height: 12),
           Text(
             'Aucun produit ici',
-            style: GoogleFonts.inter(fontSize: 14, color: _C.sub),
+            style: TextStyle(fontFamily: kPolice, fontSize: 14, color: _C.sub),
           ),
         ],
       ),
@@ -402,7 +380,7 @@ class _MesProduitsViewState extends State<_MesProduitsView> {
             child: Text(
               message,
               textAlign: TextAlign.center,
-              style: GoogleFonts.inter(color: _C.sub),
+              style: TextStyle(fontFamily: kPolice, color: _C.sub),
             ),
           ),
           const SizedBox(height: 12),
@@ -411,7 +389,7 @@ class _MesProduitsViewState extends State<_MesProduitsView> {
                 context.read<VendeurProduitBloc>().add(LoadMesProduits()),
             child: Text(
               'Réessayer',
-              style: GoogleFonts.inter(
+              style: TextStyle(fontFamily: kPolice, 
                 color: _C.green,
                 fontWeight: FontWeight.w700,
               ),

@@ -15,7 +15,7 @@ class VendeurProduitDataSource {
   List<dynamic> _extractList(dynamic raw) {
     if (raw is List) return raw;
     if (raw is Map) {
-      for (final k in ['produits', 'data', 'items', 'results']) {
+      for (final k in ['produits', 'categories', 'data', 'items', 'results']) {
         if (raw[k] is List) return raw[k] as List;
       }
     }

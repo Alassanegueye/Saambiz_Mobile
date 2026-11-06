@@ -1,6 +1,6 @@
 import 'package:saambiz/core/theme/app_color.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:saambiz/core/theme/police.dart';
 
 class DividerRow extends StatelessWidget {
   final String title;
@@ -20,7 +20,7 @@ class DividerRow extends StatelessWidget {
               softWrap: false,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
-              style: GoogleFonts.inter(
+              style: TextStyle(fontFamily: kPolice, 
                 color: AppColor.kGrayscale40,
                 fontWeight: FontWeight.w500,
                 fontSize: 14,

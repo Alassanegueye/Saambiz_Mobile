@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:saambiz/core/theme/police.dart';
+import 'package:saambiz/core/widgets/libelle_obligatoire.dart';
 
 import '../widgets/mise_en_page_auth.dart';
 
-/// Briques communes aux écrans du parcours d'inscription (choix du profil,
-/// formulaires, vérification email, centres d'intérêt, création de boutique).
-/// Un seul endroit à toucher pour faire évoluer la charte de ce parcours.
+/// Briques communes aux ecrans du parcours d'inscription (choix du profil,
+/// formulaires, verification email, centres d'interet, creation de boutique).
+/// Un seul endroit a toucher pour faire evoluer la charte de ce parcours.
 
 // Palette SaamBiz
 class Sb {
@@ -16,26 +17,27 @@ class Sb {
   static const navyDeep = Color(0xFF000B30);
   static const navySoft = Color(0xFFEDF0F8);
 
-  /// Fond d'une carte sélectionnée : un sable à peine perceptible.
+  /// Fond d'une carte selectionnee : un bleu/sable a peine perceptible.
   static const navyTint = Color(0xFFF5F7FC);
   static const gold = Color(0xFFFBB900);
   static const goldSoft = Color(0xFFFFF4D1);
 
-  /// Or foncé, lisible sur fond blanc (coches, petits textes).
+  /// Or fonce, lisible sur fond blanc (coches, petits textes).
   static const goldDark = Color(0xFF9A6B00);
   static const white = Color(0xFFFFFFFF);
   static const bg = Color(0xFFF4F5F8);
 
-  /// Surface des champs dans une carte blanche (comme à la connexion).
+  /// Surface des champs dans une carte blanche (comme a la connexion).
   static const surface = Color(0xFFF7F8FA);
   static const border = Color(0xFFE6E9EF);
-  static const text = Color(0xFF0E1A3A);
+  static const text = Color(0xFF01154B);
   static const textMid = Color(0xFF4B5568);
   static const textLight = Color(0xFF98A2B3);
   static const green = Color(0xFF22C55E);
   static const error = Color(0xFFE53935);
 
-  static TextStyle title([double size = 22]) => GoogleFonts.inter(
+  static TextStyle title([double size = 22]) => TextStyle(
+    fontFamily: kPolice,
     fontSize: size,
     fontWeight: FontWeight.w800,
     color: navy,
@@ -43,18 +45,17 @@ class Sb {
   );
 
   static TextStyle body([double size = 14]) =>
-      GoogleFonts.inter(fontSize: size, color: textMid, height: 1.55);
+      TextStyle(fontFamily: kPolice, fontSize: size, color: textMid, height: 1.55);
 
-  static TextStyle label() => GoogleFonts.inter(
+  static TextStyle label() => const TextStyle(
+    fontFamily: kPolice,
     fontSize: 13,
     fontWeight: FontWeight.w600,
     color: navy,
   );
 }
 
-/// Ossature commune des écrans d'inscription : fond clair uni, contenu
-/// défilant. Volontairement sans décor (plus de vague ni de pastille dans
-/// l'angle) : l'écran reste calme et le contenu commence tout en haut.
+/// Ossature commune des ecrans d'inscription : fond clair uni, contenu defilant.
 class SbScaffold extends StatelessWidget {
   final List<Widget> children;
   final EdgeInsets padding;
@@ -82,15 +83,12 @@ class SbScaffold extends StatelessWidget {
   }
 }
 
-/// Progression du parcours d'inscription : segments et « Étape 2 sur 5 ·
-/// Contact ». Même nombre d'étapes pour les deux profils, seule la dernière
-/// change (ses centres d'intérêt pour un client, votre boutique pour un vendeur).
-/// Pas de logo sur ces écrans : la progression tient lieu d'en-tête.
+/// Progression du parcours d'inscription : segments et « Etape 2 sur 5 · Contact ».
 class SbEtapes extends StatelessWidget {
   final int courante;
   final bool vendeur;
 
-  /// Posée sur l'en-tête bleu marine : segments et texte en clair.
+  /// Posee sur l'en-tete bleu marine : segments et texte en clair.
   final bool surFonce;
   const SbEtapes({
     super.key,
@@ -99,11 +97,11 @@ class SbEtapes extends StatelessWidget {
     this.surFonce = false,
   });
 
-  static const _communes = ['Vous', 'Contact', 'Sécurité', 'Vérification'];
+  static const _communes = ['Vous', 'Contact', 'Securite', 'Verification'];
 
   List<String> get etapes => [
     ..._communes,
-    vendeur ? 'Votre boutique' : 'Centres d’intérêt',
+    vendeur ? 'Votre boutique' : 'Centres d\'interet',
   ];
 
   @override
@@ -140,19 +138,17 @@ class SbEtapes extends StatelessWidget {
         const SizedBox(height: 7),
         Text.rich(
           TextSpan(
-            style: GoogleFonts.inter(
+            style: TextStyle(
+              fontFamily: kPolice,
               fontSize: 11.5,
               color: surFonce ? Sb.white.withValues(alpha: 0.7) : Sb.textLight,
             ),
             children: [
               TextSpan(
-                text: 'ÉTAPE $n SUR ${liste.length}',
-                style: const TextStyle(
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 0.6,
-                ),
+                text: 'ETAPE $n SUR ${liste.length}',
+                style: const TextStyle(fontWeight: FontWeight.w700),
               ),
-              TextSpan(text: '   ${liste[n - 1]}'),
+              TextSpan(text: ' · ${liste[n - 1]}'),
             ],
           ),
         ),
@@ -161,53 +157,167 @@ class SbEtapes extends StatelessWidget {
   }
 }
 
-/// Flèche de retour discrète, alignée sur les maquettes.
-class SbBackButton extends StatelessWidget {
-  final VoidCallback? onTap;
-  const SbBackButton({super.key, this.onTap});
+/// Bouton principal SaamBiz (52 px, arrondi 16, marine).
+class SbPrimaryButton extends StatelessWidget {
+  final String label;
+  final VoidCallback? onPressed;
+  final bool loading;
+  final IconData? icon;
+
+  const SbPrimaryButton({
+    super.key,
+    required this.label,
+    this.onPressed,
+    this.loading = false,
+    this.icon,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap ?? () => Navigator.of(context).maybePop(),
-      borderRadius: BorderRadius.circular(12),
-      child: const Padding(
-        padding: EdgeInsets.all(8),
-        child: Icon(Icons.arrow_back_ios_new_rounded, size: 20, color: Sb.navy),
+    return SizedBox(
+      height: 52,
+      child: ElevatedButton(
+        onPressed: loading ? null : onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Sb.navy,
+          foregroundColor: Sb.white,
+          disabledBackgroundColor: Sb.navy.withValues(alpha: 0.6),
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          textStyle: const TextStyle(
+            fontFamily: kPolice,
+            fontSize: 15.5,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        child: loading
+            ? const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.2,
+                  valueColor: AlwaysStoppedAnimation(Sb.white),
+                ),
+              )
+            : Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(label),
+                  if (icon != null) ...[
+                    const SizedBox(width: 8),
+                    Icon(icon, size: 18),
+                  ],
+                ],
+              ),
       ),
     );
   }
 }
 
-/// Champ de saisie : libellé au-dessus, bordure arrondie, focus or.
+/// Bouton secondaire (fond blanc, bord fin).
+class SbSecondaryButton extends StatelessWidget {
+  final String label;
+  final VoidCallback? onPressed;
+
+  const SbSecondaryButton({super.key, required this.label, this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 52,
+      child: OutlinedButton(
+        onPressed: onPressed,
+        style: OutlinedButton.styleFrom(
+          foregroundColor: Sb.navy,
+          side: const BorderSide(color: Sb.border, width: 1.3),
+          backgroundColor: Sb.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          textStyle: const TextStyle(
+            fontFamily: kPolice,
+            fontSize: 14.5,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        child: Text(label),
+      ),
+    );
+  }
+}
+
+/// Lien texte discret « Deja un compte ? Se connecter ».
+class SbLoginLink extends StatelessWidget {
+  final VoidCallback onTap;
+  const SbLoginLink({super.key, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Center(
+        child: TextButton(
+          onPressed: onTap,
+          child: const Text.rich(
+            TextSpan(
+              style: TextStyle(
+                fontFamily: kPolice,
+                fontSize: 13.5,
+                color: Sb.textMid,
+              ),
+              children: [
+                TextSpan(text: 'Deja un compte ? '),
+                TextSpan(
+                  text: 'Se connecter',
+                  style: TextStyle(
+                    fontFamily: kPolice,
+                    fontWeight: FontWeight.w700,
+                    color: Sb.navy,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Champ de formulaire : libelle au-dessus, icone a gauche, fond gris clair.
 class SbField extends StatelessWidget {
   final String label;
   final String hint;
+  final IconData icon;
   final TextEditingController controller;
+  final bool obscure;
   final TextInputType keyboardType;
   final TextInputAction textInputAction;
-  final bool obscure;
-  final Widget? suffix;
-  final String? errorText;
-  final List<TextInputFormatter>? formatters;
   final String? autofillHint;
-  final void Function(String)? onSubmitted;
-  final IconData? icon;
+  final String? errorText;
+  final ValueChanged<String>? onSubmitted;
+  final Widget? suffix;
+  final List<TextInputFormatter>? formatters;
+  final bool obligatoire;
 
   const SbField({
     super.key,
     required this.label,
     required this.hint,
+    required this.icon,
     required this.controller,
+    this.obscure = false,
     this.keyboardType = TextInputType.text,
     this.textInputAction = TextInputAction.next,
-    this.obscure = false,
-    this.suffix,
-    this.errorText,
-    this.formatters,
     this.autofillHint,
+    this.errorText,
     this.onSubmitted,
-    this.icon,
+    this.suffix,
+    this.formatters,
+    this.obligatoire = false,
   });
 
   @override
@@ -215,31 +325,36 @@ class SbField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        LibelleChamp(label),
-        TextField(
+        LibelleChamp(label, obligatoire: obligatoire),
+        TextFormField(
           controller: controller,
+          obscureText: obscure,
           keyboardType: keyboardType,
           textInputAction: textInputAction,
-          obscureText: obscure,
+          autofillHints: autofillHint != null ? [autofillHint!] : null,
           inputFormatters: formatters,
-          autofillHints: autofillHint == null ? null : [autofillHint!],
-          onSubmitted: onSubmitted,
-          style: GoogleFonts.inter(fontSize: 15, color: Sb.text),
+          onFieldSubmitted: onSubmitted,
+          cursorColor: Sb.navy,
+          style: const TextStyle(
+            fontFamily: kPolice,
+            fontSize: 15,
+            color: Sb.text,
+          ),
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: GoogleFonts.inter(fontSize: 15, color: Sb.textLight),
-            errorText: errorText,
-            errorStyle: GoogleFonts.inter(fontSize: 12, color: Sb.error),
+            hintStyle: const TextStyle(
+              fontFamily: kPolice,
+              color: Sb.textLight,
+              fontSize: 14,
+            ),
             filled: true,
             fillColor: Sb.surface,
             isDense: true,
             contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
+              horizontal: 14,
               vertical: 16,
             ),
-            prefixIcon: icon == null
-                ? null
-                : Icon(icon, color: Sb.navy, size: 20),
+            prefixIcon: Icon(icon, size: 20, color: Sb.navy),
             suffixIcon: suffix,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
@@ -261,6 +376,12 @@ class SbField extends StatelessWidget {
               borderRadius: BorderRadius.circular(14),
               borderSide: const BorderSide(color: Sb.error, width: 1.5),
             ),
+            errorText: errorText,
+            errorStyle: const TextStyle(
+              fontFamily: kPolice,
+              fontSize: 12,
+              color: Sb.error,
+            ),
           ),
         ),
       ],
@@ -268,71 +389,7 @@ class SbField extends StatelessWidget {
   }
 }
 
-/// Bouton principal bleu marine, pleine largeur, flèche or, avec état de
-/// chargement intégré.
-class SbPrimaryButton extends StatelessWidget {
-  final String label;
-  final VoidCallback? onPressed;
-  final bool loading;
-  final IconData? icon;
-
-  const SbPrimaryButton({
-    super.key,
-    required this.label,
-    required this.onPressed,
-    this.loading = false,
-    this.icon,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      height: 52,
-      child: ElevatedButton(
-        onPressed: loading ? null : onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Sb.navy,
-          disabledBackgroundColor: Sb.navy.withValues(alpha: 0.35),
-          foregroundColor: Sb.white,
-          disabledForegroundColor: Sb.white,
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ),
-        child: loading
-            ? const SizedBox(
-                width: 22,
-                height: 22,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2.4,
-                  valueColor: AlwaysStoppedAnimation<Color>(Sb.white),
-                ),
-              )
-            : Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    label,
-                    style: GoogleFonts.inter(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                      color: Sb.white,
-                    ),
-                  ),
-                  if (icon != null) ...[
-                    const SizedBox(width: 10),
-                    Icon(icon, size: 22, color: Sb.gold),
-                  ],
-                ],
-              ),
-      ),
-    );
-  }
-}
-
-/// Bandeau d'erreur sous un formulaire (message renvoyé par le backend).
+/// Bandeau d'erreur rouge clair en haut d'une etape.
 class SbErrorBanner extends StatelessWidget {
   final String? message;
   const SbErrorBanner(this.message, {super.key});
@@ -341,23 +398,27 @@ class SbErrorBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     if (message == null || message!.isEmpty) return const SizedBox.shrink();
     return Container(
-      width: double.infinity,
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: const Color(0xFFFDECEA),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Sb.error.withValues(alpha: 0.35)),
+        color: const Color(0xFFFEE2E2),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xFFFCA5A5)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.error_outline_rounded, size: 18, color: Sb.error),
+          const Icon(Icons.error_outline_rounded, color: Sb.error, size: 18),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
               message!,
-              style: GoogleFonts.inter(fontSize: 13, color: Sb.error),
+              style: const TextStyle(
+                fontFamily: kPolice,
+                fontSize: 13,
+                color: Color(0xFF991B1B),
+                height: 1.4,
+              ),
             ),
           ),
         ],
@@ -366,80 +427,28 @@ class SbErrorBanner extends StatelessWidget {
   }
 }
 
-/// « Déjà un compte ? Se connecter »
-class SbLoginLink extends StatelessWidget {
-  final VoidCallback onTap;
-  const SbLoginLink({super.key, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) => LienAuth(
-    question: 'Déjà un compte ? ',
-    action: 'Se connecter',
-    onTap: onTap,
-  );
-}
-
-/// Bouton secondaire (blanc, contour discret), pleine largeur.
-class SbSecondaryButton extends StatelessWidget {
-  final String label;
-  final VoidCallback? onPressed;
-  final IconData? icon;
-  const SbSecondaryButton({
-    super.key,
-    required this.label,
-    this.onPressed,
-    this.icon,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final texte = Text(
-      label,
-      style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w700),
-    );
-    final style = OutlinedButton.styleFrom(
-      foregroundColor: Sb.navy,
-      backgroundColor: Sb.white,
-      side: const BorderSide(color: Sb.border, width: 1.3),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-    );
-    return SizedBox(
-      width: double.infinity,
-      height: 52,
-      child: icon == null
-          ? OutlinedButton(onPressed: onPressed, style: style, child: texte)
-          : OutlinedButton.icon(
-              onPressed: onPressed,
-              style: style,
-              icon: Icon(icon, size: 20),
-              label: texte,
-            ),
-    );
-  }
-}
-
-/// Mise en page des écrans d'inscription, calquée sur la connexion :
-/// en-tête bleu marine (retour, progression, pictogramme, titre court) puis
-/// une carte blanche posée à cheval, et ce qui suit la carte (boutons, liens).
+/// Mise en page des ecrans d'inscription, calquee sur la connexion :
+/// en-tete bleu marine SaamBiz (logo, titre, sous-titre), carte blanche
+/// posee a cheval sur l'en-tete, contenu en defilement continu.
 class SbPageAuth extends StatelessWidget {
   final String titre;
   final String? sousTitre;
 
-  /// Pictogramme de l'en-tête ; sans lui, le logo SaamBiz.
+  /// Pictogramme de l'en-tete ; sans lui, le logo SaamBiz picto_clair.
   final IconData? icone;
 
-  /// Étape courante (1 à 5) du parcours ; null : pas de progression.
+  /// Etape courante (1 a 5) du parcours ; null : pas de progression.
   final int? etape;
   final bool vendeur;
 
-  /// Action du bouton retour ; par défaut, la page précédente si elle existe.
+  /// Action du bouton retour ; par defaut, la page precedente si elle existe.
   final VoidCallback? onRetour;
 
   /// Contenu de la carte blanche ; null : pas de carte.
   final List<Widget>? carte;
   final List<Widget> apres;
 
-  /// Bouton à droite de l'en-tête (« Se connecter »…).
+  /// Bouton a droite de l'en-tete.
   final Widget? actionEntete;
 
   const SbPageAuth({
@@ -455,111 +464,155 @@ class SbPageAuth extends StatelessWidget {
     this.actionEntete,
   });
 
+  static const double _chevauchement = 36;
+
   @override
   Widget build(BuildContext context) {
     final peutRevenir = onRetour != null || Navigator.of(context).canPop();
     return Scaffold(
-      backgroundColor: Sb.white,
+      backgroundColor: Sb.bg,
       body: AnnotatedRegion<SystemUiOverlayStyle>(
-        value: SystemUiOverlayStyle.dark,
+        value: SystemUiOverlayStyle.light,
         child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          child: SafeArea(
-            bottom: false,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(8, 4, 20, 24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  SizedBox(
-                    height: 48,
-                    child: Row(
-                      children: [
-                        if (peutRevenir)
-                          IconButton(
-                            tooltip: 'Retour',
-                            icon: const Icon(
-                              Icons.arrow_back_ios_new_rounded,
-                              color: Sb.navy,
-                              size: 20,
-                            ),
-                            onPressed:
-                                onRetour ??
-                                () => Navigator.of(context).maybePop(),
-                          )
-                        else
-                          const SizedBox(width: 16),
-                        if (etape != null)
-                          Expanded(
-                            child: Padding(
-                              padding: const EdgeInsets.only(left: 4),
-                              child: SbEtapes(
-                                courante: etape!,
-                                vendeur: vendeur,
-                              ),
-                            ),
-                          )
-                        else
-                          const Spacer(),
-                        if (actionEntete != null) ...[
-                          const SizedBox(width: 8),
-                          actionEntete!,
-                        ],
-                      ],
-                    ),
+          child: Column(
+            children: [
+              Container(
+                width: double.infinity,
+                decoration: const BoxDecoration(
+                  color: Sb.navy,
+                  borderRadius: BorderRadius.vertical(
+                    bottom: Radius.circular(32),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(12, 16, 0, 0),
+                ),
+                child: SafeArea(
+                  bottom: false,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      8,
+                      4,
+                      24,
+                      _chevauchement + 28,
+                    ),
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: icone == null
-                              ? Image.asset(
-                                  'assets/images/logo.png',
-                                  height: 34,
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          child: Row(
+                            children: [
+                              if (peutRevenir)
+                                IconButton(
+                                  tooltip: 'Retour',
+                                  icon: const Icon(
+                                    Icons.arrow_back_ios_new_rounded,
+                                    color: Sb.white,
+                                    size: 20,
+                                  ),
+                                  onPressed:
+                                      onRetour ??
+                                      () => Navigator.of(context).maybePop(),
+                                )
+                              else
+                                const SizedBox(width: 16),
+                              if (etape != null)
+                                Expanded(
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(left: 4),
+                                    child: SbEtapes(
+                                      courante: etape!,
+                                      vendeur: vendeur,
+                                      surFonce: true,
+                                    ),
+                                  ),
+                                )
+                              else
+                                const Spacer(),
+                              if (actionEntete != null) ...[
+                                const SizedBox(width: 8),
+                                actionEntete!,
+                              ],
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 14),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (icone == null)
+                                Image.asset(
+                                  'assets/images/picto_clair.png',
+                                  height: 52,
                                   fit: BoxFit.contain,
                                   semanticLabel: 'SaamBiz',
                                 )
-                              : Icon(icone, color: Sb.navy, size: 34),
-                        ),
-                        const SizedBox(height: 24),
-                        Text(
-                          titre,
-                          style: GoogleFonts.inter(
-                            fontSize: 26,
-                            fontWeight: FontWeight.w700,
-                            color: Sb.text,
-                            height: 1.2,
+                              else
+                                Container(
+                                  width: 52,
+                                  height: 52,
+                                  decoration: BoxDecoration(
+                                    color: Sb.white.withValues(alpha: 0.1),
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(
+                                      color: Sb.white.withValues(alpha: 0.18),
+                                    ),
+                                  ),
+                                  child: Icon(icone, color: Sb.gold, size: 26),
+                                ),
+                              const SizedBox(height: 22),
+                              Text(
+                                titre,
+                                style: const TextStyle(
+                                  fontFamily: kPolice,
+                                  fontSize: 26,
+                                  fontWeight: FontWeight.w700,
+                                  color: Sb.white,
+                                  height: 1.2,
+                                ),
+                              ),
+                              if (sousTitre != null) ...[
+                                const SizedBox(height: 8),
+                                Text(
+                                  sousTitre!,
+                                  style: TextStyle(
+                                    fontFamily: kPolice,
+                                    fontSize: 14,
+                                    height: 1.45,
+                                    color: Sb.white.withValues(alpha: 0.8),
+                                  ),
+                                ),
+                              ],
+                            ],
                           ),
                         ),
-                        if (sousTitre != null) ...[
-                          const SizedBox(height: 6),
-                          Text(
-                            sousTitre!,
-                            style: GoogleFonts.inter(
-                              fontSize: 15,
-                              height: 1.45,
-                              color: Sb.textMid,
-                            ),
-                          ),
-                        ],
-                        const SizedBox(height: 20),
-                        if (carte != null)
-                          CarteAuth(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: carte!,
-                            ),
-                          ),
-                        ...apres,
                       ],
                     ),
                   ),
-                ],
+                ),
               ),
-            ),
+              Transform.translate(
+                offset: const Offset(0, -_chevauchement),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      if (carte != null)
+                        CarteAuth(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: carte!,
+                          ),
+                        ),
+                      ...apres,
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -567,17 +620,17 @@ class SbPageAuth extends StatelessWidget {
   }
 }
 
-// Validations partagées
+// Validations partagees
 final RegExp kEmailRegExp = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]{2,}$');
 
-/// Règle du backend (MED-02) : 8 caractères, une majuscule, un chiffre,
-/// un caractère spécial. On la vérifie côté app pour éviter un aller-retour.
+/// Regle du backend (MED-02) : 8 caracteres, une majuscule, un chiffre,
+/// un caractere special. On la verifie cote app pour eviter un aller-retour.
 String? validateMotDePasse(String value) {
-  if (value.length < 8) return 'Au moins 8 caractères.';
+  if (value.length < 8) return 'Au moins 8 caracteres.';
   if (!RegExp(r'[A-Z]').hasMatch(value)) return 'Au moins une majuscule.';
   if (!RegExp(r'[0-9]').hasMatch(value)) return 'Au moins un chiffre.';
   if (!RegExp(r'[^A-Za-z0-9]').hasMatch(value)) {
-    return 'Au moins un caractère spécial.';
+    return 'Au moins un caractere special.';
   }
   return null;
 }

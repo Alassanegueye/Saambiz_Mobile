@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/libelle_obligatoire.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -57,9 +58,6 @@ class _ForgotPasswordViewState extends State<_ForgotPasswordView> {
     return Scaffold(
       backgroundColor: _C.bg,
       appBar: AppBar(
-        backgroundColor: _C.white,
-        elevation: 0.5,
-        foregroundColor: _C.black,
         title: const Text('Mot de passe oublié'),
       ),
       body: BlocConsumer<CompteBloc, CompteState>(
@@ -98,7 +96,7 @@ class _ForgotPasswordViewState extends State<_ForgotPasswordView> {
                   validator: (v) =>
                       (v == null || !v.contains('@')) ? 'Email invalide' : null,
                   decoration: InputDecoration(
-                    labelText: 'E-mail',
+                    label: const LibelleObligatoire('E-mail'),
                     filled: true,
                     fillColor: _C.white,
                     contentPadding: const EdgeInsets.symmetric(

@@ -11,6 +11,7 @@ class UserModel extends User {
     required super.telephone,
     required super.role,
     super.photoProfil,
+    super.soldeDisponible,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -24,6 +25,7 @@ class UserModel extends User {
       telephone: json['telephone'] ?? '',
       role: json['role'] ?? '',
       photoProfil: json['photoProfil'],
+      soldeDisponible: montantDepuisJson(json['soldeDisponible']),
     );
   }
 
@@ -38,21 +40,28 @@ class UserModel extends User {
       'telephone': telephone,
       'role': role,
       'photoProfil': photoProfil,
+      'soldeDisponible': soldeDisponible,
     };
   }
 }
 
 class AuthResponseModel {
   final String token;
+  final String? refreshToken;
   final UserModel user;
 
-  AuthResponseModel({required this.token, required this.user});
+  AuthResponseModel({
+    required this.token,
+    required this.user,
+    this.refreshToken,
+  });
 
   factory AuthResponseModel.fromJson(Map<String, dynamic> json) {
     final userData = json['utilisateur'] ?? {};
 
     return AuthResponseModel(
       token: json['token'] ?? '',
+      refreshToken: json['refreshToken']?.toString(),
       user: UserModel.fromJson(userData as Map<String, dynamic>),
     );
   }

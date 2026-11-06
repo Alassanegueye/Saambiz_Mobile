@@ -1,7 +1,7 @@
 import 'package:saambiz/core/theme/app_color.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:saambiz/core/theme/police.dart';
 
 class TermsAndPrivacyText extends StatefulWidget {
   const TermsAndPrivacyText({
@@ -55,12 +55,12 @@ class _TermsAndPrivacyTextState extends State<TermsAndPrivacyText> {
 
   @override
   Widget build(BuildContext context) {
-    final styleParDefaut = GoogleFonts.inter(
+    final styleParDefaut = TextStyle(fontFamily: kPolice, 
       color: AppColor.kGrayscale40,
       fontWeight: FontWeight.w500,
       fontSize: 14,
     );
-    final styleLien = GoogleFonts.inter(
+    final styleLien = TextStyle(fontFamily: kPolice, 
       color: widget.couleurTermes ?? AppColor.kGrayscaleDark100,
       fontWeight: FontWeight.w600,
       fontSize: 14,

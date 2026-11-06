@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/onglets_conserves.dart';
 import 'package:flutter/material.dart';
 import 'package:saambiz/features/auth/domain/entities/user.dart';
 
@@ -17,7 +18,7 @@ import '../../../../../core/widgets/ui_kit.dart';
 /// 2 favoris, 3 commandes, 4 compte.
 final ValueNotifier<int?> ongletAcheteurDemande = ValueNotifier<int?>(null);
 
-/// Espace acheteur : cinq onglets, barre de navigation en bas d'écran.
+/// Espace acheteur : cinq onglets sous une barre de navigation flottante.
 class MainAcheteurPage extends StatefulWidget {
   final User? user;
   final bool isGuest;
@@ -62,11 +63,13 @@ class _MainAcheteurPageState extends State<MainAcheteurPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColor.kBackground,
-      body: TransitionOnglet(
-        index: _selectedIndex,
-        child: _pages[_selectedIndex],
-      ),
+      extendBody: true,
+      // Autour de la barre flottante, le fond de l'onglet affiché : blanc
+      // pour l'accueil, gris bleuté pour les autres.
+      backgroundColor: _selectedIndex == 0
+          ? AppColor.kWhite
+          : AppColor.kBackground,
+      body: OngletsConserves(index: _selectedIndex, pages: _pages),
       bottomNavigationBar: BarreNavigationVerre(
         selectedIndex: _selectedIndex,
         onDestinationSelected: (i) => setState(() => _selectedIndex = i),
@@ -108,6 +111,7 @@ class _FavorisInvite extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBody: true,
       backgroundColor: AppColor.kBackground,
       body: SafeArea(
         child: Center(

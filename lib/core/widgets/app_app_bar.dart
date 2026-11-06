@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter/services.dart';
 
 import '../theme/app_color.dart';
+import '../theme/police.dart';
 
-/// En-tête unifié des écrans SaamBiz : fond ivoire de l'écran, grand titre
-/// aligné à gauche, ombre légère seulement au défilement.
+/// En-tete unifie des ecrans SaamBiz : fond transparent ou personnalise,
+/// titre marine aligne a gauche, bouton retour simple sans pastille.
 class AppAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String? title;
   final Widget? titleWidget;
@@ -14,15 +15,19 @@ class AppAppBar extends StatelessWidget implements PreferredSizeWidget {
   final PreferredSizeWidget? bottom;
   final bool implyLeading;
 
+  /// Fond de l'en-tete ; transparent par defaut pour laisser voir le degrade.
+  final Color? couleurFond;
+
   const AppAppBar({
     super.key,
     this.title,
     this.titleWidget,
-    this.centerTitle = false,
+    this.centerTitle = true,
     this.actions,
     this.leading,
     this.bottom,
     this.implyLeading = true,
+    this.couleurFond,
   });
 
   @override
@@ -34,19 +39,21 @@ class AppAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
+    final avecRetour =
+        leading != null ||
+        (implyLeading &&
+            (ModalRoute.of(context)?.impliesAppBarDismissal ?? false));
     return AppBar(
       centerTitle: centerTitle,
       elevation: 0,
-      scrolledUnderElevation: 0.5,
-      shadowColor: AppColor.kPrimary.withValues(alpha: 0.15),
-      surfaceTintColor: Colors.transparent,
-      backgroundColor: AppColor.kBackground,
-      foregroundColor: AppColor.kPrimary,
-      iconTheme: const IconThemeData(color: AppColor.kPrimary, size: 22),
-      actionsIconTheme: const IconThemeData(color: AppColor.kPrimary, size: 22),
+      scrolledUnderElevation: 0,
+      backgroundColor: couleurFond ?? Colors.transparent,
+      systemOverlayStyle: SystemUiOverlayStyle.dark.copyWith(
+        statusBarColor: Colors.transparent,
+      ),
       leading: leading,
       automaticallyImplyLeading: implyLeading,
-      titleSpacing: leading != null ? 0 : null,
+      titleSpacing: avecRetour ? 0 : 16,
       title:
           titleWidget ??
           (title == null
@@ -55,14 +62,15 @@ class AppAppBar extends StatelessWidget implements PreferredSizeWidget {
                   title!,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.inter(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -0.3,
-                    color: AppColor.kPrimary,
+                  style: const TextStyle(
+                    fontFamily: kPolice,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: -0.2,
+                    color: AppColor.kGrayscaleDark100,
                   ),
                 )),
-      actions: actions,
+      actions: [...?actions, if (actions != null) const SizedBox(width: 4)],
       bottom: bottom,
     );
   }

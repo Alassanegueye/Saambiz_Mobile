@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:saambiz/core/theme/police.dart';
 
 class PasswordTextField extends StatefulWidget {
   final String hintText;
@@ -54,7 +54,7 @@ class _PasswordTextFieldState extends State<PasswordTextField> {
           focusNode: widget.focusNode,
           style:
               widget.style ??
-              GoogleFonts.inter(
+              TextStyle(fontFamily: kPolice, 
                 fontSize: 15,
                 fontWeight: FontWeight.w500,
                 color: const Color(0xFF01154B),
@@ -90,7 +90,7 @@ class _PasswordTextFieldState extends State<PasswordTextField> {
               ),
             ),
             hintText: widget.hintText,
-            hintStyle: GoogleFonts.inter(
+            hintStyle: TextStyle(fontFamily: kPolice, 
               color: const Color(0xFFC2CCBA),
               fontWeight: FontWeight.w400,
               fontSize: 14,

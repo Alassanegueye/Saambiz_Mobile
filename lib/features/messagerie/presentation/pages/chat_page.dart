@@ -89,9 +89,6 @@ class _ChatViewState extends State<_ChatView> {
     return Scaffold(
       backgroundColor: _C.bg,
       appBar: AppBar(
-        backgroundColor: _C.white,
-        elevation: 0.5,
-        foregroundColor: _C.black,
         title: Text(widget.interlocuteurNom),
       ),
       body: BlocConsumer<MessagerieBloc, MessagerieState>(

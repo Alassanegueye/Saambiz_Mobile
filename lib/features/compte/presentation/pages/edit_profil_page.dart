@@ -1,3 +1,7 @@
+import 'dart:io';
+import 'package:saambiz/core/widgets/image_reseau.dart';
+
+import 'package:saambiz/core/widgets/libelle_obligatoire.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
@@ -7,8 +11,6 @@ import '../../../auth/domain/entities/user.dart';
 import '../bloc/compte_bloc.dart';
 import '../bloc/compte_event.dart';
 import '../bloc/compte_state.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:saambiz/core/utils/image_url.dart';
 
 class _C {
   static const green = Color(0xFF01154B);
@@ -74,6 +76,49 @@ class _EditProfileViewState extends State<_EditProfileView> {
     if (x != null) setState(() => _photoPath = x.path);
   }
 
+  /// La photo tout juste choisie, sinon la photo actuelle, sinon une icône.
+  /// Le petit appareil photo reste visible : il dit qu'on peut en changer.
+  Widget _avatar() {
+    final actuelle = widget.user?.photoProfil;
+    final ImageProvider? image = _photoPath != null
+        ? FileImage(File(_photoPath!))
+        : (actuelle != null && actuelle.isNotEmpty)
+        ? fournisseurImageReseau(actuelle)
+        : null;
+    return GestureDetector(
+      onTap: _choisirPhoto,
+      child: Stack(
+        children: [
+          CircleAvatar(
+            radius: 44,
+            backgroundColor: _C.green.withValues(alpha: 0.15),
+            backgroundImage: image,
+            child: image == null
+                ? const Icon(Icons.person_outline_rounded, color: _C.green)
+                : null,
+          ),
+          Positioned(
+            right: 0,
+            bottom: 0,
+            child: Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: _C.green,
+                shape: BoxShape.circle,
+                border: Border.all(color: _C.white, width: 2),
+              ),
+              child: const Icon(
+                Icons.camera_alt_outlined,
+                size: 14,
+                color: _C.white,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _soumettre() {
     if (!_formKey.currentState!.validate()) return;
     context.read<CompteBloc>().add(
@@ -92,9 +137,6 @@ class _EditProfileViewState extends State<_EditProfileView> {
     return Scaffold(
       backgroundColor: _C.bg,
       appBar: AppBar(
-        backgroundColor: _C.white,
-        elevation: 0.5,
-        foregroundColor: _C.black,
         title: const Text('Modifier le profil'),
       ),
       body: BlocConsumer<CompteBloc, CompteState>(
@@ -117,28 +159,8 @@ class _EditProfileViewState extends State<_EditProfileView> {
             child: ListView(
               padding: const EdgeInsets.all(16),
               children: [
-                Center(
-                  child: GestureDetector(
-                    onTap: _choisirPhoto,
-                    child: CircleAvatar(
-                      radius: 44,
-                      backgroundColor: _C.green.withOpacity(0.15),
-                      backgroundImage: _photoPath != null
-                          ? null
-                          : (widget.user?.photoProfil != null &&
-                                widget.user!.photoProfil!.isNotEmpty)
-                          ? CachedNetworkImageProvider(
-                              imageOptimisee(widget.user!.photoProfil!),
-                            )
-                          : null,
-                      child: const Icon(
-                        Icons.camera_alt_outlined,
-                        color: _C.green,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24),
+                Center(child: _avatar()),
+                const SizedBox(height: 20),
                 _input(_prenomCtrl, 'Prénom'),
                 const SizedBox(height: 12),
                 _input(_nomCtrl, 'Nom'),
@@ -194,7 +216,7 @@ class _EditProfileViewState extends State<_EditProfileView> {
       validator: (v) =>
           (v == null || v.trim().isEmpty) ? '$label requis' : null,
       decoration: InputDecoration(
-        labelText: label,
+        label: LibelleObligatoire(label),
         filled: true,
         fillColor: _C.white,
         contentPadding: const EdgeInsets.symmetric(

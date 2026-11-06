@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:saambiz/core/theme/police.dart';
 import 'package:saambiz/core/theme/app_color.dart';
 
 Widget buildDetailChip({required IconData icon, required String label}) {
@@ -16,7 +16,7 @@ Widget buildDetailChip({required IconData icon, required String label}) {
         const SizedBox(width: 4),
         Text(
           label,
-          style: GoogleFonts.inter(
+          style: TextStyle(fontFamily: kPolice, 
             fontSize: 12,
             fontWeight: FontWeight.w500,
             color: AppColor.kGrayscaleDark100,

@@ -1,14 +1,14 @@
+import 'package:saambiz/core/widgets/libelle_obligatoire.dart';
+import 'package:saambiz/core/widgets/image_reseau.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../injection_container.dart';
 import '../../../home/data/models/produit_model.dart';
 import '../../data/datasources/vendeur_produit_datasource.dart';
 import '../../data/models/categorie_model.dart';
 import '../../../categories/data/specification.dart';
 import '../../../categories/presentation/widgets/champs_specifications.dart';
-import 'package:saambiz/core/utils/image_url.dart';
 
 class _C {
   static const green = Color(0xFF01154B);
@@ -233,9 +233,6 @@ class _ProduitFormPageState extends State<ProduitFormPage> {
     return Scaffold(
       backgroundColor: _C.bg,
       appBar: AppBar(
-        backgroundColor: _C.white,
-        elevation: 0.5,
-        foregroundColor: _C.black,
         title: Text(_isEdit ? 'Modifier le produit' : 'Nouveau produit'),
       ),
       body: Form(
@@ -342,10 +339,7 @@ class _ProduitFormPageState extends State<ProduitFormPage> {
     if (_imagePath != null) {
       content = Image.file(File(_imagePath!), fit: BoxFit.cover);
     } else if (_isEdit && widget.produit!.image.isNotEmpty) {
-      content = CachedNetworkImage(
-        imageUrl: imageOptimisee(widget.produit!.image),
-        fit: BoxFit.cover,
-      );
+      content = ImageReseau(widget.produit!.image, fit: BoxFit.cover);
     } else {
       content = const Center(
         child: Column(
@@ -433,12 +427,7 @@ class _ProduitFormPageState extends State<ProduitFormPage> {
                     children: [
                       ClipRRect(
                         borderRadius: BorderRadius.circular(12),
-                        child: CachedNetworkImage(
-                          imageUrl: imageOptimisee(img.url),
-                          width: 90,
-                          height: 90,
-                          fit: BoxFit.cover,
-                          errorWidget: (_, __, ___) => Container(
+                        child: ImageReseau(img.url, width: 90, height: 90, fit: BoxFit.cover, repli: Container(
                             width: 90,
                             height: 90,
                             color: _C.bg,
@@ -446,8 +435,7 @@ class _ProduitFormPageState extends State<ProduitFormPage> {
                               Icons.image_not_supported_outlined,
                               color: _C.sub,
                             ),
-                          ),
-                        ),
+                          )),
                       ),
                       Positioned(
                         top: -6,
@@ -493,7 +481,8 @@ class _ProduitFormPageState extends State<ProduitFormPage> {
         child: LinearProgressIndicator(),
       );
     }
-    if (_erreurCats != null) {
+    // Une liste vide désactive le menu sans rien dire : on l'explique.
+    if (_erreurCats != null || _categories.isEmpty) {
       return Row(
         children: [
           const Expanded(child: Text('Catégories indisponibles')),
@@ -524,7 +513,7 @@ class _ProduitFormPageState extends State<ProduitFormPage> {
   }
 
   InputDecoration _decoration(String hint) => InputDecoration(
-    hintText: hint,
+    label: LibelleObligatoire(hint),
     filled: true,
     fillColor: _C.white,
     contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),

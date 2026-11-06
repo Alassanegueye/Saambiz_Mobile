@@ -1,11 +1,12 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:saambiz/core/theme/police.dart';
 
 import '../../../../core/theme/app_color.dart';
 import '../../../../core/utils/texte.dart';
 import '../../../../core/widgets/animations.dart';
 import '../../../../core/widgets/app_app_bar.dart';
+import '../../../../core/widgets/degrade_fond.dart';
 import '../../../../core/widgets/barre_navigation_verre.dart'
     show kEspaceBarreBas;
 import '../../../../core/widgets/empty_state.dart';
@@ -70,23 +71,30 @@ class _CategoriesPageState extends State<CategoriesPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColor.kBackground,
-      appBar: const AppAppBar(title: 'Catégories', implyLeading: false),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
-            child: ChampRecherche(
-              controleur: _ctrl,
-              indication: 'Rechercher une catégorie',
-              surFondClair: true,
-              onChanged: (texte) => setState(() => _filtre = texte),
-              onSubmitted: (_) => FocusScope.of(context).unfocus(),
+    return FondDegradeSubtil(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: const AppAppBar(
+          title: 'Catégories',
+          centerTitle: true,
+          implyLeading: false,
+          couleurFond: Colors.transparent,
+        ),
+        body: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
+              child: ChampRecherche(
+                controleur: _ctrl,
+                indication: 'Rechercher une catégorie',
+                surFondClair: true,
+                onChanged: (texte) => setState(() => _filtre = texte),
+                onSubmitted: (_) => FocusScope.of(context).unfocus(),
+              ),
             ),
-          ),
-          Expanded(child: _corps()),
-        ],
+            Expanded(child: _corps()),
+          ],
+        ),
       ),
     );
   }
@@ -99,12 +107,12 @@ class _CategoriesPageState extends State<CategoriesPage> {
           padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2,
-            mainAxisSpacing: 12,
-            crossAxisSpacing: 12,
-            childAspectRatio: 1.25,
+            mainAxisSpacing: 10,
+            crossAxisSpacing: 10,
+            childAspectRatio: 2.1,
           ),
-          itemCount: 8,
-          itemBuilder: (_, __) => const Os(hauteur: double.infinity, rayon: 12),
+          itemCount: 12,
+          itemBuilder: (_, __) => const Os(hauteur: double.infinity, rayon: 16),
         ),
       );
     }
@@ -140,16 +148,17 @@ class _CategoriesPageState extends State<CategoriesPage> {
             sliver: SliverGrid(
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
-                mainAxisSpacing: 12,
-                crossAxisSpacing: 12,
-                childAspectRatio: 1.25,
+                mainAxisSpacing: 10,
+                crossAxisSpacing: 10,
+                childAspectRatio: 2.1,
               ),
               delegate: SliverChildListDelegate([
                 if (promotionsVisible)
                   _tuile(
                     rang: 0,
                     nom: 'Promotions',
-                    icone: Icons.local_offer_outlined,
+                    icone: Icons.local_offer_rounded,
+                    mise: true,
                     onTap: () => _ouvrir(
                       const ProduitsPage(titre: 'Promotions', promotions: true),
                     ),
@@ -202,58 +211,60 @@ class _CategoriesPageState extends State<CategoriesPage> {
     bool mise = false,
   }) {
     return Material(
-      color: mise ? AppColor.kSecondary : AppColor.kWhite,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: mise ? AppColor.kSecondary : AppColor.kLine),
-      ),
+      color: AppColor.kWhite,
+      borderRadius: BorderRadius.circular(16),
+      shadowColor: AppColor.kPrimary.withValues(alpha: 0.12),
+      elevation: 1.5,
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.all(14),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          padding: const EdgeInsets.fromLTRB(12, 10, 10, 10),
+          child: Row(
             children: [
-              Row(
-                children: [
-                  Container(
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(
-                      color: mise ? AppColor.kPrimary : AppColor.kSecondaryLight,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Icon(
-                      icone,
-                      color: mise ? AppColor.kSecondary : AppColor.kPrimary,
-                      size: 22,
-                    ),
-                  ),
-                ],
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: mise ? AppColor.kSecondary : AppColor.kPrimaryLight,
+                  borderRadius: BorderRadius.circular(13),
+                ),
+                child: Icon(icone, color: AppColor.kPrimary, size: 22),
               ),
-              const Spacer(),
-              Text(
-                nom.trim(),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: GoogleFonts.inter(
-                  fontSize: 15,
-                  height: 1.2,
-                  fontWeight: FontWeight.w700,
-                  color: AppColor.kGrayscaleDark100,
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      nom.trim(),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontFamily: kPolice,
+                        fontSize: 13.5,
+                        height: 1.2,
+                        fontWeight: FontWeight.w700,
+                        color: AppColor.kGrayscaleDark100,
+                      ),
+                    ),
+                    // Nombre de produits en vente, sous le nom.
+                    if (nombre != null || mise) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        mise
+                            ? 'Offres en cours'
+                            : nombre == 0
+                            ? 'Bientôt des produits'
+                            : '$nombre produit${nombre! > 1 ? 's' : ''}',
+                        maxLines: 1,
+                        style: texteDiscret(11.5),
+                      ),
+                    ],
+                  ],
                 ),
               ),
-              // Nombre de produits en vente, sous le nom.
-              if (nombre != null) ...[
-                const SizedBox(height: 3),
-                Text(
-                  nombre == 0
-                      ? 'Bientôt des produits'
-                      : '$nombre produit${nombre > 1 ? 's' : ''}',
-                  style: texteDiscret(12.5),
-                ),
-              ],
             ],
           ),
         ),

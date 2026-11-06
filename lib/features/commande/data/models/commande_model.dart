@@ -108,7 +108,10 @@ class CommandeModel {
       return '${p['prenom'] ?? ''} ${p['nom'] ?? ''}'.trim();
     }
 
-    final acheteur = json['acheteur'] as Map<String, dynamic>?;
+    // Sans compte (commande venue du site de la boutique), le client est décrit
+    // par la commande elle-même.
+    final acheteur =
+        (json['acheteur'] ?? json['client']) as Map<String, dynamic>?;
     final vendeur = json['vendeur'] as Map<String, dynamic>?;
 
     return CommandeModel(
@@ -147,6 +150,9 @@ double _toDouble(dynamic v) {
 // Libellés FR + ordre des statuts pour l'affichage du suivi
 const Map<String, String> kStatutCommandeLabels = {
   'en_attente': 'En attente',
+  'acceptee': 'Acceptée',
+  'rejetee': 'Rejetée',
+  'payee': 'Payée',
   'confirmee': 'Confirmée',
   'en_preparation': 'En préparation',
   'prete': 'Prête',

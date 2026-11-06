@@ -272,17 +272,14 @@ class _AssistantVitrinePageState extends State<AssistantVitrinePage> {
           child: Scaffold(
             backgroundColor: _C.bg,
             appBar: AppBar(
-              backgroundColor: _C.white,
-              surfaceTintColor: _C.white,
-              elevation: 0,
               leading: IconButton(
-                icon: const Icon(Icons.arrow_back_rounded, color: _C.text),
+                icon: const Icon(Icons.arrow_back_rounded),
                 onPressed: genere ? null : _precedent,
               ),
               title: Text(
                 _modification ? 'Modifier mon site' : 'Créer mon site',
                 style: const TextStyle(
-                  color: _C.text,
+                  color: Colors.white,
                   fontWeight: FontWeight.w700,
                   fontSize: 17,
                 ),
@@ -298,41 +295,54 @@ class _AssistantVitrinePageState extends State<AssistantVitrinePage> {
               ),
             ),
 
+            // Le bouton fait partie du corps : un `bottomNavigationBar` reste
+            // sous le clavier, et il devenait impossible de continuer.
             body: genere
                 ? const _EcranGeneration()
-                : SingleChildScrollView(
-                    padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
-                    child: _contenuEtape(state),
-                  ),
-
-            bottomNavigationBar: genere
-                ? null
-                : SafeArea(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 8, 20, 14),
-                      child: FilledButton(
-                        style: FilledButton.styleFrom(
-                          backgroundColor: _C.navy,
-                          disabledBackgroundColor: _C.border,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
+                : Column(
+                    children: [
+                      Expanded(
+                        child: SingleChildScrollView(
+                          keyboardDismissBehavior:
+                              ScrollViewKeyboardDismissBehavior.onDrag,
+                          padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
+                          child: _contenuEtape(state),
                         ),
-                        onPressed: _etapeValide ? _suivant : null,
-                        child: Text(
-                          _etape == _nombreEtapes - 1
-                              ? (_modification
-                                    ? 'Enregistrer'
-                                    : 'Créer mon site')
-                              : 'Continuer',
-                          style: const TextStyle(
-                            fontSize: 15.5,
-                            fontWeight: FontWeight.w700,
+                      ),
+                      SafeArea(
+                        top: false,
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(20, 8, 20, 14),
+                          child: SizedBox(
+                            width: double.infinity,
+                            child: FilledButton(
+                              style: FilledButton.styleFrom(
+                                backgroundColor: _C.navy,
+                                disabledBackgroundColor: _C.border,
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 16,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              onPressed: _etapeValide ? _suivant : null,
+                              child: Text(
+                                _etape == _nombreEtapes - 1
+                                    ? (_modification
+                                          ? 'Enregistrer'
+                                          : 'Créer mon site')
+                                    : 'Continuer',
+                                style: const TextStyle(
+                                  fontSize: 15.5,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
                           ),
                         ),
                       ),
-                    ),
+                    ],
                   ),
           ),
         );
@@ -440,6 +450,8 @@ class _AssistantVitrinePageState extends State<AssistantVitrinePage> {
           indication: 'Ex. : boubous et tissus wax cousus sur mesure',
           lignes: 2,
           maxCaracteres: 300,
+          // Une seule phrase : la touche Retour referme le clavier.
+          actionClavier: TextInputAction.done,
         ),
         const SizedBox(height: 6),
         const Text(
@@ -892,17 +904,20 @@ class _Champ extends StatelessWidget {
   final int lignes;
   final int? maxCaracteres;
 
+  final TextInputAction? actionClavier;
   const _Champ({
     required this.controleur,
     required this.indication,
     this.lignes = 1,
     this.maxCaracteres,
+    this.actionClavier,
   });
 
   @override
   Widget build(BuildContext context) {
     return TextField(
       controller: controleur,
+      textInputAction: actionClavier,
       maxLines: lignes,
       maxLength: maxCaracteres,
       style: const TextStyle(fontSize: 14.5, color: _C.text),

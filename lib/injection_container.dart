@@ -1,3 +1,9 @@
+import 'package:saambiz/core/services/session_service.dart';
+import 'package:saambiz/core/connection/auth_interceptor.dart';
+import 'package:saambiz/core/routes/app_router.dart';
+import 'dart:io';
+
+import 'package:dio/io.dart';
 import 'package:saambiz/features/auth/data/datasources/auth_remote_datasource.dart';
 import 'package:saambiz/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:saambiz/features/auth/domain/repositories/auth_repository.dart';
@@ -145,6 +151,19 @@ Future<void> init() async {
 
   // Services
   sl.registerLazySingleton(() => TokenService(secureStorage: sl()));
+  sl.registerLazySingleton(
+    () => SessionService(
+      jetons: sl(),
+      dio: Dio(
+        BaseOptions(
+          baseUrl: Env.apiBaseUrlEffective,
+          connectTimeout: Env.timeoutConnexion,
+          receiveTimeout: Env.timeoutReception,
+          contentType: 'application/json',
+        ),
+      ),
+    ),
+  );
   sl.registerLazySingleton(() => SocketService(tokenService: sl()));
 
   //================================================
@@ -171,24 +190,33 @@ Future<void> init() async {
       ),
     );
 
+    // Ouvrir une connexion HTTPS coûte bien plus cher que la requête elle-même
+    // (de 0,4 à 1,2 s, contre 0,1 s). Par défaut, elle est refermée après 15 s
+    // d'inactivité : presque chaque geste en rouvrait une. 60 s reste sous le
+    // délai de Nginx (75 s), qui fermerait sinon la connexion le premier.
+    dio.httpClientAdapter = IOHttpClientAdapter(
+      createHttpClient: () =>
+          HttpClient()..idleTimeout = const Duration(seconds: 60),
+    );
+
     // Intercepteurs pour logging et gestion du token
     dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
           // Logging des requêtes
-          _log('🌐 [REQUEST] ${options.method} ${options.path}');
+          _log('[REQUEST] ${options.method} ${options.path}');
           if (options.data != null) {
             if (options.data is FormData) {
               final formData = options.data as FormData;
-              _log('📦 FormData fields:');
+              _log('FormData fields:');
               formData.fields.forEach((field) {
-                _log('  ${field.key}: ${field.value}');
+                _log('${field.key}: ${field.value}');
               });
               formData.files.forEach((file) {
-                _log('  ${file.key}: ${file.value.filename}');
+                _log('${file.key}: ${file.value.filename}');
               });
             } else {
-              _log('📦 Body: ${options.data}');
+              _log('Body: ${options.data}');
             }
           }
 
@@ -211,10 +239,10 @@ Future<void> init() async {
 
               if (token != null && token.isNotEmpty) {
                 options.headers['Authorization'] = 'Bearer $token';
-                _log('🔑 Token ajouté à la requête');
+                _log('Token ajouté à la requête');
               }
             } catch (e) {
-              _log('⚠️ Erreur lors de la récupération du token: $e');
+              _log('Erreur lors de la récupération du token: $e');
             }
           }
 
@@ -222,19 +250,45 @@ Future<void> init() async {
         },
         onResponse: (response, handler) {
           _log(
-            '✅ [RESPONSE] ${response.statusCode} ${response.requestOptions.path}',
+            ' [RESPONSE] ${response.statusCode} ${response.requestOptions.path}',
           );
           if (response.data != null && response.data is Map) {
-            _log('📥 Data: ${response.data}');
+            _log('Data: ${response.data}');
           }
           return handler.next(response);
         },
-        onError: (DioException e, handler) {
-          _log('❌ [ERROR] ${e.type} ${e.requestOptions.path}');
-          _log('📝 Message: ${e.message}');
+        onError: (DioException e, handler) async {
+          _log('[ERROR] ${e.type} ${e.requestOptions.path}');
+          // Jeton expiré : on en obtient un autre et on rejoue la requête, sans
+          // que l'utilisateur s'en aperçoive.
+          final requete = e.requestOptions;
+          if (e.response?.statusCode == 401 &&
+              !requete.path.contains('/auth/') &&
+              requete.extra['relancee'] != true) {
+            final resultat = await sl<SessionService>().renouveler();
+            if (resultat == ResultatRenouvellement.renouvele) {
+              requete.extra['relancee'] = true;
+              if (requete.data is FormData) {
+                requete.data = (requete.data as FormData).clone();
+              }
+              try {
+                return handler.resolve(await dio.fetch(requete));
+              } on DioException catch (erreur) {
+                return handler.next(erreur);
+              }
+            }
+            if (resultat == ResultatRenouvellement.refuse) {
+              AuthInterceptor.navigatorKey.currentState
+                  ?.pushNamedAndRemoveUntil(
+                    AppRouter.loginRoute,
+                    (_) => false,
+                  );
+            }
+          }
+          _log('Message: ${e.message}');
           if (e.response != null) {
-            _log('📊 Status: ${e.response!.statusCode}');
-            _log('📋 Data: ${e.response!.data}');
+            _log('Status: ${e.response!.statusCode}');
+            _log('Data: ${e.response!.data}');
           }
           return handler.next(e);
         },
@@ -546,7 +600,7 @@ void _validateEnvVariables() {
     );
   }
 
-  _log('✅ Toutes les variables d\'environnement sont configurées');
+  _log('Toutes les variables d\'environnement sont configurées');
 
   // L'adresse RÉELLEMENT utilisée par Dio, et non celle du .env.
   //
@@ -558,9 +612,9 @@ void _validateEnvVariables() {
   //
   // La provenance est indiquée, parce que c'est la question suivante.
   _log(
-    '🌐 API Base URL: ${Env.apiBaseUrlEffective}'
+    ' API Base URL: ${Env.apiBaseUrlEffective}'
     '${Env.apiBaseUrlCompilee ? ' (--dart-define)' : ' (.env)'}',
   );
-  _log('🔑 Auth Login Path: ${dotenv.get('AUTH_LOGIN_PATH')}');
-  _log('📝 Auth Register Path: ${dotenv.get('AUTH_REGISTER_PATH')}');
+  _log('Auth Login Path: ${dotenv.get('AUTH_LOGIN_PATH')}');
+  _log('Auth Register Path: ${dotenv.get('AUTH_REGISTER_PATH')}');
 }
