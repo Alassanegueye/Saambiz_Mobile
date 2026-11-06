@@ -145,7 +145,7 @@ class SbEtapes extends StatelessWidget {
             ),
             children: [
               TextSpan(
-                text: 'ETAPE $n SUR ${liste.length}',
+                text: 'ÉTAPE $n SUR ${liste.length}',
                 style: const TextStyle(fontWeight: FontWeight.w700),
               ),
               TextSpan(text: ' · ${liste[n - 1]}'),
@@ -249,7 +249,7 @@ class SbSecondaryButton extends StatelessWidget {
   }
 }
 
-/// Lien texte discret « Deja un compte ? Se connecter ».
+/// Lien texte discret « Déjà un compte ? Se connecter ».
 class SbLoginLink extends StatelessWidget {
   final VoidCallback onTap;
   const SbLoginLink({super.key, required this.onTap});
@@ -269,7 +269,7 @@ class SbLoginLink extends StatelessWidget {
                 color: Sb.textMid,
               ),
               children: [
-                TextSpan(text: 'Deja un compte ? '),
+                TextSpan(text: 'Déjà un compte ? '),
                 TextSpan(
                   text: 'Se connecter',
                   style: TextStyle(
