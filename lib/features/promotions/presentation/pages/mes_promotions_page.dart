@@ -67,7 +67,6 @@ class _MesPromotionsView extends StatelessWidget {
   Widget build(BuildContext context) {
     return PageVendeur(
       titre: 'Promotions',
-      sousTitre: 'Réductions et messages aux abonnés',
       actions: [
         BoutonEnteteVendeur(
           icone: Icons.campaign_outlined,

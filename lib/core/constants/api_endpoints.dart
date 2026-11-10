@@ -55,6 +55,7 @@ class CommandeEndpoints {
   static String annuler(String id) => '/commandes/$id/annuler';
   static String payer(String id) => '/commandes/$id/payer';
   static String statut(String id) => '/commandes/$id/statut';
+  static String paiement(String id) => '/commandes/$id/paiement';
   static String demandeRetour(String id) => '/commandes/$id/demande-retour';
 }
 

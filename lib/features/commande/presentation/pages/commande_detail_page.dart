@@ -209,6 +209,32 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
     }
   }
 
+  /// Le vendeur confirme avoir été payé (commande réglée à la réception).
+  Future<void> _confirmerPaiement() async {
+    final bloc = context.read<CommandeBloc>();
+    final confirme = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Confirmer le paiement ?'),
+        content: Text(
+          'Vous confirmez avoir reçu ${montantFcfa(commande.montantTotal)} '
+          'pour cette commande. Elle sera comptée dans vos ventes.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Retour'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Oui, payée'),
+          ),
+        ],
+      ),
+    );
+    if (confirme == true) bloc.add(ConfirmerPaiementCommande(commande.id));
+  }
+
   void _annuler() {
     context.read<CommandeBloc>().add(AnnulerCommande(commande.id));
   }
@@ -937,10 +963,36 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
           info(
             Icons.payments_outlined,
             'Paiement',
-            commande.modePaiement == 'en_ligne'
-                ? 'Wave ou Orange Money'
-                : 'À la réception',
+            '${commande.modePaiement == 'en_ligne' ? 'Wave ou Orange Money' : 'À la réception'}'
+                ' · ${commande.statutPaiement == 'paye' ? 'Payée' : 'Non payée'}',
           ),
+          // Réglée à la réception : c'est le vendeur qui confirme avoir été
+          // payé, pour que la vente entre dans sa comptabilité.
+          if (isVendeur &&
+              commande.modePaiement != 'en_ligne' &&
+              commande.statutPaiement == 'non_paye' &&
+              const {
+                'acceptee',
+                'confirmee',
+                'en_preparation',
+                'prete',
+                'en_livraison',
+                'livree',
+              }.contains(commande.statut)) ...[
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: _confirmerPaiement,
+                icon: const Icon(Icons.check_circle_outline_rounded, size: 20),
+                label: const Text('Marquer comme payée'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: _C.green,
+                  foregroundColor: _C.white,
+                ),
+              ),
+            ),
+          ],
           if (note != null && note.isNotEmpty)
             info(Icons.sticky_note_2_outlined, 'Note du client', note),
         ],

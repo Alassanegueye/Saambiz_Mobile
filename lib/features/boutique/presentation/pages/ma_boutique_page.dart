@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/page_vendeur.dart';
 import 'package:saambiz/core/theme/app_color.dart';
 import 'package:saambiz/core/widgets/image_reseau.dart';
 import 'package:saambiz/core/utils/texte.dart';
@@ -37,7 +38,7 @@ class _MaBoutiqueView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return ScaffoldMarine(
       backgroundColor: _C.bg,
       appBar: AppBar(title: const Text('Ma boutique')),
       body: BlocConsumer<BoutiqueBloc, BoutiqueState>(

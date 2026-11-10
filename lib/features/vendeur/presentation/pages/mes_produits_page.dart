@@ -68,7 +68,6 @@ class _MesProduitsViewState extends State<_MesProduitsView> {
   Widget build(BuildContext context) {
     return PageVendeur(
       titre: 'Mes produits',
-      sousTitre: 'Votre catalogue',
       titreWidget: _rechercheOuverte ? _champRecherche() : null,
       actions: [
         BoutonEnteteVendeur(

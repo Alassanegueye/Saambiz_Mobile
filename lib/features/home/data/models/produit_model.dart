@@ -20,6 +20,9 @@ class ProduitModel {
   final String nom;
   final String description;
   final String prix;
+
+  /// Prix remisé (promotion en cours), ou null.
+  final String? prixPromo;
   final int quantite;
   final String image;
   final String ville; // extrait de vendeur.boutiques[0].localisation
@@ -41,6 +44,7 @@ class ProduitModel {
     required this.nom,
     required this.description,
     required this.prix,
+    this.prixPromo,
     required this.quantite,
     required this.image,
     required this.ville,
@@ -96,6 +100,7 @@ class ProduitModel {
       nom: json['nom'] ?? '',
       description: json['description'] ?? '',
       prix: json['prix']?.toString() ?? '0',
+      prixPromo: (json['prix_promo'] ?? json['prixPromo'])?.toString(),
       quantite: (json['quantite'] ?? 0) as int,
       image: json['image'] ?? '',
       ville: ville,

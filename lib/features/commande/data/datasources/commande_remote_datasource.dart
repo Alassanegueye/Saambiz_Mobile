@@ -17,6 +17,10 @@ abstract class CommandeRemoteDataSource {
   // Vendeur
   Future<List<CommandeModel>> commandesVendeur({String? statut});
   Future<CommandeModel> changerStatut(String id, String statut);
+  // Le vendeur confirme avoir reçu le paiement (commande réglée à la livraison).
+  Future<CommandeModel> confirmerPaiement(String id);
+  // Commande prise hors de l'application, saisie par le vendeur.
+  Future<CommandeModel> creerCommandeVendeur(Map<String, dynamic> body);
   // Retour (acheteur), uniquement si la commande est au statut 'livree'
   Future<void> demandeRetour(String id, {required String raison});
 }
@@ -98,6 +102,18 @@ class CommandeRemoteDataSourceImpl implements CommandeRemoteDataSource {
       queryParameters: statut != null ? {'statut': statut} : null,
     );
     return _parseListe(res.data);
+  }
+
+  @override
+  Future<CommandeModel> confirmerPaiement(String id) async {
+    final res = await dio.patch(CommandeEndpoints.paiement(id));
+    return _parseUne(res.data);
+  }
+
+  @override
+  Future<CommandeModel> creerCommandeVendeur(Map<String, dynamic> body) async {
+    final res = await dio.post(CommandeEndpoints.commandesVendeur, data: body);
+    return _parseUne(res.data);
   }
 
   @override

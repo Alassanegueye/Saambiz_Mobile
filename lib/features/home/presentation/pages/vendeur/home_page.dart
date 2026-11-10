@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:saambiz/core/widgets/onglets_conserves.dart';
 import 'package:saambiz/core/widgets/image_reseau.dart';
 import 'package:flutter/material.dart';
@@ -31,6 +32,7 @@ import '../../../../../core/widgets/avatar_utilisateur.dart';
 import '../../../../../core/widgets/ui_kit.dart';
 import '../../../../vendeur/presentation/pages/produit_form_page.dart';
 import 'profil_page.dart';
+import 'package:saambiz/features/certification/certification_service.dart';
 import '../../../../../core/widgets/page_vendeur.dart';
 
 class _C {
@@ -85,6 +87,10 @@ class _HomePageState extends State<HomePage>
   // est restaurée sans transmettre d'utilisateur à cette page.
   User? _utilisateur;
 
+  // Le vendeur doit encore faire certifier sa boutique : point rouge sur
+  // l'avatar, jusqu'à l'envoi de sa pièce d'identité.
+  bool _certificationAFaire = false;
+
   List<BoutiqueModel> _boutiques = [];
   bool _boutiquesLoad = false;
   String? _boutiquesError;
@@ -115,7 +121,16 @@ class _HomePageState extends State<HomePage>
     _utilisateur = widget.user;
     _loadStats();
     _loadUtilisateur();
+    _loadCertification();
     _initBloc();
+  }
+
+  /// Silencieux en cas d'échec : sans réponse, pas de point rouge.
+  Future<void> _loadCertification() async {
+    try {
+      final s = await CertificationService(sl<Dio>()).statut();
+      if (mounted) setState(() => _certificationAFaire = s.actionRequise);
+    } catch (_) {}
   }
 
   /// En cas d'échec, l'en-tête garde simplement ce qu'il connaît déjà.
@@ -332,8 +347,6 @@ class _HomePageState extends State<HomePage>
   /// Barre du haut, toujours visible : boutique, salutation, cloche.
   Widget _buildBarreHaut() {
     final boutique = _boutiques.isNotEmpty ? _boutiques.first : null;
-    final prenom = _utilisateur?.prenom.trim() ?? '';
-    final nom = prenom.isNotEmpty ? prenom : (_utilisateur?.nomAffiche ?? '');
 
     return ColoredBox(
       color: AppColor.kPrimary,
@@ -354,9 +367,9 @@ class _HomePageState extends State<HomePage>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if (nom.isNotEmpty)
+                      if (boutique != null)
                         Text(
-                          'Bonjour, $nom',
+                          'Ma boutique',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
@@ -429,13 +442,20 @@ class _HomePageState extends State<HomePage>
               ),
               AvatarUtilisateur(
                 utilisateur: _utilisateur,
+                pastille: _certificationAFaire,
                 // Le compte n'est plus un onglet : il s'ouvre ici, en haut,
                 // et se referme sur l'écran d'où il a été appelé.
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => ProfilPage(user: _utilisateur),
-                  ),
-                ),
+                onTap: () async {
+                  await Navigator.of(context).push(
+                    // Route iOS : le compte se ferme aussi d'un glissé
+                    // du bord gauche vers la droite.
+                    CupertinoPageRoute(
+                      builder: (_) => ProfilPage(user: _utilisateur),
+                    ),
+                  );
+                  // Au retour, la demande a peut-être été envoyée.
+                  _loadCertification();
+                },
               ),
             ],
           ),

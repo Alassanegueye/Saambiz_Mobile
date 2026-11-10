@@ -51,8 +51,10 @@ class SocketService {
     // que le --dart-define et le .env divergeaient.
     final baseUrl = Env.apiBaseUrlEffective.trim();
     final uri = Uri.tryParse(baseUrl);
-    if (uri == null) return baseUrl;
-    return uri.replace(path: '', query: '').toString();
+    if (uri == null || !uri.hasAuthority) return baseUrl;
+    // Schéma et hôte seuls : un « ? » vide en fin d'adresse faisait planter
+    // la lecture des paramètres dans socket_io_client (RangeError).
+    return '${uri.scheme}://${uri.authority}';
   }
 
   Future<void> _connect() async {

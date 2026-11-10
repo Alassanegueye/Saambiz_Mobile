@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/page_vendeur.dart';
 import 'package:saambiz/core/widgets/libelle_obligatoire.dart';
 import 'package:saambiz/core/widgets/image_reseau.dart';
 import 'dart:io';
@@ -118,7 +119,7 @@ class _BoutiqueFormViewState extends State<_BoutiqueFormView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return ScaffoldMarine(
       backgroundColor: _C.bg,
       appBar: AppBar(
         title: Text(_isEdit ? 'Modifier ma boutique' : 'Créer ma boutique'),

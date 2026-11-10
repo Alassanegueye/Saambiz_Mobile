@@ -14,6 +14,7 @@ class CommandeBloc extends Bloc<CommandeEvent, CommandeState> {
     on<PayerCommande>(_onPayerCommande);
     on<AnnulerCommande>(_onAnnulerCommande);
     on<ChangerStatutCommande>(_onChangerStatut);
+    on<ConfirmerPaiementCommande>(_onConfirmerPaiement);
     on<DemanderRetourCommande>(_onDemanderRetour);
   }
 
@@ -106,6 +107,19 @@ class CommandeBloc extends Bloc<CommandeEvent, CommandeState> {
         event.commandeId,
         event.statut,
       );
+      emit(CommandeMiseAJour(commande));
+    } catch (e) {
+      emit(CommandeError(_msg(e)));
+    }
+  }
+
+  Future<void> _onConfirmerPaiement(
+    ConfirmerPaiementCommande event,
+    Emitter<CommandeState> emit,
+  ) async {
+    emit(CommandeLoading());
+    try {
+      final commande = await repository.confirmerPaiement(event.commandeId);
       emit(CommandeMiseAJour(commande));
     } catch (e) {
       emit(CommandeError(_msg(e)));

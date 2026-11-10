@@ -94,7 +94,7 @@ class PageVendeur extends StatelessWidget {
                 borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(28),
                 ),
-                child: ColoredBox(color: AppColor.kBackground, child: corps),
+                child: Material(color: AppColor.kBackground, child: corps),
               ),
             ),
           ],
@@ -181,6 +181,85 @@ class BoutonEnteteVendeur extends StatelessWidget {
               icone,
               size: 21,
               color: principal ? AppColor.kPrimary : AppColor.kWhite,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Scaffold des sous-pages, au même style que les onglets : en-tête marine
+/// (titre et icônes en blanc), puis une feuille claire aux coins arrondis.
+///
+/// S'utilise comme un [Scaffold] : l'[AppBar] passée est habillée en marine
+/// par le thème, sans rien changer à son contenu.
+class ScaffoldMarine extends StatelessWidget {
+  final PreferredSizeWidget? appBar;
+  final Widget? body;
+
+  /// Couleur de la feuille qui porte le contenu.
+  final Color? backgroundColor;
+  final Widget? floatingActionButton;
+  final Widget? bottomNavigationBar;
+  final bool? resizeToAvoidBottomInset;
+
+  const ScaffoldMarine({
+    super.key,
+    this.appBar,
+    this.body,
+    this.backgroundColor,
+    this.floatingActionButton,
+    this.bottomNavigationBar,
+    this.resizeToAvoidBottomInset,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    const style = TextStyle(
+      fontFamily: kPolice,
+      fontSize: 18,
+      fontWeight: FontWeight.w800,
+      letterSpacing: -0.3,
+      color: AppColor.kWhite,
+    );
+    return Theme(
+      data: theme.copyWith(
+        appBarTheme: theme.appBarTheme.copyWith(
+          backgroundColor: AppColor.kPrimary,
+          foregroundColor: AppColor.kWhite,
+          surfaceTintColor: Colors.transparent,
+          elevation: 0,
+          scrolledUnderElevation: 0,
+          centerTitle: false,
+          titleTextStyle: style,
+          toolbarHeight: 64,
+          iconTheme: const IconThemeData(color: AppColor.kWhite, size: 24),
+          actionsIconTheme: const IconThemeData(
+            color: AppColor.kWhite,
+            size: 24,
+          ),
+          systemOverlayStyle: SystemUiOverlayStyle.light.copyWith(
+            statusBarColor: Colors.transparent,
+          ),
+        ),
+      ),
+      child: Scaffold(
+        backgroundColor: AppColor.kPrimary,
+        appBar: appBar,
+        floatingActionButton: floatingActionButton,
+        bottomNavigationBar: bottomNavigationBar,
+        resizeToAvoidBottomInset: resizeToAvoidBottomInset,
+        body: Padding(
+          padding: const EdgeInsets.only(top: 6),
+          child: ClipRRect(
+            borderRadius: const BorderRadius.vertical(
+              top: Radius.circular(28),
+            ),
+            child: Material(
+              color: backgroundColor ?? AppColor.kBackground,
+              child: body ?? const SizedBox.shrink(),
             ),
           ),
         ),
