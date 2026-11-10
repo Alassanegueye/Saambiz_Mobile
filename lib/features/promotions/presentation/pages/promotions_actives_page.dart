@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:saambiz/core/widgets/image_reseau.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
 
 import '../../../../injection_container.dart';
 import '../bloc/promotions_bloc.dart';

@@ -4,7 +4,6 @@ import '../../../../core/widgets/page_vendeur.dart';
 import '../../../../core/widgets/ui_kit.dart';
 import '../../../../core/theme/police.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
 
 import '../../../../core/theme/app_color.dart';
 import '../../../../injection_container.dart';

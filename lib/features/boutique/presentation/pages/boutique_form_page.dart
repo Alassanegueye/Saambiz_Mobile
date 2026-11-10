@@ -14,7 +14,6 @@ import '../bloc/boutique_state.dart';
 
 class _C {
   static const green = Color(0xFF01154B);
-  static const black = Color(0xFF01154B);
   static const white = Color(0xFFFFFFFF);
   static const bg = Color(0xFFF4F5F8);
   static const sub = Color(0xFF5B6C8A);

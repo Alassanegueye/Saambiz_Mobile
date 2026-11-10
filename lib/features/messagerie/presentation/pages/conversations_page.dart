@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
 
 import '../../../../injection_container.dart';
 import '../../../../core/services/socket_service.dart';
@@ -18,7 +17,6 @@ import '../../../../core/utils/dates.dart';
 
 class _C {
   static const green = Color(0xFF01154B);
-  static const black = Color(0xFF01154B);
   static const white = Color(0xFFFFFFFF);
   static const bg = Color(0xFFF4F5F8);
   static const sub = Color(0xFF5B6C8A);

@@ -1,7 +1,6 @@
 import 'package:saambiz/core/widgets/libelle_obligatoire.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
 
 import '../../../../injection_container.dart';
 import '../../../home/data/models/produit_model.dart';
@@ -14,11 +13,8 @@ import '../../../../core/utils/dates.dart';
 
 class _C {
   static const green = Color(0xFF01154B);
-  static const black = Color(0xFF01154B);
   static const white = Color(0xFFFFFFFF);
   static const bg = Color(0xFFF4F5F8);
-  static const sub = Color(0xFF5B6C8A);
-  static const border = Color(0xFFE3E8F0);
 }
 
 /// Création (POST /promotions) ou modification (PUT /promotions/:id) d'une
