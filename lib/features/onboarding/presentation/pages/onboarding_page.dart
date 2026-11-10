@@ -276,6 +276,15 @@ class _PageSlide extends StatelessWidget {
             fit: BoxFit.contain,
             width: double.infinity,
             alignment: Alignment.bottomCenter,
+            // Décodage à la largeur réellement affichée. Les illustrations
+            // font 1080 px de large : sur un téléphone de densité 2, les
+            // décoder telles quelles occupait deux fois la mémoire utile,
+            // et trois images gardées en cache par le PageView, c'est la
+            // différence entre 7 Mo et 20 Mo sur l'écran d'accueil.
+            cacheWidth:
+                (MediaQuery.sizeOf(context).width *
+                        MediaQuery.devicePixelRatioOf(context))
+                    .round(),
           ),
         ),
         Padding(

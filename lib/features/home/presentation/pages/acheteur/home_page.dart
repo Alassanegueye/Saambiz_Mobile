@@ -302,42 +302,21 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                           child:
                               (widget.user?.photoProfil != null &&
                                   widget.user!.photoProfil!.isNotEmpty)
-                              ? Image.network(
-                                  widget.user!.photoProfil!,
+                              ? ImageReseau(
+                                  widget.user!.photoProfil,
                                   width: 44,
                                   height: 44,
-                                  fit: BoxFit.cover,
-                                  loadingBuilder: (context, child, loadingProgress) {
-                                    if (loadingProgress == null) return child;
-                                    return Center(
-                                      child: CircularProgressIndicator(
-                                        value:
-                                            loadingProgress
-                                                    .expectedTotalBytes !=
-                                                null
-                                            ? loadingProgress
-                                                      .cumulativeBytesLoaded /
-                                                  (loadingProgress
-                                                          .expectedTotalBytes ??
-                                                      1)
-                                            : null,
+                                  largeurServeur: 132,
+                                  repli: Center(
+                                    child: Text(
+                                      initiales,
+                                      style: const TextStyle(
+                                        fontFamily: kPolice,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w800,
                                       ),
-                                    );
-                                  },
-                                  errorBuilder: (context, error, stackTrace) {
-                                    // Si l'image ne charge pas, afficher les initiales
-                                    return Center(
-                                      child: Text(
-                                        initiales,
-                                        style: const TextStyle(
-                                          fontFamily: kPolice,
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w800,
-                                          color: _C.green,
-                                        ),
-                                      ),
-                                    );
-                                  },
+                                    ),
+                                  ),
                                 )
                               : Center(
                                   child: Text(
