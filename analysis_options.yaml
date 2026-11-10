@@ -27,8 +27,23 @@ linter:
   # `// ignore_for_file: name_of_lint` syntax on the line or in the file
   # producing the lint.
   rules:
-    # avoid_print: false  # Uncomment to disable the `avoid_print` rule
-    # prefer_single_quotes: true  # Uncomment to enable the `prefer_single_quotes` rule
+    # ── Règles de performance ────────────────────────────────────────────
+    # Un widget `const` n'est construit qu'une fois, et Flutter saute sa
+    # sous-arborescence à chaque reconstruction du parent. C'est le levier
+    # le moins coûteux contre les reconstructions inutiles, et l'analyseur
+    # le vérifie à notre place — contrairement à une relecture à l'œil, qui
+    # en laisse toujours passer sur 49 000 lignes.
+    prefer_const_constructors: true
+    prefer_const_constructors_in_immutables: true
+    prefer_const_declarations: true
+    prefer_const_literals_to_create_immutables: true
+
+    # Un Container sans décoration ni contrainte ajoute un nœud à l'arbre
+    # pour rien, et n'est jamais `const` ; SizedBox et ColoredBox le sont.
+    avoid_unnecessary_containers: true
+    sized_box_for_whitespace: true
+    use_colored_box: true
+    use_decorated_box: true
 
 # Additional information about this file can be found at
 # https://dart.dev/guides/language/analysis-options

@@ -23,7 +23,7 @@ class CustomRichText extends StatelessWidget {
         textAlign: TextAlign.center,
         text: TextSpan(
           text: textePrincipal,
-          style: TextStyle(
+          style: const TextStyle(
             fontFamily: kPolice,
             color: AppColor.kGrayscale40,
             fontWeight: FontWeight.w600,

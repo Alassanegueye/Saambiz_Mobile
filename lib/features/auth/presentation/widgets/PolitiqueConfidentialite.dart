@@ -9,7 +9,7 @@ class PolitiqueConfidentialite extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FB),
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           'Politique de confidentialité',
           style: TextStyle(
             fontFamily: kPolice,
@@ -28,7 +28,7 @@ class PolitiqueConfidentialite extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
+                color: Colors.black.withValues(alpha: 0.05),
                 blurRadius: 20,
                 offset: const Offset(0, 8),
               ),
@@ -88,7 +88,7 @@ class PolitiqueConfidentialite extends StatelessWidget {
 
               const SizedBox(height: 24),
 
-              Center(
+              const Center(
                 child: Text(
                   'Dernière mise à jour : 2026',
                   style: TextStyle(
@@ -110,7 +110,7 @@ class PolitiqueConfidentialite extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 16),
       child: Text(
         text,
-        style: TextStyle(
+        style: const TextStyle(
           fontFamily: kPolice,
           fontSize: 20,
           fontWeight: FontWeight.w800,
@@ -124,7 +124,7 @@ class PolitiqueConfidentialite extends StatelessWidget {
       padding: const EdgeInsets.only(top: 20, bottom: 8),
       child: Text(
         text,
-        style: TextStyle(
+        style: const TextStyle(
           fontFamily: kPolice,
           fontSize: 16,
           fontWeight: FontWeight.w700,
@@ -138,7 +138,7 @@ class PolitiqueConfidentialite extends StatelessWidget {
     return Text(
       text,
       textAlign: TextAlign.justify,
-      style: TextStyle(
+      style: const TextStyle(
         fontFamily: kPolice,
         fontSize: 14,
         height: 1.6,

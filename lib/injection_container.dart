@@ -100,6 +100,7 @@ import 'package:saambiz/core/config/env.dart';
 import 'core/services/config_publique_service.dart';
 import 'core/services/token_service.dart';
 import 'core/services/socket_service.dart';
+import 'core/connection/rejeu_reseau.dart';
 
 // Service Locator
 final sl = GetIt.instance;
@@ -205,6 +206,12 @@ Future<void> init() async {
           HttpClient()..idleTimeout = const Duration(seconds: 60),
     );
 
+    // Rejeu des lectures quand le réseau a flanché. Posé AVANT celui du
+    // jeton : Dio déroule les intercepteurs d'erreur dans l'ordre, et le
+    // rejeu doit avoir laissé passer l'erreur pour que le renouvellement de
+    // session la voie à son tour sur un 401 — que le rejeu ignore.
+    dio.interceptors.add(RejeuReseau(dio));
+
     // Intercepteurs pour logging et gestion du token
     dio.interceptors.add(
       InterceptorsWrapper(
@@ -215,12 +222,12 @@ Future<void> init() async {
             if (options.data is FormData) {
               final formData = options.data as FormData;
               _log('FormData fields:');
-              formData.fields.forEach((field) {
+              for (var field in formData.fields) {
                 _log('${field.key}: ${field.value}');
-              });
-              formData.files.forEach((file) {
+              }
+              for (var file in formData.files) {
                 _log('${file.key}: ${file.value.filename}');
-              });
+              }
             } else {
               _log('Body: ${options.data}');
             }
@@ -285,10 +292,7 @@ Future<void> init() async {
             }
             if (resultat == ResultatRenouvellement.refuse) {
               AuthInterceptor.navigatorKey.currentState
-                  ?.pushNamedAndRemoveUntil(
-                    AppRouter.loginRoute,
-                    (_) => false,
-                  );
+                  ?.pushNamedAndRemoveUntil(AppRouter.loginRoute, (_) => false);
             }
           }
           _log('Message: ${e.message}');

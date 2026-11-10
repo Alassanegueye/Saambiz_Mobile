@@ -10,6 +10,7 @@ import '../../data/models/promotion_model.dart';
 import '../bloc/promotions_bloc.dart';
 import '../bloc/promotions_event.dart';
 import '../bloc/promotions_state.dart';
+import '../../../../core/utils/dates.dart';
 
 class _C {
   static const green = Color(0xFF01154B);
@@ -66,10 +67,12 @@ class _PromotionFormViewState extends State<_PromotionFormView> {
   @override
   void initState() {
     super.initState();
-    if (widget.promotion?.dateDebut != null)
+    if (widget.promotion?.dateDebut != null) {
       _dateDebut = widget.promotion!.dateDebut!;
-    if (widget.promotion?.dateFin != null)
+    }
+    if (widget.promotion?.dateFin != null) {
       _dateFin = widget.promotion!.dateFin!;
+    }
     _produitId = widget.promotion?.produitId;
     _chargerProduits();
   }
@@ -121,8 +124,8 @@ class _PromotionFormViewState extends State<_PromotionFormView> {
       return;
     }
     final bloc = context.read<PromotionsBloc>();
-    final isoDebut = DateFormat('yyyy-MM-dd').format(_dateDebut);
-    final isoFin = DateFormat('yyyy-MM-dd').format(_dateFin);
+    final isoDebut = dateIso.format(_dateDebut);
+    final isoFin = dateIso.format(_dateFin);
     final prix = num.tryParse(_prixCtrl.text.trim()) ?? 0;
     if (_isEdit) {
       bloc.add(
@@ -212,18 +215,14 @@ class _PromotionFormViewState extends State<_PromotionFormView> {
                     Expanded(
                       child: OutlinedButton(
                         onPressed: () => _choisirDate(debut: true),
-                        child: Text(
-                          'Début : ${DateFormat('dd/MM/yyyy').format(_dateDebut)}',
-                        ),
+                        child: Text('Début : ${dateCourte.format(_dateDebut)}'),
                       ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: OutlinedButton(
                         onPressed: () => _choisirDate(debut: false),
-                        child: Text(
-                          'Fin : ${DateFormat('dd/MM/yyyy').format(_dateFin)}',
-                        ),
+                        child: Text('Fin : ${dateCourte.format(_dateFin)}'),
                       ),
                     ),
                   ],

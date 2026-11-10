@@ -71,8 +71,9 @@ class _ProduitsPageState extends State<ProduitsPage> {
   void initState() {
     super.initState();
     _scroll.addListener(() {
-      if (_scroll.position.pixels > _scroll.position.maxScrollExtent - 400)
+      if (_scroll.position.pixels > _scroll.position.maxScrollExtent - 400) {
         _chargerSuite();
+      }
     });
     _charger();
   }
@@ -93,8 +94,7 @@ class _ProduitsPageState extends State<ProduitsPage> {
   );
 
   /// Recherche générale : ni catégorie ni promotions.
-  bool get _rechercheGenerale =>
-      widget.categorie == null && !widget.promotions;
+  bool get _rechercheGenerale => widget.categorie == null && !widget.promotions;
 
   Future<List<Map<String, dynamic>>> _chercherBoutiques() async {
     if (!_rechercheGenerale || _recherche.trim().isEmpty) return const [];
@@ -185,7 +185,8 @@ class _ProduitsPageState extends State<ProduitsPage> {
                     widget.titre,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontFamily: kPolice, 
+                    style: const TextStyle(
+                      fontFamily: kPolice,
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
                     ),
@@ -350,9 +351,9 @@ class _ProduitsPageState extends State<ProduitsPage> {
     return [
       if (_boutiques.isNotEmpty) ..._bandeauBoutiques(),
       if (_produits.isNotEmpty && _boutiques.isNotEmpty)
-        SliverToBoxAdapter(
+        const SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 18, 16, 0),
+            padding: EdgeInsets.fromLTRB(16, 18, 16, 0),
             child: Text('Produits', style: _styleTitreSection),
           ),
         ),
@@ -369,7 +370,8 @@ class _ProduitsPageState extends State<ProduitsPage> {
     ];
   }
 
-  static final _styleTitreSection = TextStyle(fontFamily: kPolice, 
+  static const _styleTitreSection = TextStyle(
+    fontFamily: kPolice,
     fontSize: 15,
     fontWeight: FontWeight.w700,
     color: AppColor.kGrayscaleDark100,
@@ -377,9 +379,9 @@ class _ProduitsPageState extends State<ProduitsPage> {
 
   /// Boutiques trouvées, en bandeau horizontal au-dessus des produits.
   List<Widget> _bandeauBoutiques() => [
-    SliverToBoxAdapter(
+    const SliverToBoxAdapter(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 10),
+        padding: EdgeInsets.fromLTRB(16, 16, 16, 10),
         child: Text('Boutiques', style: _styleTitreSection),
       ),
     ),
@@ -439,7 +441,14 @@ class _CarteBoutique extends StatelessWidget {
                     width: 44,
                     height: 44,
                     child: logo != null && logo.isNotEmpty
-                        ? ImageReseau(logo, largeurServeur: 120, fit: BoxFit.cover, repli: const PastilleIcone(Icons.storefront_outlined))
+                        ? ImageReseau(
+                            logo,
+                            largeurServeur: 120,
+                            fit: BoxFit.cover,
+                            repli: const PastilleIcone(
+                              Icons.storefront_outlined,
+                            ),
+                          )
                         : const PastilleIcone(Icons.storefront_outlined),
                   ),
                 ),
@@ -448,7 +457,8 @@ class _CarteBoutique extends StatelessWidget {
                   donnees['nom']?.toString() ?? 'Boutique',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontFamily: kPolice, 
+                  style: const TextStyle(
+                    fontFamily: kPolice,
                     fontSize: 13.5,
                     fontWeight: FontWeight.w700,
                     color: AppColor.kGrayscaleDark100,

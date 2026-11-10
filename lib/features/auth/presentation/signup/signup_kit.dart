@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:saambiz/core/theme/police.dart';
-import 'package:saambiz/core/widgets/libelle_obligatoire.dart';
 
 import '../widgets/mise_en_page_auth.dart';
 

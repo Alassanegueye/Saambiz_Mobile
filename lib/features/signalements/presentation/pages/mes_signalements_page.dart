@@ -6,6 +6,7 @@ import '../../../../injection_container.dart';
 import '../bloc/signalements_bloc.dart';
 import '../bloc/signalements_event.dart';
 import '../bloc/signalements_state.dart';
+import '../../../../core/utils/dates.dart';
 
 class _C {
   static const black = Color(0xFF01154B);
@@ -36,9 +37,7 @@ class _MesSignalementsView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: _C.bg,
-      appBar: AppBar(
-        title: const Text('Mes signalements'),
-      ),
+      appBar: AppBar(title: const Text('Mes signalements')),
       body: BlocConsumer<SignalementsBloc, SignalementsState>(
         listener: (context, state) {
           if (state is SignalementsError) {
@@ -106,7 +105,7 @@ class _MesSignalementsView extends StatelessWidget {
                                 vertical: 3,
                               ),
                               decoration: BoxDecoration(
-                                color: _C.orange.withOpacity(0.12),
+                                color: _C.orange.withValues(alpha: 0.12),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Text(
@@ -125,7 +124,7 @@ class _MesSignalementsView extends StatelessWidget {
                         if (s.createdAt != null) ...[
                           const SizedBox(height: 6),
                           Text(
-                            DateFormat('dd/MM/yyyy').format(s.createdAt!),
+                            dateCourte.format(s.createdAt!),
                             style: const TextStyle(fontSize: 11, color: _C.sub),
                           ),
                         ],

@@ -132,9 +132,10 @@ class _OnboardingPageState extends State<OnboardingPage> {
                     opacity: isLast ? 0 : 1,
                     child: TextButton(
                       onPressed: isLast ? null : _finish,
-                      child: Text(
+                      child: const Text(
                         'Passer',
-                        style: TextStyle(fontFamily: kPolice, 
+                        style: TextStyle(
+                          fontFamily: kPolice,
                           color: AppColor.kGrayscale40,
                           fontWeight: FontWeight.w600,
                           fontSize: 14,
@@ -184,18 +185,19 @@ class _OnboardingPageState extends State<OnboardingPage> {
               borderRadius: BorderRadius.circular(14),
             ),
           ),
-          child: Row(
+          child: const Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
                 'Suivant',
-                style: TextStyle(fontFamily: kPolice, 
+                style: TextStyle(
+                  fontFamily: kPolice,
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
                 ),
               ),
-              const SizedBox(width: 6),
-              const Icon(Icons.arrow_forward_rounded, size: 19),
+              SizedBox(width: 6),
+              Icon(Icons.arrow_forward_rounded, size: 19),
             ],
           ),
         ),
@@ -223,9 +225,10 @@ class _OnboardingPageState extends State<OnboardingPage> {
                 borderRadius: BorderRadius.circular(14),
               ),
             ),
-            child: Text(
+            child: const Text(
               'Commencer',
-              style: TextStyle(fontFamily: kPolice, 
+              style: TextStyle(
+                fontFamily: kPolice,
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
               ),
@@ -273,6 +276,15 @@ class _PageSlide extends StatelessWidget {
             fit: BoxFit.contain,
             width: double.infinity,
             alignment: Alignment.bottomCenter,
+            // Décodage à la largeur réellement affichée. Les illustrations
+            // font 1080 px de large : sur un téléphone de densité 2, les
+            // décoder telles quelles occupait deux fois la mémoire utile,
+            // et trois images gardées en cache par le PageView, c'est la
+            // différence entre 7 Mo et 20 Mo sur l'écran d'accueil.
+            cacheWidth:
+                (MediaQuery.sizeOf(context).width *
+                        MediaQuery.devicePixelRatioOf(context))
+                    .round(),
           ),
         ),
         Padding(
@@ -282,7 +294,8 @@ class _PageSlide extends StatelessWidget {
               Text(
                 slide.titre,
                 textAlign: TextAlign.center,
-                style: TextStyle(fontFamily: kPolice, 
+                style: const TextStyle(
+                  fontFamily: kPolice,
                   fontSize: 24,
                   fontWeight: FontWeight.w700,
                   height: 1.25,
@@ -293,7 +306,8 @@ class _PageSlide extends StatelessWidget {
               Text(
                 slide.texte,
                 textAlign: TextAlign.center,
-                style: TextStyle(fontFamily: kPolice, 
+                style: const TextStyle(
+                  fontFamily: kPolice,
                   fontSize: 15,
                   height: 1.55,
                   color: AppColor.kGrayscale40,

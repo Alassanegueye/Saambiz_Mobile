@@ -150,7 +150,7 @@ class _ProfilPageState extends State<ProfilPage> with RetourSurOnglet {
       },
       child: Scaffold(
         backgroundColor: AppColor.kBackground,
-        appBar: AppAppBar(title: 'Compte', implyLeading: false),
+        appBar: const AppAppBar(title: 'Compte', implyLeading: false),
         body: ListView(
           physics: const BouncingScrollPhysics(),
           padding: const EdgeInsets.fromLTRB(20, 8, 20, kEspaceBarreBas),
@@ -247,8 +247,8 @@ class _ProfilPageState extends State<ProfilPage> with RetourSurOnglet {
             ),
             const SizedBox(height: 28),
             BoutonChangerCompte(onPressed: _changerDeCompte),
-              const SizedBox(height: 10),
-              BoutonDeconnexion(onPressed: _onLogout),
+            const SizedBox(height: 10),
+            BoutonDeconnexion(onPressed: _onLogout),
             const SizedBox(height: 12),
             const VersionApp(),
           ],
@@ -290,7 +290,8 @@ class _CarteSolde extends StatelessWidget {
               const SizedBox(width: 8),
               Text(
                 'Montant disponible',
-                style: TextStyle(fontFamily: kPolice, 
+                style: TextStyle(
+                  fontFamily: kPolice,
                   fontSize: 12.5,
                   fontWeight: FontWeight.w600,
                   color: AppColor.kWhite.withValues(alpha: 0.75),
@@ -301,7 +302,8 @@ class _CarteSolde extends StatelessWidget {
           const SizedBox(height: 9),
           Text(
             formaterPrix(montant),
-            style: TextStyle(fontFamily: kPolice, 
+            style: const TextStyle(
+              fontFamily: kPolice,
               fontSize: 26,
               fontWeight: FontWeight.w800,
               color: AppColor.kWhite,
@@ -311,7 +313,8 @@ class _CarteSolde extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             'Vos encaissements apparaîtront ici.',
-            style: TextStyle(fontFamily: kPolice, 
+            style: TextStyle(
+              fontFamily: kPolice,
               fontSize: 11.8,
               color: AppColor.kWhite.withValues(alpha: 0.6),
             ),

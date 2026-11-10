@@ -57,9 +57,7 @@ class _ForgotPasswordViewState extends State<_ForgotPasswordView> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: _C.bg,
-      appBar: AppBar(
-        title: const Text('Mot de passe oublié'),
-      ),
+      appBar: AppBar(title: const Text('Mot de passe oublié')),
       body: BlocConsumer<CompteBloc, CompteState>(
         listener: (context, state) {
           if (state is CompteError) {

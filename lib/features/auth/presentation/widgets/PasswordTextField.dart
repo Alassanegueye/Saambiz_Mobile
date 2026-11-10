@@ -11,7 +11,7 @@ class PasswordTextField extends StatefulWidget {
   final FocusNode? focusNode;
 
   const PasswordTextField({
-    Key? key,
+    super.key,
     required this.hintText,
     required this.height,
     required this.controller,
@@ -20,7 +20,7 @@ class PasswordTextField extends StatefulWidget {
     this.validator,
     this.style,
     this.focusNode,
-  }) : super(key: key);
+  });
 
   @override
   _PasswordTextFieldState createState() => _PasswordTextFieldState();
@@ -54,11 +54,11 @@ class _PasswordTextFieldState extends State<PasswordTextField> {
           focusNode: widget.focusNode,
           style:
               widget.style ??
-              TextStyle(
+              const TextStyle(
                 fontFamily: kPolice,
                 fontSize: 15,
                 fontWeight: FontWeight.w500,
-                color: const Color(0xFF01154B),
+                color: Color(0xFF01154B),
               ),
           validator: widget.validator,
           cursorColor: const Color(0xFF01154B), // curseur vert, cohérent
@@ -91,9 +91,9 @@ class _PasswordTextFieldState extends State<PasswordTextField> {
               ),
             ),
             hintText: widget.hintText,
-            hintStyle: TextStyle(
+            hintStyle: const TextStyle(
               fontFamily: kPolice,
-              color: const Color(0xFFC2CCBA),
+              color: Color(0xFFC2CCBA),
               fontWeight: FontWeight.w400,
               fontSize: 14,
             ),

@@ -1,6 +1,5 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:saambiz/core/theme/police.dart';
 
 import '../../core/theme/app_color.dart';
@@ -138,9 +137,10 @@ class _AbonneDetailPageState extends State<AbonneDetailPage> {
     return Scaffold(
       backgroundColor: AppColor.kBackground,
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           'Fiche abonné',
-          style: TextStyle(fontFamily: kPolice, 
+          style: TextStyle(
+            fontFamily: kPolice,
             fontSize: 17,
             fontWeight: FontWeight.w700,
             color: AppColor.kWhite,
@@ -161,7 +161,8 @@ class _AbonneDetailPageState extends State<AbonneDetailPage> {
                   Text(
                     a.nomComplet,
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontFamily: kPolice, 
+                    style: const TextStyle(
+                      fontFamily: kPolice,
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
                       color: AppColor.kGrayscaleDark100,
@@ -195,10 +196,13 @@ class _AbonneDetailPageState extends State<AbonneDetailPage> {
       return _Bloc(
         child: Column(
           children: [
-            Text(
+            const Text(
               'Impossible de charger l\'activité de cet abonné.',
               textAlign: TextAlign.center,
-              style: TextStyle(fontFamily: kPolice, color: AppColor.kGrayscale40),
+              style: TextStyle(
+                fontFamily: kPolice,
+                color: AppColor.kGrayscale40,
+              ),
             ),
             TextButton(onPressed: _charger, child: const Text('Réessayer')),
           ],
@@ -269,7 +273,8 @@ class _Bloc extends StatelessWidget {
           if (titre != null) ...[
             Text(
               titre!,
-              style: TextStyle(fontFamily: kPolice, 
+              style: const TextStyle(
+                fontFamily: kPolice,
                 fontSize: 15,
                 fontWeight: FontWeight.w700,
                 color: AppColor.kGrayscaleDark100,
@@ -295,7 +300,11 @@ class _LigneProfil extends StatelessWidget {
       child: Text(
         texte,
         textAlign: TextAlign.center,
-        style: TextStyle(fontFamily: kPolice, fontSize: 14, color: AppColor.kGrayscale40),
+        style: const TextStyle(
+          fontFamily: kPolice,
+          fontSize: 14,
+          color: AppColor.kGrayscale40,
+        ),
       ),
     );
   }
@@ -315,7 +324,8 @@ class _LigneActivite extends StatelessWidget {
           Expanded(
             child: Text(
               libelle,
-              style: TextStyle(fontFamily: kPolice, 
+              style: const TextStyle(
+                fontFamily: kPolice,
                 fontSize: 14,
                 color: AppColor.kGrayscale40,
               ),
@@ -323,7 +333,8 @@ class _LigneActivite extends StatelessWidget {
           ),
           Text(
             valeur,
-            style: TextStyle(fontFamily: kPolice, 
+            style: const TextStyle(
+              fontFamily: kPolice,
               fontSize: 14,
               fontWeight: FontWeight.w600,
               color: AppColor.kGrayscaleDark100,
@@ -359,7 +370,8 @@ class _BadgeFidelite extends StatelessWidget {
           const SizedBox(width: 6),
           Text(
             fidele ? 'Client fidèle' : 'Nouveau client',
-            style: TextStyle(fontFamily: kPolice, 
+            style: TextStyle(
+              fontFamily: kPolice,
               fontSize: 13,
               fontWeight: FontWeight.w700,
               color: couleur,

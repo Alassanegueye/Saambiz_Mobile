@@ -76,7 +76,9 @@ void main() {
     });
 
     test('un message vide côté backend ne masque pas le code', () {
-      final m = messageErreurReseau(_erreur(code: 404, corps: {'message': '  '}));
+      final m = messageErreurReseau(
+        _erreur(code: 404, corps: {'message': '  '}),
+      );
       expect(m, contains('introuvable'));
     });
   });

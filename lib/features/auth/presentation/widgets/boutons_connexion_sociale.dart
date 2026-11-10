@@ -119,7 +119,7 @@ class _BoutonFournisseur extends StatelessWidget {
           ),
         ),
         child: chargement
-            ? SizedBox(
+            ? const SizedBox(
                 width: 22,
                 height: 22,
                 child: CircularProgressIndicator(
@@ -138,7 +138,7 @@ class _BoutonFournisseur extends StatelessWidget {
                     child: Text(
                       apple ? 'Continuer avec Apple' : 'Continuer avec Google',
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontFamily: kPolice,
                         fontSize: 15,
                         fontWeight: FontWeight.w600,

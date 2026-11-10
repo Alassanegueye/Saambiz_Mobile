@@ -74,76 +74,77 @@ class _GuestProfilPageState extends State<GuestProfilPage>
         body: FadeTransition(
           opacity: _fadeAnim,
           child: ListView(
-          physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.fromLTRB(20, 8, 20, kEspaceBarreBas),
-          children: [
-            _carteBienvenue(),
-            const SizedBox(height: 24),
-            SectionProfil(
-              titre: 'Mon activité',
-              entrees: [
-                LigneProfil(
-                  icone: Icons.local_offer_outlined,
-                  libelle: 'Promotions actives',
-                  sousTitre: 'Bons plans du moment',
-                  onTap: () => _ouvrir(const PromotionsActivesPage()),
-                ),
-                LigneProfil(
-                  icone: Icons.receipt_long_outlined,
-                  libelle: 'Mes commandes',
-                  sousTitre: 'Suivez vos achats et livraisons',
-                  onTap: () => _demanderConnexion('suivre vos commandes.'),
-                ),
-                LigneProfil(
-                  icone: Icons.favorite_border_rounded,
-                  libelle: 'Mes favoris',
-                  sousTitre: 'Vos boutiques enregistrées',
-                  onTap: () => _demanderConnexion('retrouver vos favoris.'),
-                ),
-                LigneProfil(
-                  icone: Icons.chat_bubble_outline_rounded,
-                  libelle: 'Messages',
-                  sousTitre: 'Vos échanges avec les vendeurs',
-                  onTap: () => _demanderConnexion('échanger avec les vendeurs.'),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            SectionProfil(
-              titre: 'Aide et informations',
-              entrees: [
-                LigneProfil(
-                  icone: Icons.help_outline_rounded,
-                  libelle: 'Centre d\'aide',
-                  sousTitre: 'Questions fréquentes',
-                  onTap: () => _ouvrir(const AidePage()),
-                ),
-                LigneProfil(
-                  icone: Icons.support_agent_outlined,
-                  libelle: 'Nous contacter',
-                  sousTitre: 'Service client SaamBiz',
-                  onTap: () =>
-                      _ouvrir(const AidePage(contactSeulement: true)),
-                ),
-                LigneProfil(
-                  icone: Icons.star_border_rounded,
-                  libelle: 'Noter l\'application',
-                  sousTitre: 'Votre avis compte pour nous',
-                  onTap: () => UrlExterne.lancer(InfosApp.lienPlayStore),
-                ),
-                LigneProfil(
-                  icone: Icons.info_outline_rounded,
-                  libelle: 'À propos',
-                  sousTitre:
-                      'Version ${InfosApp.version}, conditions et confidentialité',
-                  onTap: () => _ouvrir(const AProposPage()),
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
-            const VersionApp(),
-          ],
-        ),
+            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, kEspaceBarreBas),
+            children: [
+              _carteBienvenue(),
+              const SizedBox(height: 24),
+              SectionProfil(
+                titre: 'Mon activité',
+                entrees: [
+                  LigneProfil(
+                    icone: Icons.local_offer_outlined,
+                    libelle: 'Promotions actives',
+                    sousTitre: 'Bons plans du moment',
+                    onTap: () => _ouvrir(const PromotionsActivesPage()),
+                  ),
+                  LigneProfil(
+                    icone: Icons.receipt_long_outlined,
+                    libelle: 'Mes commandes',
+                    sousTitre: 'Suivez vos achats et livraisons',
+                    onTap: () => _demanderConnexion('suivre vos commandes.'),
+                  ),
+                  LigneProfil(
+                    icone: Icons.favorite_border_rounded,
+                    libelle: 'Mes favoris',
+                    sousTitre: 'Vos boutiques enregistrées',
+                    onTap: () => _demanderConnexion('retrouver vos favoris.'),
+                  ),
+                  LigneProfil(
+                    icone: Icons.chat_bubble_outline_rounded,
+                    libelle: 'Messages',
+                    sousTitre: 'Vos échanges avec les vendeurs',
+                    onTap: () =>
+                        _demanderConnexion('échanger avec les vendeurs.'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              SectionProfil(
+                titre: 'Aide et informations',
+                entrees: [
+                  LigneProfil(
+                    icone: Icons.help_outline_rounded,
+                    libelle: 'Centre d\'aide',
+                    sousTitre: 'Questions fréquentes',
+                    onTap: () => _ouvrir(const AidePage()),
+                  ),
+                  LigneProfil(
+                    icone: Icons.support_agent_outlined,
+                    libelle: 'Nous contacter',
+                    sousTitre: 'Service client SaamBiz',
+                    onTap: () =>
+                        _ouvrir(const AidePage(contactSeulement: true)),
+                  ),
+                  LigneProfil(
+                    icone: Icons.star_border_rounded,
+                    libelle: 'Noter l\'application',
+                    sousTitre: 'Votre avis compte pour nous',
+                    onTap: () => UrlExterne.lancer(InfosApp.lienPlayStore),
+                  ),
+                  LigneProfil(
+                    icone: Icons.info_outline_rounded,
+                    libelle: 'À propos',
+                    sousTitre:
+                        'Version ${InfosApp.version}, conditions et confidentialité',
+                    onTap: () => _ouvrir(const AProposPage()),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              const VersionApp(),
+            ],
+          ),
         ),
       ),
     );

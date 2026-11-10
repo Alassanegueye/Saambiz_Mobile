@@ -101,11 +101,14 @@ class ComptesMemorises {
     try {
       final brut = await stockage.read(key: _cle);
       if (brut == null || brut.isEmpty) return [];
-      final comptes = (jsonDecode(brut) as List)
-          .whereType<Map>()
-          .map((e) => CompteMemorise.fromJson(Map<String, dynamic>.from(e)))
-          .toList()
-        ..sort((a, b) => b.derniereUtilisation.compareTo(a.derniereUtilisation));
+      final comptes =
+          (jsonDecode(brut) as List)
+              .whereType<Map>()
+              .map((e) => CompteMemorise.fromJson(Map<String, dynamic>.from(e)))
+              .toList()
+            ..sort(
+              (a, b) => b.derniereUtilisation.compareTo(a.derniereUtilisation),
+            );
       return comptes;
     } catch (_) {
       return []; // contenu illisible : on repart d'une liste vide

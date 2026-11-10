@@ -160,14 +160,18 @@ class _NouvelleCampagnePageState extends State<NouvelleCampagnePage> {
   Future<void> _envoyer() async {
     FocusScope.of(context).unfocus();
     String? probleme;
-    if (_type == TypeCampagne.promotion && _produitsChoisis.isEmpty)
+    if (_type == TypeCampagne.promotion && _produitsChoisis.isEmpty) {
       probleme = 'Choisissez au moins un produit.';
-    if (_titre.text.trim().isEmpty)
+    }
+    if (_titre.text.trim().isEmpty) {
       probleme ??= 'Donnez un titre à votre message.';
-    if (_message.text.trim().isEmpty)
+    }
+    if (_message.text.trim().isEmpty) {
       probleme ??= 'Écrivez le message à envoyer.';
-    if (!_tous && _clientsChoisis.isEmpty)
+    }
+    if (!_tous && _clientsChoisis.isEmpty) {
       probleme ??= 'Choisissez au moins un client.';
+    }
     if (probleme != null) {
       _snack(probleme);
       return;
@@ -224,7 +228,11 @@ class _NouvelleCampagnePageState extends State<NouvelleCampagnePage> {
           _type == TypeCampagne.promotion
               ? 'Nouvelle promotion'
               : 'Informer mes clients',
-          style: TextStyle(fontFamily: kPolice, fontSize: 17, fontWeight: FontWeight.w700),
+          style: const TextStyle(
+            fontFamily: kPolice,
+            fontSize: 17,
+            fontWeight: FontWeight.w700,
+          ),
         ),
       ),
       // Le bouton fait partie du corps : un `bottomNavigationBar` reste sous le
@@ -313,7 +321,8 @@ class _NouvelleCampagnePageState extends State<NouvelleCampagnePage> {
                     _type == TypeCampagne.promotion
                         ? 'Créer et notifier'
                         : 'Envoyer',
-                    style: TextStyle(fontFamily: kPolice, 
+                    style: const TextStyle(
+                      fontFamily: kPolice,
                       fontSize: 15.5,
                       fontWeight: FontWeight.w700,
                     ),
@@ -387,8 +396,12 @@ class _NouvelleCampagnePageState extends State<NouvelleCampagnePage> {
                           width: 44,
                           height: 44,
                           child: p.image.isNotEmpty
-                              ? ImageReseau(p.image, largeurServeur: 120, fit: BoxFit.cover)
-                              : Container(
+                              ? ImageReseau(
+                                  p.image,
+                                  largeurServeur: 120,
+                                  fit: BoxFit.cover,
+                                )
+                              : ColoredBox(
                                   color: AppColor.kPrimaryLight,
                                   child: const Icon(
                                     Icons.image_outlined,
@@ -401,7 +414,8 @@ class _NouvelleCampagnePageState extends State<NouvelleCampagnePage> {
                         p.nom,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(fontFamily: kPolice, 
+                        style: const TextStyle(
+                          fontFamily: kPolice,
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                         ),
@@ -425,7 +439,10 @@ class _NouvelleCampagnePageState extends State<NouvelleCampagnePage> {
                             ),
                           ],
                         ),
-                        style: TextStyle(fontFamily: kPolice, fontSize: 12),
+                        style: const TextStyle(
+                          fontFamily: kPolice,
+                          fontSize: 12,
+                        ),
                       ),
                     ),
                 ],
@@ -501,9 +518,12 @@ class _NouvelleCampagnePageState extends State<NouvelleCampagnePage> {
             groupValue: _tous,
             onChanged: (v) => setState(() => _tous = true),
             contentPadding: EdgeInsets.zero,
-            title: Text(
+            title: const Text(
               'Tous mes abonnés',
-              style: TextStyle(fontFamily: kPolice, fontWeight: FontWeight.w600),
+              style: TextStyle(
+                fontFamily: kPolice,
+                fontWeight: FontWeight.w600,
+              ),
             ),
             subtitle: Text(
               abonnes == null
@@ -517,9 +537,12 @@ class _NouvelleCampagnePageState extends State<NouvelleCampagnePage> {
             groupValue: _tous,
             onChanged: (v) => setState(() => _tous = false),
             contentPadding: EdgeInsets.zero,
-            title: Text(
+            title: const Text(
               'Choisir les clients',
-              style: TextStyle(fontFamily: kPolice, fontWeight: FontWeight.w600),
+              style: TextStyle(
+                fontFamily: kPolice,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
           if (!_tous && abonnes != null)
@@ -537,7 +560,7 @@ class _NouvelleCampagnePageState extends State<NouvelleCampagnePage> {
                 controlAffinity: ListTileControlAffinity.leading,
                 title: Text(
                   a.nomComplet,
-                  style: TextStyle(fontFamily: kPolice, fontSize: 14),
+                  style: const TextStyle(fontFamily: kPolice, fontSize: 14),
                 ),
                 subtitle: a.clocheActive
                     ? null
@@ -557,8 +580,11 @@ class _NouvelleCampagnePageState extends State<NouvelleCampagnePage> {
   }
 
   // Petits outils
-  TextStyle _discret() =>
-      TextStyle(fontFamily: kPolice, fontSize: 12, color: AppColor.kGrayscale40);
+  TextStyle _discret() => const TextStyle(
+    fontFamily: kPolice,
+    fontSize: 12,
+    color: AppColor.kGrayscale40,
+  );
 
   InputDecoration _deco(String libelle, String indication) => InputDecoration(
     label: LibelleObligatoire(libelle),
@@ -585,7 +611,8 @@ class _NouvelleCampagnePageState extends State<NouvelleCampagnePage> {
       children: [
         Text(
           titre,
-          style: TextStyle(fontFamily: kPolice, 
+          style: const TextStyle(
+            fontFamily: kPolice,
             fontSize: 15,
             fontWeight: FontWeight.w700,
             color: AppColor.kGrayscaleDark100,

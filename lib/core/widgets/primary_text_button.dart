@@ -27,7 +27,8 @@ class PrimaryTextButton extends StatelessWidget {
         titre,
         style:
             style ??
-            TextStyle(fontFamily: kPolice, 
+            const TextStyle(
+              fontFamily: kPolice,
               color: AppColor.kPrimary,
               fontWeight: FontWeight.w600,
               fontSize: 14,

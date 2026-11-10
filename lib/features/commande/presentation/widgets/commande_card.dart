@@ -20,11 +20,15 @@ Color couleurStatutCommande(String statut) {
       return AppColor.kSucces;
     case 'prete':
     case 'en_livraison':
-      return const Color(0xFFE65100); // Orange chaud vif comme TRANSIT sur la maquette
+      return const Color(
+        0xFFE65100,
+      ); // Orange chaud vif comme TRANSIT sur la maquette
     case 'acceptee':
     case 'confirmee':
     case 'en_preparation':
-      return const Color(0xFF263238); // Anthracite PROCESS comme sur la maquette
+      return const Color(
+        0xFF263238,
+      ); // Anthracite PROCESS comme sur la maquette
     case 'en_attente':
       return AppColor.kSecondaryDark;
     default:
@@ -185,8 +189,10 @@ class CommandeCard extends StatelessWidget {
 
     // Détermination de l'étape de livraison pour la ligne temporelle
     final estLivree = commande.statut == 'livree';
-    final estEnLivraison = commande.statut == 'en_livraison' || commande.statut == 'prete';
-    final estEnPreparation = commande.statut == 'en_preparation' ||
+    final estEnLivraison =
+        commande.statut == 'en_livraison' || commande.statut == 'prete';
+    final estEnPreparation =
+        commande.statut == 'en_preparation' ||
         commande.statut == 'confirmee' ||
         commande.statut == 'acceptee';
 
@@ -255,7 +261,9 @@ class CommandeCard extends StatelessWidget {
                         const SizedBox(width: 12),
                         Expanded(
                           child: Padding(
-                            padding: const EdgeInsets.only(right: 48), // Espace pour le ruban
+                            padding: const EdgeInsets.only(
+                              right: 48,
+                            ), // Espace pour le ruban
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -382,8 +390,8 @@ class CommandeCard extends StatelessWidget {
                                 (commande.adresseLivraison?.isNotEmpty == true)
                                     ? commande.adresseLivraison!
                                     : (commande.acheteurNom?.isNotEmpty == true
-                                        ? commande.acheteurNom!
-                                        : 'Dakar, Sénégal'),
+                                          ? commande.acheteurNom!
+                                          : 'Dakar, Sénégal'),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: const TextStyle(
@@ -448,25 +456,35 @@ class _LigneSuiviColis extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final actif1 = true;
+    const actif1 = true;
     final actif2 = estEnLivraison || estLivree;
     final actif3 = estLivree;
 
     return Row(
       children: [
         // Étape 1 : Préparé
-        _PastilleEtape(active: actif1, couleur: couleur, icone: Icons.check_rounded),
+        _PastilleEtape(
+          active: actif1,
+          couleur: couleur,
+          icone: Icons.check_rounded,
+        ),
         // Ligne pointillée 1
-        Expanded(child: _SeparateurPoints(actif: actif2, couleur: couleur)),
+        Expanded(
+          child: _SeparateurPoints(actif: actif2, couleur: couleur),
+        ),
         // Étape 2 : Camion
         _PastilleCamion(active: actif2, couleur: couleur),
         // Ligne pointillée 2
-        Expanded(child: _SeparateurPoints(actif: actif3, couleur: couleur)),
+        Expanded(
+          child: _SeparateurPoints(actif: actif3, couleur: couleur),
+        ),
         // Étape 3 : Arrivée
         _PastilleEtape(
           active: actif3,
           couleur: couleur,
-          icone: actif3 ? Icons.check_rounded : Icons.radio_button_unchecked_rounded,
+          icone: actif3
+              ? Icons.check_rounded
+              : Icons.radio_button_unchecked_rounded,
         ),
       ],
     );
@@ -599,7 +617,12 @@ class _VignetteProduit extends StatelessWidget {
         height: 54,
         color: AppColor.kPrimaryLight,
         child: img != null && img.isNotEmpty
-            ? ImageReseau(img, largeurServeur: 160, fit: BoxFit.cover, repli: defaut)
+            ? ImageReseau(
+                img,
+                largeurServeur: 160,
+                fit: BoxFit.cover,
+                repli: defaut,
+              )
             : defaut,
       ),
     );

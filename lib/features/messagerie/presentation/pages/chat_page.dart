@@ -61,8 +61,9 @@ class _ChatViewState extends State<_ChatView> {
   void initState() {
     super.initState();
     _sub = sl<SocketService>().onNewMessage.listen((data) {
-      if (mounted)
+      if (mounted) {
         context.read<MessagerieBloc>().add(MessageRecuTempsReel(data));
+      }
     });
   }
 
@@ -88,9 +89,7 @@ class _ChatViewState extends State<_ChatView> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: _C.bg,
-      appBar: AppBar(
-        title: Text(widget.interlocuteurNom),
-      ),
+      appBar: AppBar(title: Text(widget.interlocuteurNom)),
       body: BlocConsumer<MessagerieBloc, MessagerieState>(
         listener: (context, state) {
           if (state is MessagerieError) {
@@ -132,7 +131,7 @@ class _ChatViewState extends State<_ChatView> {
                               ),
                               constraints: BoxConstraints(
                                 maxWidth:
-                                    MediaQuery.of(context).size.width * 0.75,
+                                    MediaQuery.sizeOf(context).width * 0.75,
                               ),
                               decoration: BoxDecoration(
                                 color: mine ? _C.green : _C.white,

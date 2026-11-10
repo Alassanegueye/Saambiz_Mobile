@@ -171,7 +171,9 @@ class _AccueilBoutiquesPageState extends State<AccueilBoutiquesPage>
   }
 
   void _ouvrirCategorie(Categorie c) => Navigator.of(context).push(
-    MaterialPageRoute(builder: (_) => ProduitsPage(titre: c.nom, categorie: c)),
+    MaterialPageRoute(
+      builder: (_) => ProduitsPage(titre: c.nom, categorie: c),
+    ),
   );
 
   Future<void> _modifierInterets() async {
@@ -350,11 +352,7 @@ class _AccueilBoutiquesPageState extends State<AccueilBoutiquesPage>
     }
 
     if (tousPourVous.isNotEmpty) {
-      blocs.add(
-        _SectionPourVousGrille(
-          produits: tousPourVous,
-        ),
-      );
+      blocs.add(_SectionPourVousGrille(produits: tousPourVous));
     }
 
     if (parCle.isEmpty && promotions == null) {
@@ -469,10 +467,7 @@ class _EnteteAccueil extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            Color(0xFF01154B),
-            Color(0xFF08226D),
-          ],
+          colors: [Color(0xFF01154B), Color(0xFF08226D)],
         ),
         borderRadius: BorderRadius.vertical(bottom: Radius.circular(32)),
         boxShadow: [
@@ -538,9 +533,9 @@ class _EnteteAccueil extends StatelessWidget {
               ),
               if (!isGuest && user != null && _nomAffiche.isNotEmpty) ...[
                 const SizedBox(height: 12),
-                Text(
+                const Text(
                   'Bonjour, ',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: kPolice,
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
@@ -564,11 +559,7 @@ class _BoutonVerreRond extends StatelessWidget {
   final IconData icon;
   final String? badge;
 
-  const _BoutonVerreRond({
-    required this.onTap,
-    required this.icon,
-    this.badge,
-  });
+  const _BoutonVerreRond({required this.onTap, required this.icon, this.badge});
 
   @override
   Widget build(BuildContext context) {
@@ -674,6 +665,7 @@ class _BarreRecherchePilule extends StatelessWidget {
     );
   }
 }
+
 /// Categories en pastilles avec forme carree arrondie moderne (style Image 1 "Services")
 class _RangeeCategories extends StatelessWidget {
   final List<Categorie> categories;
@@ -1071,9 +1063,9 @@ class _CarteBoutique extends StatelessWidget {
                       ? ImageReseau(
                           logo,
                           largeurServeur: 160,
-                          repli: LogoBoutiqueParDefaut(rayon: 15),
+                          repli: const LogoBoutiqueParDefaut(rayon: 15),
                         )
-                      : LogoBoutiqueParDefaut(rayon: 15),
+                      : const LogoBoutiqueParDefaut(rayon: 15),
                 ),
               ),
               const SizedBox(width: 12),
@@ -1123,7 +1115,10 @@ class _CarteBoutique extends StatelessWidget {
                     Row(
                       children: [
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2.5),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2.5,
+                          ),
                           decoration: BoxDecoration(
                             color: AppColor.kSecondaryLight,
                             borderRadius: BorderRadius.circular(8),
@@ -1154,7 +1149,9 @@ class _CarteBoutique extends StatelessWidget {
                           child: Text(
                             distance != null
                                 ? '${distance.toStringAsFixed(1)} km'
-                                : (nbArticles != null ? '$nbArticles articles' : 'Boutique active'),
+                                : (nbArticles != null
+                                      ? '$nbArticles articles'
+                                      : 'Boutique active'),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
@@ -1192,6 +1189,7 @@ class _CarteBoutique extends StatelessWidget {
     );
   }
 }
+
 /// « Près de chez vous » sans position connue : une ligne qui propose
 /// d'activer la localisation, à la place de la section.
 class _InviteLocalisation extends StatelessWidget {
@@ -1341,10 +1339,8 @@ class _SectionAccueilPageState extends State<SectionAccueilPage> {
         itemBuilder: (_, i) => produits
             ? ProduitCard(produit: ProduitCatalogue.fromJson(elements[i]))
             : LayoutBuilder(
-                builder: (_, c) => _CarteBoutique(
-                  donnees: elements[i],
-                  largeur: c.maxWidth,
-                ),
+                builder: (_, c) =>
+                    _CarteBoutique(donnees: elements[i], largeur: c.maxWidth),
               ),
       ),
     );
@@ -1423,7 +1419,6 @@ class _SqueletteGrille extends StatelessWidget {
   }
 }
 
-
 /// Section « Pour vous » tout en bas de la page d'accueil :
 /// grille 2 colonnes comme sur les images de reference SHEIN.
 class _SectionPourVousGrille extends StatelessWidget {
@@ -1482,9 +1477,7 @@ class _SectionPourVousGrille extends StatelessWidget {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    child: _CarteProduitPourVous(produit: produits[i]),
-                  ),
+                  Expanded(child: _CarteProduitPourVous(produit: produits[i])),
                   const SizedBox(width: 12),
                   Expanded(
                     child: i + 1 < produits.length
@@ -1549,7 +1542,7 @@ class _CarteProduitPourVous extends StatelessWidget {
                             fit: BoxFit.cover,
                             largeurServeur: 400,
                           )
-                        : Container(
+                        : ColoredBox(
                             color: AppColor.kPrimaryLight,
                             child: const Icon(
                               Icons.shopping_bag_outlined,
@@ -1564,7 +1557,10 @@ class _CarteProduitPourVous extends StatelessWidget {
                       top: 8,
                       left: 8,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 7,
+                          vertical: 3,
+                        ),
                         decoration: BoxDecoration(
                           color: const Color(0xFFDC2626),
                           borderRadius: BorderRadius.circular(6),
@@ -1615,7 +1611,10 @@ class _CarteProduitPourVous extends StatelessWidget {
                   children: [
                     // Tag descriptif (style SHEIN "Coton Extensible >")
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
                         color: const Color(0xFFFFF3E6),
                         borderRadius: BorderRadius.circular(4),
@@ -1658,7 +1657,9 @@ class _CarteProduitPourVous extends StatelessWidget {
                             fontFamily: kPolice,
                             fontSize: 14,
                             fontWeight: FontWeight.w800,
-                            color: aRemise ? const Color(0xFFDC2626) : AppColor.kPrimary,
+                            color: aRemise
+                                ? const Color(0xFFDC2626)
+                                : AppColor.kPrimary,
                           ),
                         ),
                         if (aRemise && produit.prixPromo != null) ...[

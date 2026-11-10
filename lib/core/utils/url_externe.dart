@@ -15,8 +15,9 @@ class UrlExterne {
 
   static Future<bool> lancer(String url) async {
     final uri = Uri.tryParse(url);
-    if (uri == null || !_autorises.contains(uri.scheme.toLowerCase()))
+    if (uri == null || !_autorises.contains(uri.scheme.toLowerCase())) {
       return false;
+    }
     try {
       return await launchUrl(uri, mode: LaunchMode.externalApplication);
     } catch (_) {

@@ -49,7 +49,8 @@ class PrimaryTextFormField extends StatelessWidget {
         controller: controller,
         maxLines: maxLines,
         keyboardType: keyboardType,
-        style: TextStyle(fontFamily: kPolice, 
+        style: const TextStyle(
+          fontFamily: kPolice,
           color: AppColor.kGrayscaleDark100,
           fontSize: 14,
           fontWeight: FontWeight.w500,
@@ -64,7 +65,8 @@ class PrimaryTextFormField extends StatelessWidget {
           filled: true,
           fillColor: Colors.transparent, // Le Container gère la couleur
           hintText: hintText,
-          hintStyle: TextStyle(fontFamily: kPolice, 
+          hintStyle: const TextStyle(
+            fontFamily: kPolice,
             color: AppColor.kGrayscale40,
             fontWeight: FontWeight.w500,
             fontSize: 14,

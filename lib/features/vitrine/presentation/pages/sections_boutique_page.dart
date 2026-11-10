@@ -144,7 +144,8 @@ class _SectionsBoutiquePageState extends State<SectionsBoutiquePage> {
         backgroundColor: _C.white,
         title: Text(
           initial.isEmpty ? 'Nouvelle section' : 'Renommer la section',
-          style: TextStyle(fontFamily: kPolice, 
+          style: const TextStyle(
+            fontFamily: kPolice,
             fontSize: 16,
             fontWeight: FontWeight.w700,
             color: _C.navy,
@@ -201,7 +202,8 @@ class _SectionsBoutiquePageState extends State<SectionsBoutiquePage> {
         backgroundColor: _C.white,
         title: Text(
           'Supprimer « ${section.titre} » ?',
-          style: TextStyle(fontFamily: kPolice, 
+          style: const TextStyle(
+            fontFamily: kPolice,
             fontSize: 16,
             fontWeight: FontWeight.w700,
             color: _C.navy,
@@ -271,9 +273,10 @@ class _SectionsBoutiquePageState extends State<SectionsBoutiquePage> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: _C.white,
-        title: Text(
+        title: const Text(
           'Abandonner vos modifications ?',
-          style: TextStyle(fontFamily: kPolice, 
+          style: TextStyle(
+            fontFamily: kPolice,
             fontSize: 16,
             fontWeight: FontWeight.w700,
             color: _C.navy,
@@ -313,9 +316,10 @@ class _SectionsBoutiquePageState extends State<SectionsBoutiquePage> {
       child: Scaffold(
         backgroundColor: _C.bg,
         appBar: AppBar(
-          title: Text(
+          title: const Text(
             'Sections de ma boutique',
-            style: TextStyle(fontFamily: kPolice, 
+            style: TextStyle(
+              fontFamily: kPolice,
               color: Colors.white,
               fontWeight: FontWeight.w700,
               fontSize: 17,
@@ -327,7 +331,8 @@ class _SectionsBoutiquePageState extends State<SectionsBoutiquePage> {
                 onPressed: _modifie ? _enregistrer : null,
                 child: Text(
                   'Enregistrer',
-                  style: TextStyle(fontFamily: kPolice, 
+                  style: TextStyle(
+                    fontFamily: kPolice,
                     color: _modifie ? _C.gold : Colors.white38,
                     fontWeight: FontWeight.w700,
                   ),
@@ -494,7 +499,7 @@ class _CarteSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final vide = produits.isEmpty;
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         color: _C.white,
         borderRadius: BorderRadius.circular(14),
@@ -517,7 +522,8 @@ class _CarteSection extends StatelessWidget {
                   ),
                   child: Text(
                     '$position',
-                    style: TextStyle(fontFamily: kPolice, 
+                    style: const TextStyle(
+                      fontFamily: kPolice,
                       fontSize: 12,
                       fontWeight: FontWeight.w800,
                       color: _C.navy,
@@ -533,7 +539,8 @@ class _CarteSection extends StatelessWidget {
                         titre,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(fontFamily: kPolice, 
+                        style: const TextStyle(
+                          fontFamily: kPolice,
                           fontSize: 14.5,
                           fontWeight: FontWeight.w700,
                           color: _C.navy,
@@ -599,7 +606,8 @@ class _CarteSection extends StatelessWidget {
               ),
               label: Text(
                 vide ? 'Choisir des produits' : 'Modifier les produits',
-                style: TextStyle(fontFamily: kPolice, 
+                style: const TextStyle(
+                  fontFamily: kPolice,
                   fontSize: 13.5,
                   fontWeight: FontWeight.w700,
                 ),
@@ -634,7 +642,14 @@ class _Vignette extends StatelessWidget {
     );
 
     if (produit.image.isEmpty) return repli;
-    return ImageReseau(produit.image, largeurServeur: 240, width: cote, height: cote, fit: BoxFit.cover, repli: repli);
+    return ImageReseau(
+      produit.image,
+      largeurServeur: 240,
+      width: cote,
+      height: cote,
+      fit: BoxFit.cover,
+      repli: repli,
+    );
   }
 }
 
@@ -712,7 +727,8 @@ class _SelecteurProduitsState extends State<_SelecteurProduits> {
         title: Text(
           widget.titreSection,
           overflow: TextOverflow.ellipsis,
-          style: TextStyle(fontFamily: kPolice, 
+          style: const TextStyle(
+            fontFamily: kPolice,
             color: Colors.white,
             fontWeight: FontWeight.w700,
             fontSize: 17,
@@ -721,9 +737,10 @@ class _SelecteurProduitsState extends State<_SelecteurProduits> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(_choisis),
-            child: Text(
+            child: const Text(
               'Valider',
-              style: TextStyle(fontFamily: kPolice, 
+              style: TextStyle(
+                fontFamily: kPolice,
                 color: _C.gold,
                 fontWeight: FontWeight.w700,
               ),
@@ -747,7 +764,8 @@ class _SelecteurProduitsState extends State<_SelecteurProduits> {
               children: [
                 Text(
                   '${_choisis.length} choisi${_choisis.length > 1 ? 's' : ''}',
-                  style: TextStyle(fontFamily: kPolice, 
+                  style: const TextStyle(
+                    fontFamily: kPolice,
                     fontSize: 12.5,
                     fontWeight: FontWeight.w700,
                     color: _C.navy,
@@ -835,7 +853,8 @@ class _LigneProduit extends StatelessWidget {
                     produit.nom,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontFamily: kPolice, 
+                    style: const TextStyle(
+                      fontFamily: kPolice,
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
                       color: _C.navy,
@@ -844,7 +863,8 @@ class _LigneProduit extends StatelessWidget {
                   const SizedBox(height: 3),
                   Text(
                     formaterPrix(double.tryParse(produit.prix) ?? 0),
-                    style: TextStyle(fontFamily: kPolice, 
+                    style: const TextStyle(
+                      fontFamily: kPolice,
                       fontSize: 12.5,
                       fontWeight: FontWeight.w600,
                       color: _C.muted,
@@ -866,7 +886,8 @@ class _LigneProduit extends StatelessWidget {
                 ),
                 child: Text(
                   '$rang',
-                  style: TextStyle(fontFamily: kPolice, 
+                  style: const TextStyle(
+                    fontFamily: kPolice,
                     fontSize: 11.5,
                     fontWeight: FontWeight.w800,
                     color: Colors.white,

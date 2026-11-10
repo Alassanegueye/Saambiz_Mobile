@@ -10,8 +10,8 @@ BoxDecoration decorationFondSubtil() {
       stops: [0.0, 0.22, 1.0],
       colors: [
         Color(0xFFE8EFFB), // Lueur bleue très douce en haut (1/4 haut)
-        Colors.white,      // Transition douce vers le blanc
-        Colors.white,      // 3/4 inférieur en blanc pur
+        Colors.white, // Transition douce vers le blanc
+        Colors.white, // 3/4 inférieur en blanc pur
       ],
     ),
   );

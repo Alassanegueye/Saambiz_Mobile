@@ -16,7 +16,8 @@ Widget buildDetailChip({required IconData icon, required String label}) {
         const SizedBox(width: 4),
         Text(
           label,
-          style: TextStyle(fontFamily: kPolice, 
+          style: const TextStyle(
+            fontFamily: kPolice,
             fontSize: 12,
             fontWeight: FontWeight.w500,
             color: AppColor.kGrayscaleDark100,

@@ -246,10 +246,10 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                 Expanded(
                   child: Text(
                     _info!,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontFamily: kPolice,
                       fontSize: 13,
-                      color: const Color(0xFF15803D),
+                      color: Color(0xFF15803D),
                     ),
                   ),
                 ),
@@ -273,7 +273,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
               ? Text('Renvoyer dans $_secondsLeft s', style: Sb.body(13))
               : TextButton(
                   onPressed: _renvoyer,
-                  child: Text(
+                  child: const Text(
                     'Renvoyer le code',
                     style: TextStyle(
                       fontFamily: kPolice,
@@ -321,7 +321,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
           // Une seule case n'accepte qu'un chiffre, mais on laisse passer un
           // collage plus long pour le remplissage automatique du code.
           inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-          style: TextStyle(
+          style: const TextStyle(
             fontFamily: kPolice,
             fontSize: 21,
             fontWeight: FontWeight.w700,
