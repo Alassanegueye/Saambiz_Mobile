@@ -100,6 +100,18 @@ class _VueBoutiqueState extends State<_VueBoutique> {
           if (state is VitrineCreee || state is VitrineEnregistree) {
             context.read<VitrineBloc>().add(ChargerVitrine());
           }
+          if (state is VitrineSupprimee) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text(
+                  'Votre site a été retiré. Vous pouvez en créer un autre '
+                  'quand vous voulez.',
+                ),
+              ),
+            );
+            // Recharger : l'écran repart sur l'assistant de création.
+            context.read<VitrineBloc>().add(ChargerVitrine());
+          }
         },
         builder: (context, state) {
           if (state is VitrineChargee) {
@@ -695,6 +707,42 @@ class _ConfigurationState extends State<_Configuration> {
   void _modifierApparence() =>
       _ouvrirAssistant(context, widget.secteurs, vitrine: vitrine);
 
+  /// Retire le site public, après confirmation explicite.
+  ///
+  /// Le geste est irréversible côté serveur : le site est supprimé, son
+  /// adresse se libère, et les liens déjà partagés par le vendeur ne mènent
+  /// plus nulle part. La boutique et les produits, eux, restent — c'est la
+  /// distinction que la confirmation doit rendre évidente, sans quoi le
+  /// vendeur croit tout perdre et n'ose pas, ou croit ne rien perdre et
+  /// s'étonne après coup.
+  Future<void> _supprimerSite() async {
+    final bloc = context.read<VitrineBloc>();
+    final confirme = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Retirer votre site ?'),
+        content: const Text(
+          'Votre site public sera supprimé et son adresse libérée : les liens '
+          'que vous avez partagés ne mèneront plus à rien.\n\n'
+          'Votre boutique et vos produits ne sont pas touchés, et vous pourrez '
+          'créer un nouveau site quand vous voudrez.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Annuler'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: TextButton.styleFrom(foregroundColor: _C.danger),
+            child: const Text('Retirer mon site'),
+          ),
+        ],
+      ),
+    );
+    if (confirme == true) bloc.add(SupprimerVitrineDemande());
+  }
+
   // ── Mise en ligne ───────────────────────────────────────────────────
 
   void _mettreEnLigne(bool enLigne) {
@@ -826,6 +874,17 @@ class _ConfigurationState extends State<_Configuration> {
                   titre: 'Gérer mes produits',
                   sousTitre: 'Créer, modifier ou retirer un produit',
                   onTap: widget.ouvrirProduits,
+                ),
+                const Divider(height: 1, color: _C.border),
+                // `DELETE /vendeur/ma-vitrine` existait côté backend sans
+                // qu'aucun écran ne l'appelle : un vendeur pouvait créer son
+                // site, jamais le retirer.
+                _LigneReglage(
+                  icone: Icons.delete_outline_rounded,
+                  titre: 'Retirer mon site',
+                  sousTitre: 'La boutique reste, seul le site disparaît',
+                  couleur: _C.danger,
+                  onTap: occupe ? null : _supprimerSite,
                 ),
               ],
             ),
@@ -2231,25 +2290,31 @@ class _LigneReglage extends StatelessWidget {
   final String titre;
   final String sousTitre;
   final VoidCallback? onTap;
+
+  /// Teinte du titre et de l'icône. Sert à distinguer une action
+  /// irréversible des réglages ordinaires.
+  final Color? couleur;
+
   const _LigneReglage({
     required this.icone,
     required this.titre,
     required this.sousTitre,
     this.onTap,
+    this.couleur,
   });
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
       contentPadding: EdgeInsets.zero,
-      leading: Icon(icone, color: _C.navy),
+      leading: Icon(icone, color: couleur ?? _C.navy),
       title: Text(
         titre,
-        style: const TextStyle(
+        style: TextStyle(
           fontFamily: kPolice,
           fontSize: 14.5,
           fontWeight: FontWeight.w700,
-          color: _C.navy,
+          color: couleur ?? _C.navy,
         ),
       ),
       subtitle: Text(

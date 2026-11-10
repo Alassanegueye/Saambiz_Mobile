@@ -80,3 +80,6 @@ class ModifierVitrineDemande extends VitrineEvent {
   @override
   List<Object?> get props => [champs];
 }
+
+/// Retrait du site public de la boutique.
+class SupprimerVitrineDemande extends VitrineEvent {}

@@ -102,6 +102,7 @@ import 'core/services/token_service.dart';
 import 'core/services/socket_service.dart';
 import 'core/connection/rejeu_reseau.dart';
 import 'core/utils/journal_sensible.dart';
+import 'features/vitrine/domain/usecases/supprimer_vitrine.dart';
 
 // Service Locator
 final sl = GetIt.instance;
@@ -481,6 +482,7 @@ Future<void> init() async {
   sl.registerLazySingleton(() => AnalyserLogo(sl()));
   sl.registerLazySingleton(() => GenererVitrine(sl()));
   sl.registerLazySingleton(() => ModifierVitrine(sl()));
+  sl.registerLazySingleton(() => SupprimerVitrine(sl()));
 
   sl.registerFactory(
     () => VitrineBloc(
@@ -489,6 +491,7 @@ Future<void> init() async {
       analyserLogo: sl(),
       genererVitrine: sl(),
       modifierVitrine: sl(),
+      supprimerVitrine: sl(),
     ),
   );
 

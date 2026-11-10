@@ -248,6 +248,17 @@ void main() {
 
       expect(espion.appel, 'DELETE /vendeur/ma-vitrine');
     });
+
+    test('un refus du serveur remonte à l\'appelant', () async {
+      // L'écran doit pouvoir afficher le message plutôt que de laisser croire
+      // que le site a été retiré.
+      espion.repondErreur(403, corps: {'message': 'Abonnement expiré'});
+
+      await expectLater(
+        VitrineRemoteDataSourceImpl(dio).supprimerVitrine(),
+        throwsA(isA<DioException>()),
+      );
+    });
   });
 
   group('Promotions', () {
