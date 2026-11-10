@@ -18,8 +18,8 @@ import '../widgets/choix_compte.dart';
 import '../widgets/mise_en_page_auth.dart';
 
 /// Connexion : en-tete marine (logo, titre), puis une feuille blanche
-/// arrondie qui porte Google / Apple en premier, puis e-mail ou telephone et mot
-/// de passe ; l'inscription est proposee en bas de page.
+/// arrondie qui porte e-mail ou telephone et mot de passe, puis Google / Apple
+/// sous un separateur « ou » ; l'inscription est proposee en bas de page.
 ///
 /// Si des comptes ont deja servi sur ce telephone (clients comme vendeurs),
 /// la carte les propose d'abord : on touche celui ou l'on revient. Session
@@ -328,11 +328,6 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
           ),
-        // Google / Apple d'abord : un toucher suffit.
-        const BoutonsConnexionSociale(
-          separateur: 'ou avec votre e-mail',
-          separateurApres: true,
-        ),
         ChampFormulaire(
           libelle: 'E-mail ou téléphone',
           hint: 'exemple@mail.com ou 77 000 00 00',
@@ -383,6 +378,8 @@ class _LoginPageState extends State<LoginPage> {
           // pendant Google / Apple, c'est leur bouton qui tourne.
           chargement: isLoading && state is! AuthSocialEnCours,
         ),
+        // Google / Apple sous le formulaire, après un séparateur « ou ».
+        const BoutonsConnexionSociale(),
       ],
     );
   }
