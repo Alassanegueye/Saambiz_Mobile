@@ -62,9 +62,7 @@ class _ChangePasswordViewState extends State<_ChangePasswordView> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: _C.bg,
-      appBar: AppBar(
-        title: const Text('Changer le mot de passe'),
-      ),
+      appBar: AppBar(title: const Text('Changer le mot de passe')),
       body: BlocConsumer<CompteBloc, CompteState>(
         listener: (context, state) {
           if (state is CompteError) {

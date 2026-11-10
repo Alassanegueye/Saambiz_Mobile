@@ -37,9 +37,12 @@ void main() {
         'pagination': {'page': 2, 'limit': 20, 'total': 0, 'pages': 0},
       });
 
-      final page = await CatalogueRemoteDataSource(
-        dio,
-      ).produits(categorie: 'mode-homme', recherche: 'wax', page: 2, promo: true);
+      final page = await CatalogueRemoteDataSource(dio).produits(
+        categorie: 'mode-homme',
+        recherche: 'wax',
+        page: 2,
+        promo: true,
+      );
 
       expect(espion.appel, 'GET /catalogue/produits');
       expect(espion.requete.queryParameters['categorie'], 'mode-homme');

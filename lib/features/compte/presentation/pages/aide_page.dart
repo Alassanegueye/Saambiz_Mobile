@@ -57,11 +57,12 @@ class AidePage extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
         children: [
           if (!contactSeulement) ...[
-            Padding(
-              padding: const EdgeInsets.only(left: 4, bottom: 10),
+            const Padding(
+              padding: EdgeInsets.only(left: 4, bottom: 10),
               child: Text(
                 'Questions fréquentes',
-                style: TextStyle(fontFamily: kPolice, 
+                style: TextStyle(
+                  fontFamily: kPolice,
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
                   color: AppColor.kGrayscale40,
@@ -91,7 +92,8 @@ class AidePage extends StatelessWidget {
                         collapsedIconColor: AppColor.kGrayscale30,
                         title: Text(
                           _faq[i].$1,
-                          style: TextStyle(fontFamily: kPolice, 
+                          style: const TextStyle(
+                            fontFamily: kPolice,
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
                             color: AppColor.kGrayscaleDark100,
@@ -102,7 +104,8 @@ class AidePage extends StatelessWidget {
                             alignment: Alignment.centerLeft,
                             child: Text(
                               _faq[i].$2,
-                              style: TextStyle(fontFamily: kPolice, 
+                              style: const TextStyle(
+                                fontFamily: kPolice,
                                 fontSize: 13.5,
                                 height: 1.55,
                                 color: AppColor.kGrayscale40,

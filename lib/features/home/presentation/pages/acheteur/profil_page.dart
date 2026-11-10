@@ -192,115 +192,115 @@ class _ProfilPageState extends State<ProfilPage>
           body: FadeTransition(
             opacity: _fadeAnim,
             child: ListView(
-            physics: const BouncingScrollPhysics(),
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, kEspaceBarreBas),
-            children: [
-              ListenableBuilder(
-                listenable: sl<PanierService>(),
-                builder: (_, __) => CarteEnteteProfil(
-                  nom: _nomComplet,
-                  initiales: _initiales,
-                  email: _user?.email ?? '',
-                  role: _user?.role ?? 'ACHETEUR',
-                  photo: _user?.photoProfil,
-                  onTap: _onEditProfil,
-                  compteurs: [
-                    ('Commandes', '$_nbCommandes'),
-                    ('Favoris', '$_nbFavoris'),
-                    ('Panier', '${sl<PanierService>().nombreArticles}'),
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, kEspaceBarreBas),
+              children: [
+                ListenableBuilder(
+                  listenable: sl<PanierService>(),
+                  builder: (_, __) => CarteEnteteProfil(
+                    nom: _nomComplet,
+                    initiales: _initiales,
+                    email: _user?.email ?? '',
+                    role: _user?.role ?? 'ACHETEUR',
+                    photo: _user?.photoProfil,
+                    onTap: _onEditProfil,
+                    compteurs: [
+                      ('Commandes', '$_nbCommandes'),
+                      ('Favoris', '$_nbFavoris'),
+                      ('Panier', '${sl<PanierService>().nombreArticles}'),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 24),
+                SectionProfil(
+                  titre: 'Mon activité',
+                  entrees: [
+                    LigneProfil(
+                      icone: Icons.local_offer_outlined,
+                      libelle: 'Promotions actives',
+                      sousTitre: 'Bons plans du moment',
+                      onTap: () => _ouvrir(const PromotionsActivesPage()),
+                    ),
+                    LigneProfil(
+                      icone: Icons.notifications_none_rounded,
+                      libelle: 'Notifications',
+                      sousTitre: 'Vos alertes récentes',
+                      onTap: () => _ouvrir(const NotificationsPage()),
+                    ),
+                    LigneProfil(
+                      icone: Icons.chat_bubble_outline_rounded,
+                      libelle: 'Messages',
+                      sousTitre: 'Vos conversations avec les vendeurs',
+                      onTap: () => _ouvrir(const ConversationsPage()),
+                    ),
+                    LigneProfil(
+                      icone: Icons.flag_outlined,
+                      libelle: 'Mes signalements',
+                      sousTitre: 'Contenus que vous avez signalés',
+                      onTap: () => _ouvrir(const MesSignalementsPage()),
+                    ),
                   ],
                 ),
-              ),
-              const SizedBox(height: 24),
-              SectionProfil(
-                titre: 'Mon activité',
-                entrees: [
-                  LigneProfil(
-                    icone: Icons.local_offer_outlined,
-                    libelle: 'Promotions actives',
-                    sousTitre: 'Bons plans du moment',
-                    onTap: () => _ouvrir(const PromotionsActivesPage()),
-                  ),
-                  LigneProfil(
-                    icone: Icons.notifications_none_rounded,
-                    libelle: 'Notifications',
-                    sousTitre: 'Vos alertes récentes',
-                    onTap: () => _ouvrir(const NotificationsPage()),
-                  ),
-                  LigneProfil(
-                    icone: Icons.chat_bubble_outline_rounded,
-                    libelle: 'Messages',
-                    sousTitre: 'Vos conversations avec les vendeurs',
-                    onTap: () => _ouvrir(const ConversationsPage()),
-                  ),
-                  LigneProfil(
-                    icone: Icons.flag_outlined,
-                    libelle: 'Mes signalements',
-                    sousTitre: 'Contenus que vous avez signalés',
-                    onTap: () => _ouvrir(const MesSignalementsPage()),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              SectionProfil(
-                titre: 'Sécurité',
-                entrees: [
-                  LigneProfil(
-                    icone: Icons.lock_outline_rounded,
-                    libelle: 'Mot de passe',
-                    sousTitre: 'Modifier votre mot de passe',
-                    onTap: () => _ouvrir(const ChangePasswordPage()),
-                  ),
-                  LigneProfil(
-                    icone: Icons.delete_outline_rounded,
-                    libelle: 'Supprimer mon compte',
-                    sousTitre: 'Suppression définitive de vos données',
-                    danger: true,
-                    onTap: _onSupprimerCompte,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              SectionProfil(
-                titre: 'Aide et informations',
-                entrees: [
-                  LigneProfil(
-                    icone: Icons.help_outline_rounded,
-                    libelle: 'Centre d\'aide',
-                    sousTitre: 'Questions fréquentes',
-                    onTap: () => _ouvrir(const AidePage()),
-                  ),
-                  LigneProfil(
-                    icone: Icons.support_agent_outlined,
-                    libelle: 'Nous contacter',
-                    sousTitre: 'Service client',
-                    onTap: () =>
-                        _ouvrir(const AidePage(contactSeulement: true)),
-                  ),
-                  LigneProfil(
-                    icone: Icons.star_border_rounded,
-                    libelle: 'Noter l\'application',
-                    sousTitre: 'Votre avis compte',
-                    onTap: () => UrlExterne.lancer(InfosApp.lienPlayStore),
-                  ),
-                  LigneProfil(
-                    icone: Icons.info_outline_rounded,
-                    libelle: 'À propos',
-                    sousTitre:
-                        'Version ${InfosApp.version}, conditions, confidentialité',
-                    onTap: () => _ouvrir(const AProposPage()),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 28),
-              BoutonChangerCompte(onPressed: _changerDeCompte),
-              const SizedBox(height: 10),
-              BoutonDeconnexion(onPressed: _onLogout),
-              const SizedBox(height: 12),
-              const VersionApp(),
-            ],
+                const SizedBox(height: 20),
+                SectionProfil(
+                  titre: 'Sécurité',
+                  entrees: [
+                    LigneProfil(
+                      icone: Icons.lock_outline_rounded,
+                      libelle: 'Mot de passe',
+                      sousTitre: 'Modifier votre mot de passe',
+                      onTap: () => _ouvrir(const ChangePasswordPage()),
+                    ),
+                    LigneProfil(
+                      icone: Icons.delete_outline_rounded,
+                      libelle: 'Supprimer mon compte',
+                      sousTitre: 'Suppression définitive de vos données',
+                      danger: true,
+                      onTap: _onSupprimerCompte,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                SectionProfil(
+                  titre: 'Aide et informations',
+                  entrees: [
+                    LigneProfil(
+                      icone: Icons.help_outline_rounded,
+                      libelle: 'Centre d\'aide',
+                      sousTitre: 'Questions fréquentes',
+                      onTap: () => _ouvrir(const AidePage()),
+                    ),
+                    LigneProfil(
+                      icone: Icons.support_agent_outlined,
+                      libelle: 'Nous contacter',
+                      sousTitre: 'Service client',
+                      onTap: () =>
+                          _ouvrir(const AidePage(contactSeulement: true)),
+                    ),
+                    LigneProfil(
+                      icone: Icons.star_border_rounded,
+                      libelle: 'Noter l\'application',
+                      sousTitre: 'Votre avis compte',
+                      onTap: () => UrlExterne.lancer(InfosApp.lienPlayStore),
+                    ),
+                    LigneProfil(
+                      icone: Icons.info_outline_rounded,
+                      libelle: 'À propos',
+                      sousTitre:
+                          'Version ${InfosApp.version}, conditions, confidentialité',
+                      onTap: () => _ouvrir(const AProposPage()),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 28),
+                BoutonChangerCompte(onPressed: _changerDeCompte),
+                const SizedBox(height: 10),
+                BoutonDeconnexion(onPressed: _onLogout),
+                const SizedBox(height: 12),
+                const VersionApp(),
+              ],
+            ),
           ),
-        ),
         ),
       ),
     );

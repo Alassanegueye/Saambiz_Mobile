@@ -10,14 +10,14 @@ class DividerRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Expanded(child: Divider(color: AppColor.kLine)),
+        const Expanded(child: Divider(color: AppColor.kLine)),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12),
           child: Text(
             title,
             maxLines: 1,
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: const TextStyle(
               fontFamily: kPolice,
               color: AppColor.kGrayscale40,
               fontWeight: FontWeight.w500,
@@ -25,7 +25,7 @@ class DividerRow extends StatelessWidget {
             ),
           ),
         ),
-        Expanded(child: Divider(color: AppColor.kLine)),
+        const Expanded(child: Divider(color: AppColor.kLine)),
       ],
     );
   }

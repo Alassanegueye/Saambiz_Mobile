@@ -209,7 +209,13 @@ class LogoAnimePainter extends CustomPainter {
 
   /// Tracé progressif d'un chemin (équivalent de stroke-dashoffset 1 → 0),
   /// avec l'apparition rapide sur les 8 premiers pourcents.
-  void _trace(Canvas canvas, Path chemin, double p, Cubic courbe, Paint pinceau) {
+  void _trace(
+    Canvas canvas,
+    Path chemin,
+    double p,
+    Cubic courbe,
+    Paint pinceau,
+  ) {
     if (p <= 0) return;
     final fraction = courbe.transform(p).clamp(0.0, 1.0);
     final opacite = courbe.transform((p / 0.08).clamp(0.0, 1.0));

@@ -67,62 +67,62 @@ class _VueBoutique extends StatelessWidget {
         ),
       ],
       corps: BlocConsumer<VitrineBloc, VitrineState>(
-              listener: (context, state) {
-                if (state is VitrineErreur) {
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(SnackBar(content: Text(state.message)));
-                }
-                // Retour de l'assistant ou d'un enregistrement : on recharge
-                // pour repartir d'un état sûr, plutôt que de recomposer
-                // l'écran à partir de ce qui vient d'être renvoyé.
-                if (state is VitrineCreee || state is VitrineEnregistree) {
-                  context.read<VitrineBloc>().add(ChargerVitrine());
-                }
-              },
-              builder: (context, state) {
-                if (state is VitrineChargement || state is VitrineInitial) {
-                  return const Center(
-                    child: CircularProgressIndicator(color: _C.navy),
-                  );
-                }
+        listener: (context, state) {
+          if (state is VitrineErreur) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(state.message)));
+          }
+          // Retour de l'assistant ou d'un enregistrement : on recharge
+          // pour repartir d'un état sûr, plutôt que de recomposer
+          // l'écran à partir de ce qui vient d'être renvoyé.
+          if (state is VitrineCreee || state is VitrineEnregistree) {
+            context.read<VitrineBloc>().add(ChargerVitrine());
+          }
+        },
+        builder: (context, state) {
+          if (state is VitrineChargement || state is VitrineInitial) {
+            return const Center(
+              child: CircularProgressIndicator(color: _C.navy),
+            );
+          }
 
-                if (state is VitrineSansBoutique) {
-                  return Center(
-                    child: EtatVide(
-                      icone: Icons.storefront_outlined,
-                      titre: 'Créez d\'abord votre boutique',
-                      message: state.message,
-                    ),
-                  );
-                }
+          if (state is VitrineSansBoutique) {
+            return Center(
+              child: EtatVide(
+                icone: Icons.storefront_outlined,
+                titre: 'Créez d\'abord votre boutique',
+                message: state.message,
+              ),
+            );
+          }
 
-                if (state is VitrineErreur) {
-                  return Center(
-                    child: EtatVide(
-                      icone: Icons.wifi_off_rounded,
-                      titre: 'Chargement impossible',
-                      message: state.message,
-                      action: 'Réessayer',
-                      onAction: () =>
-                          context.read<VitrineBloc>().add(ChargerVitrine()),
-                    ),
-                  );
-                }
+          if (state is VitrineErreur) {
+            return Center(
+              child: EtatVide(
+                icone: Icons.wifi_off_rounded,
+                titre: 'Chargement impossible',
+                message: state.message,
+                action: 'Réessayer',
+                onAction: () =>
+                    context.read<VitrineBloc>().add(ChargerVitrine()),
+              ),
+            );
+          }
 
-                if (state is VitrineChargee) {
-                  return state.vitrine.configuree
-                      ? _Configuration(
-                          vitrine: state.vitrine,
-                          secteurs: state.secteurs,
-                          ouvrirProduits: ouvrirProduits,
-                        )
-                      : _BoutiqueAcreer(secteurs: state.secteurs);
-                }
+          if (state is VitrineChargee) {
+            return state.vitrine.configuree
+                ? _Configuration(
+                    vitrine: state.vitrine,
+                    secteurs: state.secteurs,
+                    ouvrirProduits: ouvrirProduits,
+                  )
+                : _BoutiqueAcreer(secteurs: state.secteurs);
+          }
 
-                return const SizedBox.shrink();
-              },
-            ),
+          return const SizedBox.shrink();
+        },
+      ),
     );
   }
 }
@@ -153,10 +153,11 @@ class _BoutiqueAcreer extends StatelessWidget {
             child: const Icon(Icons.language_rounded, color: _C.navy, size: 30),
           ),
           const SizedBox(height: 18),
-          Text(
+          const Text(
             'Mettez votre boutique en ligne',
             textAlign: TextAlign.center,
-            style: TextStyle(fontFamily: kPolice, 
+            style: TextStyle(
+              fontFamily: kPolice,
               fontSize: 19,
               fontWeight: FontWeight.w800,
               color: _C.navy,
@@ -183,9 +184,10 @@ class _BoutiqueAcreer extends StatelessWidget {
                 ? null
                 : () => _ouvrirAssistant(context, secteurs),
             icon: const Icon(Icons.auto_awesome_rounded, size: 19),
-            label: Text(
+            label: const Text(
               'Créer ma boutique en ligne',
-              style: TextStyle(fontFamily: kPolice, 
+              style: TextStyle(
+                fontFamily: kPolice,
                 fontSize: 15,
                 fontWeight: FontWeight.w700,
               ),
@@ -246,10 +248,7 @@ class _Configuration extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final sections = vitrine.sectionsPerso;
-    final produitsRanges = sections
-        .expand((s) => s.produitIds)
-        .toSet()
-        .length;
+    final produitsRanges = sections.expand((s) => s.produitIds).toSet().length;
 
     return SingleChildScrollView(
       padding: EdgeInsets.fromLTRB(16, 18, 16, espaceBasVendeur(context)),
@@ -266,9 +265,10 @@ class _Configuration extends StatelessWidget {
             enfant: ListTile(
               contentPadding: EdgeInsets.zero,
               leading: const Icon(Icons.storefront_outlined, color: _C.navy),
-              title: Text(
+              title: const Text(
                 'Nom, logo, catégories',
-                style: TextStyle(fontFamily: kPolice, 
+                style: TextStyle(
+                  fontFamily: kPolice,
                   fontSize: 14.5,
                   fontWeight: FontWeight.w700,
                   color: _C.navy,
@@ -282,9 +282,9 @@ class _Configuration extends StatelessWidget {
                 Icons.chevron_right_rounded,
                 color: _C.muted,
               ),
-              onTap: () => Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const MaBoutiquePage()),
-              ),
+              onTap: () => Navigator.of(
+                context,
+              ).push(MaterialPageRoute(builder: (_) => const MaBoutiquePage())),
             ),
           ),
 
@@ -300,7 +300,8 @@ class _Configuration extends StatelessWidget {
               activeTrackColor: _C.success,
               title: Text(
                 vitrine.active ? 'Ouvert au public' : 'Fermé',
-                style: TextStyle(fontFamily: kPolice, 
+                style: const TextStyle(
+                  fontFamily: kPolice,
                   fontSize: 14.5,
                   fontWeight: FontWeight.w700,
                   color: _C.navy,
@@ -350,22 +351,23 @@ class _Configuration extends StatelessWidget {
                     runSpacing: 6,
                     children: [
                       for (final s in sections)
-                        _Etiquette(
-                          texte: s.titre,
-                          nombre: s.produitIds.length,
-                        ),
+                        _Etiquette(texte: s.titre, nombre: s.produitIds.length),
                     ],
                   ),
                 ],
                 const SizedBox(height: 12),
                 OutlinedButton.icon(
                   onPressed: () => _composerSections(context),
-                  icon: const Icon(Icons.dashboard_customize_outlined, size: 18),
+                  icon: const Icon(
+                    Icons.dashboard_customize_outlined,
+                    size: 18,
+                  ),
                   label: Text(
                     sections.isEmpty
                         ? 'Créer mes sections'
                         : 'Composer mes sections',
-                    style: TextStyle(fontFamily: kPolice, 
+                    style: const TextStyle(
+                      fontFamily: kPolice,
                       fontSize: 13.5,
                       fontWeight: FontWeight.w700,
                     ),
@@ -404,9 +406,10 @@ class _Configuration extends StatelessWidget {
                 OutlinedButton.icon(
                   onPressed: ouvrirProduits,
                   icon: const Icon(Icons.inventory_2_outlined, size: 18),
-                  label: Text(
+                  label: const Text(
                     'Gérer mes produits',
-                    style: TextStyle(fontFamily: kPolice, 
+                    style: TextStyle(
+                      fontFamily: kPolice,
                       fontSize: 13.5,
                       fontWeight: FontWeight.w700,
                     ),
@@ -431,9 +434,10 @@ class _Configuration extends StatelessWidget {
             enfant: ListTile(
               contentPadding: EdgeInsets.zero,
               leading: const Icon(Icons.tune_rounded, color: _C.navy),
-              title: Text(
+              title: const Text(
                 'Modifier mon site',
-                style: TextStyle(fontFamily: kPolice, 
+                style: TextStyle(
+                  fontFamily: kPolice,
                   fontSize: 14.5,
                   fontWeight: FontWeight.w700,
                   color: _C.navy,
@@ -508,10 +512,7 @@ class _CarteAdresse extends StatelessWidget {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 9,
-                  vertical: 4,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
                 decoration: BoxDecoration(
                   color: vitrine.active
                       ? _C.successBg
@@ -565,10 +566,7 @@ class _CarteAdresse extends StatelessWidget {
                   icon: const Icon(Icons.share_rounded, size: 17),
                   label: const Text(
                     'Partager',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                    ),
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
                   ),
                 ),
               ),
@@ -614,7 +612,8 @@ class _Bloc extends StatelessWidget {
           padding: const EdgeInsets.only(left: 4, bottom: 7),
           child: Text(
             titre.toUpperCase(),
-            style: TextStyle(fontFamily: kPolice, 
+            style: const TextStyle(
+              fontFamily: kPolice,
               fontSize: 11,
               fontWeight: FontWeight.w800,
               letterSpacing: 0.6,
@@ -653,7 +652,8 @@ class _Etiquette extends StatelessWidget {
       ),
       child: Text(
         vide ? '$texte · vide' : '$texte · $nombre',
-        style: TextStyle(fontFamily: kPolice, 
+        style: TextStyle(
+          fontFamily: kPolice,
           fontSize: 11.8,
           fontWeight: FontWeight.w700,
           color: vide ? _C.alerte : _C.navy,

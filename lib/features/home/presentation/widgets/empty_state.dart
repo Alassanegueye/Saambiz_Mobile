@@ -17,7 +17,7 @@ Widget buildEmptyState({
           const SizedBox(height: 16),
           Text(
             message,
-            style: TextStyle(fontSize: 16, color: AppColor.kGrayscale80),
+            style: const TextStyle(fontSize: 16, color: AppColor.kGrayscale80),
             textAlign: TextAlign.center,
           ),
           if (buttonText != null && onPressed != null) ...[

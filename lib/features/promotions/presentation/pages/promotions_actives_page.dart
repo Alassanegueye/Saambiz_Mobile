@@ -38,9 +38,7 @@ class _PromotionsActivesView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: _C.bg,
-      appBar: AppBar(
-        title: const Text('Promotions'),
-      ),
+      appBar: AppBar(title: const Text('Promotions')),
       body: BlocConsumer<PromotionsBloc, PromotionsState>(
         listener: (context, state) {
           if (state is PromotionsError) {
@@ -86,7 +84,12 @@ class _PromotionsActivesView extends StatelessWidget {
                         ClipRRect(
                           borderRadius: BorderRadius.circular(12),
                           child: (p.produitImage ?? '').isNotEmpty
-                              ? ImageReseau(p.produitImage!, width: 60, height: 60, fit: BoxFit.cover)
+                              ? ImageReseau(
+                                  p.produitImage!,
+                                  width: 60,
+                                  height: 60,
+                                  fit: BoxFit.cover,
+                                )
                               : Container(
                                   width: 60,
                                   height: 60,

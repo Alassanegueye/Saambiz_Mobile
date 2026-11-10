@@ -59,7 +59,13 @@ class CarteEnteteProfil extends StatelessWidget {
                 backgroundColor: AppColor.kPrimary,
                 child: aUnePhoto
                     ? ClipOval(
-                        child: ImageReseau(photo!, width: 56, height: 56, fit: BoxFit.cover, repli: _initiales()),
+                        child: ImageReseau(
+                          photo!,
+                          width: 56,
+                          height: 56,
+                          fit: BoxFit.cover,
+                          repli: _initiales(),
+                        ),
                       )
                     : _initiales(),
               ),
@@ -72,7 +78,8 @@ class CarteEnteteProfil extends StatelessWidget {
                       nom,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(fontFamily: kPolice, 
+                      style: const TextStyle(
+                        fontFamily: kPolice,
                         fontSize: 17,
                         fontWeight: FontWeight.w700,
                         color: AppColor.kGrayscaleDark100,
@@ -83,7 +90,8 @@ class CarteEnteteProfil extends StatelessWidget {
                         email,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(fontFamily: kPolice, 
+                        style: const TextStyle(
+                          fontFamily: kPolice,
                           fontSize: 13,
                           color: AppColor.kGrayscale40,
                         ),
@@ -99,7 +107,8 @@ class CarteEnteteProfil extends StatelessWidget {
                   minimumSize: const Size(0, 36),
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   side: const BorderSide(color: AppColor.kGrayscale20),
-                  textStyle: TextStyle(fontFamily: kPolice, 
+                  textStyle: const TextStyle(
+                    fontFamily: kPolice,
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                   ),
@@ -135,7 +144,8 @@ class CarteEnteteProfil extends StatelessWidget {
 
   Widget _initiales() => Text(
     initiales,
-    style: TextStyle(fontFamily: kPolice, 
+    style: const TextStyle(
+      fontFamily: kPolice,
       fontSize: 19,
       fontWeight: FontWeight.w700,
       color: AppColor.kWhite,
@@ -154,7 +164,8 @@ class _Compteur extends StatelessWidget {
       children: [
         Text(
           valeur,
-          style: TextStyle(fontFamily: kPolice, 
+          style: const TextStyle(
+            fontFamily: kPolice,
             fontSize: 17,
             fontWeight: FontWeight.w700,
             color: AppColor.kGrayscaleDark100,
@@ -162,7 +173,11 @@ class _Compteur extends StatelessWidget {
         ),
         Text(
           libelle,
-          style: TextStyle(fontFamily: kPolice, fontSize: 12, color: AppColor.kGrayscale40),
+          style: const TextStyle(
+            fontFamily: kPolice,
+            fontSize: 12,
+            color: AppColor.kGrayscale40,
+          ),
         ),
       ],
     );
@@ -183,7 +198,8 @@ class BadgeTypeProfil extends StatelessWidget {
     };
     return Text(
       libelle,
-      style: TextStyle(fontFamily: kPolice, 
+      style: const TextStyle(
+        fontFamily: kPolice,
         fontSize: 12,
         fontWeight: FontWeight.w600,
         color: AppColor.kSecondaryDark,
@@ -209,14 +225,15 @@ class SectionProfil extends StatelessWidget {
             padding: const EdgeInsets.only(left: 6, bottom: 10),
             child: Text(
               titre,
-              style: TextStyle(fontFamily: kPolice, 
+              style: const TextStyle(
+                fontFamily: kPolice,
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
                 color: AppColor.kGrayscale40,
               ),
             ),
           ),
-          Container(
+          DecoratedBox(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: AppColor.kLine),
@@ -280,7 +297,8 @@ class LigneProfil extends StatelessWidget {
         libelle,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
-        style: TextStyle(fontFamily: kPolice, 
+        style: TextStyle(
+          fontFamily: kPolice,
           fontSize: 15,
           fontWeight: FontWeight.w500,
           color: danger ? AppColor.kErreur : AppColor.kGrayscaleDark100,
@@ -323,7 +341,7 @@ Future<bool> confirmerAction(
             Container(
               width: 60,
               height: 60,
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: AppColor.kErreurLight,
                 shape: BoxShape.circle,
               ),
@@ -333,7 +351,8 @@ Future<bool> confirmerAction(
             Text(
               titre,
               textAlign: TextAlign.center,
-              style: TextStyle(fontFamily: kPolice, 
+              style: const TextStyle(
+                fontFamily: kPolice,
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
                 color: AppColor.kGrayscaleDark100,
@@ -343,7 +362,8 @@ Future<bool> confirmerAction(
             Text(
               message,
               textAlign: TextAlign.center,
-              style: TextStyle(fontFamily: kPolice, 
+              style: const TextStyle(
+                fontFamily: kPolice,
                 fontSize: 14,
                 height: 1.55,
                 color: AppColor.kGrayscale40,
@@ -362,7 +382,8 @@ Future<bool> confirmerAction(
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  textStyle: TextStyle(fontFamily: kPolice, 
+                  textStyle: const TextStyle(
+                    fontFamily: kPolice,
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
                   ),
@@ -373,9 +394,10 @@ Future<bool> confirmerAction(
             const SizedBox(height: 8),
             TextButton(
               onPressed: () => Navigator.pop(ctx, false),
-              child: Text(
+              child: const Text(
                 'Annuler',
-                style: TextStyle(fontFamily: kPolice, 
+                style: TextStyle(
+                  fontFamily: kPolice,
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
                   color: AppColor.kGrayscale40,
@@ -405,7 +427,8 @@ class BoutonDeconnexion extends StatelessWidget {
         backgroundColor: AppColor.kWhite,
         minimumSize: const Size(double.infinity, 48),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        textStyle: TextStyle(fontFamily: kPolice, 
+        textStyle: const TextStyle(
+          fontFamily: kPolice,
           fontSize: 15,
           fontWeight: FontWeight.w700,
         ),
@@ -449,10 +472,11 @@ class VersionApp extends StatelessWidget {
   const VersionApp({super.key});
 
   @override
-  Widget build(BuildContext context) => Center(
+  Widget build(BuildContext context) => const Center(
     child: Text(
       '${InfosApp.nom} v${InfosApp.version}',
-      style: TextStyle(fontFamily: kPolice, 
+      style: TextStyle(
+        fontFamily: kPolice,
         fontSize: 11,
         fontWeight: FontWeight.w500,
         color: AppColor.kGrayscale40,

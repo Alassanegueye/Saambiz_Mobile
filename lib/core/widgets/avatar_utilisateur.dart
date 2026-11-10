@@ -23,7 +23,8 @@ class AvatarUtilisateur extends StatelessWidget {
     final initiales = Center(
       child: Text(
         initialesDe('${utilisateur?.prenom ?? ''} ${utilisateur?.nom ?? ''}'),
-        style: TextStyle(fontFamily: kPolice, 
+        style: const TextStyle(
+          fontFamily: kPolice,
           fontSize: 13,
           fontWeight: FontWeight.w700,
           color: AppColor.kPrimary,
@@ -44,7 +45,12 @@ class AvatarUtilisateur extends StatelessWidget {
             shape: BoxShape.circle,
           ),
           child: photo != null && photo.isNotEmpty
-              ? ImageReseau(photo, largeurServeur: 128, fit: BoxFit.cover, repli: initiales)
+              ? ImageReseau(
+                  photo,
+                  largeurServeur: 128,
+                  fit: BoxFit.cover,
+                  repli: initiales,
+                )
               : initiales,
         ),
       ),

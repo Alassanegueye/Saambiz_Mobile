@@ -110,7 +110,8 @@ class _AbonnesPageState extends State<AbonnesPage> {
       appBar: AppBar(
         title: Text(
           liste == null ? 'Mes abonnés' : 'Mes abonnés (${liste.length})',
-          style: TextStyle(fontFamily: kPolice, 
+          style: const TextStyle(
+            fontFamily: kPolice,
             fontSize: 17,
             fontWeight: FontWeight.w700,
             color: AppColor.kWhite,
@@ -128,7 +129,10 @@ class _AbonnesPageState extends State<AbonnesPage> {
                     child: Text(
                       _erreur!,
                       textAlign: TextAlign.center,
-                      style: TextStyle(fontFamily: kPolice, color: AppColor.kGrayscale40),
+                      style: const TextStyle(
+                        fontFamily: kPolice,
+                        color: AppColor.kGrayscale40,
+                      ),
                     ),
                   ),
                 ],
@@ -142,30 +146,32 @@ class _AbonnesPageState extends State<AbonnesPage> {
               )
             : liste.isEmpty
             ? ListView(
-                children: [
+                children: const [
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(32, 80, 32, 32),
+                    padding: EdgeInsets.fromLTRB(32, 80, 32, 32),
                     child: Column(
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.people_outline_rounded,
                           size: 46,
                           color: AppColor.kGrayscale30,
                         ),
-                        const SizedBox(height: 12),
+                        SizedBox(height: 12),
                         Text(
                           'Aucun abonné pour l\'instant',
-                          style: TextStyle(fontFamily: kPolice, 
+                          style: TextStyle(
+                            fontFamily: kPolice,
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
                             color: AppColor.kGrayscaleDark100,
                           ),
                         ),
-                        const SizedBox(height: 6),
+                        SizedBox(height: 6),
                         Text(
                           'Les clients qui suivent votre boutique apparaîtront ici.',
                           textAlign: TextAlign.center,
-                          style: TextStyle(fontFamily: kPolice, 
+                          style: TextStyle(
+                            fontFamily: kPolice,
                             fontSize: 13,
                             color: AppColor.kGrayscale40,
                           ),
@@ -198,7 +204,8 @@ class _AbonnesPageState extends State<AbonnesPage> {
                           Expanded(
                             child: Text(
                               '$avecCloche sur ${liste.length} ont activé la cloche : ce sont eux qui reçoivent vos promotions et messages.',
-                              style: TextStyle(fontFamily: kPolice, 
+                              style: const TextStyle(
+                                fontFamily: kPolice,
                                 fontSize: 12.5,
                                 color: AppColor.kPrimary,
                                 height: 1.4,
@@ -243,7 +250,8 @@ class _LigneAbonne extends StatelessWidget {
                   a.nomComplet,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontFamily: kPolice, 
+                  style: const TextStyle(
+                    fontFamily: kPolice,
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
                     color: AppColor.kGrayscaleDark100,
@@ -273,7 +281,8 @@ class _LigneAbonne extends StatelessWidget {
           if (a.depuis != null)
             Text(
               'Abonné depuis le ${dateLongue(a.depuis!)}',
-              style: TextStyle(fontFamily: kPolice, 
+              style: const TextStyle(
+                fontFamily: kPolice,
                 fontSize: 13,
                 color: AppColor.kGrayscale40,
               ),
@@ -308,7 +317,8 @@ class _Info extends StatelessWidget {
       child: Text.rich(
         TextSpan(
           text: '$libelle : ',
-          style: TextStyle(fontFamily: kPolice, 
+          style: const TextStyle(
+            fontFamily: kPolice,
             fontSize: 13,
             fontWeight: FontWeight.w600,
             color: AppColor.kGrayscaleDark100,
@@ -316,7 +326,8 @@ class _Info extends StatelessWidget {
           children: [
             TextSpan(
               text: valeur,
-              style: TextStyle(fontFamily: kPolice, 
+              style: const TextStyle(
+                fontFamily: kPolice,
                 fontWeight: FontWeight.w400,
                 color: AppColor.kGrayscale40,
               ),
@@ -349,7 +360,8 @@ class AvatarAbonne extends StatelessWidget {
       child: photo == null
           ? Text(
               initiale,
-              style: TextStyle(fontFamily: kPolice, 
+              style: TextStyle(
+                fontFamily: kPolice,
                 fontSize: rayon * 0.8,
                 fontWeight: FontWeight.w800,
                 color: AppColor.kPrimary,

@@ -94,11 +94,12 @@ class _CompteAReboursState extends State<CompteARebours> {
             const SizedBox(width: 3),
             Text(
               texte,
-              style: TextStyle(fontFamily: kPolice, 
+              style: const TextStyle(
+                fontFamily: kPolice,
                 fontSize: 10,
                 fontWeight: FontWeight.w800,
                 color: Colors.white,
-                fontFeatures: const [FontFeature.tabularFigures()],
+                fontFeatures: [FontFeature.tabularFigures()],
               ),
             ),
           ],
@@ -117,16 +118,18 @@ class _CompteAReboursState extends State<CompteARebours> {
           children: [
             TextSpan(
               text: valeur,
-              style: TextStyle(fontFamily: kPolice, 
+              style: const TextStyle(
+                fontFamily: kPolice,
                 fontSize: 15,
                 fontWeight: FontWeight.w800,
                 color: kPromoEncre,
-                fontFeatures: const [FontFeature.tabularFigures()],
+                fontFeatures: [FontFeature.tabularFigures()],
               ),
             ),
             TextSpan(
               text: unite,
-              style: TextStyle(fontFamily: kPolice, 
+              style: const TextStyle(
+                fontFamily: kPolice,
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
                 color: kPromoEncre,
@@ -147,13 +150,14 @@ class _CompteAReboursState extends State<CompteARebours> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
+          const Row(
             children: [
-              const Icon(Icons.timer_outlined, size: 18, color: kPromoEncre),
-              const SizedBox(width: 6),
+              Icon(Icons.timer_outlined, size: 18, color: kPromoEncre),
+              SizedBox(width: 6),
               Text(
                 'Fin de la promotion dans',
-                style: TextStyle(fontFamily: kPolice, 
+                style: TextStyle(
+                  fontFamily: kPolice,
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
                   color: kPromoEncre,

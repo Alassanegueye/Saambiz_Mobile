@@ -107,97 +107,103 @@ class PanierPage extends StatelessWidget {
       appBar: const AppAppBar(title: 'Mon panier'),
       body: FondDegradeSubtil(
         child: ListenableBuilder(
-        listenable: panier,
-        builder: (context, _) {
-          if (panier.estVide) {
-            return const _PanierVide();
-          }
-          return Column(
-            children: [
-              Expanded(
-                child: ListView.separated(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: panier.items.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 12),
-                  itemBuilder: (context, i) {
-                    final item = panier.items[i];
-                    return Container(
-                      decoration: BoxDecoration(
-                        color: _C.white,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: _C.border),
-                      ),
-                      padding: const EdgeInsets.all(12),
-                      child: Row(
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: item.image.isNotEmpty
-                                ? ImageReseau(item.image, width: 64, height: 64, fit: BoxFit.cover, repli: const _ImgFallback())
-                                : const _ImgFallback(),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  item.nom,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w700,
-                                    color: _C.black,
-                                  ),
-                                ),
-                                if (item.options.isNotEmpty)
-                                  Padding(
-                                    padding: const EdgeInsets.only(top: 3),
-                                    child: Text(
-                                      item.libelleOptions,
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(
-                                        fontSize: 12,
-                                        color: _C.sub,
-                                      ),
+          listenable: panier,
+          builder: (context, _) {
+            if (panier.estVide) {
+              return const _PanierVide();
+            }
+            return Column(
+              children: [
+                Expanded(
+                  child: ListView.separated(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: panier.items.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 12),
+                    itemBuilder: (context, i) {
+                      final item = panier.items[i];
+                      return Container(
+                        decoration: BoxDecoration(
+                          color: _C.white,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: _C.border),
+                        ),
+                        padding: const EdgeInsets.all(12),
+                        child: Row(
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: item.image.isNotEmpty
+                                  ? ImageReseau(
+                                      item.image,
+                                      width: 64,
+                                      height: 64,
+                                      fit: BoxFit.cover,
+                                      repli: const _ImgFallback(),
+                                    )
+                                  : const _ImgFallback(),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    item.nom,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w700,
+                                      color: _C.black,
                                     ),
                                   ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  montantFcfa(item.prix),
-                                  style: const TextStyle(
-                                    color: _C.green,
-                                    fontWeight: FontWeight.w700,
+                                  if (item.options.isNotEmpty)
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 3),
+                                      child: Text(
+                                        item.libelleOptions,
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          color: _C.sub,
+                                        ),
+                                      ),
+                                    ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    montantFcfa(item.prix),
+                                    style: const TextStyle(
+                                      color: _C.green,
+                                      fontWeight: FontWeight.w700,
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                          ),
-                          _QtyStepper(
-                            quantite: item.quantite,
-                            onMoins: () => panier.changerQuantite(
-                              item.cle,
-                              item.quantite - 1,
+                            _QtyStepper(
+                              quantite: item.quantite,
+                              onMoins: () => panier.changerQuantite(
+                                item.cle,
+                                item.quantite - 1,
+                              ),
+                              onPlus: () => panier.changerQuantite(
+                                item.cle,
+                                item.quantite + 1,
+                              ),
                             ),
-                            onPlus: () => panier.changerQuantite(
-                              item.cle,
-                              item.quantite + 1,
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
+                          ],
+                        ),
+                      );
+                    },
+                  ),
                 ),
-              ),
-              _BarreTotal(
-                total: panier.total,
-                onCommander: () => _commander(context),
-              ),
-            ],
-          );
-        },
+                _BarreTotal(
+                  total: panier.total,
+                  onCommander: () => _commander(context),
+                ),
+              ],
+            );
+          },
         ),
       ),
     );
@@ -312,10 +318,10 @@ class _PanierVide extends StatelessWidget {
   const _PanierVide();
   @override
   Widget build(BuildContext context) {
-    return Center(
+    return const Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        children: const [
+        children: [
           Icon(Icons.shopping_cart_outlined, size: 64, color: _C.sub),
           SizedBox(height: 12),
           Text(

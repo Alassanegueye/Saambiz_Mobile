@@ -76,7 +76,7 @@ class _ProduitPageState extends State<ProduitPage> {
       } else {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
+            const SnackBar(
               content: Text(
                 'WhatsApp non disponible',
                 style: TextStyle(fontFamily: kPolice, color: _C.white),
@@ -93,7 +93,7 @@ class _ProduitPageState extends State<ProduitPage> {
           SnackBar(
             content: Text(
               'Erreur: ${e.toString()}',
-              style: TextStyle(fontFamily: kPolice, color: _C.white),
+              style: const TextStyle(fontFamily: kPolice, color: _C.white),
             ),
             backgroundColor: _C.orange,
             behavior: SnackBarBehavior.floating,
@@ -184,11 +184,12 @@ class _ProduitPageState extends State<ProduitPage> {
               ),
               // Titre
               RichText(
-                text: TextSpan(
+                text: const TextSpan(
                   children: [
                     TextSpan(
                       text: 'Les ',
-                      style: TextStyle(fontFamily: kPolice, 
+                      style: TextStyle(
+                        fontFamily: kPolice,
                         fontSize: 20,
                         fontWeight: FontWeight.w800,
                         color: _C.white,
@@ -197,7 +198,8 @@ class _ProduitPageState extends State<ProduitPage> {
                     ),
                     TextSpan(
                       text: 'Produits',
-                      style: TextStyle(fontFamily: kPolice, 
+                      style: TextStyle(
+                        fontFamily: kPolice,
                         fontSize: 20,
                         fontWeight: FontWeight.w800,
                         color: _C.green,
@@ -216,11 +218,16 @@ class _ProduitPageState extends State<ProduitPage> {
             child: TextField(
               controller: _searchCtrl,
               onChanged: (v) => setState(() => _search = v),
-              style: TextStyle(fontFamily: kPolice, fontSize: 15, color: _C.white),
+              style: const TextStyle(
+                fontFamily: kPolice,
+                fontSize: 15,
+                color: _C.white,
+              ),
               cursorColor: _C.green,
               decoration: InputDecoration(
                 hintText: 'Rechercher un produit...',
-                hintStyle: TextStyle(fontFamily: kPolice, 
+                hintStyle: TextStyle(
+                  fontFamily: kPolice,
                   fontSize: 15,
                   color: Colors.white.withOpacity(0.4),
                 ),
@@ -272,9 +279,10 @@ class _ProduitPageState extends State<ProduitPage> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
+          const Text(
             'Produits',
-            style: TextStyle(fontFamily: kPolice, 
+            style: TextStyle(
+              fontFamily: kPolice,
               fontSize: 14,
               fontWeight: FontWeight.w700,
               color: _C.black,
@@ -282,18 +290,19 @@ class _ProduitPageState extends State<ProduitPage> {
           ),
           GestureDetector(
             onTap: () => _produitBloc?.add(LoadProduits()),
-            child: Row(
+            child: const Row(
               children: [
                 Text(
                   'Actualiser',
-                  style: TextStyle(fontFamily: kPolice, 
+                  style: TextStyle(
+                    fontFamily: kPolice,
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                     color: _C.green,
                   ),
                 ),
-                const SizedBox(width: 3),
-                const Icon(Icons.refresh_rounded, color: _C.green, size: 16),
+                SizedBox(width: 3),
+                Icon(Icons.refresh_rounded, color: _C.green, size: 16),
               ],
             ),
           ),
@@ -334,7 +343,10 @@ class _ProduitPageState extends State<ProduitPage> {
                   padding: const EdgeInsets.symmetric(horizontal: 32),
                   child: Text(
                     'Erreur: ${state.message}',
-                    style: TextStyle(fontFamily: kPolice, color: _C.orange),
+                    style: const TextStyle(
+                      fontFamily: kPolice,
+                      color: _C.orange,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -350,9 +362,10 @@ class _ProduitPageState extends State<ProduitPage> {
                       color: _C.black,
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Text(
+                    child: const Text(
                       'Réessayer',
-                      style: TextStyle(fontFamily: kPolice, 
+                      style: TextStyle(
+                        fontFamily: kPolice,
                         color: _C.white,
                         fontWeight: FontWeight.w600,
                       ),
@@ -368,19 +381,16 @@ class _ProduitPageState extends State<ProduitPage> {
           final list = _filter(state.produits);
 
           if (list.isEmpty) {
-            return Center(
+            return const Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(
-                    Icons.search_off_rounded,
-                    color: _C.label,
-                    size: 48,
-                  ),
-                  const SizedBox(height: 12),
+                  Icon(Icons.search_off_rounded, color: _C.label, size: 48),
+                  SizedBox(height: 12),
                   Text(
                     'Aucun produit trouvé',
-                    style: TextStyle(fontFamily: kPolice, 
+                    style: TextStyle(
+                      fontFamily: kPolice,
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
                       color: _C.label,
@@ -419,7 +429,7 @@ class _ProduitPageState extends State<ProduitPage> {
   Widget _buildCard(ProduitModel p) {
     return GestureDetector(
       onTap: () => _openModal(p),
-      child: Container(
+      child: DecoratedBox(
         decoration: BoxDecoration(
           color: _C.white,
           borderRadius: BorderRadius.circular(20),
@@ -436,7 +446,7 @@ class _ProduitPageState extends State<ProduitPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
-              child: Container(
+              child: DecoratedBox(
                 decoration: BoxDecoration(
                   color: _C.surface,
                   borderRadius: const BorderRadius.vertical(
@@ -470,7 +480,8 @@ class _ProduitPageState extends State<ProduitPage> {
                 children: [
                   Text(
                     p.nom,
-                    style: TextStyle(fontFamily: kPolice, 
+                    style: const TextStyle(
+                      fontFamily: kPolice,
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
                       color: _C.black,
@@ -481,7 +492,11 @@ class _ProduitPageState extends State<ProduitPage> {
                   const SizedBox(height: 2),
                   Text(
                     p.ville,
-                    style: TextStyle(fontFamily: kPolice, fontSize: 10, color: _C.label),
+                    style: const TextStyle(
+                      fontFamily: kPolice,
+                      fontSize: 10,
+                      color: _C.label,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Row(
@@ -492,15 +507,17 @@ class _ProduitPageState extends State<ProduitPage> {
                           children: [
                             TextSpan(
                               text: p.prix,
-                              style: TextStyle(fontFamily: kPolice, 
+                              style: const TextStyle(
+                                fontFamily: kPolice,
                                 fontSize: 13,
                                 fontWeight: FontWeight.w800,
                                 color: _C.black,
                               ),
                             ),
-                            TextSpan(
+                            const TextSpan(
                               text: ' F',
-                              style: TextStyle(fontFamily: kPolice, 
+                              style: TextStyle(
+                                fontFamily: kPolice,
                                 fontSize: 10,
                                 color: _C.label,
                               ),
@@ -604,7 +621,7 @@ class _ProduitModalState extends State<_ProduitModal> {
       } else {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
+            const SnackBar(
               content: Text(
                 'WhatsApp non disponible',
                 style: TextStyle(fontFamily: kPolice, color: _C.white),
@@ -620,7 +637,7 @@ class _ProduitModalState extends State<_ProduitModal> {
           SnackBar(
             content: Text(
               'Erreur: ${e.toString()}',
-              style: TextStyle(fontFamily: kPolice, color: _C.white),
+              style: const TextStyle(fontFamily: kPolice, color: _C.white),
             ),
             backgroundColor: _C.orange,
           ),
@@ -635,7 +652,7 @@ class _ProduitModalState extends State<_ProduitModal> {
     // Prix : on le laisse tel quel, pas de calcul de total
     final prixUnitaire = p.prix;
 
-    return Container(
+    return DecoratedBox(
       decoration: const BoxDecoration(
         color: _C.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
@@ -719,7 +736,8 @@ class _ProduitModalState extends State<_ProduitModal> {
                             Expanded(
                               child: Text(
                                 p.nom,
-                                style: TextStyle(fontFamily: kPolice, 
+                                style: const TextStyle(
+                                  fontFamily: kPolice,
                                   fontSize: 20,
                                   fontWeight: FontWeight.w800,
                                   color: _C.black,
@@ -771,7 +789,8 @@ class _ProduitModalState extends State<_ProduitModal> {
                             ),
                             child: Text(
                               p.categorie!,
-                              style: TextStyle(fontFamily: kPolice, 
+                              style: const TextStyle(
+                                fontFamily: kPolice,
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
                                 color: _C.green,
@@ -798,7 +817,8 @@ class _ProduitModalState extends State<_ProduitModal> {
                             const SizedBox(width: 8),
                             Text(
                               p.ville,
-                              style: TextStyle(fontFamily: kPolice, 
+                              style: const TextStyle(
+                                fontFamily: kPolice,
                                 fontSize: 13,
                                 color: _C.label,
                               ),
@@ -813,7 +833,8 @@ class _ProduitModalState extends State<_ProduitModal> {
                             padding: const EdgeInsets.only(bottom: 16),
                             child: Text(
                               p.description!,
-                              style: TextStyle(fontFamily: kPolice, 
+                              style: const TextStyle(
+                                fontFamily: kPolice,
                                 fontSize: 13,
                                 color: _C.sub,
                               ),
@@ -842,7 +863,8 @@ class _ProduitModalState extends State<_ProduitModal> {
                                 const SizedBox(width: 8),
                                 Text(
                                   'Stock disponible : ${p.quantite}',
-                                  style: TextStyle(fontFamily: kPolice, 
+                                  style: const TextStyle(
+                                    fontFamily: kPolice,
                                     fontSize: 13,
                                     color: _C.label,
                                   ),
@@ -880,16 +902,18 @@ class _ProduitModalState extends State<_ProduitModal> {
                                   children: [
                                     Text(
                                       p.vendeurNom,
-                                      style: TextStyle(fontFamily: kPolice, 
+                                      style: const TextStyle(
+                                        fontFamily: kPolice,
                                         fontSize: 14,
                                         fontWeight: FontWeight.w700,
                                         color: _C.black,
                                       ),
                                     ),
                                     const SizedBox(height: 2),
-                                    Text(
+                                    const Text(
                                       'Vendeur',
-                                      style: TextStyle(fontFamily: kPolice, 
+                                      style: TextStyle(
+                                        fontFamily: kPolice,
                                         fontSize: 11,
                                         color: _C.label,
                                       ),
@@ -916,7 +940,8 @@ class _ProduitModalState extends State<_ProduitModal> {
                                     const SizedBox(width: 4),
                                     Text(
                                       p.vendeurNumero,
-                                      style: TextStyle(fontFamily: kPolice, 
+                                      style: const TextStyle(
+                                        fontFamily: kPolice,
                                         fontSize: 12,
                                         fontWeight: FontWeight.w600,
                                         color: _C.green,
@@ -943,9 +968,10 @@ class _ProduitModalState extends State<_ProduitModal> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(
+                                    const Text(
                                       'PRIX UNITAIRE',
-                                      style: TextStyle(fontFamily: kPolice, 
+                                      style: TextStyle(
+                                        fontFamily: kPolice,
                                         fontSize: 9.5,
                                         fontWeight: FontWeight.w700,
                                         color: _C.label,
@@ -958,15 +984,17 @@ class _ProduitModalState extends State<_ProduitModal> {
                                         children: [
                                           TextSpan(
                                             text: '$prixUnitaire ',
-                                            style: TextStyle(fontFamily: kPolice, 
+                                            style: const TextStyle(
+                                              fontFamily: kPolice,
                                               fontSize: 22,
                                               fontWeight: FontWeight.w800,
                                               color: _C.black,
                                             ),
                                           ),
-                                          TextSpan(
+                                          const TextSpan(
                                             text: 'FCFA',
-                                            style: TextStyle(fontFamily: kPolice, 
+                                            style: TextStyle(
+                                              fontFamily: kPolice,
                                               fontSize: 12,
                                               color: _C.label,
                                             ),
@@ -1027,10 +1055,11 @@ class _ProduitModalState extends State<_ProduitModal> {
                         color: _C.black,
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      child: Center(
+                      child: const Center(
                         child: Text(
                           'Fermer',
-                          style: TextStyle(fontFamily: kPolice, 
+                          style: TextStyle(
+                            fontFamily: kPolice,
                             color: _C.white,
                             fontWeight: FontWeight.w600,
                           ),

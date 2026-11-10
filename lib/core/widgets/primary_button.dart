@@ -86,7 +86,8 @@ class _PrimaryButtonState extends State<PrimaryButton>
                 Text(
                   widget.text,
                   style:
-                      TextStyle(fontFamily: kPolice, 
+                      const TextStyle(
+                        fontFamily: kPolice,
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
                         color: AppColor.kWhite,

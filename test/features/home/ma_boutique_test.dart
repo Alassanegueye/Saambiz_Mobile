@@ -71,9 +71,6 @@ void main() {
   test('une panne du serveur reste une erreur', () async {
     final serveur = _FauxServeur(500, {'message': 'Erreur'});
 
-    expect(
-      _source(serveur).getMaBoutique(),
-      throwsA(isA<DioException>()),
-    );
+    expect(_source(serveur).getMaBoutique(), throwsA(isA<DioException>()));
   });
 }

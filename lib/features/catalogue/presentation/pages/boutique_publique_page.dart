@@ -280,9 +280,7 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
     final sections = _sections;
     return Scaffold(
       backgroundColor: AppColor.kWhite,
-      appBar: AppBar(
-        actions: const [BoutonPanier(), SizedBox(width: 6)],
-      ),
+      appBar: AppBar(actions: const [BoutonPanier(), SizedBox(width: 6)]),
       body: RefreshIndicator(
         color: AppColor.kPrimary,
         onRefresh: () async => Future.wait([_chargerBoutique(), _charger()]),
@@ -351,7 +349,8 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
             const SizedBox(width: 3),
             Text(
               '$note',
-              style: TextStyle(fontFamily: kPolice, 
+              style: const TextStyle(
+                fontFamily: kPolice,
                 fontSize: 13.5,
                 fontWeight: FontWeight.w700,
                 color: _encre,
@@ -368,7 +367,11 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
             const SizedBox(width: 5),
             Text(
               'Vente en ligne depuis $depuis',
-              style: TextStyle(fontFamily: kPolice, fontSize: 13, color: _encre),
+              style: const TextStyle(
+                fontFamily: kPolice,
+                fontSize: 13,
+                color: _encre,
+              ),
             ),
           ],
         ),
@@ -385,7 +388,11 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
                   adresse,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontFamily: kPolice, fontSize: 13, color: _encre),
+                  style: const TextStyle(
+                    fontFamily: kPolice,
+                    fontSize: 13,
+                    color: _encre,
+                  ),
                 ),
               ),
             ],
@@ -429,7 +436,12 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
                 ),
                 clipBehavior: Clip.antiAlias,
                 child: logo.isNotEmpty
-                    ? ImageReseau(logo, largeurServeur: 256, fit: BoxFit.cover, repli: const LogoBoutiqueParDefaut())
+                    ? ImageReseau(
+                        logo,
+                        largeurServeur: 256,
+                        fit: BoxFit.cover,
+                        repli: const LogoBoutiqueParDefaut(),
+                      )
                     : const LogoBoutiqueParDefaut(),
               ),
               const SizedBox(width: 16),
@@ -444,7 +456,8 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
                             nom,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
-                            style: TextStyle(fontFamily: kPolice, 
+                            style: const TextStyle(
+                              fontFamily: kPolice,
                               fontSize: 22,
                               fontWeight: FontWeight.w800,
                               color: _encre,
@@ -497,7 +510,8 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
                     ),
                     label: Text(
                       _suivi ? 'Suivie' : 'Suivre',
-                      style: TextStyle(fontFamily: kPolice, 
+                      style: TextStyle(
+                        fontFamily: kPolice,
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
                         color: _accent,
@@ -572,9 +586,10 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
+                  const Text(
                     'Suivez-nous',
-                    style: TextStyle(fontFamily: kPolice, 
+                    style: TextStyle(
+                      fontFamily: kPolice,
                       fontSize: 13.5,
                       fontWeight: FontWeight.w600,
                       color: AppColor.kGrayscale40,
@@ -647,7 +662,8 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
                   children: [
                     Text(
                       titre,
-                      style: TextStyle(fontFamily: kPolice, 
+                      style: const TextStyle(
+                        fontFamily: kPolice,
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
                         color: _encre,
@@ -683,7 +699,8 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
               titre,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(fontFamily: kPolice, 
+              style: const TextStyle(
+                fontFamily: kPolice,
                 fontSize: 22,
                 fontWeight: FontWeight.w800,
                 color: _encre,
@@ -698,7 +715,8 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
                 children: [
                   Text(
                     'Voir tout',
-                    style: TextStyle(fontFamily: kPolice, 
+                    style: TextStyle(
+                      fontFamily: kPolice,
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
                       color: _accent,
@@ -833,7 +851,8 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
                   Text(
                     (a['titre'] ?? '').toString(),
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontFamily: kPolice, 
+                    style: const TextStyle(
+                      fontFamily: kPolice,
                       fontSize: 13.5,
                       fontWeight: FontWeight.w600,
                       color: _encre,
@@ -861,9 +880,10 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          const Text(
             'À propos',
-            style: TextStyle(fontFamily: kPolice, 
+            style: TextStyle(
+              fontFamily: kPolice,
               fontSize: 20,
               fontWeight: FontWeight.w800,
               color: _encre,
@@ -872,7 +892,8 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
           const SizedBox(height: 8),
           Text(
             texte,
-            style: TextStyle(fontFamily: kPolice, 
+            style: const TextStyle(
+              fontFamily: kPolice,
               fontSize: 14,
               height: 1.55,
               color: AppColor.kGrayscale40,
@@ -897,7 +918,11 @@ class _SectionPage extends StatelessWidget {
       appBar: AppBar(
         title: Text(
           titre,
-          style: TextStyle(fontFamily: kPolice, fontSize: 17, fontWeight: FontWeight.w700),
+          style: const TextStyle(
+            fontFamily: kPolice,
+            fontSize: 17,
+            fontWeight: FontWeight.w700,
+          ),
         ),
         actions: const [BoutonPanier(), SizedBox(width: 6)],
       ),

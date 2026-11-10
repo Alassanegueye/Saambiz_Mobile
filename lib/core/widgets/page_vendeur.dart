@@ -6,7 +6,6 @@ import 'package:flutter/services.dart';
 import '../theme/app_color.dart';
 import '../theme/police.dart';
 
-
 /// Espace à laisser en bas d'un onglet vendeur pour que rien ne passe sous
 /// la barre d'onglets flottante.
 ///
@@ -79,9 +78,7 @@ class PageVendeur extends StatelessWidget {
                       ),
                       const SizedBox(width: 12),
                     ],
-                    Expanded(
-                      child: titreWidget ?? _Titre(titre, sousTitre),
-                    ),
+                    Expanded(child: titreWidget ?? _Titre(titre, sousTitre)),
                     for (final a in actions) ...[const SizedBox(width: 8), a],
                   ],
                 ),

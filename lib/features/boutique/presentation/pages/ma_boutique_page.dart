@@ -132,7 +132,11 @@ class _MaBoutiqueView extends StatelessWidget {
                           height: 72,
                           color: _C.white,
                           child: (b.logo ?? '').isNotEmpty
-                              ? ImageReseau(b.logo!, fit: BoxFit.cover, repli: _initiales(b.nom))
+                              ? ImageReseau(
+                                  b.logo!,
+                                  fit: BoxFit.cover,
+                                  repli: _initiales(b.nom),
+                                )
                               : _initiales(b.nom),
                         ),
                       ),

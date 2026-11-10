@@ -138,7 +138,12 @@ class _ListeCommandesState extends State<_ListeCommandes> {
                     ],
                   )
                 : ListView.separated(
-                    padding: EdgeInsets.fromLTRB(16, 4, 16, espaceBasVendeur(context)),
+                    padding: EdgeInsets.fromLTRB(
+                      16,
+                      4,
+                      16,
+                      espaceBasVendeur(context),
+                    ),
                     itemCount: visibles.length,
                     separatorBuilder: (_, __) => const SizedBox(height: 10),
                     itemBuilder: (context, i) {

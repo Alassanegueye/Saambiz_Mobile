@@ -338,11 +338,7 @@ class ChampRecherche extends StatelessWidget {
       child: Row(
         children: [
           const SizedBox(width: 14),
-          const Icon(
-            Icons.search_rounded,
-            color: AppColor.kPrimary,
-            size: 22,
-          ),
+          const Icon(Icons.search_rounded, color: AppColor.kPrimary, size: 22),
           const SizedBox(width: 10),
           Expanded(
             child: TextField(

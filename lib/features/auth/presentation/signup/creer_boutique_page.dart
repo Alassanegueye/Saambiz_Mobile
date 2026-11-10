@@ -169,7 +169,7 @@ class _CreerBoutiquePageState extends State<CreerBoutiquePage> {
             padding: const EdgeInsets.only(bottom: 14),
             child: Text(
               'Page ${_page + 1} sur 3',
-              style: TextStyle(
+              style: const TextStyle(
                 fontFamily: kPolice,
                 fontSize: 12.5,
                 fontWeight: FontWeight.w600,
@@ -259,7 +259,11 @@ class _Dropdown extends StatelessWidget {
             Icons.keyboard_arrow_down_rounded,
             color: Sb.textMid,
           ),
-          style: TextStyle(fontFamily: kPolice, fontSize: 15, color: Sb.text),
+          style: const TextStyle(
+            fontFamily: kPolice,
+            fontSize: 15,
+            color: Sb.text,
+          ),
           decoration: InputDecoration(
             filled: true,
             fillColor: Sb.surface,

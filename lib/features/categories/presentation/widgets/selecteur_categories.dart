@@ -97,9 +97,10 @@ class _SelecteurCategoriesState extends State<SelecteurCategories> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        LibelleObligatoire(
+        const LibelleObligatoire(
           'Catégories de la boutique',
-          style: TextStyle(fontFamily: kPolice, 
+          style: TextStyle(
+            fontFamily: kPolice,
             fontSize: 13,
             fontWeight: FontWeight.w600,
             color: _navy,
@@ -108,7 +109,11 @@ class _SelecteurCategoriesState extends State<SelecteurCategories> {
         const SizedBox(height: 4),
         Text(
           'Choisissez 1 à ${widget.maximum} catégories. La première est la principale.',
-          style: TextStyle(fontFamily: kPolice, fontSize: 12, color: _textLight),
+          style: const TextStyle(
+            fontFamily: kPolice,
+            fontSize: 12,
+            color: _textLight,
+          ),
         ),
         const SizedBox(height: 10),
         Wrap(
@@ -120,7 +125,11 @@ class _SelecteurCategoriesState extends State<SelecteurCategories> {
           const SizedBox(height: 8),
           Text(
             widget.erreur!,
-            style: TextStyle(fontFamily: kPolice, fontSize: 12, color: _erreur),
+            style: const TextStyle(
+              fontFamily: kPolice,
+              fontSize: 12,
+              color: _erreur,
+            ),
           ),
         ],
       ],
@@ -158,7 +167,8 @@ class _SelecteurCategoriesState extends State<SelecteurCategories> {
               const SizedBox(width: 6),
               Text(
                 c.nom,
-                style: TextStyle(fontFamily: kPolice, 
+                style: const TextStyle(
+                  fontFamily: kPolice,
                   fontSize: 12.5,
                   fontWeight: FontWeight.w600,
                   color: _navy,

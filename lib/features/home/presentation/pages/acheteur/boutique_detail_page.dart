@@ -163,7 +163,11 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
               child: (hasLogo)
                   ? Opacity(
                       opacity: 0.25,
-                      child: ImageReseau(b.logo!, fit: BoxFit.cover, repli: const SizedBox()),
+                      child: ImageReseau(
+                        b.logo!,
+                        fit: BoxFit.cover,
+                        repli: const SizedBox(),
+                      ),
                     )
                   : null,
             ),
@@ -177,11 +181,12 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
                       Icons.arrow_back_ios_new_rounded,
                       () => Navigator.of(context).pop(),
                     ),
-                    Expanded(
+                    const Expanded(
                       child: Text(
                         'Boutique',
                         textAlign: TextAlign.center,
-                        style: TextStyle(fontFamily: kPolice, 
+                        style: TextStyle(
+                          fontFamily: kPolice,
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
                           color: _C.white,
@@ -216,11 +221,15 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
                 ),
                 clipBehavior: Clip.antiAlias,
                 child: hasLogo
-                    ? ImageReseau(b.logo!, fit: BoxFit.cover, repli: const Icon(
+                    ? ImageReseau(
+                        b.logo!,
+                        fit: BoxFit.cover,
+                        repli: const Icon(
                           Icons.storefront_rounded,
                           color: _C.green,
                           size: 36,
-                        ))
+                        ),
+                      )
                     : const Icon(
                         Icons.storefront_rounded,
                         color: _C.green,
@@ -240,7 +249,8 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
             children: [
               Text(
                 b.nom,
-                style: TextStyle(fontFamily: kPolice, 
+                style: const TextStyle(
+                  fontFamily: kPolice,
                   fontSize: 20,
                   fontWeight: FontWeight.w800,
                   color: _C.black,
@@ -254,7 +264,8 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
                     const SizedBox(width: 3),
                     Text(
                       _effNote.toStringAsFixed(1),
-                      style: TextStyle(fontFamily: kPolice, 
+                      style: const TextStyle(
+                        fontFamily: kPolice,
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
                         color: _C.black,
@@ -263,7 +274,11 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
                     const SizedBox(width: 4),
                     Text(
                       '($_effTotal avis)',
-                      style: TextStyle(fontFamily: kPolice, fontSize: 13, color: _C.sub),
+                      style: const TextStyle(
+                        fontFamily: kPolice,
+                        fontSize: 13,
+                        color: _C.sub,
+                      ),
                     ),
                   ] else ...[
                     const Icon(
@@ -272,16 +287,24 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
                       size: 17,
                     ),
                     const SizedBox(width: 3),
-                    Text(
+                    const Text(
                       'Nouveau',
-                      style: TextStyle(fontFamily: kPolice, fontSize: 13, color: _C.sub),
+                      style: TextStyle(
+                        fontFamily: kPolice,
+                        fontSize: 13,
+                        color: _C.sub,
+                      ),
                     ),
                   ],
                   if (b.localisation.isNotEmpty) ...[
                     const SizedBox(width: 6),
-                    Text(
+                    const Text(
                       '•',
-                      style: TextStyle(fontFamily: kPolice, fontSize: 13, color: _C.label),
+                      style: TextStyle(
+                        fontFamily: kPolice,
+                        fontSize: 13,
+                        color: _C.label,
+                      ),
                     ),
                     const SizedBox(width: 6),
                     Flexible(
@@ -289,7 +312,11 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
                         b.localisation,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(fontFamily: kPolice, fontSize: 13, color: _C.sub),
+                        style: const TextStyle(
+                          fontFamily: kPolice,
+                          fontSize: 13,
+                          color: _C.sub,
+                        ),
                       ),
                     ),
                   ],
@@ -299,7 +326,8 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
                 const SizedBox(height: 8),
                 Text(
                   b.description,
-                  style: TextStyle(fontFamily: kPolice, 
+                  style: const TextStyle(
+                    fontFamily: kPolice,
                     fontSize: 13.5,
                     height: 1.4,
                     color: _C.sub,
@@ -316,9 +344,10 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
                         Icons.chat_bubble_outline_rounded,
                         size: 17,
                       ),
-                      label: Text(
+                      label: const Text(
                         'Message',
-                        style: TextStyle(fontFamily: kPolice, 
+                        style: TextStyle(
+                          fontFamily: kPolice,
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
                         ),
@@ -343,7 +372,8 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
                       ),
                       label: Text(
                         _suivi ? 'Suivi' : 'Suivre',
-                        style: TextStyle(fontFamily: kPolice, 
+                        style: const TextStyle(
+                          fontFamily: kPolice,
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
                         ),
@@ -408,7 +438,8 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
                 child: Text(
                   tabs[i],
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontFamily: kPolice, 
+                  style: TextStyle(
+                    fontFamily: kPolice,
                     fontSize: 14,
                     fontWeight: active ? FontWeight.w700 : FontWeight.w500,
                     color: active ? _C.green : _C.sub,
@@ -447,7 +478,10 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
       return Padding(
         padding: const EdgeInsets.all(28),
         child: Center(
-          child: Text(_error!, style: TextStyle(fontFamily: kPolice, color: _C.sub)),
+          child: Text(
+            _error!,
+            style: const TextStyle(fontFamily: kPolice, color: _C.sub),
+          ),
         ),
       );
     }
@@ -456,8 +490,8 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
       children: [
         _sectionHeader('Produits populaires'),
         if (_produits.isEmpty)
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
             child: Text(
               'Aucun produit disponible',
               style: TextStyle(fontFamily: kPolice, color: _C.label),
@@ -484,7 +518,7 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
   }
 
   Widget _productCard(ProduitModel p) {
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         color: _C.white,
         borderRadius: BorderRadius.circular(16),
@@ -518,7 +552,8 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
                   p.nom,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontFamily: kPolice, 
+                  style: const TextStyle(
+                    fontFamily: kPolice,
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
                     color: _C.black,
@@ -527,7 +562,8 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
                 const SizedBox(height: 4),
                 Text(
                   '${p.prix} FCFA',
-                  style: TextStyle(fontFamily: kPolice, 
+                  style: const TextStyle(
+                    fontFamily: kPolice,
                     fontSize: 12.5,
                     fontWeight: FontWeight.w700,
                     color: _C.green,
@@ -552,16 +588,20 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
       );
     }
     if (_promos.isEmpty) {
-      return Padding(
-        padding: const EdgeInsets.fromLTRB(20, 30, 20, 20),
+      return const Padding(
+        padding: EdgeInsets.fromLTRB(20, 30, 20, 20),
         child: Center(
           child: Column(
             children: [
-              const Icon(Icons.local_offer_outlined, color: _C.label, size: 44),
-              const SizedBox(height: 12),
+              Icon(Icons.local_offer_outlined, color: _C.label, size: 44),
+              SizedBox(height: 12),
               Text(
                 'Aucune promotion en cours',
-                style: TextStyle(fontFamily: kPolice, fontSize: 14, color: _C.sub),
+                style: TextStyle(
+                  fontFamily: kPolice,
+                  fontSize: 14,
+                  color: _C.sub,
+                ),
               ),
             ],
           ),
@@ -588,7 +628,8 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
                     children: [
                       Text(
                         promo.titre,
-                        style: TextStyle(fontFamily: kPolice, 
+                        style: const TextStyle(
+                          fontFamily: kPolice,
                           fontSize: 17,
                           fontWeight: FontWeight.w800,
                           color: _C.gold,
@@ -598,7 +639,8 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
                         const SizedBox(height: 4),
                         Text(
                           promo.produitNom!,
-                          style: TextStyle(fontFamily: kPolice, 
+                          style: TextStyle(
+                            fontFamily: kPolice,
                             fontSize: 13,
                             color: _C.white.withOpacity(0.9),
                           ),
@@ -607,7 +649,8 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
                       const SizedBox(height: 6),
                       Text(
                         '${promo.prixPromo.toStringAsFixed(0)} FCFA',
-                        style: TextStyle(fontFamily: kPolice, 
+                        style: const TextStyle(
+                          fontFamily: kPolice,
                           fontSize: 15,
                           fontWeight: FontWeight.w800,
                           color: _C.white,
@@ -623,9 +666,10 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
                           color: _C.gold,
                           borderRadius: BorderRadius.circular(11),
                         ),
-                        child: Text(
+                        child: const Text(
                           "Profiter de l'offre",
-                          style: TextStyle(fontFamily: kPolice, 
+                          style: TextStyle(
+                            fontFamily: kPolice,
                             fontSize: 12.5,
                             fontWeight: FontWeight.w700,
                             color: _C.navyDk,
@@ -660,7 +704,8 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
             children: [
               Text(
                 _effTotal > 0 ? _effNote.toStringAsFixed(1) : '0',
-                style: TextStyle(fontFamily: kPolice, 
+                style: const TextStyle(
+                  fontFamily: kPolice,
                   fontSize: 34,
                   fontWeight: FontWeight.w800,
                   color: _C.black,
@@ -685,7 +730,11 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
                   const SizedBox(height: 2),
                   Text(
                     '$_effTotal avis',
-                    style: TextStyle(fontFamily: kPolice, fontSize: 13, color: _C.sub),
+                    style: const TextStyle(
+                      fontFamily: kPolice,
+                      fontSize: 13,
+                      color: _C.sub,
+                    ),
                   ),
                 ],
               ),
@@ -701,9 +750,10 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
                     color: _C.green,
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Text(
+                  child: const Text(
                     'Donner mon avis',
-                    style: TextStyle(fontFamily: kPolice, 
+                    style: TextStyle(
+                      fontFamily: kPolice,
                       fontSize: 12.5,
                       fontWeight: FontWeight.w700,
                       color: _C.white,
@@ -715,12 +765,16 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
           ),
           const SizedBox(height: 18),
           if (_avis.isEmpty)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 20),
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 20),
               child: Center(
                 child: Text(
                   'Aucun avis pour le moment. Soyez le premier !',
-                  style: TextStyle(fontFamily: kPolice, fontSize: 14, color: _C.sub),
+                  style: TextStyle(
+                    fontFamily: kPolice,
+                    fontSize: 14,
+                    color: _C.sub,
+                  ),
                 ),
               ),
             )
@@ -766,7 +820,8 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
               Expanded(
                 child: Text(
                   nom.isEmpty ? 'Client' : nom,
-                  style: TextStyle(fontFamily: kPolice, 
+                  style: const TextStyle(
+                    fontFamily: kPolice,
                     fontSize: 13.5,
                     fontWeight: FontWeight.w700,
                     color: _C.black,
@@ -789,7 +844,8 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
             const SizedBox(height: 8),
             Text(
               commentaire,
-              style: TextStyle(fontFamily: kPolice, 
+              style: const TextStyle(
+                fontFamily: kPolice,
                 fontSize: 13,
                 height: 1.4,
                 color: _C.sub,
@@ -808,7 +864,7 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setLocal) => AlertDialog(
-          title: Text(
+          title: const Text(
             'Votre avis',
             style: TextStyle(fontFamily: kPolice, fontWeight: FontWeight.w700),
           ),
@@ -886,15 +942,17 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
         children: [
           Text(
             title,
-            style: TextStyle(fontFamily: kPolice, 
+            style: const TextStyle(
+              fontFamily: kPolice,
               fontSize: 15,
               fontWeight: FontWeight.w700,
               color: _C.black,
             ),
           ),
-          Text(
+          const Text(
             'Voir tout',
-            style: TextStyle(fontFamily: kPolice, 
+            style: TextStyle(
+              fontFamily: kPolice,
               fontSize: 12.5,
               fontWeight: FontWeight.w600,
               color: _C.green,

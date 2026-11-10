@@ -64,9 +64,7 @@ class _ResetPasswordViewState extends State<_ResetPasswordView> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: _C.bg,
-      appBar: AppBar(
-        title: const Text('Réinitialiser le mot de passe'),
-      ),
+      appBar: AppBar(title: const Text('Réinitialiser le mot de passe')),
       body: BlocConsumer<CompteBloc, CompteState>(
         listener: (context, state) {
           if (state is CompteError) {

@@ -285,10 +285,7 @@ Future<void> init() async {
             }
             if (resultat == ResultatRenouvellement.refuse) {
               AuthInterceptor.navigatorKey.currentState
-                  ?.pushNamedAndRemoveUntil(
-                    AppRouter.loginRoute,
-                    (_) => false,
-                  );
+                  ?.pushNamedAndRemoveUntil(AppRouter.loginRoute, (_) => false);
             }
           }
           _log('Message: ${e.message}');

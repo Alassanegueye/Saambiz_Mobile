@@ -55,7 +55,7 @@ class _TermsAndPrivacyTextState extends State<TermsAndPrivacyText> {
 
   @override
   Widget build(BuildContext context) {
-    final styleParDefaut = TextStyle(
+    const styleParDefaut = TextStyle(
       fontFamily: kPolice,
       color: AppColor.kGrayscale40,
       fontWeight: FontWeight.w500,

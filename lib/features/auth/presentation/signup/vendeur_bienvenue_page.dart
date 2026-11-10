@@ -97,7 +97,7 @@ class _ActionTile extends StatelessWidget {
               Expanded(
                 child: Text(
                   title,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontFamily: kPolice,
                     fontSize: 14.5,
                     fontWeight: FontWeight.w600,

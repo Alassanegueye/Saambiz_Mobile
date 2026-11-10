@@ -55,12 +55,17 @@ Widget buildColisCard({required Colis colis, required bool isReception}) {
               Expanded(
                 child: Row(
                   children: [
-                    Icon(Icons.location_on, size: 18, color: AppColor.kPrimary),
+                    const Icon(
+                      Icons.location_on,
+                      size: 18,
+                      color: AppColor.kPrimary,
+                    ),
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(
                         colis.destination,
-                        style: TextStyle(fontFamily: kPolice, 
+                        style: const TextStyle(
+                          fontFamily: kPolice,
                           fontWeight: FontWeight.w700,
                           fontSize: 16,
                           color: AppColor.kGrayscaleDark100,
@@ -83,7 +88,8 @@ Widget buildColisCard({required Colis colis, required bool isReception}) {
                 ),
                 child: Text(
                   colis.statut,
-                  style: TextStyle(fontFamily: kPolice, 
+                  style: TextStyle(
+                    fontFamily: kPolice,
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                     color: statusColor,
@@ -100,7 +106,7 @@ Widget buildColisCard({required Colis colis, required bool isReception}) {
                 backgroundColor: AppColor.kPrimary.withOpacity(0.1),
                 child: Text(
                   personneNom.isNotEmpty ? personneNom[0] : '?',
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: AppColor.kPrimary,
                     fontWeight: FontWeight.bold,
                   ),
@@ -113,14 +119,16 @@ Widget buildColisCard({required Colis colis, required bool isReception}) {
                   children: [
                     Text(
                       personneLabel,
-                      style: TextStyle(fontFamily: kPolice, 
+                      style: const TextStyle(
+                        fontFamily: kPolice,
                         fontSize: 12,
                         color: AppColor.kGrayscale60,
                       ),
                     ),
                     Text(
                       personneNom,
-                      style: TextStyle(fontFamily: kPolice, 
+                      style: const TextStyle(
+                        fontFamily: kPolice,
                         fontWeight: FontWeight.w600,
                         fontSize: 15,
                         color: AppColor.kGrayscaleDark100,
@@ -130,7 +138,8 @@ Widget buildColisCard({required Colis colis, required bool isReception}) {
                     if (personne?.email != null && personne!.email.isNotEmpty)
                       Text(
                         personne.email,
-                        style: TextStyle(fontFamily: kPolice, 
+                        style: const TextStyle(
+                          fontFamily: kPolice,
                           fontSize: 12,
                           color: AppColor.kGrayscale40,
                         ),
@@ -156,7 +165,8 @@ Widget buildColisCard({required Colis colis, required bool isReception}) {
               const Spacer(),
               Text(
                 formatDate(colis.createdAt),
-                style: TextStyle(fontFamily: kPolice, 
+                style: const TextStyle(
+                  fontFamily: kPolice,
                   fontSize: 12,
                   color: AppColor.kGrayscale40,
                 ),

@@ -136,9 +136,7 @@ class _EditProfileViewState extends State<_EditProfileView> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: _C.bg,
-      appBar: AppBar(
-        title: const Text('Modifier le profil'),
-      ),
+      appBar: AppBar(title: const Text('Modifier le profil')),
       body: BlocConsumer<CompteBloc, CompteState>(
         listener: (context, state) {
           if (state is CompteError) {

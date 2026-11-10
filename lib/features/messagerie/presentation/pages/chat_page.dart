@@ -88,9 +88,7 @@ class _ChatViewState extends State<_ChatView> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: _C.bg,
-      appBar: AppBar(
-        title: Text(widget.interlocuteurNom),
-      ),
+      appBar: AppBar(title: Text(widget.interlocuteurNom)),
       body: BlocConsumer<MessagerieBloc, MessagerieState>(
         listener: (context, state) {
           if (state is MessagerieError) {

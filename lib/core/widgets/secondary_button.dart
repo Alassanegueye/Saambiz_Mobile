@@ -96,7 +96,8 @@ class _SecondaryButtonState extends State<SecondaryButton>
               if (icon != null) ...[icon, const SizedBox(width: 12)],
               Text(
                 widget.text,
-                style: TextStyle(fontFamily: kPolice, 
+                style: TextStyle(
+                  fontFamily: kPolice,
                   fontSize: widget.fontSize ?? 14,
                   fontWeight: FontWeight.w600,
                   color: widget.textColor,

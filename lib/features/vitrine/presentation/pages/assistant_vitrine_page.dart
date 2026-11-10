@@ -1138,19 +1138,19 @@ class _EcranGeneration extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
+    return const Center(
       child: Padding(
-        padding: const EdgeInsets.all(36),
+        padding: EdgeInsets.all(36),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const SizedBox(
+            SizedBox(
               width: 42,
               height: 42,
               child: CircularProgressIndicator(strokeWidth: 3, color: _C.navy),
             ),
-            const SizedBox(height: 26),
-            const Text(
+            SizedBox(height: 26),
+            Text(
               'Nous composons votre site',
               style: TextStyle(
                 fontSize: 18,
@@ -1158,7 +1158,7 @@ class _EcranGeneration extends StatelessWidget {
                 color: _C.text,
               ),
             ),
-            const SizedBox(height: 10),
+            SizedBox(height: 10),
             Text(
               'Vos couleurs, votre mise en page, vos textes et votre catalogue '
               'sont assemblés. Encore quelques secondes.',

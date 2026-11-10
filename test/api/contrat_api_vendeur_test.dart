@@ -201,9 +201,9 @@ void main() {
     test('le dépôt du dossier de vérification', () async {
       espion.repond({'success': true, 'data': {}});
 
-      await BoutiqueRemoteDataSourceImpl(dio).soumettreVerification({
-        'registreCommerce': 'RC-123',
-      });
+      await BoutiqueRemoteDataSourceImpl(
+        dio,
+      ).soumettreVerification({'registreCommerce': 'RC-123'});
 
       expect(espion.appel, 'POST /vendeur/soumettre-verification');
       expect(espion.corpsEnvoye['registreCommerce'], 'RC-123');
@@ -321,9 +321,10 @@ void main() {
       );
 
       expect(espion.appel, 'POST /paiement/payer');
-      expect(espion.corpsEnvoye.keys, containsAll(
-        ['montant', 'numeroTelephone', 'methode'],
-      ));
+      expect(
+        espion.corpsEnvoye.keys,
+        containsAll(['montant', 'numeroTelephone', 'methode']),
+      );
       expect(res['paymentUrl'], 'https://pay/x');
     });
 

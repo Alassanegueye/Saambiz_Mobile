@@ -22,10 +22,8 @@ class AuthRepositoryImpl implements AuthRepository {
   AuthRepositoryImpl({required this.remoteDataSource});
 
   @override
-  Future<Either<Failure, User>> login(
-    String identifiant,
-    String motDePasse,
-  ) => _ouvrir(() => remoteDataSource.login(identifiant, motDePasse));
+  Future<Either<Failure, User>> login(String identifiant, String motDePasse) =>
+      _ouvrir(() => remoteDataSource.login(identifiant, motDePasse));
 
   @override
   Future<Either<Failure, User>> connexionSociale(IdentiteSociale identite) =>

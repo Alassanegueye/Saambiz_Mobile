@@ -31,7 +31,8 @@ class MesPromotionsPage extends StatelessWidget {
     return BlocProvider(
       create: (_) => sl<PromotionsBloc>()..add(LoadMesPromotions()),
       child: ActualiserAuRetour(
-        onRetour: (context) => context.read<PromotionsBloc>().add(LoadMesPromotions()),
+        onRetour: (context) =>
+            context.read<PromotionsBloc>().add(LoadMesPromotions()),
         child: const _MesPromotionsView(),
       ),
     );
@@ -86,109 +87,109 @@ class _MesPromotionsView extends StatelessWidget {
         ),
       ),
       corps: BlocConsumer<PromotionsBloc, PromotionsState>(
-              buildWhen: (avant, apres) =>
-                  !(apres is PromotionsLoading && avant is PromotionsLoaded),
-              listener: (context, state) {
-                if (state is PromotionsError) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(state.message),
-                      backgroundColor: Colors.red,
+        buildWhen: (avant, apres) =>
+            !(apres is PromotionsLoading && avant is PromotionsLoaded),
+        listener: (context, state) {
+          if (state is PromotionsError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        },
+        builder: (context, state) {
+          if (state is PromotionsLoading || state is PromotionsInitial) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (state is PromotionsLoaded) {
+            if (state.promotions.isEmpty) {
+              return const _AucunePromotion();
+            }
+            return RefreshIndicator(
+              onRefresh: () async =>
+                  context.read<PromotionsBloc>().add(LoadMesPromotions()),
+              child: ListView.separated(
+                padding: EdgeInsets.fromLTRB(
+                  16,
+                  16,
+                  16,
+                  espaceBasVendeur(context) + 72,
+                ),
+                itemCount: state.promotions.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 12),
+                itemBuilder: (context, i) {
+                  final p = state.promotions[i];
+                  return Container(
+                    decoration: BoxDecoration(
+                      color: _C.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: _C.border),
                     ),
-                  );
-                }
-              },
-              builder: (context, state) {
-                if (state is PromotionsLoading || state is PromotionsInitial) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                if (state is PromotionsLoaded) {
-                  if (state.promotions.isEmpty) {
-                    return const _AucunePromotion();
-                  }
-                  return RefreshIndicator(
-                    onRefresh: () async =>
-                        context.read<PromotionsBloc>().add(LoadMesPromotions()),
-                    child: ListView.separated(
-                      padding: EdgeInsets.fromLTRB(
-                        16,
-                        16,
-                        16,
-                        espaceBasVendeur(context) + 72,
-                      ),
-                      itemCount: state.promotions.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 12),
-                      itemBuilder: (context, i) {
-                        final p = state.promotions[i];
-                        return Container(
-                          decoration: BoxDecoration(
-                            color: _C.white,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: _C.border),
-                          ),
-                          padding: const EdgeInsets.all(12),
-                          child: Row(
+                    padding: const EdgeInsets.all(12),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      p.titre,
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.w700,
-                                        color: _C.black,
-                                      ),
-                                    ),
-                                    Text(
-                                      '${p.prixPromo.toStringAsFixed(0)} FCFA',
-                                      style: const TextStyle(
-                                        color: _C.green,
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                    ),
-                                    if (p.dateFin != null)
-                                      Text(
-                                        'Jusqu\'au ${DateFormat('dd/MM/yyyy').format(p.dateFin!)}',
-                                        style: const TextStyle(
-                                          fontSize: 11,
-                                          color: _C.sub,
-                                        ),
-                                      ),
-                                  ],
+                              Text(
+                                p.titre,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                  color: _C.black,
                                 ),
                               ),
-                              PopupMenuButton<String>(
-                                onSelected: (v) {
-                                  if (v == 'edit') {
-                                    _ouvrirForm(context, promotion: p);
-                                  } else if (v == 'delete') {
-                                    context.read<PromotionsBloc>().add(
-                                      SupprimerPromotion(p.id),
-                                    );
-                                  }
-                                },
-                                itemBuilder: (_) => const [
-                                  PopupMenuItem(
-                                    value: 'edit',
-                                    child: Text('Modifier'),
-                                  ),
-                                  PopupMenuItem(
-                                    value: 'delete',
-                                    child: Text('Supprimer'),
-                                  ),
-                                ],
+                              Text(
+                                '${p.prixPromo.toStringAsFixed(0)} FCFA',
+                                style: const TextStyle(
+                                  color: _C.green,
+                                  fontWeight: FontWeight.w700,
+                                ),
                               ),
+                              if (p.dateFin != null)
+                                Text(
+                                  'Jusqu\'au ${DateFormat('dd/MM/yyyy').format(p.dateFin!)}',
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    color: _C.sub,
+                                  ),
+                                ),
                             ],
                           ),
-                        );
-                      },
+                        ),
+                        PopupMenuButton<String>(
+                          onSelected: (v) {
+                            if (v == 'edit') {
+                              _ouvrirForm(context, promotion: p);
+                            } else if (v == 'delete') {
+                              context.read<PromotionsBloc>().add(
+                                SupprimerPromotion(p.id),
+                              );
+                            }
+                          },
+                          itemBuilder: (_) => const [
+                            PopupMenuItem(
+                              value: 'edit',
+                              child: Text('Modifier'),
+                            ),
+                            PopupMenuItem(
+                              value: 'delete',
+                              child: Text('Supprimer'),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   );
-                }
-                return const SizedBox.shrink();
-              },
-            ),
+                },
+              ),
+            );
+          }
+          return const SizedBox.shrink();
+        },
+      ),
     );
   }
 }

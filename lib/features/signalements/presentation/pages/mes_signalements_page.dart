@@ -36,9 +36,7 @@ class _MesSignalementsView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: _C.bg,
-      appBar: AppBar(
-        title: const Text('Mes signalements'),
-      ),
+      appBar: AppBar(title: const Text('Mes signalements')),
       body: BlocConsumer<SignalementsBloc, SignalementsState>(
         listener: (context, state) {
           if (state is SignalementsError) {
