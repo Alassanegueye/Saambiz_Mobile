@@ -222,12 +222,12 @@ Future<void> init() async {
             if (options.data is FormData) {
               final formData = options.data as FormData;
               _log('FormData fields:');
-              formData.fields.forEach((field) {
+              for (var field in formData.fields) {
                 _log('${field.key}: ${field.value}');
-              });
-              formData.files.forEach((file) {
+              }
+              for (var file in formData.files) {
                 _log('${file.key}: ${file.value.filename}');
-              });
+              }
             } else {
               _log('Body: ${options.data}');
             }

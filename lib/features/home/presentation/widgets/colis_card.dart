@@ -38,7 +38,7 @@ Widget buildColisCard({required Colis colis, required bool isReception}) {
       borderRadius: BorderRadius.circular(16),
       boxShadow: [
         BoxShadow(
-          color: Colors.black.withOpacity(0.05),
+          color: Colors.black.withValues(alpha: 0.05),
           blurRadius: 10,
           offset: const Offset(0, 4),
         ),
@@ -82,9 +82,9 @@ Widget buildColisCard({required Colis colis, required bool isReception}) {
                   vertical: 4,
                 ),
                 decoration: BoxDecoration(
-                  color: statusColor.withOpacity(0.1),
+                  color: statusColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: statusColor.withOpacity(0.3)),
+                  border: Border.all(color: statusColor.withValues(alpha: 0.3)),
                 ),
                 child: Text(
                   colis.statut,
@@ -103,7 +103,7 @@ Widget buildColisCard({required Colis colis, required bool isReception}) {
             children: [
               CircleAvatar(
                 radius: 20,
-                backgroundColor: AppColor.kPrimary.withOpacity(0.1),
+                backgroundColor: AppColor.kPrimary.withValues(alpha: 0.1),
                 child: Text(
                   personneNom.isNotEmpty ? personneNom[0] : '?',
                   style: const TextStyle(

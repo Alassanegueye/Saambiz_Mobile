@@ -71,8 +71,9 @@ class _ProduitsPageState extends State<ProduitsPage> {
   void initState() {
     super.initState();
     _scroll.addListener(() {
-      if (_scroll.position.pixels > _scroll.position.maxScrollExtent - 400)
+      if (_scroll.position.pixels > _scroll.position.maxScrollExtent - 400) {
         _chargerSuite();
+      }
     });
     _charger();
   }

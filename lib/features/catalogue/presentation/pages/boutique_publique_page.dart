@@ -70,8 +70,9 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
     super.initState();
     _scroll.addListener(() {
       if (_sections.isEmpty &&
-          _scroll.position.pixels > _scroll.position.maxScrollExtent - 400)
+          _scroll.position.pixels > _scroll.position.maxScrollExtent - 400) {
         _chargerSuite();
+      }
     });
     _chargerBoutique();
     _charger();
@@ -253,8 +254,9 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
   Future<void> _carte(String adresse) async {
     final url =
         'https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent(adresse)}';
-    if (!await UrlExterne.lancer(url))
+    if (!await UrlExterne.lancer(url)) {
       _message('Impossible d\'ouvrir la carte.');
+    }
   }
 
   void _message(String texte) {

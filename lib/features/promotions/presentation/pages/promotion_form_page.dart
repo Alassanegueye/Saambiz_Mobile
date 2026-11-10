@@ -66,10 +66,12 @@ class _PromotionFormViewState extends State<_PromotionFormView> {
   @override
   void initState() {
     super.initState();
-    if (widget.promotion?.dateDebut != null)
+    if (widget.promotion?.dateDebut != null) {
       _dateDebut = widget.promotion!.dateDebut!;
-    if (widget.promotion?.dateFin != null)
+    }
+    if (widget.promotion?.dateFin != null) {
       _dateFin = widget.promotion!.dateFin!;
+    }
     _produitId = widget.promotion?.produitId;
     _chargerProduits();
   }

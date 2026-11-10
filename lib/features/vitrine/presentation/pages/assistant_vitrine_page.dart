@@ -113,8 +113,9 @@ class _AssistantVitrinePageState extends State<AssistantVitrinePage> {
           ),
         );
       }
-      if (blocs['icones'] is Map)
+      if (blocs['icones'] is Map) {
         _icones = Map<String, dynamic>.from(blocs['icones'] as Map);
+      }
     }
   }
 

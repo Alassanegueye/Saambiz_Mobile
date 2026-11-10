@@ -71,11 +71,12 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
       final list = await widget.dataSource!.getProduitsByBoutique(
         widget.boutique.id,
       );
-      if (mounted)
+      if (mounted) {
         setState(() {
           _produits = list;
           _loading = false;
         });
+      }
 
       // Promotions actives filtrées sur les produits de cette boutique
       try {
@@ -96,11 +97,12 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
       // Avis de la boutique
       await _loadAvis();
     } catch (e) {
-      if (mounted)
+      if (mounted) {
         setState(() {
           _error = e.toString();
           _loading = false;
         });
+      }
     }
   }
 
@@ -213,7 +215,7 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
                   border: Border.all(color: _C.white, width: 4),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.15),
+                      color: Colors.black.withValues(alpha: 0.15),
                       blurRadius: 12,
                       offset: const Offset(0, 4),
                     ),
@@ -405,7 +407,7 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
         width: 38,
         height: 38,
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.2),
+          color: Colors.white.withValues(alpha: 0.2),
           shape: BoxShape.circle,
         ),
         child: Icon(icon, color: _C.white, size: 18),
@@ -642,7 +644,7 @@ class _BoutiqueDetailPageState extends State<BoutiqueDetailPage> {
                           style: TextStyle(
                             fontFamily: kPolice,
                             fontSize: 13,
-                            color: _C.white.withOpacity(0.9),
+                            color: _C.white.withValues(alpha: 0.9),
                           ),
                         ),
                       ],

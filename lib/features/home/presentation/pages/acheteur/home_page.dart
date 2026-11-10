@@ -144,17 +144,19 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     });
     try {
       final list = await _dataSource!.getBoutiques();
-      if (mounted)
+      if (mounted) {
         setState(() {
           _boutiques = list;
           _boutiquesLoad = false;
         });
+      }
     } catch (e) {
-      if (mounted)
+      if (mounted) {
         setState(() {
           _boutiquesError = e.toString();
           _boutiquesLoad = false;
         });
+      }
     }
   }
 
@@ -261,7 +263,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               height: 160,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: _C.green.withOpacity(0.07),
+                color: _C.green.withValues(alpha: 0.07),
               ),
             ),
           ),
@@ -273,7 +275,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               height: 120,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: _C.green.withOpacity(0.05),
+                color: _C.green.withValues(alpha: 0.05),
               ),
             ),
           ),
@@ -290,10 +292,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                         width: 44,
                         height: 44,
                         decoration: BoxDecoration(
-                          color: _C.green.withOpacity(0.15),
+                          color: _C.green.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(13),
                           border: Border.all(
-                            color: _C.green.withOpacity(0.3),
+                            color: _C.green.withValues(alpha: 0.3),
                             width: 1.5,
                           ),
                         ),
@@ -356,7 +358,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                       ? Icons.storefront_outlined
                                       : Icons.email_outlined,
                                   size: 12,
-                                  color: _C.green.withOpacity(0.7),
+                                  color: _C.green.withValues(alpha: 0.7),
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
@@ -368,7 +370,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                     fontFamily: kPolice,
                                     fontSize: 11,
                                     fontWeight: FontWeight.w500,
-                                    color: _C.white.withOpacity(0.6),
+                                    color: _C.white.withValues(alpha: 0.6),
                                     letterSpacing: -0.2,
                                   ),
                                 ),
@@ -878,7 +880,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 height: 110,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: _C.gold.withOpacity(0.15),
+                  color: _C.gold.withValues(alpha: 0.15),
                 ),
               ),
             ),
@@ -918,7 +920,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                         style: TextStyle(
                           fontFamily: kPolice,
                           fontSize: 13,
-                          color: _C.white.withOpacity(0.85),
+                          color: _C.white.withValues(alpha: 0.85),
                           height: 1.35,
                         ),
                       ),
@@ -1015,7 +1017,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             width: 34,
             height: 34,
             decoration: BoxDecoration(
-              color: color.withOpacity(0.10),
+              color: color.withValues(alpha: 0.10),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(icon, size: 17, color: color),
@@ -1401,7 +1403,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       width: 28,
                       height: 28,
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.9),
+                        color: Colors.white.withValues(alpha: 0.9),
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(
@@ -1493,8 +1495,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   // Helpers
   String _getInitiales(User? user) {
     if (user == null) return '?';
-    final p = user.prenom?.isNotEmpty == true ? user.prenom![0] : '';
-    final n = user.nom?.isNotEmpty == true ? user.nom![0] : '';
+    final p = user.prenom.isNotEmpty == true ? user.prenom[0] : '';
+    final n = user.nom.isNotEmpty == true ? user.nom[0] : '';
     return '$p$n'.toUpperCase();
   }
 }
@@ -1535,19 +1537,21 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
       final list = await widget.dataSource!.getProduitsByBoutique(
         widget.boutique.id,
       );
-      if (mounted)
+      if (mounted) {
         setState(() {
           _produits = list;
           _loading = false;
         });
+      }
     } on DioException catch (e) {
       // 404 = boutique sans produit : on affiche la boutique avec une liste vide.
       if (e.response?.statusCode == 404) {
-        if (mounted)
+        if (mounted) {
           setState(() {
             _produits = [];
             _loading = false;
           });
+        }
         return;
       }
       final pasDeReseau =
@@ -1563,11 +1567,12 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
         });
       }
     } catch (e) {
-      if (mounted)
+      if (mounted) {
         setState(() {
           _error = 'Impossible de charger les produits de la boutique.';
           _loading = false;
         });
+      }
     }
   }
 
@@ -1945,7 +1950,7 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
                       width: 28,
                       height: 28,
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.9),
+                        color: Colors.white.withValues(alpha: 0.9),
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(

@@ -61,8 +61,9 @@ class _ChatViewState extends State<_ChatView> {
   void initState() {
     super.initState();
     _sub = sl<SocketService>().onNewMessage.listen((data) {
-      if (mounted)
+      if (mounted) {
         context.read<MessagerieBloc>().add(MessageRecuTempsReel(data));
+      }
     });
   }
 

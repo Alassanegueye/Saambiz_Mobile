@@ -11,7 +11,7 @@ class PasswordTextField extends StatefulWidget {
   final FocusNode? focusNode;
 
   const PasswordTextField({
-    Key? key,
+    super.key,
     required this.hintText,
     required this.height,
     required this.controller,
@@ -20,7 +20,7 @@ class PasswordTextField extends StatefulWidget {
     this.validator,
     this.style,
     this.focusNode,
-  }) : super(key: key);
+  });
 
   @override
   _PasswordTextFieldState createState() => _PasswordTextFieldState();

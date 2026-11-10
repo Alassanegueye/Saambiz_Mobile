@@ -160,14 +160,18 @@ class _NouvelleCampagnePageState extends State<NouvelleCampagnePage> {
   Future<void> _envoyer() async {
     FocusScope.of(context).unfocus();
     String? probleme;
-    if (_type == TypeCampagne.promotion && _produitsChoisis.isEmpty)
+    if (_type == TypeCampagne.promotion && _produitsChoisis.isEmpty) {
       probleme = 'Choisissez au moins un produit.';
-    if (_titre.text.trim().isEmpty)
+    }
+    if (_titre.text.trim().isEmpty) {
       probleme ??= 'Donnez un titre à votre message.';
-    if (_message.text.trim().isEmpty)
+    }
+    if (_message.text.trim().isEmpty) {
       probleme ??= 'Écrivez le message à envoyer.';
-    if (!_tous && _clientsChoisis.isEmpty)
+    }
+    if (!_tous && _clientsChoisis.isEmpty) {
       probleme ??= 'Choisissez au moins un client.';
+    }
     if (probleme != null) {
       _snack(probleme);
       return;

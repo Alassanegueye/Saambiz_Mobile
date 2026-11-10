@@ -178,7 +178,7 @@ class _ProduitPageState extends State<ProduitPage> {
                   height: 100,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: _C.green.withOpacity(0.07),
+                    color: _C.green.withValues(alpha: 0.07),
                   ),
                 ),
               ),
@@ -229,7 +229,7 @@ class _ProduitPageState extends State<ProduitPage> {
                 hintStyle: TextStyle(
                   fontFamily: kPolice,
                   fontSize: 15,
-                  color: Colors.white.withOpacity(0.4),
+                  color: Colors.white.withValues(alpha: 0.4),
                 ),
                 prefixIcon: const Icon(
                   Icons.search_rounded,
@@ -250,14 +250,16 @@ class _ProduitPageState extends State<ProduitPage> {
                       )
                     : null,
                 filled: true,
-                fillColor: Colors.white.withOpacity(0.1),
+                fillColor: Colors.white.withValues(alpha: 0.1),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(30),
                   borderSide: BorderSide.none,
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(30),
-                  borderSide: BorderSide(color: Colors.white.withOpacity(0.2)),
+                  borderSide: BorderSide(
+                    color: Colors.white.withValues(alpha: 0.2),
+                  ),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(30),
@@ -436,7 +438,7 @@ class _ProduitPageState extends State<ProduitPage> {
           border: Border.all(color: _C.border),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.03),
+              color: Colors.black.withValues(alpha: 0.03),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -710,7 +712,7 @@ class _ProduitModalState extends State<_ProduitModal> {
                               width: 32,
                               height: 32,
                               decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.9),
+                                color: Colors.white.withValues(alpha: 0.9),
                                 shape: BoxShape.circle,
                               ),
                               child: const Icon(
@@ -776,7 +778,7 @@ class _ProduitModalState extends State<_ProduitModal> {
                         const SizedBox(height: 8),
 
                         // Catégorie (chip)
-                        if (p.categorie != null && p.categorie!.isNotEmpty)
+                        if (p.categorie.isNotEmpty)
                           Container(
                             margin: const EdgeInsets.only(bottom: 12),
                             padding: const EdgeInsets.symmetric(
@@ -788,7 +790,7 @@ class _ProduitModalState extends State<_ProduitModal> {
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Text(
-                              p.categorie!,
+                              p.categorie,
                               style: const TextStyle(
                                 fontFamily: kPolice,
                                 fontSize: 12,
@@ -828,11 +830,11 @@ class _ProduitModalState extends State<_ProduitModal> {
                         const SizedBox(height: 16),
 
                         // Description
-                        if (p.description != null && p.description!.isNotEmpty)
+                        if (p.description.isNotEmpty)
                           Padding(
                             padding: const EdgeInsets.only(bottom: 16),
                             child: Text(
-                              p.description!,
+                              p.description,
                               style: const TextStyle(
                                 fontFamily: kPolice,
                                 fontSize: 13,
@@ -842,36 +844,35 @@ class _ProduitModalState extends State<_ProduitModal> {
                           ),
 
                         // Quantité en stock (si disponible)
-                        if (p.quantite != null)
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 16),
-                            child: Row(
-                              children: [
-                                Container(
-                                  width: 26,
-                                  height: 26,
-                                  decoration: BoxDecoration(
-                                    color: _C.greenLight,
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: const Icon(
-                                    Icons.inventory_2_rounded,
-                                    color: _C.green,
-                                    size: 14,
-                                  ),
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 16),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 26,
+                                height: 26,
+                                decoration: BoxDecoration(
+                                  color: _C.greenLight,
+                                  borderRadius: BorderRadius.circular(8),
                                 ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  'Stock disponible : ${p.quantite}',
-                                  style: const TextStyle(
-                                    fontFamily: kPolice,
-                                    fontSize: 13,
-                                    color: _C.label,
-                                  ),
+                                child: const Icon(
+                                  Icons.inventory_2_rounded,
+                                  color: _C.green,
+                                  size: 14,
                                 ),
-                              ],
-                            ),
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Stock disponible : ${p.quantite}',
+                                style: const TextStyle(
+                                  fontFamily: kPolice,
+                                  fontSize: 13,
+                                  color: _C.label,
+                                ),
+                              ),
+                            ],
                           ),
+                        ),
 
                         // INFOS VENDEUR
                         Container(
@@ -1032,7 +1033,7 @@ class _ProduitModalState extends State<_ProduitModal> {
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: [
                         BoxShadow(
-                          color: _C.whatsapp.withOpacity(0.35),
+                          color: _C.whatsapp.withValues(alpha: 0.35),
                           blurRadius: 12,
                           offset: const Offset(0, 4),
                         ),

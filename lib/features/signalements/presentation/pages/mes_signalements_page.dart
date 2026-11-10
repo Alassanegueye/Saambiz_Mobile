@@ -104,7 +104,7 @@ class _MesSignalementsView extends StatelessWidget {
                                 vertical: 3,
                               ),
                               decoration: BoxDecoration(
-                                color: _C.orange.withOpacity(0.12),
+                                color: _C.orange.withValues(alpha: 0.12),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Text(

@@ -1,7 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:saambiz/core/widgets/image_reseau.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:saambiz/core/theme/police.dart';
 
 import '../../core/theme/app_color.dart';
@@ -93,11 +92,12 @@ class _AbonnesPageState extends State<AbonnesPage> {
       final liste = await AbonnesService.charger();
       if (mounted) setState(() => _abonnes = liste);
     } catch (_) {
-      if (mounted)
+      if (mounted) {
         setState(
           () => _erreur =
               'Impossible de charger vos abonnés. Vérifiez votre connexion.',
         );
+      }
     }
   }
 
