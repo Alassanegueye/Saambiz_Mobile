@@ -35,7 +35,13 @@ class BoutonsConnexionSociale extends StatelessWidget {
     final source = sl<ConnexionSocialeSource>();
     final fournisseurs = [
       if (source.appleDisponible) FournisseurSocial.apple,
-      if (source.googleAffiche) FournisseurSocial.google,
+      // `googleDisponible`, et non `googleAffiche` : tant que l'identifiant
+      // client n'est pas fourni à la compilation, le bouton répondait « la
+      // connexion avec Google arrive bientôt ». Un bouton qui annonce une
+      // fonctionnalité absente est précisément ce que le relecteur de l'App
+      // Store refuse (directive 2.1, fonctionnalité non opérationnelle) —
+      // et il touche chaque bouton de l'écran de connexion.
+      if (source.googleDisponible) FournisseurSocial.google,
     ];
     if (fournisseurs.isEmpty) return const SizedBox.shrink();
 
