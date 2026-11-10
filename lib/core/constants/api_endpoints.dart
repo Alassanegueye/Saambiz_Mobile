@@ -23,8 +23,10 @@ class AuthEndpoints {
   // avant l'inscription en deux temps.
   static const verifyEmail = '/auth/verify-email';
 
-  /// Renvoi d'un nouveau code de vérification (POST { email }).
-  static const resendVerification = '/auth/resend-verification';
+  // `/auth/resend-verification` n'est pas déclarée ici : l'inscription en deux
+  // temps renvoie un code par `envoyerCodeInscription`, et cette constante
+  // n'était appelée nulle part. La route existe toujours côté backend pour les
+  // comptes ouverts avant ce changement.
 }
 
 /// Produits/boutiques côté acheteur (feature `home`).
@@ -97,6 +99,14 @@ class BoutiqueEndpoints {
   static const modifierBoutique = '/vendeur/modifier-boutique';
   static const pause = '/vendeur/boutique/pause';
   static const reactiver = '/vendeur/boutique/reactiver';
+
+  /// Badge « Boutique vérifiée » : état de la demande, et dépôt du dossier.
+  static const statutVerification = '/vendeur/statut-verification';
+  static const soumettreVerification = '/vendeur/soumettre-verification';
+
+  /// Abonnés de la boutique, et fiche d'un abonné.
+  static const abonnes = '/vendeur/abonnes';
+  static String abonne(String id) => '/vendeur/abonnes/$id';
 }
 
 /// Le site web public de la boutique, « vitrine ».
@@ -111,6 +121,9 @@ class VitrineEndpoints {
   static const analyserLogo = '/vendeur/vitrine/analyser-logo';
   static const generer = '/vendeur/vitrine/generer';
   static const maVitrine = '/vendeur/ma-vitrine';
+
+  /// Rendu du site tel qu'il sera publié, avant de le mettre en ligne.
+  static const apercu = '/vendeur/ma-vitrine/apercu';
 }
 
 /// Abonnement vendeur.
@@ -175,12 +188,46 @@ class PromotionsEndpoints {
   static String parId(String id) => '/promotions/$id';
 }
 
+/// Avis laissés par les acheteurs sur une boutique.
+class AvisEndpoints {
+  AvisEndpoints._();
+
+  static const avis = '/avis';
+  static String boutique(String boutiqueId) => '/avis/boutique/$boutiqueId';
+  static String monAvis(String boutiqueId) =>
+      '/avis/boutique/$boutiqueId/mon-avis';
+}
+
+/// Catégories du catalogue.
+class CategorieEndpoints {
+  CategorieEndpoints._();
+
+  static const categories = '/categories';
+  static String categorie(String idOuSlug) => '/categories/$idOuSlug';
+  static String boutiques(String idOuSlug) => '/categories/$idOuSlug/boutiques';
+}
+
 /// Signalements.
 class SignalementsEndpoints {
   SignalementsEndpoints._();
 
   static const signalements = '/signalements';
   static const mesSignalements = '/signalements/mes-signalements';
+}
+
+/// Réglages publics du backend, servis sans authentification.
+///
+/// Deux routes que l'application n'appelait pas alors qu'elles existaient :
+/// le prix de l'abonnement était donc inconnu côté mobile, et l'app ne voyait
+/// ni les mises en maintenance ni les versions minimales exigées.
+class ConfigEndpoints {
+  ConfigEndpoints._();
+
+  /// `{ prix: 2000, devise: 'FCFA' }`
+  static const prixAbonnement = '/prix-abonnement';
+
+  /// `{ minVersionAndroid, minVersionIos, maintenance, message }`
+  static const appConfig = '/app/config';
 }
 
 /// Dashboard / statistiques vendeur.

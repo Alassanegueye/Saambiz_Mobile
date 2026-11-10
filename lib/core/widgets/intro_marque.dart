@@ -146,7 +146,8 @@ class _IntroMarqueState extends State<IntroMarque>
             CustomPaint(
               size: const Size(
                 116,
-                116 * LogoAnimePainter.hauteurRepere /
+                116 *
+                    LogoAnimePainter.hauteurRepere /
                     LogoAnimePainter.largeurRepere,
               ),
               painter: LogoAnimePainter(ms: ms),
@@ -162,10 +163,7 @@ class _IntroMarqueState extends State<IntroMarque>
         );
 
         if (_mouvementReduit) {
-          return Opacity(
-            opacity: 1 - s,
-            child: _fond(contenu),
-          );
+          return Opacity(opacity: 1 - s, child: _fond(contenu));
         }
 
         // Le rideau remonte ; le logo, lui, descend en s'effaçant.
@@ -186,9 +184,9 @@ class _IntroMarqueState extends State<IntroMarque>
   }
 
   Widget _fond(Widget contenu) => Material(
-        color: Colors.white,
-        child: ExcludeSemantics(child: Center(child: contenu)),
-      );
+    color: Colors.white,
+    child: ExcludeSemantics(child: Center(child: contenu)),
+  );
 }
 
 /// « Saam » bleu marine, « Biz » doré : il s'écrit de gauche à droite en

@@ -10,7 +10,6 @@ import 'reset_password_page.dart';
 
 class _C {
   static const green = Color(0xFF01154B);
-  static const black = Color(0xFF01154B);
   static const white = Color(0xFFFFFFFF);
   static const bg = Color(0xFFF4F5F8);
   static const sub = Color(0xFF5B6C8A);
@@ -57,9 +56,7 @@ class _ForgotPasswordViewState extends State<_ForgotPasswordView> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: _C.bg,
-      appBar: AppBar(
-        title: const Text('Mot de passe oublié'),
-      ),
+      appBar: AppBar(title: const Text('Mot de passe oublié')),
       body: BlocConsumer<CompteBloc, CompteState>(
         listener: (context, state) {
           if (state is CompteError) {

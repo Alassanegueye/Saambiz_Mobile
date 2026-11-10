@@ -10,6 +10,12 @@ abstract class VitrineRemoteDataSource {
   Future<List<SecteurVitrine>> getSecteurs();
   Future<VitrineModel> getMaVitrine();
 
+  /// Rendu du site tel qu'il sera publié, sans le mettre en ligne.
+  Future<Map<String, dynamic>> apercu();
+
+  /// Retire le site public de la boutique.
+  Future<void> supprimerVitrine();
+
   /// Analyse un logo sans rien enregistrer.
   Future<ResultatAnalyse> analyserLogo({
     required String logoPath,
@@ -121,5 +127,20 @@ class VitrineRemoteDataSourceImpl implements VitrineRemoteDataSource {
   Future<VitrineModel> modifierVitrine(Map<String, dynamic> champs) async {
     final res = await dio.put(VitrineEndpoints.maVitrine, data: champs);
     return VitrineModel.fromJson(res.data);
+  }
+
+  // `apercu` et la suppression existaient côté backend sans être appelées :
+  // le vendeur ne pouvait ni relire son site avant publication, ni le retirer.
+
+  @override
+  Future<Map<String, dynamic>> apercu() async {
+    final res = await dio.get(VitrineEndpoints.apercu);
+    final data = res.data;
+    return data is Map ? Map<String, dynamic>.from(data) : const {};
+  }
+
+  @override
+  Future<void> supprimerVitrine() async {
+    await dio.delete(VitrineEndpoints.maVitrine);
   }
 }

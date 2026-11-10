@@ -16,11 +16,8 @@ import 'package:saambiz/core/utils/texte.dart';
 
 class _C {
   static const green = Color(0xFF01154B);
-  static const navyDk = Color(0xFF060F26);
-  static const gold = Color(0xFFFBB900);
   static const black = Color(0xFF01154B);
   static const white = Color(0xFFFFFFFF);
-  static const bg = Color(0xFFF4F5F8);
   static const sub = Color(0xFF5B6C8A);
   static const border = Color(0xFFE6EAF0);
   static const success = Color(0xFF1E9E62);
@@ -94,79 +91,74 @@ class _MesProduitsViewState extends State<_MesProduitsView> {
         ),
       ),
       corps: BlocConsumer<VendeurProduitBloc, VendeurProduitState>(
-                buildWhen: (avant, apres) =>
-                    !(apres is VendeurProduitLoading &&
-                        avant is VendeurProduitLoaded),
-                listener: (context, state) {
-                  if (state is VendeurProduitError) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(state.message),
-                        backgroundColor: _C.danger,
-                      ),
-                    );
-                  }
-                },
-                builder: (context, state) {
-                  if (state is VendeurProduitLoading) {
-                    return const Center(
-                      child: CircularProgressIndicator(color: _C.green),
-                    );
-                  }
-                  if (state is VendeurProduitError) {
-                    return _buildError(context, state.message);
-                  }
-                  if (state is VendeurProduitLoaded) {
-                    final all = state.produits;
-                    final enLigne = all.where(_enLigne).toList();
-                    final horsLigne = all.where((p) => !_enLigne(p)).toList();
-                    final shown =
-                        (_tab == 1
-                                ? enLigne
-                                : _tab == 2
-                                ? horsLigne
-                                : all)
-                            .where((p) => contientRecherche(p.nom, _recherche))
-                            .toList();
-
-                    return Column(
-                      children: [
-                        _buildTabs(
-                          all.length,
-                          enLigne.length,
-                          horsLigne.length,
-                        ),
-                        Expanded(
-                          child: shown.isEmpty
-                              ? _buildEmpty()
-                              : RefreshIndicator(
-                                  color: _C.green,
-                                  onRefresh: () async => context
-                                      .read<VendeurProduitBloc>()
-                                      .add(LoadMesProduits()),
-                                  child: ListView.separated(
-                                    // Le bas laisse la place au bouton
-                                    // Ajouter et a la barre d'onglets.
-                                    padding: EdgeInsets.fromLTRB(
-                                      16,
-                                      4,
-                                      16,
-                                      espaceBasVendeur(context) + 72,
-                                    ),
-                                    itemCount: shown.length,
-                                    separatorBuilder: (_, __) =>
-                                        const SizedBox(height: 8),
-                                    itemBuilder: (_, i) =>
-                                        _buildCard(context, shown[i]),
-                                  ),
-                                ),
-                        ),
-                      ],
-                    );
-                  }
-                  return const SizedBox.shrink();
-                },
+        buildWhen: (avant, apres) =>
+            !(apres is VendeurProduitLoading && avant is VendeurProduitLoaded),
+        listener: (context, state) {
+          if (state is VendeurProduitError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: _C.danger,
               ),
+            );
+          }
+        },
+        builder: (context, state) {
+          if (state is VendeurProduitLoading) {
+            return const Center(
+              child: CircularProgressIndicator(color: _C.green),
+            );
+          }
+          if (state is VendeurProduitError) {
+            return _buildError(context, state.message);
+          }
+          if (state is VendeurProduitLoaded) {
+            final all = state.produits;
+            final enLigne = all.where(_enLigne).toList();
+            final horsLigne = all.where((p) => !_enLigne(p)).toList();
+            final shown =
+                (_tab == 1
+                        ? enLigne
+                        : _tab == 2
+                        ? horsLigne
+                        : all)
+                    .where((p) => contientRecherche(p.nom, _recherche))
+                    .toList();
+
+            return Column(
+              children: [
+                _buildTabs(all.length, enLigne.length, horsLigne.length),
+                Expanded(
+                  child: shown.isEmpty
+                      ? _buildEmpty()
+                      : RefreshIndicator(
+                          color: _C.green,
+                          onRefresh: () async => context
+                              .read<VendeurProduitBloc>()
+                              .add(LoadMesProduits()),
+                          child: ListView.separated(
+                            // Le bas laisse la place au bouton
+                            // Ajouter et a la barre d'onglets.
+                            padding: EdgeInsets.fromLTRB(
+                              16,
+                              4,
+                              16,
+                              espaceBasVendeur(context) + 72,
+                            ),
+                            itemCount: shown.length,
+                            separatorBuilder: (_, __) =>
+                                const SizedBox(height: 8),
+                            itemBuilder: (_, i) =>
+                                _buildCard(context, shown[i]),
+                          ),
+                        ),
+                ),
+              ],
+            );
+          }
+          return const SizedBox.shrink();
+        },
+      ),
     );
   }
 
@@ -253,7 +245,13 @@ class _MesProduitsViewState extends State<_MesProduitsView> {
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
             child: p.image.isNotEmpty
-                ? ImageReseau(p.image, width: 64, height: 64, fit: BoxFit.cover, repli: _imgFallback())
+                ? ImageReseau(
+                    p.image,
+                    width: 64,
+                    height: 64,
+                    fit: BoxFit.cover,
+                    repli: _imgFallback(),
+                  )
                 : _imgFallback(),
           ),
           const SizedBox(width: 12),
@@ -265,7 +263,8 @@ class _MesProduitsViewState extends State<_MesProduitsView> {
                   p.nom,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontFamily: kPolice, 
+                  style: const TextStyle(
+                    fontFamily: kPolice,
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
                     color: _C.black,
@@ -274,7 +273,8 @@ class _MesProduitsViewState extends State<_MesProduitsView> {
                 const SizedBox(height: 3),
                 Text(
                   formaterPrix(double.tryParse(p.prix) ?? 0),
-                  style: TextStyle(fontFamily: kPolice, 
+                  style: const TextStyle(
+                    fontFamily: kPolice,
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
                     color: _C.green,
@@ -285,7 +285,8 @@ class _MesProduitsViewState extends State<_MesProduitsView> {
                   enLigne
                       ? 'En ligne · ${p.quantite} en stock'
                       : 'Hors ligne · rupture de stock',
-                  style: TextStyle(fontFamily: kPolice, 
+                  style: TextStyle(
+                    fontFamily: kPolice,
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
                     color: enLigne ? _C.success : _C.sub,
@@ -346,16 +347,17 @@ class _MesProduitsViewState extends State<_MesProduitsView> {
             child: Text(
               message,
               textAlign: TextAlign.center,
-              style: TextStyle(fontFamily: kPolice, color: _C.sub),
+              style: const TextStyle(fontFamily: kPolice, color: _C.sub),
             ),
           ),
           const SizedBox(height: 12),
           TextButton(
             onPressed: () =>
                 context.read<VendeurProduitBloc>().add(LoadMesProduits()),
-            child: Text(
+            child: const Text(
               'Réessayer',
-              style: TextStyle(fontFamily: kPolice, 
+              style: TextStyle(
+                fontFamily: kPolice,
                 color: _C.green,
                 fontWeight: FontWeight.w700,
               ),

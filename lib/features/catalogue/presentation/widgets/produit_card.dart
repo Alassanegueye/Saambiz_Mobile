@@ -260,10 +260,7 @@ class ProduitCard extends StatelessWidget {
               top: 8,
               left: 8,
               child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 7,
-                  vertical: 3,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
                 decoration: BoxDecoration(
                   color: AppColor.kWhite,
                   borderRadius: BorderRadius.circular(7),
@@ -419,11 +416,15 @@ Future<bool> ajouterAuPanier(
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text(
+        title: const Text(
           'Une boutique à la fois',
-          style: TextStyle(fontFamily: kPolice, fontWeight: FontWeight.w700, fontSize: 17),
+          style: TextStyle(
+            fontFamily: kPolice,
+            fontWeight: FontWeight.w700,
+            fontSize: 17,
+          ),
         ),
-        content: Text(
+        content: const Text(
           'Votre panier contient des articles d\'une autre boutique. '
           'Voulez-vous le vider pour ajouter celui-ci ?',
           style: TextStyle(fontFamily: kPolice, fontSize: 14, height: 1.45),
@@ -455,9 +456,13 @@ Future<bool> ajouterAuPanier(
   final messager = ScaffoldMessenger.of(context)..clearSnackBars();
   final bandeau = messager.showSnackBar(
     SnackBar(
-      content: Text(
+      content: const Text(
         'Ajouté au panier',
-        style: TextStyle(fontFamily: kPolice, fontSize: 13.5, fontWeight: FontWeight.w600),
+        style: TextStyle(
+          fontFamily: kPolice,
+          fontSize: 13.5,
+          fontWeight: FontWeight.w600,
+        ),
       ),
       backgroundColor: AppColor.kPrimary,
       behavior: SnackBarBehavior.floating,

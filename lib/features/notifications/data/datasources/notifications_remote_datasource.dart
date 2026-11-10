@@ -44,9 +44,20 @@ class NotificationsRemoteDataSourceImpl
   @override
   Future<int> nombreNonLues() async {
     final res = await dio.get(NotificationsEndpoints.nonLues);
-    final data = res.data;
-    if (data is Map && data['nombre'] != null) {
-      return int.tryParse(data['nombre'].toString()) ?? 0;
+    return _compteur(res.data, 'nonLues');
+  }
+
+  /// Lit un compteur dans la réponse du backend.
+  ///
+  /// La clé lue était `nombre`, que le backend n'envoie pas : il répond
+  /// `{ nonLues: 3 }`. Le compteur retombait donc toujours sur 0, et la
+  /// pastille de la cloche restait vide quel que soit le nombre réel de
+  /// notifications — un défaut muet, qui ressemblait à « rien de nouveau ».
+  static int _compteur(dynamic data, String cle) {
+    if (data is! Map) return 0;
+    for (final candidate in [cle, 'nombre', 'count', 'total']) {
+      final valeur = data[candidate];
+      if (valeur != null) return int.tryParse(valeur.toString()) ?? 0;
     }
     return 0;
   }

@@ -14,7 +14,6 @@ class _C {
   static const black = Color(0xFF01154B);
   static const white = Color(0xFFFFFFFF);
   static const bg = Color(0xFFF4F5F8);
-  static const sub = Color(0xFF5B6C8A);
   static const border = Color(0xFFE3E8F0);
 }
 
@@ -61,8 +60,9 @@ class _ChatViewState extends State<_ChatView> {
   void initState() {
     super.initState();
     _sub = sl<SocketService>().onNewMessage.listen((data) {
-      if (mounted)
+      if (mounted) {
         context.read<MessagerieBloc>().add(MessageRecuTempsReel(data));
+      }
     });
   }
 
@@ -88,9 +88,7 @@ class _ChatViewState extends State<_ChatView> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: _C.bg,
-      appBar: AppBar(
-        title: Text(widget.interlocuteurNom),
-      ),
+      appBar: AppBar(title: Text(widget.interlocuteurNom)),
       body: BlocConsumer<MessagerieBloc, MessagerieState>(
         listener: (context, state) {
           if (state is MessagerieError) {
@@ -132,7 +130,7 @@ class _ChatViewState extends State<_ChatView> {
                               ),
                               constraints: BoxConstraints(
                                 maxWidth:
-                                    MediaQuery.of(context).size.width * 0.75,
+                                    MediaQuery.sizeOf(context).width * 0.75,
                               ),
                               decoration: BoxDecoration(
                                 color: mine ? _C.green : _C.white,

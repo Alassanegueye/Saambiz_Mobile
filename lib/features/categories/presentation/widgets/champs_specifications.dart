@@ -336,8 +336,9 @@ class _ValeursState extends State<_Valeurs> {
         .map((e) => e.trim())
         .where((e) => e.isNotEmpty && !_coche(e))
         .toList();
-    if (nouvelles.isNotEmpty)
+    if (nouvelles.isNotEmpty) {
       widget.onChanged([...widget.valeurs, ...nouvelles]);
+    }
     _saisie.clear();
   }
 

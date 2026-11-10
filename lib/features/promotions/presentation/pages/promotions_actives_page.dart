@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:saambiz/core/widgets/image_reseau.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
 
 import '../../../../injection_container.dart';
 import '../bloc/promotions_bloc.dart';
 import '../bloc/promotions_event.dart';
 import '../bloc/promotions_state.dart';
+import '../../../../core/utils/dates.dart';
 
 class _C {
   static const green = Color(0xFF01154B);
@@ -38,9 +38,7 @@ class _PromotionsActivesView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: _C.bg,
-      appBar: AppBar(
-        title: const Text('Promotions'),
-      ),
+      appBar: AppBar(title: const Text('Promotions')),
       body: BlocConsumer<PromotionsBloc, PromotionsState>(
         listener: (context, state) {
           if (state is PromotionsError) {
@@ -86,7 +84,12 @@ class _PromotionsActivesView extends StatelessWidget {
                         ClipRRect(
                           borderRadius: BorderRadius.circular(12),
                           child: (p.produitImage ?? '').isNotEmpty
-                              ? ImageReseau(p.produitImage!, width: 60, height: 60, fit: BoxFit.cover)
+                              ? ImageReseau(
+                                  p.produitImage!,
+                                  width: 60,
+                                  height: 60,
+                                  fit: BoxFit.cover,
+                                )
                               : Container(
                                   width: 60,
                                   height: 60,
@@ -126,7 +129,7 @@ class _PromotionsActivesView extends StatelessWidget {
                               ),
                               if (p.dateFin != null)
                                 Text(
-                                  'Jusqu\'au ${DateFormat('dd/MM/yyyy').format(p.dateFin!)}',
+                                  'Jusqu\'au ${dateCourte.format(p.dateFin!)}',
                                   style: const TextStyle(
                                     fontSize: 11,
                                     color: _C.sub,

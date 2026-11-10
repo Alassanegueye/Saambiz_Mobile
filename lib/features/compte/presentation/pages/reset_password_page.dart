@@ -10,7 +10,6 @@ import '../bloc/compte_state.dart';
 
 class _C {
   static const green = Color(0xFF01154B);
-  static const black = Color(0xFF01154B);
   static const white = Color(0xFFFFFFFF);
   static const bg = Color(0xFFF4F5F8);
   static const border = Color(0xFFE3E8F0);
@@ -64,9 +63,7 @@ class _ResetPasswordViewState extends State<_ResetPasswordView> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: _C.bg,
-      appBar: AppBar(
-        title: const Text('Réinitialiser le mot de passe'),
-      ),
+      appBar: AppBar(title: const Text('Réinitialiser le mot de passe')),
       body: BlocConsumer<CompteBloc, CompteState>(
         listener: (context, state) {
           if (state is CompteError) {

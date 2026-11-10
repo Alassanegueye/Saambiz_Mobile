@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:saambiz/core/demo/donnees_demo.dart';
 import 'package:saambiz/core/routes/app_router.dart';
 import 'package:saambiz/core/theme/app_theme.dart';
 import 'package:saambiz/core/utils/app_logger.dart';
@@ -58,6 +59,11 @@ void main() async {
 
       // dotenv est chargé une seule fois, à l'intérieur de di.init().
       await di.init();
+
+      // Captures App Store : les photos des produits de démonstration sont
+      // embarquées, rien n'est téléchargé. Sans --dart-define=DEMO=true,
+      // cet appel est éliminé à la compilation.
+      if (modeDemo) installerImagesDemo();
 
       runApp(const MyApp());
     },

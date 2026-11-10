@@ -6,6 +6,7 @@ import '../../domain/entities/vitrine.dart';
 import '../../domain/repositories/vitrine_repository.dart';
 import '../datasources/vitrine_remote_datasource.dart';
 import '../models/vitrine_model.dart';
+import '../../../../core/errors/message_erreur.dart';
 
 class VitrineRepositoryImpl implements VitrineRepository {
   final VitrineRemoteDataSource remoteDataSource;
@@ -14,15 +15,7 @@ class VitrineRepositoryImpl implements VitrineRepository {
   /// Le message du serveur passe avant le nôtre : « Cette adresse est déjà
   /// prise par une autre boutique » est écrit pour le vendeur, « erreur 409 »
   /// ne lui apprend rien.
-  String _message(Object e) {
-    if (e is DioException) {
-      final data = e.response?.data;
-      if (data is Map && data['message'] != null)
-        return data['message'].toString();
-      return e.message ?? 'Une erreur est survenue';
-    }
-    return e.toString();
-  }
+  String _message(Object e) => messageErreurReseau(e);
 
   int? _statut(Object e) => e is DioException ? e.response?.statusCode : null;
 

@@ -5,13 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:dio/dio.dart';
 import '../../../../../core/widgets/logo_boutique.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:saambiz/core/theme/police.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:saambiz/features/auth/domain/entities/user.dart';
 import '../../bloc/produit_bloc.dart';
 import '../../bloc/produit_event.dart';
-import '../../bloc/produit_state.dart';
 import '../../../data/datasources/produit_remote_datasource.dart';
 import '../../../data/models/produit_model.dart';
 import '../../../data/models/boutique_model.dart';
@@ -39,19 +37,15 @@ import '../../../../../core/widgets/page_vendeur.dart';
 
 class _C {
   static const green = Color(0xFF01154B); // navy (héritage de nom)
-  static const navyDk = Color(0xFF060F26);
-  static const gold = Color(0xFFFBB900);
   static const greenLight = Color(0xFFE8EEF7);
   static const black = Color(0xFF01154B);
   static const white = Color(0xFFFFFFFF);
-  static const success = Color(0xFF1E9E62);
   static const bg = Color(0xFFF4F5F8);
   static const surface = Color(0xFFF7F9FC);
   static const border = Color(0xFFE8EDF7);
   static const label = Color(0xFF93A1B8);
   static const sub = Color(0xFF5B6C8A);
   static const orange = Color(0xFFFF5722);
-  static const amber = Color(0xFFFF9800);
   static const whatsapp = Color(0xFF25D366);
 }
 
@@ -78,7 +72,7 @@ class _HomePageState extends State<HomePage>
 
   bool _loading = false;
   int _nbCommandes = 0;
-  int _nbFavoris = 0;
+  final int _nbFavoris = 0;
 
   // Tableau de bord (données réelles via /vendeur/dashboard)
   String _ventes = '0';
@@ -101,9 +95,11 @@ class _HomePageState extends State<HomePage>
   bool _boutiquesLoad = false;
   String? _boutiquesError;
 
-  late AnimationController _headerCtrl;
-  late Animation<double> _headerFade;
-  late Animation<Offset> _headerSlide;
+  // Pas d'animation d'en-tête : celle qui existait pilotait deux
+  // `Animation` que plus rien n'écoutait depuis la refonte de l'écran. Le
+  // contrôleur était pourtant lancé, et un contrôleur lancé réclame une
+  // frame à chaque battement pendant toute sa durée — 800 ms de travail de
+  // rendu à chaque ouverture du tableau de bord, pour rien à l'écran.
 
   late AnimationController _contentCtrl;
   late Animation<double> _contentFade;
@@ -114,21 +110,11 @@ class _HomePageState extends State<HomePage>
   @override
   void initState() {
     super.initState();
-    _headerCtrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 800),
-    );
     _contentCtrl = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 600),
     );
-    _headerFade = CurvedAnimation(parent: _headerCtrl, curve: Curves.easeOut);
-    _headerSlide = Tween<Offset>(
-      begin: const Offset(0, -0.04),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _headerCtrl, curve: Curves.easeOutCubic));
     _contentFade = CurvedAnimation(parent: _contentCtrl, curve: Curves.easeOut);
-    _headerCtrl.forward();
     Future.delayed(const Duration(milliseconds: 250), () {
       if (mounted) _contentCtrl.forward();
     });
@@ -185,23 +171,24 @@ class _HomePageState extends State<HomePage>
       // Surtout pas la liste publique : elle contient les boutiques de tous les
       // vendeurs, la plus récente en premier.
       final maBoutique = await _dataSource!.getMaBoutique();
-      if (mounted)
+      if (mounted) {
         setState(() {
           _boutiques = maBoutique == null ? [] : [maBoutique];
           _boutiquesLoad = false;
         });
+      }
     } catch (e) {
-      if (mounted)
+      if (mounted) {
         setState(() {
           _boutiquesError = e.toString();
           _boutiquesLoad = false;
         });
+      }
     }
   }
 
   @override
   void dispose() {
-    _headerCtrl.dispose();
     _contentCtrl.dispose();
     _produitBloc?.close();
     super.dispose();
@@ -361,7 +348,7 @@ class _HomePageState extends State<HomePage>
   Widget _buildBarreHaut() {
     final boutique = _boutiques.isNotEmpty ? _boutiques.first : null;
 
-    return Container(
+    return ColoredBox(
       color: AppColor.kPrimary,
       child: SafeArea(
         bottom: false,
@@ -385,7 +372,8 @@ class _HomePageState extends State<HomePage>
                           'Ma boutique',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(fontFamily: kPolice, 
+                          style: TextStyle(
+                            fontFamily: kPolice,
                             fontSize: 12.5,
                             color: AppColor.kWhite.withValues(alpha: 0.7),
                           ),
@@ -397,7 +385,8 @@ class _HomePageState extends State<HomePage>
                               boutique?.nom ?? 'Ma boutique',
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: TextStyle(fontFamily: kPolice, 
+                              style: const TextStyle(
+                                fontFamily: kPolice,
                                 fontSize: 17,
                                 fontWeight: FontWeight.w700,
                                 color: AppColor.kWhite,
@@ -483,7 +472,8 @@ class _HomePageState extends State<HomePage>
         : Center(
             child: Text(
               initialesDe(boutique.nom),
-              style: TextStyle(fontFamily: kPolice, 
+              style: const TextStyle(
+                fontFamily: kPolice,
                 fontSize: 16,
                 fontWeight: FontWeight.w800,
                 color: AppColor.kPrimary,
@@ -516,7 +506,9 @@ class _HomePageState extends State<HomePage>
           child: Container(
             decoration: BoxDecoration(
               color: AppColor.kPrimary,
-              borderRadius: const BorderRadius.vertical(bottom: Radius.circular(32)),
+              borderRadius: const BorderRadius.vertical(
+                bottom: Radius.circular(32),
+              ),
               boxShadow: [
                 BoxShadow(
                   color: AppColor.kPrimary.withValues(alpha: 0.20),
@@ -539,7 +531,8 @@ class _HomePageState extends State<HomePage>
                   children: [
                     Text(
                       'Chiffre d’affaires',
-                      style: TextStyle(fontFamily: kPolice, 
+                      style: TextStyle(
+                        fontFamily: kPolice,
                         fontSize: 13,
                         color: AppColor.kWhite.withValues(alpha: 0.7),
                       ),
@@ -551,10 +544,11 @@ class _HomePageState extends State<HomePage>
                       child: Text.rich(
                         TextSpan(
                           text: _ventes,
-                          children: [
+                          children: const [
                             TextSpan(
                               text: ' FCFA',
-                              style: TextStyle(fontFamily: kPolice, 
+                              style: TextStyle(
+                                fontFamily: kPolice,
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
                                 color: AppColor.kSecondary,
@@ -562,12 +556,13 @@ class _HomePageState extends State<HomePage>
                             ),
                           ],
                         ),
-                        style: TextStyle(fontFamily: kPolice, 
+                        style: const TextStyle(
+                          fontFamily: kPolice,
                           fontSize: 36,
                           fontWeight: FontWeight.w800,
                           letterSpacing: -0.5,
                           color: AppColor.kWhite,
-                          fontFeatures: const [FontFeature.tabularFigures()],
+                          fontFeatures: [FontFeature.tabularFigures()],
                         ),
                       ),
                     ),
@@ -602,11 +597,12 @@ class _HomePageState extends State<HomePage>
                 const SizedBox(height: 6),
                 Text(
                   valeur,
-                  style: TextStyle(fontFamily: kPolice, 
+                  style: const TextStyle(
+                    fontFamily: kPolice,
                     fontSize: 20,
                     fontWeight: FontWeight.w700,
                     color: AppColor.kGrayscaleDark100,
-                    fontFeatures: const [FontFeature.tabularFigures()],
+                    fontFeatures: [FontFeature.tabularFigures()],
                   ),
                 ),
                 const SizedBox(height: 1),
@@ -621,7 +617,7 @@ class _HomePageState extends State<HomePage>
     Widget separateur() =>
         Container(width: 1, height: 44, color: AppColor.kLine);
 
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         color: AppColor.kWhite,
         borderRadius: BorderRadius.circular(20),
@@ -637,27 +633,27 @@ class _HomePageState extends State<HomePage>
       child: ClipRRect(
         borderRadius: BorderRadius.circular(20),
         child: Row(
-        children: [
-          chiffre(
-            Icons.receipt_long_outlined,
-            'Commandes',
-            '$_commandesCount',
-            onTap: () => widget.ouvrirOnglet?.call(1),
-          ),
-          separateur(),
-          chiffre(Icons.visibility_outlined, 'Visites', _visites),
-          separateur(),
-          // Le nombre d'abonnés ouvre la liste des clients abonnés.
-          chiffre(
-            Icons.people_outline_rounded,
-            'Abonnés',
-            _clients,
-            onTap: () => Navigator.of(
-              context,
-            ).push(MaterialPageRoute(builder: (_) => const AbonnesPage())),
-          ),
-        ],
-      ),
+          children: [
+            chiffre(
+              Icons.receipt_long_outlined,
+              'Commandes',
+              '$_commandesCount',
+              onTap: () => widget.ouvrirOnglet?.call(1),
+            ),
+            separateur(),
+            chiffre(Icons.visibility_outlined, 'Visites', _visites),
+            separateur(),
+            // Le nombre d'abonnés ouvre la liste des clients abonnés.
+            chiffre(
+              Icons.people_outline_rounded,
+              'Abonnés',
+              _clients,
+              onTap: () => Navigator.of(
+                context,
+              ).push(MaterialPageRoute(builder: (_) => const AbonnesPage())),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -687,7 +683,8 @@ class _HomePageState extends State<HomePage>
                   children: [
                     Text(
                       '$_aTraiter commande${pluriel ? 's' : ''} à traiter',
-                      style: TextStyle(fontFamily: kPolice, 
+                      style: const TextStyle(
+                        fontFamily: kPolice,
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
                         color: AppColor.kGrayscaleDark100,
@@ -741,7 +738,8 @@ class _HomePageState extends State<HomePage>
                       libelle,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(fontFamily: kPolice, 
+                      style: const TextStyle(
+                        fontFamily: kPolice,
                         fontSize: 13.5,
                         fontWeight: FontWeight.w600,
                         color: AppColor.kGrayscaleDark100,
@@ -767,7 +765,8 @@ class _HomePageState extends State<HomePage>
             backgroundColor: AppColor.kSecondary,
             foregroundColor: AppColor.kPrimary,
             padding: const EdgeInsets.symmetric(vertical: 15),
-            textStyle: TextStyle(fontFamily: kPolice, 
+            textStyle: const TextStyle(
+              fontFamily: kPolice,
               fontSize: 15,
               fontWeight: FontWeight.w700,
             ),
@@ -865,7 +864,8 @@ class _HomePageState extends State<HomePage>
                 backgroundColor: AppColor.kPrimaryLight,
                 child: Text(
                   initiales.isEmpty ? '?' : initiales,
-                  style: TextStyle(fontFamily: kPolice, 
+                  style: const TextStyle(
+                    fontFamily: kPolice,
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
                     color: AppColor.kPrimary,
@@ -881,7 +881,8 @@ class _HomePageState extends State<HomePage>
                       nom.isEmpty ? 'Client' : nom,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(fontFamily: kPolice, 
+                      style: const TextStyle(
+                        fontFamily: kPolice,
                         fontSize: 14.5,
                         fontWeight: FontWeight.w600,
                         color: AppColor.kGrayscaleDark100,
@@ -903,7 +904,8 @@ class _HomePageState extends State<HomePage>
                 children: [
                   Text(
                     '${_fmtNombre(o.montantTotal)} FCFA',
-                    style: TextStyle(fontFamily: kPolice, 
+                    style: const TextStyle(
+                      fontFamily: kPolice,
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
                       color: AppColor.kGrayscaleDark100,
@@ -921,7 +923,8 @@ class _HomePageState extends State<HomePage>
                     ),
                     child: Text(
                       st.label,
-                      style: TextStyle(fontFamily: kPolice, 
+                      style: TextStyle(
+                        fontFamily: kPolice,
                         fontSize: 11.5,
                         fontWeight: FontWeight.w600,
                         color: st.color,
@@ -935,786 +938,6 @@ class _HomePageState extends State<HomePage>
         ),
       ),
     );
-  }
-
-  // Header
-  Widget _buildHeader(String prenom, String initiales) {
-    return Container(
-      color: _C.black,
-      child: Stack(
-        children: [
-          Positioned(
-            top: -50,
-            right: -30,
-            child: Container(
-              width: 160,
-              height: 160,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: _C.green.withOpacity(0.07),
-              ),
-            ),
-          ),
-          Positioned(
-            bottom: -30,
-            left: -20,
-            child: Container(
-              width: 120,
-              height: 120,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: _C.green.withOpacity(0.05),
-              ),
-            ),
-          ),
-          SafeArea(
-            bottom: false,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(22, 16, 22, 24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        width: 44,
-                        height: 44,
-                        decoration: BoxDecoration(
-                          color: _C.green.withOpacity(0.15),
-                          borderRadius: BorderRadius.circular(13),
-                          border: Border.all(
-                            color: _C.green.withOpacity(0.3),
-                            width: 1.5,
-                          ),
-                        ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(13),
-                          child:
-                              (widget.user?.photoProfil != null &&
-                                  widget.user!.photoProfil!.isNotEmpty)
-                              ? Image.network(
-                                  widget.user!.photoProfil!,
-                                  width: 44,
-                                  height: 44,
-                                  fit: BoxFit.cover,
-                                  loadingBuilder: (context, child, loadingProgress) {
-                                    if (loadingProgress == null) return child;
-                                    return Center(
-                                      child: CircularProgressIndicator(
-                                        value:
-                                            loadingProgress
-                                                    .expectedTotalBytes !=
-                                                null
-                                            ? loadingProgress
-                                                      .cumulativeBytesLoaded /
-                                                  (loadingProgress
-                                                          .expectedTotalBytes ??
-                                                      1)
-                                            : null,
-                                      ),
-                                    );
-                                  },
-                                  errorBuilder: (context, error, stackTrace) {
-                                    // Si l'image ne charge pas, afficher les initiales
-                                    return Center(
-                                      child: Text(
-                                        initiales,
-                                        style: TextStyle(fontFamily: kPolice, 
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w800,
-                                          color: _C.green,
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                )
-                              : Center(
-                                  child: Text(
-                                    initiales,
-                                    style: TextStyle(fontFamily: kPolice, 
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w800,
-                                      color: _C.green,
-                                    ),
-                                  ),
-                                ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              '$prenom ${widget.user?.nom ?? ''}',
-                              style: TextStyle(fontFamily: kPolice, 
-                                fontSize: 18,
-                                fontWeight: FontWeight.w800,
-                                color: _C.white,
-                                letterSpacing: -0.4,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.email_outlined,
-                                  size: 12,
-                                  color: _C.green.withOpacity(0.7),
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  widget.user?.email ?? 'email@exemple.com',
-                                  style: TextStyle(fontFamily: kPolice, 
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w500,
-                                    color: _C.white.withOpacity(0.6),
-                                    letterSpacing: -0.2,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 18),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Bannière promo
-  Widget _buildPromoBanner() {
-    return Container(
-      margin: const EdgeInsets.fromLTRB(18, 18, 18, 0),
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
-      decoration: BoxDecoration(
-        color: _C.black,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Stack(
-        children: [
-          Positioned(
-            right: -10,
-            top: -20,
-            child: Container(
-              width: 90,
-              height: 90,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: _C.green.withOpacity(0.12),
-              ),
-            ),
-          ),
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: _C.green.withOpacity(0.15),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        'OFFRE SPÉCIALE',
-                        style: TextStyle(fontFamily: kPolice, 
-                          fontSize: 10,
-                          fontWeight: FontWeight.w700,
-                          color: _C.green,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    RichText(
-                      text: TextSpan(
-                        children: [
-                          TextSpan(
-                            text: 'Livraison ',
-                            style: TextStyle(fontFamily: kPolice, 
-                              fontSize: 15,
-                              fontWeight: FontWeight.w800,
-                              color: _C.white,
-                            ),
-                          ),
-                          TextSpan(
-                            text: 'offerte\n',
-                            style: TextStyle(fontFamily: kPolice, 
-                              fontSize: 15,
-                              fontWeight: FontWeight.w800,
-                              color: _C.green,
-                            ),
-                          ),
-                          TextSpan(
-                            text: 'ce week-end !',
-                            style: TextStyle(fontFamily: kPolice, 
-                              fontSize: 15,
-                              fontWeight: FontWeight.w800,
-                              color: _C.white,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Sur toutes vos commandes',
-                      style: TextStyle(fontFamily: kPolice, fontSize: 11, color: _C.label),
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 10,
-                ),
-                decoration: BoxDecoration(
-                  color: _C.green,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  'En profiter',
-                  style: TextStyle(fontFamily: kPolice, 
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: _C.white,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Statistiques
-  Widget _buildStatsRow() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(18, 16, 18, 0),
-      child: Row(
-        children: [
-          Expanded(
-            child: _buildStatChip(
-              icon: Icons.receipt_long_rounded,
-              label: 'Commandes',
-              value: _nbCommandes.toString(),
-              color: _C.green,
-            ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: _buildStatChip(
-              icon: Icons.favorite_border_rounded,
-              label: 'Favoris',
-              value: _nbFavoris.toString(),
-              color: const Color(0xFFE53935),
-            ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: _buildStatChip(
-              icon: Icons.local_shipping_outlined,
-              label: 'En transit',
-              value: '0',
-              color: _C.amber,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStatChip({
-    required IconData icon,
-    required String label,
-    required String value,
-    required Color color,
-  }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
-      decoration: BoxDecoration(
-        color: _C.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: _C.border),
-      ),
-      child: Column(
-        children: [
-          Container(
-            width: 34,
-            height: 34,
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.10),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(icon, size: 17, color: color),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            value,
-            style: TextStyle(fontFamily: kPolice, 
-              fontSize: 18,
-              fontWeight: FontWeight.w800,
-              color: _C.black,
-            ),
-          ),
-          Text(
-            label,
-            style: TextStyle(fontFamily: kPolice, 
-              fontSize: 10,
-              color: _C.label,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // En-tête section
-  Widget _buildSectionHeader(String title) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(18, 22, 18, 12),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            title,
-            style: TextStyle(fontFamily: kPolice, 
-              fontSize: 15,
-              fontWeight: FontWeight.w700,
-              color: _C.black,
-            ),
-          ),
-          Text(
-            'Voir tout',
-            style: TextStyle(fontFamily: kPolice, 
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: _C.green,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Liste boutiques dynamique
-  Widget _buildShopList() {
-    if (_dataSource == null || _boutiquesLoad) {
-      return const Padding(
-        padding: EdgeInsets.all(32),
-        child: Center(
-          child: CircularProgressIndicator(color: _C.green, strokeWidth: 2.5),
-        ),
-      );
-    }
-    if (_boutiquesError != null) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 18),
-        child: Column(
-          children: [
-            const Icon(Icons.error_outline_rounded, color: _C.orange, size: 40),
-            const SizedBox(height: 8),
-            Text(
-              'Erreur: $_boutiquesError',
-              style: TextStyle(fontFamily: kPolice, color: _C.orange),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 12),
-            GestureDetector(
-              onTap: _fetchBoutiques,
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 10,
-                ),
-                decoration: BoxDecoration(
-                  color: _C.black,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  'Réessayer',
-                  style: TextStyle(fontFamily: kPolice, 
-                    color: _C.white,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-    if (_boutiques.isEmpty) {
-      return Padding(
-        padding: const EdgeInsets.all(32),
-        child: Center(
-          child: Text(
-            'Aucune boutique disponible',
-            style: TextStyle(fontFamily: kPolice, color: _C.label),
-          ),
-        ),
-      );
-    }
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 18),
-      child: Column(children: _boutiques.map(_buildShopItem).toList()),
-    );
-  }
-
-  Widget _buildShopItem(BoutiqueModel boutique) {
-    final hasLogo = boutique.logo != null && boutique.logo!.isNotEmpty;
-    final horaires = boutique.horaires;
-    final sousTitre = boutique.localisation.isNotEmpty
-        ? boutique.localisation
-        : boutique.description;
-
-    return GestureDetector(
-      onTap: () => _openBoutiqueSheet(boutique),
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 10),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-        decoration: BoxDecoration(
-          color: _C.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: _C.border),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: _C.greenLight,
-                borderRadius: BorderRadius.circular(12),
-                image: hasLogo
-                    ? DecorationImage(
-                        image: fournisseurImageReseau(boutique.logo!),
-                        fit: BoxFit.cover,
-                      )
-                    : null,
-              ),
-              child: hasLogo ? null : const LogoBoutiqueParDefaut(rayon: 12),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    boutique.nom,
-                    style: TextStyle(fontFamily: kPolice, 
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      color: _C.black,
-                    ),
-                  ),
-                  Text(
-                    sousTitre,
-                    style: TextStyle(fontFamily: kPolice, fontSize: 11, color: _C.label),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  if (horaires.isNotEmpty) ...[
-                    const SizedBox(height: 2),
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.access_time_rounded,
-                          size: 10,
-                          color: _C.green,
-                        ),
-                        const SizedBox(width: 3),
-                        Text(
-                          horaires,
-                          style: TextStyle(fontFamily: kPolice, 
-                            fontSize: 10,
-                            color: _C.green,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ],
-              ),
-            ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: _C.greenLight,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Text(
-                boutique.vendeurNomComplet,
-                style: TextStyle(fontFamily: kPolice, 
-                  fontSize: 10,
-                  fontWeight: FontWeight.w600,
-                  color: _C.sub,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            const SizedBox(width: 8),
-            // Icône ouvrir boutique
-            GestureDetector(
-              onTap: () => _openBoutiqueSheet(boutique),
-              child: Container(
-                width: 32,
-                height: 32,
-                decoration: BoxDecoration(
-                  color: _C.black,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: const Icon(
-                  Icons.chevron_right_rounded,
-                  color: _C.white,
-                  size: 18,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // Grille produits dynamique via Bloc
-  Widget _buildProductGrid() {
-    if (_produitBloc == null) {
-      return const Padding(
-        padding: EdgeInsets.all(32),
-        child: Center(
-          child: CircularProgressIndicator(color: _C.green, strokeWidth: 2.5),
-        ),
-      );
-    }
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 18),
-      child: BlocBuilder<ProduitBloc, ProduitState>(
-        bloc: _produitBloc,
-        builder: (context, state) {
-          if (state is ProduitLoading) {
-            return const Center(
-              child: Padding(
-                padding: EdgeInsets.all(32),
-                child: CircularProgressIndicator(
-                  color: _C.green,
-                  strokeWidth: 2.5,
-                ),
-              ),
-            );
-          } else if (state is ProduitLoaded) {
-            final produits = state.produits;
-            if (produits.isEmpty) {
-              return Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(32),
-                  child: Text(
-                    'Aucun produit disponible',
-                    style: TextStyle(fontFamily: kPolice, color: _C.label),
-                  ),
-                ),
-              );
-            }
-            return GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-                childAspectRatio: 0.80,
-              ),
-              itemCount: produits.length,
-              itemBuilder: (_, i) => _buildProductCard(produits[i]),
-            );
-          } else if (state is ProduitError) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(32),
-                child: Column(
-                  children: [
-                    const Icon(
-                      Icons.error_outline_rounded,
-                      color: _C.orange,
-                      size: 40,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Erreur: ${state.message}',
-                      style: TextStyle(fontFamily: kPolice, color: _C.orange),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 12),
-                    GestureDetector(
-                      onTap: () => _produitBloc?.add(LoadProduits()),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 10,
-                        ),
-                        decoration: BoxDecoration(
-                          color: _C.black,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          'Réessayer',
-                          style: TextStyle(fontFamily: kPolice, 
-                            color: _C.white,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          }
-          return const SizedBox.shrink();
-        },
-      ),
-    );
-  }
-
-  Widget _buildProductCard(ProduitModel produit) {
-    return Container(
-      decoration: BoxDecoration(
-        color: _C.white,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: _C.border),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                color: _C.surface,
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(17),
-                ),
-                image: produit.image.isNotEmpty
-                    ? DecorationImage(
-                        image: fournisseurImageReseau(produit.image),
-                        fit: BoxFit.cover,
-                      )
-                    : null,
-              ),
-              child: Stack(
-                children: [
-                  Positioned(
-                    top: 8,
-                    right: 8,
-                    child: Container(
-                      width: 28,
-                      height: 28,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.9),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.favorite_border_rounded,
-                        size: 14,
-                        color: _C.label,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(10, 8, 10, 10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  produit.nom,
-                  style: TextStyle(fontFamily: kPolice, 
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: _C.black,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  produit.ville,
-                  style: TextStyle(fontFamily: kPolice, fontSize: 10, color: _C.label),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    RichText(
-                      text: TextSpan(
-                        children: [
-                          TextSpan(
-                            text: produit.prix,
-                            style: TextStyle(fontFamily: kPolice, 
-                              fontSize: 13,
-                              fontWeight: FontWeight.w800,
-                              color: _C.black,
-                            ),
-                          ),
-                          TextSpan(
-                            text: ' F',
-                            style: TextStyle(fontFamily: kPolice, 
-                              fontSize: 10,
-                              color: _C.label,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Container(
-                      width: 28,
-                      height: 28,
-                      decoration: BoxDecoration(
-                        color: _C.black,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: const Icon(
-                        Icons.add_rounded,
-                        color: _C.white,
-                        size: 16,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Helpers
-  String _getInitiales(User? user) {
-    if (user == null) return '?';
-    final p = user.prenom?.isNotEmpty == true ? user.prenom![0] : '';
-    final n = user.nom?.isNotEmpty == true ? user.nom![0] : '';
-    return '$p$n'.toUpperCase();
   }
 }
 
@@ -1760,19 +983,21 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
       final list = await widget.dataSource!.getProduitsByBoutique(
         widget.boutique.id,
       );
-      if (mounted)
+      if (mounted) {
         setState(() {
           _produits = list;
           _loading = false;
         });
+      }
     } on DioException catch (e) {
       // 404 = boutique sans produit : on affiche la boutique avec une liste vide.
       if (e.response?.statusCode == 404) {
-        if (mounted)
+        if (mounted) {
           setState(() {
             _produits = [];
             _loading = false;
           });
+        }
         return;
       }
       final pasDeReseau =
@@ -1788,11 +1013,12 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
         });
       }
     } catch (e) {
-      if (mounted)
+      if (mounted) {
         setState(() {
           _error = 'Impossible de charger les produits de la boutique.';
           _loading = false;
         });
+      }
     }
   }
 
@@ -1815,7 +1041,7 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
         // 4. Affiche un message si WhatsApp n'est pas installé
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
+            const SnackBar(
               content: Text(
                 'Impossible d\'ouvrir WhatsApp. Veuillez vérifier que l\'application est installée.',
                 style: TextStyle(fontFamily: kPolice, color: _C.white),
@@ -1832,7 +1058,7 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
           SnackBar(
             content: Text(
               'Erreur: ${e.toString()}',
-              style: TextStyle(fontFamily: kPolice, color: _C.white),
+              style: const TextStyle(fontFamily: kPolice, color: _C.white),
             ),
             backgroundColor: _C.orange,
             behavior: SnackBarBehavior.floating,
@@ -1852,7 +1078,7 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
       minChildSize: 0.5,
       maxChildSize: 0.95,
       expand: false,
-      builder: (_, controller) => Container(
+      builder: (_, controller) => DecoratedBox(
         decoration: const BoxDecoration(
           color: _C.white,
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
@@ -1884,7 +1110,9 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
                       borderRadius: BorderRadius.circular(14),
                       image: hasLogo
                           ? DecorationImage(
-                              image: fournisseurImageReseau(widget.boutique.logo!),
+                              image: fournisseurImageReseau(
+                                widget.boutique.logo!,
+                              ),
                               fit: BoxFit.cover,
                             )
                           : null,
@@ -1900,7 +1128,8 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
                       children: [
                         Text(
                           widget.boutique.nom,
-                          style: TextStyle(fontFamily: kPolice, 
+                          style: const TextStyle(
+                            fontFamily: kPolice,
                             fontSize: 16,
                             fontWeight: FontWeight.w800,
                             color: _C.black,
@@ -1917,7 +1146,8 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
                               const SizedBox(width: 3),
                               Text(
                                 widget.boutique.localisation,
-                                style: TextStyle(fontFamily: kPolice, 
+                                style: const TextStyle(
+                                  fontFamily: kPolice,
                                   fontSize: 11,
                                   color: _C.label,
                                 ),
@@ -1935,7 +1165,8 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
                               const SizedBox(width: 3),
                               Text(
                                 widget.boutique.horaires,
-                                style: TextStyle(fontFamily: kPolice, 
+                                style: const TextStyle(
+                                  fontFamily: kPolice,
                                   fontSize: 11,
                                   color: _C.green,
                                 ),
@@ -1955,7 +1186,8 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
                               const SizedBox(width: 3),
                               Text(
                                 '${widget.boutique.vendeurNomComplet} (${widget.boutique.vendeurNumero})',
-                                style: TextStyle(fontFamily: kPolice, 
+                                style: const TextStyle(
+                                  fontFamily: kPolice,
                                   fontSize: 11,
                                   color: _C.label,
                                 ),
@@ -1987,7 +1219,7 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
             ),
 
             const SizedBox(height: 14),
-            Divider(color: _C.border, thickness: 1, height: 1),
+            const Divider(color: _C.border, thickness: 1, height: 1),
             const SizedBox(height: 4),
 
             // Compteur produits
@@ -1998,7 +1230,8 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
                   children: [
                     Text(
                       '${_produits.length} produit${_produits.length > 1 ? 's' : ''}',
-                      style: TextStyle(fontFamily: kPolice, 
+                      style: const TextStyle(
+                        fontFamily: kPolice,
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
                         color: _C.black,
@@ -2035,7 +1268,8 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
                               const SizedBox(width: 4),
                               Text(
                                 '$_nbAbonnes abonné${_nbAbonnes! > 1 ? 's' : ''}',
-                                style: TextStyle(fontFamily: kPolice, 
+                                style: const TextStyle(
+                                  fontFamily: kPolice,
                                   fontSize: 11.5,
                                   fontWeight: FontWeight.w700,
                                   color: _C.green,
@@ -2060,9 +1294,10 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
                         color: _C.greenLight,
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: Text(
+                      child: const Text(
                         'En stock',
-                        style: TextStyle(fontFamily: kPolice, 
+                        style: TextStyle(
+                          fontFamily: kPolice,
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
                           color: _C.green,
@@ -2119,7 +1354,7 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
             padding: const EdgeInsets.symmetric(horizontal: 32),
             child: Text(
               _error!,
-              style: TextStyle(fontFamily: kPolice, color: _C.orange),
+              style: const TextStyle(fontFamily: kPolice, color: _C.orange),
               textAlign: TextAlign.center,
             ),
           ),
@@ -2138,9 +1373,10 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
                 color: _C.black,
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Text(
+              child: const Text(
                 'Réessayer',
-                style: TextStyle(fontFamily: kPolice, 
+                style: TextStyle(
+                  fontFamily: kPolice,
                   color: _C.white,
                   fontWeight: FontWeight.w600,
                 ),
@@ -2153,15 +1389,19 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
   }
 
   Widget _buildEmpty() {
-    return Center(
+    return const Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.inventory_2_outlined, color: _C.label, size: 48),
-          const SizedBox(height: 12),
+          Icon(Icons.inventory_2_outlined, color: _C.label, size: 48),
+          SizedBox(height: 12),
           Text(
             'Aucun produit dans cette boutique',
-            style: TextStyle(fontFamily: kPolice, fontSize: 14, color: _C.label),
+            style: TextStyle(
+              fontFamily: kPolice,
+              fontSize: 14,
+              color: _C.label,
+            ),
           ),
         ],
       ),
@@ -2170,7 +1410,7 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
 
   // Carte produit avec bouton WhatsApp
   Widget _buildProductCard(ProduitModel produit) {
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         color: _C.bg,
         borderRadius: BorderRadius.circular(18),
@@ -2181,7 +1421,7 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
         children: [
           // Image
           Expanded(
-            child: Container(
+            child: DecoratedBox(
               decoration: BoxDecoration(
                 color: _C.surface,
                 borderRadius: const BorderRadius.vertical(
@@ -2203,7 +1443,7 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
                       width: 28,
                       height: 28,
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.9),
+                        color: Colors.white.withValues(alpha: 0.9),
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(
@@ -2225,7 +1465,8 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
               children: [
                 Text(
                   produit.nom,
-                  style: TextStyle(fontFamily: kPolice, 
+                  style: const TextStyle(
+                    fontFamily: kPolice,
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
                     color: _C.black,
@@ -2236,7 +1477,11 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
                 const SizedBox(height: 2),
                 Text(
                   produit.ville,
-                  style: TextStyle(fontFamily: kPolice, fontSize: 10, color: _C.label),
+                  style: const TextStyle(
+                    fontFamily: kPolice,
+                    fontSize: 10,
+                    color: _C.label,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Row(
@@ -2247,15 +1492,17 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
                         children: [
                           TextSpan(
                             text: produit.prix,
-                            style: TextStyle(fontFamily: kPolice, 
+                            style: const TextStyle(
+                              fontFamily: kPolice,
                               fontSize: 13,
                               fontWeight: FontWeight.w800,
                               color: _C.black,
                             ),
                           ),
-                          TextSpan(
+                          const TextSpan(
                             text: ' F',
-                            style: TextStyle(fontFamily: kPolice, 
+                            style: TextStyle(
+                              fontFamily: kPolice,
                               fontSize: 10,
                               color: _C.label,
                             ),

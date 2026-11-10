@@ -29,6 +29,7 @@ class UserModel extends User {
     );
   }
 
+  @override
   Map<String, dynamic> toJson() {
     return {
       'id': id,

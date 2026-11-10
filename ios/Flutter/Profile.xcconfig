@@ -1,0 +1,6 @@
+#include? "Pods/Target Support Files/Pods-Runner/Pods-Runner.profile.xcconfig"
+// Debug et Release incluent Google.xcconfig ; sans lui ici, une construction
+// en profil laissait `$(GOOGLE_REVERSED_CLIENT_ID)` vide dans l'Info.plist,
+// donc un schéma d'URL de retour vide et une connexion Google muette.
+#include? "Google.xcconfig"
+#include "Generated.xcconfig"

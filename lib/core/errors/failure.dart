@@ -21,11 +21,9 @@ class ServerFailure extends Failure {
   /// 404 (ressource inexistante) d'une véritable erreur serveur.
   final int? statusCode;
 
-  ServerFailure({required String errorMessage, this.statusCode})
-    : super(errorMessage: errorMessage);
+  ServerFailure({required super.errorMessage, this.statusCode});
 }
 
 class CacheFailure extends Failure {
-  CacheFailure({required String errorMessage})
-    : super(errorMessage: errorMessage);
+  CacheFailure({required super.errorMessage});
 }

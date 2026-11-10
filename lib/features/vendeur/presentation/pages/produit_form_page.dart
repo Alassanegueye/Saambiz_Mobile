@@ -427,7 +427,12 @@ class _ProduitFormPageState extends State<ProduitFormPage> {
                     children: [
                       ClipRRect(
                         borderRadius: BorderRadius.circular(12),
-                        child: ImageReseau(img.url, width: 90, height: 90, fit: BoxFit.cover, repli: Container(
+                        child: ImageReseau(
+                          img.url,
+                          width: 90,
+                          height: 90,
+                          fit: BoxFit.cover,
+                          repli: Container(
                             width: 90,
                             height: 90,
                             color: _C.bg,
@@ -435,7 +440,8 @@ class _ProduitFormPageState extends State<ProduitFormPage> {
                               Icons.image_not_supported_outlined,
                               color: _C.sub,
                             ),
-                          )),
+                          ),
+                        ),
                       ),
                       Positioned(
                         top: -6,

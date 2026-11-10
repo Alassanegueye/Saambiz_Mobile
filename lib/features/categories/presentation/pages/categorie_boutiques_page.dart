@@ -125,7 +125,8 @@ class _CategorieBoutiquesPageState extends State<CategorieBoutiquesPage> {
         titleSpacing: 0,
         title: Text(
           c.nom,
-          style: TextStyle(fontFamily: kPolice, 
+          style: const TextStyle(
+            fontFamily: kPolice,
             fontSize: 17,
             fontWeight: FontWeight.w700,
           ),
@@ -153,7 +154,11 @@ class _CategorieBoutiquesPageState extends State<CategorieBoutiquesPage> {
           Text(
             _erreur!,
             textAlign: TextAlign.center,
-            style: TextStyle(fontFamily: kPolice, fontSize: 14, color: _C.textMid),
+            style: const TextStyle(
+              fontFamily: kPolice,
+              fontSize: 14,
+              color: _C.textMid,
+            ),
           ),
           const SizedBox(height: 20),
           Center(
@@ -215,7 +220,8 @@ class _CategorieBoutiquesPageState extends State<CategorieBoutiquesPage> {
                 _total > 1
                     ? '$_total boutiques'
                     : (_total == 1 ? '1 boutique' : 'Aucune boutique'),
-                style: TextStyle(fontFamily: kPolice, 
+                style: const TextStyle(
+                  fontFamily: kPolice,
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
                   color: _C.navy,
@@ -228,7 +234,8 @@ class _CategorieBoutiquesPageState extends State<CategorieBoutiquesPage> {
                     c.description!,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontFamily: kPolice, 
+                    style: const TextStyle(
+                      fontFamily: kPolice,
                       fontSize: 12.5,
                       color: _C.textMid,
                     ),
@@ -242,22 +249,30 @@ class _CategorieBoutiquesPageState extends State<CategorieBoutiquesPage> {
   }
 
   Widget _vide() {
-    return Padding(
-      padding: const EdgeInsets.only(top: 60),
+    return const Padding(
+      padding: EdgeInsets.only(top: 60),
       child: Column(
         children: [
-          const Icon(Icons.storefront_outlined, size: 44, color: _C.textLight),
-          const SizedBox(height: 14),
+          Icon(Icons.storefront_outlined, size: 44, color: _C.textLight),
+          SizedBox(height: 14),
           Text(
             'Pas encore de boutique dans cette catégorie.',
             textAlign: TextAlign.center,
-            style: TextStyle(fontFamily: kPolice, fontSize: 14, color: _C.textMid),
+            style: TextStyle(
+              fontFamily: kPolice,
+              fontSize: 14,
+              color: _C.textMid,
+            ),
           ),
-          const SizedBox(height: 4),
+          SizedBox(height: 4),
           Text(
             'Revenez bientôt : de nouvelles boutiques ouvrent chaque semaine.',
             textAlign: TextAlign.center,
-            style: TextStyle(fontFamily: kPolice, fontSize: 12.5, color: _C.textLight),
+            style: TextStyle(
+              fontFamily: kPolice,
+              fontSize: 12.5,
+              color: _C.textLight,
+            ),
           ),
         ],
       ),
@@ -305,7 +320,11 @@ class LigneBoutique extends StatelessWidget {
                 width: 60,
                 height: 60,
                 child: logo != null && logo.isNotEmpty
-                    ? ImageReseau(logo, fit: BoxFit.cover, repli: const _LogoParDefaut())
+                    ? ImageReseau(
+                        logo,
+                        fit: BoxFit.cover,
+                        repli: const _LogoParDefaut(),
+                      )
                     : const _LogoParDefaut(),
               ),
             ),
@@ -321,7 +340,8 @@ class LigneBoutique extends StatelessWidget {
                           donnees['nom']?.toString() ?? 'Boutique',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(fontFamily: kPolice, 
+                          style: const TextStyle(
+                            fontFamily: kPolice,
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
                             color: _C.navy,
@@ -345,7 +365,8 @@ class LigneBoutique extends StatelessWidget {
                         slogan,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(fontFamily: kPolice, 
+                        style: const TextStyle(
+                          fontFamily: kPolice,
                           fontSize: 12,
                           color: _C.textMid,
                         ),
@@ -368,7 +389,8 @@ class LigneBoutique extends StatelessWidget {
                           ].where((e) => e != null && e.isNotEmpty).join(', '),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(fontFamily: kPolice, 
+                          style: const TextStyle(
+                            fontFamily: kPolice,
                             fontSize: 11.5,
                             color: _C.textLight,
                           ),

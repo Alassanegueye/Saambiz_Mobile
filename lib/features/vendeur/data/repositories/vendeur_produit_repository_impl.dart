@@ -6,20 +6,13 @@ import '../../domain/entities/produit_vendeur.dart';
 import '../../domain/repositories/vendeur_produit_repository.dart';
 import '../datasources/vendeur_produit_datasource.dart';
 import '../models/categorie_model.dart';
+import '../../../../core/errors/message_erreur.dart';
 
 class VendeurProduitRepositoryImpl implements VendeurProduitRepository {
   final VendeurProduitDataSource dataSource;
   VendeurProduitRepositoryImpl({required this.dataSource});
 
-  String _errorMessage(Object e) {
-    if (e is DioException) {
-      final data = e.response?.data;
-      if (data is Map && data['message'] != null)
-        return data['message'].toString();
-      return e.message ?? 'Une erreur est survenue';
-    }
-    return e.toString();
-  }
+  String _errorMessage(Object e) => messageErreurReseau(e);
 
   int? _statusCode(Object e) =>
       e is DioException ? e.response?.statusCode : null;

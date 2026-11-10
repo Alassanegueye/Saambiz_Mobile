@@ -1,5 +1,4 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../theme/app_color.dart';
@@ -129,11 +128,7 @@ ImageProvider fournisseurImageReseau(
           imageOptimisee(url, largeur: largeurServeur),
         );
   if (largeurDecodage == null || largeurDecodage <= 0) return source;
-  return ResizeImage(
-    source,
-    width: largeurDecodage,
-    allowUpscaling: false,
-  );
+  return ResizeImage(source, width: largeurDecodage, allowUpscaling: false);
 }
 
 class _RepliImage extends StatelessWidget {

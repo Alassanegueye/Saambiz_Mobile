@@ -24,14 +24,16 @@
 	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string>SaamBiz utilise l'appareil photo pour photographier votre pièce d'identité lors de la certification de votre boutique.</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>SaamBiz accède à vos photos pour que vous choisissiez une image de profil, un logo ou la photo d'un produit.</string>
+	<string>SaamBiz utilise l'appareil photo pour photographier vos produits, votre boutique ou votre pièce d'identité lors de la certification de votre boutique.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>SaamBiz utilise votre position pour vous proposer les boutiques proches de vous. Vous pouvez refuser : les boutiques vous seront alors proposées selon vos centres d'intérêt.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>SaamBiz accède à vos photos pour illustrer vos produits, votre boutique et votre profil. Vous choisissez chaque image vous-même.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
@@ -65,13 +67,9 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-	<key>UISupportedInterfaceOrientations~ipad</key>
-	<array>
-		<string>UIInterfaceOrientationPortrait</string>
-		<string>UIInterfaceOrientationPortraitUpsideDown</string>
-		<string>UIInterfaceOrientationLandscapeLeft</string>
-		<string>UIInterfaceOrientationLandscapeRight</string>
-	</array>
+	<!-- Pas de clé ~ipad : l'application est déclarée iPhone seul
+	     (TARGETED_DEVICE_FAMILY = 1). Une configuration qui ne s'applique
+	     à rien finit par faire croire qu'elle s'applique à quelque chose. -->
 	<!-- Retour de la fenêtre « Se connecter avec Google » : schéma défini
 	     dans ios/Flutter/Google.xcconfig (GOOGLE_REVERSED_CLIENT_ID). -->
 	<key>CFBundleURLTypes</key>

@@ -32,6 +32,17 @@ abstract class BoutiqueRemoteDataSource {
 
   Future<void> pauseBoutique();
 
+  /// État de la demande de badge « Boutique vérifiée ».
+  Future<Map<String, dynamic>> statutVerification();
+
+  /// Dépôt du dossier de vérification.
+  Future<Map<String, dynamic>> soumettreVerification(
+    Map<String, dynamic> dossier,
+  );
+
+  /// Fiche d'un abonné de la boutique.
+  Future<Map<String, dynamic>> abonne(String id);
+
   Future<void> reactiverBoutique();
 }
 
@@ -107,5 +118,43 @@ class BoutiqueRemoteDataSourceImpl implements BoutiqueRemoteDataSource {
   @override
   Future<void> reactiverBoutique() async {
     await dio.patch(BoutiqueEndpoints.reactiver);
+  }
+
+  // Les trois routes ci-dessous existaient côté backend sans être appelées :
+  // le vendeur ne pouvait ni demander son badge, ni suivre sa demande, ni
+  // ouvrir la fiche d'un abonné.
+
+  @override
+  Future<Map<String, dynamic>> statutVerification() async {
+    final res = await dio.get(BoutiqueEndpoints.statutVerification);
+    return _objet(res.data);
+  }
+
+  @override
+  Future<Map<String, dynamic>> soumettreVerification(
+    Map<String, dynamic> dossier,
+  ) async {
+    final res = await dio.post(
+      BoutiqueEndpoints.soumettreVerification,
+      data: dossier,
+    );
+    return _objet(res.data);
+  }
+
+  @override
+  Future<Map<String, dynamic>> abonne(String id) async {
+    final res = await dio.get(BoutiqueEndpoints.abonne(id));
+    return _objet(res.data);
+  }
+
+  /// Certaines routes enveloppent la charge utile dans `data`, d'autres non.
+  static Map<String, dynamic> _objet(dynamic brut) {
+    if (brut is Map<String, dynamic>) {
+      final data = brut['data'];
+      if (data is Map<String, dynamic>) return data;
+      return brut;
+    }
+    if (brut is Map) return Map<String, dynamic>.from(brut);
+    return const {};
   }
 }

@@ -47,7 +47,7 @@ class AppRouter {
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
       case loginRoute:
-        return MaterialPageRoute(builder: (_) => LoginPage());
+        return MaterialPageRoute(builder: (_) => const LoginPage());
 
       case onboardingRoute:
         return MaterialPageRoute(builder: (_) => const OnboardingPage());

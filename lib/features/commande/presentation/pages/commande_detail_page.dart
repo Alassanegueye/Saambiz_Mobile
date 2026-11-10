@@ -316,16 +316,18 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            const Text(
               'Commande',
-              style: TextStyle(fontFamily: kPolice, 
+              style: TextStyle(
+                fontFamily: kPolice,
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
               ),
             ),
             Text(
               '#${commande.referenceCommande}',
-              style: TextStyle(fontFamily: kPolice, 
+              style: TextStyle(
+                fontFamily: kPolice,
                 fontSize: 11.5,
                 color: _C.white.withValues(alpha: 0.7),
               ),
@@ -580,7 +582,8 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
                 const SizedBox(width: 6),
                 Text(
                   kStatutCommandeLabels[commande.statut] ?? commande.statut,
-                  style: TextStyle(fontFamily: kPolice, 
+                  style: TextStyle(
+                    fontFamily: kPolice,
                     fontSize: 12.5,
                     fontWeight: FontWeight.w700,
                     color: couleurStatutCommande(commande.statut),
@@ -595,7 +598,8 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
             alignment: Alignment.centerLeft,
             child: Text(
               montantFcfa(commande.montantTotal),
-              style: TextStyle(fontFamily: kPolice, 
+              style: const TextStyle(
+                fontFamily: kPolice,
                 fontSize: 30,
                 fontWeight: FontWeight.w800,
                 letterSpacing: -0.4,
@@ -607,7 +611,8 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
             const SizedBox(height: 2),
             Text(
               'Passée le ${dateLongue(date)}',
-              style: TextStyle(fontFamily: kPolice, 
+              style: TextStyle(
+                fontFamily: kPolice,
                 fontSize: 13,
                 color: _C.white.withValues(alpha: 0.7),
               ),
@@ -620,7 +625,8 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
               modePaiement: commande.modePaiement,
               isVendeur: isVendeur,
             ),
-            style: TextStyle(fontFamily: kPolice, 
+            style: const TextStyle(
+              fontFamily: kPolice,
               fontSize: 14,
               height: 1.4,
               fontWeight: FontWeight.w500,
@@ -651,7 +657,11 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
               Expanded(child: _titre('Suivi')),
               Text(
                 'Étape ${idx + 1} sur ${etapes.length}',
-                style: TextStyle(fontFamily: kPolice, fontSize: 12.5, color: _C.sub),
+                style: const TextStyle(
+                  fontFamily: kPolice,
+                  fontSize: 12.5,
+                  color: _C.sub,
+                ),
               ),
             ],
           ),
@@ -676,7 +686,11 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
             const SizedBox(height: 10),
             Text(
               'Prochaine étape : $suivante',
-              style: TextStyle(fontFamily: kPolice, fontSize: 13, color: _C.sub),
+              style: const TextStyle(
+                fontFamily: kPolice,
+                fontSize: 13,
+                color: _C.sub,
+              ),
             ),
           ],
         ],
@@ -693,7 +707,8 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
         children: [
           Text(
             libelle,
-            style: TextStyle(fontFamily: kPolice, 
+            style: TextStyle(
+              fontFamily: kPolice,
               fontSize: fort ? 15 : 13.5,
               fontWeight: fort ? FontWeight.w700 : FontWeight.w400,
               color: fort ? _C.black : _C.sub,
@@ -701,7 +716,8 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
           ),
           Text(
             valeur,
-            style: TextStyle(fontFamily: kPolice, 
+            style: TextStyle(
+              fontFamily: kPolice,
               fontSize: fort ? 16 : 13.5,
               fontWeight: fort ? FontWeight.w800 : FontWeight.w500,
               color: _C.black,
@@ -737,7 +753,7 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
   }
 
   Widget _ligneArticle(LigneCommandeModel l) {
-    final defaut = Container(
+    final defaut = ColoredBox(
       color: AppColor.kSurface,
       child: const Icon(
         Icons.shopping_bag_outlined,
@@ -756,7 +772,12 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
               width: 56,
               height: 56,
               child: image != null && image.isNotEmpty
-                  ? ImageReseau(image, largeurServeur: 160, fit: BoxFit.cover, repli: defaut)
+                  ? ImageReseau(
+                      image,
+                      largeurServeur: 160,
+                      fit: BoxFit.cover,
+                      repli: defaut,
+                    )
                   : defaut,
             ),
           ),
@@ -769,7 +790,8 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
                   l.nomProduit,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontFamily: kPolice, 
+                  style: const TextStyle(
+                    fontFamily: kPolice,
                     color: _C.black,
                     fontWeight: FontWeight.w600,
                     fontSize: 14,
@@ -779,12 +801,20 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
                 if (l.libelleOptions.isNotEmpty)
                   Text(
                     l.libelleOptions,
-                    style: TextStyle(fontFamily: kPolice, color: _C.sub, fontSize: 12.5),
+                    style: const TextStyle(
+                      fontFamily: kPolice,
+                      color: _C.sub,
+                      fontSize: 12.5,
+                    ),
                   ),
                 const SizedBox(height: 2),
                 Text(
                   'Quantité : ${l.quantite}',
-                  style: TextStyle(fontFamily: kPolice, color: _C.sub, fontSize: 12.5),
+                  style: const TextStyle(
+                    fontFamily: kPolice,
+                    color: _C.sub,
+                    fontSize: 12.5,
+                  ),
                 ),
               ],
             ),
@@ -792,7 +822,8 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
           const SizedBox(width: 8),
           Text(
             montantFcfa(l.sousTotal),
-            style: TextStyle(fontFamily: kPolice, 
+            style: const TextStyle(
+              fontFamily: kPolice,
               fontSize: 13.5,
               fontWeight: FontWeight.w700,
               color: _C.black,
@@ -819,7 +850,8 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
             backgroundColor: AppColor.kPrimaryLight,
             child: Text(
               initiales.isEmpty ? '?' : initiales,
-              style: TextStyle(fontFamily: kPolice, 
+              style: const TextStyle(
+                fontFamily: kPolice,
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
                 color: _C.green,
@@ -833,13 +865,18 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
               children: [
                 Text(
                   isVendeur ? 'Client' : 'Vendeur',
-                  style: TextStyle(fontFamily: kPolice, fontSize: 12.5, color: _C.sub),
+                  style: const TextStyle(
+                    fontFamily: kPolice,
+                    fontSize: 12.5,
+                    color: _C.sub,
+                  ),
                 ),
                 Text(
                   nom.isEmpty ? 'Non renseigné' : nom,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontFamily: kPolice, 
+                  style: const TextStyle(
+                    fontFamily: kPolice,
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
                     color: _C.black,
@@ -848,7 +885,11 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
                 if (telephone != null && telephone.isNotEmpty)
                   Text(
                     telephone,
-                    style: TextStyle(fontFamily: kPolice, fontSize: 13, color: _C.sub),
+                    style: const TextStyle(
+                      fontFamily: kPolice,
+                      fontSize: 13,
+                      color: _C.sub,
+                    ),
                   ),
               ],
             ),
@@ -885,11 +926,16 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
               children: [
                 Text(
                   libelle,
-                  style: TextStyle(fontFamily: kPolice, fontSize: 12.5, color: _C.sub),
+                  style: const TextStyle(
+                    fontFamily: kPolice,
+                    fontSize: 12.5,
+                    color: _C.sub,
+                  ),
                 ),
                 Text(
                   valeur,
-                  style: TextStyle(fontFamily: kPolice, 
+                  style: const TextStyle(
+                    fontFamily: kPolice,
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
                     color: _C.black,
@@ -956,7 +1002,8 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
 
   Widget _titre(String texte) => Text(
     texte,
-    style: TextStyle(fontFamily: kPolice, 
+    style: const TextStyle(
+      fontFamily: kPolice,
       fontWeight: FontWeight.w700,
       color: _C.black,
       fontSize: 15,

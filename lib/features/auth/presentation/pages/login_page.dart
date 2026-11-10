@@ -490,10 +490,7 @@ class _ChoixIdentifiant extends StatelessWidget {
         border: Border.all(color: AppColor.kLine),
       ),
       child: Row(
-        children: [
-          _onglet('E-mail', false),
-          _onglet('Téléphone', true),
-        ],
+        children: [_onglet('E-mail', false), _onglet('Téléphone', true)],
       ),
     );
   }

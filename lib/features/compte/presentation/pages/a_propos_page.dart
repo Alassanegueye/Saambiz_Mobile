@@ -32,27 +32,30 @@ class AProposPage extends StatelessWidget {
                   fit: BoxFit.contain,
                 ),
                 const SizedBox(height: 14),
-                Text(
+                const Text(
                   InfosApp.nom,
-                  style: TextStyle(fontFamily: kPolice, 
+                  style: TextStyle(
+                    fontFamily: kPolice,
                     fontSize: 20,
                     fontWeight: FontWeight.w700,
                     color: AppColor.kPrimary,
                   ),
                 ),
                 const SizedBox(height: 4),
-                Text(
+                const Text(
                   'Version ${InfosApp.version}',
-                  style: TextStyle(fontFamily: kPolice, 
+                  style: TextStyle(
+                    fontFamily: kPolice,
                     fontSize: 13,
                     color: AppColor.kGrayscale40,
                   ),
                 ),
                 const SizedBox(height: 10),
-                Text(
+                const Text(
                   'L\'application qui met la boutique des commerçants sénégalais en ligne.',
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontFamily: kPolice, 
+                  style: TextStyle(
+                    fontFamily: kPolice,
                     fontSize: 13.5,
                     height: 1.5,
                     color: AppColor.kGrayscale40,

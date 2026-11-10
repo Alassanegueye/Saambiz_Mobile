@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import '../../../../core/demo/donnees_demo.dart';
 import '../../../home/data/models/produit_model.dart';
 import '../models/categorie_model.dart';
 import '../../../../core/constants/api_endpoints.dart';
@@ -34,6 +35,9 @@ class VendeurProduitDataSource {
   }
 
   Future<List<ProduitModel>> mesProduits() async {
+    if (modeDemo) {
+      return produitsDemo().map(ProduitModel.fromJson).toList();
+    }
     final res = await dio.get(VendeurProduitEndpoints.listeProduits);
     return _extractList(
       res.data,
@@ -121,6 +125,7 @@ class VendeurProduitDataSource {
 
   // Dashboard / statistiques
   Future<Map<String, dynamic>> dashboard() async {
+    if (modeDemo) return dashboardDemo();
     final res = await dio.get(VendeurDashboardEndpoints.dashboard);
     return _extractMap(res.data);
   }

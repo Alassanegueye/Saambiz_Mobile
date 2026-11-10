@@ -1,8 +1,8 @@
-import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../data/repositories/commande_repository.dart';
 import 'commande_event.dart';
 import 'commande_state.dart';
+import '../../../../core/errors/message_erreur.dart';
 
 class CommandeBloc extends Bloc<CommandeEvent, CommandeState> {
   final CommandeRepository repository;
@@ -19,15 +19,7 @@ class CommandeBloc extends Bloc<CommandeEvent, CommandeState> {
   }
 
   // Extrait un message d'erreur lisible (priorité au message du backend)
-  String _msg(Object e) {
-    if (e is DioException) {
-      final data = e.response?.data;
-      if (data is Map && data['message'] != null)
-        return data['message'].toString();
-      return e.message ?? 'Erreur réseau';
-    }
-    return e.toString();
-  }
+  String _msg(Object e) => messageErreurReseau(e);
 
   Future<void> _onLoadMesCommandes(
     LoadMesCommandes event,

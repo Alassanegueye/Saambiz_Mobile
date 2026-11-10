@@ -124,7 +124,10 @@ class _CategoriesPageState extends State<CategoriesPage> {
     final numero = _requete;
     setState(() => _chargementSuite = true);
     try {
-      final res = await _ds.listerBoutiques(recherche: _filtre, page: _page + 1);
+      final res = await _ds.listerBoutiques(
+        recherche: _filtre,
+        page: _page + 1,
+      );
       if (!mounted || numero != _requete) return;
       setState(() {
         _page += 1;

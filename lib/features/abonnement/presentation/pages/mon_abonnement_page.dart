@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../../core/services/config_publique_service.dart';
 import '../../../../core/utils/libelles.dart';
 import '../../../../injection_container.dart';
 import '../bloc/abonnement_bloc.dart';
@@ -92,12 +93,35 @@ class _MonAbonnementViewState extends State<_MonAbonnementView> {
     if (res == true && numeroCtrl.text.trim().isNotEmpty && context.mounted) {
       final bloc = context.read<AbonnementBloc>();
       final state = bloc.state;
-      final montant = state is AbonnementLoaded
+      num? montant = state is AbonnementLoaded
           ? state.abonnement.montant
           : null;
+
+      // Le repli valait `0`, et le backend refuse tout montant non positif :
+      // tant que la fiche d'abonnement n'était pas chargée, le paiement
+      // échouait à coup sûr sur « Le montant doit être positif ». Le prix est
+      // désormais demandé au serveur, qui en est la source.
+      if (montant == null || montant <= 0) {
+        montant = await sl<ConfigPubliqueService>().prixAbonnement();
+      }
+
+      if (!context.mounted) return;
+
+      if (montant == null || montant <= 0) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              "Le montant de l'abonnement n'a pas pu être récupéré. "
+              'Vérifiez votre connexion puis réessayez.',
+            ),
+          ),
+        );
+        return;
+      }
+
       bloc.add(
         PayerAbonnement(
-          montant: montant ?? 0,
+          montant: montant,
           numeroTelephone: numeroCtrl.text.trim(),
           methode: methode,
         ),

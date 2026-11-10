@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.0.0+1
+version: 1.0.0+2
 
 environment:
   sdk: ^3.9.2
@@ -35,28 +35,22 @@ dependencies:
   equatable: ^2.0.7
   get_it: ^8.2.0
   cached_network_image: ^3.4.1
-  dots_indicator: ^4.0.1
   shared_preferences: ^2.5.3
   flutter_secure_storage: ^9.2.4
   dartz: ^0.10.1
   flutter_svg: ^2.2.0
   dio: ^5.9.0
-  permission_handler: ^12.0.1
   # Position du client, pour lui proposer les boutiques proches. Facultatif :
   # un refus n'empêche pas d'utiliser l'application.
   geolocator: ^14.0.2
   image_picker: ^1.0.7
-  awesome_dialog: ^3.1.1
   flutter_dotenv: ^5.1.0
   toastification: ^3.0.3
   jwt_decode: ^0.3.1
   url_launcher: ^6.1.14
-  intl_phone_field: ^3.2.0
-  lottie: ^3.1.0
   flutter_localizations: # Pour la localisation
     sdk: flutter
   intl: ^0.20.2
-  provider: ^6.1.2
   socket_io_client: ^2.0.3
   google_sign_in: ^7.2.0
   sign_in_with_apple: ^8.2.0
@@ -84,13 +78,13 @@ dev_dependencies:
 flutter_launcher_icons:
   android: "ic_launcher"
   ios: true
-  image_path: "assets/icons/app_icon.png"
+  image_path: "design/icones-sources/app_icon.png"
   min_sdk_android: 21
   remove_alpha_ios: true
   # Icône adaptative Android : bleu marine du logo SaamBiz + pictogramme
   # détouré, centré dans la zone sûre (le système rogne les bords).
   adaptive_icon_background: "#01154B"
-  adaptive_icon_foreground: "assets/icons/app_icon_foreground.png"
+  adaptive_icon_foreground: "design/icones-sources/app_icon_foreground.png"
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -107,7 +101,6 @@ flutter:
   assets:
      - .env
      - assets/images/
-     - assets/icons/
 
   # Police de l'application, embarquée (licence : assets/fonts/OFL.txt).
   # Avant, google_fonts la téléchargeait au premier affichage.

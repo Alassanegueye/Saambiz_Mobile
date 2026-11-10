@@ -18,7 +18,6 @@ class _C {
   static const bg = Color(0xFFF4F5F8);
   static const sub = Color(0xFF5B6C8A);
   static const border = Color(0xFFE3E8F0);
-  static const orange = Color(0xFFFF8F00);
 }
 
 /// Écran de gestion de la boutique du vendeur connecté.
@@ -133,7 +132,11 @@ class _MaBoutiqueView extends StatelessWidget {
                           height: 72,
                           color: _C.white,
                           child: (b.logo ?? '').isNotEmpty
-                              ? ImageReseau(b.logo!, fit: BoxFit.cover, repli: _initiales(b.nom))
+                              ? ImageReseau(
+                                  b.logo!,
+                                  fit: BoxFit.cover,
+                                  repli: _initiales(b.nom),
+                                )
                               : _initiales(b.nom),
                         ),
                       ),

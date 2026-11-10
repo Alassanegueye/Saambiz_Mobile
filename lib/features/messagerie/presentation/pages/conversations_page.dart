@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
 
 import '../../../../injection_container.dart';
 import '../../../../core/services/socket_service.dart';
@@ -14,10 +13,10 @@ import '../bloc/messagerie_bloc.dart';
 import '../bloc/messagerie_event.dart';
 import '../bloc/messagerie_state.dart';
 import 'chat_page.dart';
+import '../../../../core/utils/dates.dart';
 
 class _C {
   static const green = Color(0xFF01154B);
-  static const black = Color(0xFF01154B);
   static const white = Color(0xFFFFFFFF);
   static const bg = Color(0xFFF4F5F8);
   static const sub = Color(0xFF5B6C8A);
@@ -139,7 +138,7 @@ class _ConversationsViewState extends State<_ConversationsView> {
                       children: [
                         if (c.dateDernierMessage != null)
                           Text(
-                            DateFormat('HH:mm').format(c.dateDernierMessage!),
+                            heureCourte.format(c.dateDernierMessage!),
                             style: const TextStyle(fontSize: 11, color: _C.sub),
                           ),
                         if (c.nombreNonLus > 0)

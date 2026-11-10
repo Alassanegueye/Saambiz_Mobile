@@ -163,8 +163,8 @@ class _CheckoutViewState extends State<_CheckoutView> {
                     (v) => setState(() => _modePaiement = v),
                   ),
                   if (_modePaiement == 'en_ligne')
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8),
+                    const Padding(
+                      padding: EdgeInsets.only(top: 8),
                       child: Text(
                         'Vous paierez une fois la commande acceptée par le vendeur.',
                         style: TextStyle(fontSize: 12.5, color: _C.sub),

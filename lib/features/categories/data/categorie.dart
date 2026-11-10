@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 
+import '../../../core/constants/api_endpoints.dart';
 import '../../../core/utils/app_logger.dart';
 
 /// Catégorie de la marketplace, un seul niveau, pas de sous-rayons.
@@ -194,7 +195,7 @@ class CategoriesRemoteDataSource {
       return cache;
     }
     try {
-      final res = await dio.get('/categories');
+      final res = await dio.get(CategorieEndpoints.categories);
       final brut =
           (res.data is Map ? (res.data as Map)['categories'] : res.data)
               as List? ??
@@ -216,6 +217,27 @@ class CategoriesRemoteDataSource {
     }
   }
 
+  /// Fiche d'une catégorie seule (nom, icône, spécifications).
+  ///
+  /// `GET /categories/:id` existait côté backend sans être appelée : seule la
+  /// liste complète l'était, ce qui obligeait à la parcourir pour retrouver
+  /// une catégorie connue par son identifiant.
+  Future<Categorie?> fiche(String slugOuId) async {
+    try {
+      final res = await dio.get(
+        CategorieEndpoints.categorie(Uri.encodeComponent(slugOuId)),
+      );
+      final data = res.data;
+      final brut = data is Map
+          ? (data['categorie'] is Map ? data['categorie'] : data)
+          : null;
+      if (brut is! Map) return null;
+      return Categorie.fromJson(Map<String, dynamic>.from(brut));
+    } on DioException {
+      return null;
+    }
+  }
+
   /// Boutiques d'une catégorie (par slug ou id), les plus proches d'abord
   /// si la position est connue.
   Future<PageCategorie> boutiques(
@@ -225,7 +247,7 @@ class CategoriesRemoteDataSource {
     double? longitude,
   }) async {
     final res = await dio.get(
-      '/categories/${Uri.encodeComponent(slugOuId)}/boutiques',
+      CategorieEndpoints.boutiques(Uri.encodeComponent(slugOuId)),
       queryParameters: {
         'page': page,
         'limit': 20,

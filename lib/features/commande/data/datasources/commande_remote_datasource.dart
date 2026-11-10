@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import '../../../../core/demo/donnees_demo.dart';
 import '../models/commande_model.dart';
 import '../../../../core/constants/api_endpoints.dart';
 
@@ -93,6 +94,9 @@ class CommandeRemoteDataSourceImpl implements CommandeRemoteDataSource {
 
   @override
   Future<List<CommandeModel>> commandesVendeur({String? statut}) async {
+    if (modeDemo) {
+      return commandesDemo().map(CommandeModel.fromJson).toList();
+    }
     final res = await dio.get(
       CommandeEndpoints.commandesVendeur,
       queryParameters: statut != null ? {'statut': statut} : null,

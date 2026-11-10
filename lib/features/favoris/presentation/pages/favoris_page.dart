@@ -53,124 +53,134 @@ class _FavorisView extends StatelessWidget {
           couleurFond: Colors.transparent,
         ),
         body: Column(
-        children: [
-          // Produits aimés (cœur des cartes produits), puis boutiques suivies.
-          const _ProduitsAimes(),
-          Expanded(
-            child: BlocConsumer<FavorisBloc, FavorisState>(
-              buildWhen: (avant, apres) =>
-                  !(apres is FavorisLoading && avant is FavorisLoaded),
-              listener: (context, state) {
-                if (state is FavorisError) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(state.message),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                }
-              },
-              builder: (context, state) {
-                if (state is FavorisLoading || state is FavorisInitial) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                if (state is FavorisLoaded) {
-                  if (state.boutiques.isEmpty) {
-                    return const Center(
-                      child: Text(
-                        'Aucune boutique favorite pour le moment',
-                        style: TextStyle(color: _C.sub),
+          children: [
+            // Produits aimés (cœur des cartes produits), puis boutiques suivies.
+            const _ProduitsAimes(),
+            Expanded(
+              child: BlocConsumer<FavorisBloc, FavorisState>(
+                buildWhen: (avant, apres) =>
+                    !(apres is FavorisLoading && avant is FavorisLoaded),
+                listener: (context, state) {
+                  if (state is FavorisError) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(state.message),
+                        backgroundColor: Colors.red,
                       ),
                     );
                   }
-                  return RefreshIndicator(
-                    onRefresh: () async =>
-                        context.read<FavorisBloc>().add(LoadFavoris()),
-                    child: ListView.separated(
-                      padding: const EdgeInsets.all(16),
-                      itemCount: state.boutiques.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 12),
-                      itemBuilder: (context, i) {
-                        final b = state.boutiques[i];
-                        return Container(
-                          decoration: BoxDecoration(
-                            color: _C.white,
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: _C.border),
-                          ),
-                          padding: const EdgeInsets.all(10),
-                          child: Row(
-                            children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(12),
-                                child: (b.logo ?? '').isNotEmpty
-                                    ? ImageReseau(b.logo!, width: 56, height: 56, fit: BoxFit.cover, repli: _fallback())
-                                    : _fallback(),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      b.nom,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.w700,
-                                        color: _C.black,
+                },
+                builder: (context, state) {
+                  if (state is FavorisLoading || state is FavorisInitial) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (state is FavorisLoaded) {
+                    if (state.boutiques.isEmpty) {
+                      return const Center(
+                        child: Text(
+                          'Aucune boutique favorite pour le moment',
+                          style: TextStyle(color: _C.sub),
+                        ),
+                      );
+                    }
+                    return RefreshIndicator(
+                      onRefresh: () async =>
+                          context.read<FavorisBloc>().add(LoadFavoris()),
+                      child: ListView.separated(
+                        padding: const EdgeInsets.all(16),
+                        itemCount: state.boutiques.length,
+                        separatorBuilder: (_, __) => const SizedBox(height: 12),
+                        itemBuilder: (context, i) {
+                          final b = state.boutiques[i];
+                          return Container(
+                            decoration: BoxDecoration(
+                              color: _C.white,
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: _C.border),
+                            ),
+                            padding: const EdgeInsets.all(10),
+                            child: Row(
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: (b.logo ?? '').isNotEmpty
+                                      ? ImageReseau(
+                                          b.logo!,
+                                          width: 56,
+                                          height: 56,
+                                          fit: BoxFit.cover,
+                                          repli: _fallback(),
+                                        )
+                                      : _fallback(),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        b.nom,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.w700,
+                                          color: _C.black,
+                                        ),
                                       ),
-                                    ),
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      b.localisation ??
-                                          'Localisation non précisée',
-                                      style: const TextStyle(
-                                        color: _C.sub,
-                                        fontSize: 12,
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        b.localisation ??
+                                            'Localisation non précisée',
+                                        style: const TextStyle(
+                                          color: _C.sub,
+                                          fontSize: 12,
+                                        ),
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
-                              ),
-                              //  Cloche : notifications nouveaux produits / promos
-                              IconButton(
-                                tooltip: b.clocheActive
-                                    ? 'Désactiver les notifications'
-                                    : 'Activer les notifications',
-                                icon: Icon(
-                                  b.clocheActive
-                                      ? Icons.notifications_active
-                                      : Icons.notifications_off_outlined,
-                                  color: b.clocheActive ? _C.green : _C.sub,
+                                //  Cloche : notifications nouveaux produits / promos
+                                IconButton(
+                                  tooltip: b.clocheActive
+                                      ? 'Désactiver les notifications'
+                                      : 'Activer les notifications',
+                                  icon: Icon(
+                                    b.clocheActive
+                                        ? Icons.notifications_active
+                                        : Icons.notifications_off_outlined,
+                                    color: b.clocheActive ? _C.green : _C.sub,
+                                  ),
+                                  onPressed: () =>
+                                      context.read<FavorisBloc>().add(
+                                        ToggleClocheFavori(
+                                          b.id,
+                                          !b.clocheActive,
+                                        ),
+                                      ),
                                 ),
-                                onPressed: () =>
-                                    context.read<FavorisBloc>().add(
-                                      ToggleClocheFavori(b.id, !b.clocheActive),
-                                    ),
-                              ),
-                              IconButton(
-                                icon: const Icon(
-                                  Icons.favorite,
-                                  color: Colors.redAccent,
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.favorite,
+                                    color: Colors.redAccent,
+                                  ),
+                                  onPressed: () => context
+                                      .read<FavorisBloc>()
+                                      .add(SupprimerFavori(b.id)),
                                 ),
-                                onPressed: () => context
-                                    .read<FavorisBloc>()
-                                    .add(SupprimerFavori(b.id)),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    ),
-                  );
-                }
-                return const SizedBox.shrink();
-              },
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                    );
+                  }
+                  return const SizedBox.shrink();
+                },
+              ),
             ),
-          ),
-        ],
-      ),
+          ],
+        ),
       ),
     );
   }

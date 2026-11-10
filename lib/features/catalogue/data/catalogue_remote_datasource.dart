@@ -13,6 +13,23 @@ class CatalogueRemoteDataSource {
       .map((e) => ProduitCatalogue.fromJson(Map<String, dynamic>.from(e)))
       .toList();
 
+  /// Signale au backend qu'une fiche produit a été ouverte.
+  ///
+  /// `POST /acheteurs/produit/:id/vue` existait depuis le début sans être
+  /// appelé par personne. Ce compteur alimente pourtant « Visites » sur le
+  /// tableau de bord du vendeur et le tri `populaires` du catalogue : l'un
+  /// restait à zéro, l'autre sans effet.
+  ///
+  /// Volontairement silencieux : une vue perdue ne doit jamais empêcher la
+  /// fiche de s'afficher.
+  Future<void> signalerVue(String produitId) async {
+    try {
+      await dio.post('/acheteurs/produit/$produitId/vue');
+    } on DioException {
+      // Compteur d'audience : rien à dire à l'utilisateur.
+    }
+  }
+
   /// [tri] : recents, populaires, prix_asc, prix_desc, promos.
   Future<PageProduits> produits({
     String? categorie,
