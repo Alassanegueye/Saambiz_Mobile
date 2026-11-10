@@ -416,6 +416,34 @@ class BoutonDeconnexion extends StatelessWidget {
   }
 }
 
+/// Bouton « Changer de compte », au-dessus de « Se déconnecter » : on quitte
+/// ce compte sans fermer sa session, pour y revenir d'un toucher.
+class BoutonChangerCompte extends StatelessWidget {
+  final VoidCallback onPressed;
+  const BoutonChangerCompte({super.key, required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlinedButton.icon(
+      onPressed: onPressed,
+      style: OutlinedButton.styleFrom(
+        foregroundColor: AppColor.kPrimary,
+        side: const BorderSide(color: AppColor.kPrimaryBorder),
+        backgroundColor: AppColor.kWhite,
+        minimumSize: const Size(double.infinity, 48),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        textStyle: const TextStyle(
+          fontFamily: kPolice,
+          fontSize: 15,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+      icon: const Icon(Icons.swap_horiz_rounded, size: 20),
+      label: const Text('Changer de compte'),
+    );
+  }
+}
+
 /// Nom et version de l'application, en pied d'onglet.
 class VersionApp extends StatelessWidget {
   const VersionApp({super.key});

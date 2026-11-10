@@ -11,7 +11,11 @@ class ConditionUtilisation extends StatelessWidget {
       appBar: AppBar(
         title: Text(
           'Conditions d’utilisation',
-          style: TextStyle(fontFamily: kPolice, fontWeight: FontWeight.w700, fontSize: 18),
+          style: TextStyle(
+            fontFamily: kPolice,
+            fontWeight: FontWeight.w700,
+            fontSize: 18,
+          ),
         ),
         centerTitle: true,
       ),
@@ -107,7 +111,11 @@ class ConditionUtilisation extends StatelessWidget {
               Center(
                 child: Text(
                   'Dernière mise à jour : 2026',
-                  style: TextStyle(fontFamily: kPolice, fontSize: 12, color: Colors.grey),
+                  style: TextStyle(
+                    fontFamily: kPolice,
+                    fontSize: 12,
+                    color: Colors.grey,
+                  ),
                 ),
               ),
             ],
@@ -122,7 +130,11 @@ class ConditionUtilisation extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 16),
       child: Text(
         text,
-        style: TextStyle(fontFamily: kPolice, fontSize: 20, fontWeight: FontWeight.w800),
+        style: TextStyle(
+          fontFamily: kPolice,
+          fontSize: 20,
+          fontWeight: FontWeight.w800,
+        ),
       ),
     );
   }
@@ -132,7 +144,11 @@ class ConditionUtilisation extends StatelessWidget {
       padding: const EdgeInsets.only(top: 20, bottom: 8),
       child: Text(
         text,
-        style: TextStyle(fontFamily: kPolice, fontSize: 16, fontWeight: FontWeight.w700),
+        style: TextStyle(
+          fontFamily: kPolice,
+          fontSize: 16,
+          fontWeight: FontWeight.w700,
+        ),
       ),
     );
   }
@@ -143,7 +159,8 @@ class ConditionUtilisation extends StatelessWidget {
       child: Text(
         text,
         textAlign: TextAlign.justify,
-        style: TextStyle(fontFamily: kPolice, 
+        style: TextStyle(
+          fontFamily: kPolice,
           fontSize: 14,
           height: 1.6,
           color: Colors.black54,
@@ -162,7 +179,8 @@ class ConditionUtilisation extends StatelessWidget {
           Expanded(
             child: Text(
               text,
-              style: TextStyle(fontFamily: kPolice, 
+              style: TextStyle(
+                fontFamily: kPolice,
                 fontSize: 14,
                 height: 1.5,
                 color: Colors.black54,

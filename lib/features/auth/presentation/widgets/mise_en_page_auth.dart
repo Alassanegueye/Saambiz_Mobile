@@ -97,7 +97,12 @@ class _EnteteAuth extends StatelessWidget {
       child: SafeArea(
         bottom: false,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(8, 4, 24, MiseEnPageAuth.chevauchement + 28),
+          padding: const EdgeInsets.fromLTRB(
+            8,
+            4,
+            24,
+            MiseEnPageAuth.chevauchement + 28,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -139,7 +144,11 @@ class _EnteteAuth extends StatelessWidget {
                             color: AppColor.kWhite.withValues(alpha: 0.18),
                           ),
                         ),
-                        child: Icon(icone, color: AppColor.kSecondary, size: 26),
+                        child: Icon(
+                          icone,
+                          color: AppColor.kSecondary,
+                          size: 26,
+                        ),
                       ),
                     const SizedBox(height: 26),
                     Text(
@@ -370,6 +379,7 @@ class ChampMotDePasse extends StatefulWidget {
   final FormFieldValidator<String>? validator;
   final TextInputAction? action;
   final ValueChanged<String>? onSubmitted;
+  final FocusNode? focusNode;
 
   const ChampMotDePasse({
     super.key,
@@ -378,6 +388,7 @@ class ChampMotDePasse extends StatefulWidget {
     this.validator,
     this.action,
     this.onSubmitted,
+    this.focusNode,
   });
 
   @override
@@ -391,6 +402,7 @@ class _ChampMotDePasseState extends State<ChampMotDePasse> {
   Widget build(BuildContext context) {
     return TextFormField(
       controller: widget.controller,
+      focusNode: widget.focusNode,
       obscureText: _masque,
       textInputAction: widget.action,
       onFieldSubmitted: widget.onSubmitted,
@@ -410,7 +422,9 @@ class _ChampMotDePasseState extends State<ChampMotDePasse> {
           size: 20,
         ),
         suffixe: IconButton(
-          tooltip: _masque ? 'Afficher le mot de passe' : 'Masquer le mot de passe',
+          tooltip: _masque
+              ? 'Afficher le mot de passe'
+              : 'Masquer le mot de passe',
           icon: Icon(
             _masque ? Icons.visibility_outlined : Icons.visibility_off_outlined,
             color: AppColor.kGrayscale40,

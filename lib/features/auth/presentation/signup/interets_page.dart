@@ -296,7 +296,8 @@ class _CategoryTile extends StatelessWidget {
                       child: Text(
                         label,
                         textAlign: TextAlign.center,
-                        style: TextStyle(fontFamily: kPolice, 
+                        style: TextStyle(
+                          fontFamily: kPolice,
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
                           color: Sb.navy,

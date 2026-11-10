@@ -3,16 +3,16 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:jwt_decode/jwt_decode.dart';
 
 import '../../../../core/routes/app_router.dart';
+import '../../../../core/widgets/intro_marque.dart';
 import '../../../../core/services/session_service.dart';
 import '../../data/models/user_model.dart';
+import '../../../onboarding/presentation/pages/onboarding_page.dart';
 import '../../../../injection_container.dart';
 
-/// Écran de chargement, juste après l'écran de démarrage natif (pictogramme
-/// bleu marine sur fond blanc) : logo SaamBiz complet et fine barre de
-/// chargement, sur le même fond blanc.
-///
-/// Le jeton est lu pendant que le logo s'affiche : l'écran reste au moins
-/// 0,6 s (le temps de voir la marque), sans attente fixe supplémentaire.
+/// Premier écran sous le rideau d'arrivée ([IntroMarque]) : il lit la session
+/// et choisit où entrer (onboarding, connexion ou espace du rôle). Le logo
+/// animé est dessiné par [IntroMarque], posé au-dessus ; cet écran reste un
+/// simple fond blanc, et signale au rideau qu'il peut se lever.
 class AppBootstrap extends StatefulWidget {
   const AppBootstrap({super.key});
 
@@ -20,23 +20,18 @@ class AppBootstrap extends StatefulWidget {
   State<AppBootstrap> createState() => _AppBootstrapState();
 }
 
-class _AppBootstrapState extends State<AppBootstrap>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _fondu = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 350),
-  )..forward();
-
+class _AppBootstrapState extends State<AppBootstrap> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _router());
-  }
-
-  @override
-  void dispose() {
-    _fondu.dispose();
-    super.dispose();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      try {
+        await _router();
+      } finally {
+        // Quoi qu'il arrive, le rideau ne doit pas rester baissé.
+        IntroMarque.signalerPret();
+      }
+    });
   }
 
   Future<String?> _lireJeton() async {
@@ -56,12 +51,9 @@ class _AppBootstrapState extends State<AppBootstrap>
   }
 
   Future<void> _router() async {
-    final lecture = _lireJeton();
-    await Future.wait([
-      lecture,
-      Future.delayed(const Duration(milliseconds: 600)),
-    ]);
-    var token = await lecture;
+    // Pas d'attente minimale ici : le rideau garde le logo à l'écran le temps
+    // de son animation.
+    var token = await _lireJeton();
 
     // Jeton expiré : on tente d'en obtenir un autre avant de demander quoi que
     // ce soit à l'utilisateur.
@@ -100,70 +92,29 @@ class _AppBootstrapState extends State<AppBootstrap>
         );
         return;
       } catch (_) {
-        /* jeton illisible : on continue vers l'onboarding */
+        /* jeton illisible : traité comme sans session */
       }
     }
 
-    // Personne n'est connecté → les trois écrans d'onboarding, puis le choix
-    // du profil.
+    // Personne n'est connecté. Les trois écrans d'onboarding ne se montrent
+    // qu'à la première ouverture de l'application (voir [OnboardingPage]) ;
+    // ensuite, on arrive directement sur la connexion, qui propose aussi de
+    // créer un compte.
     //
-    // Volontairement à chaque ouverture, et non « une seule fois » : le drapeau
-    // vivait dans le stockage sécurisé, que la sauvegarde automatique d'Android
-    // restaure après une réinstallation. L'onboarding devenait alors
-    // invisible et intestable. Il reste court (trois écrans, balayage,
-    // bouton « Passer ») et ne concerne que les visiteurs sans session.
+    // Le drapeau vit dans les préférences (effacées à la désinstallation sur
+    // iOS comme sur Android) et non dans le stockage sécurisé : le trousseau
+    // iOS survit à la désinstallation, et la sauvegarde automatique d'Android
+    // est coupée (android:allowBackup="false").
+    if (OnboardingPage.dejaVu()) {
+      Navigator.of(context).pushReplacementNamed(AppRouter.loginRoute);
+      return;
+    }
     Navigator.of(context).pushReplacementNamed(AppRouter.onboardingRoute);
   }
 
   @override
   Widget build(BuildContext context) {
-    // Fond blanc, comme l'écran de démarrage natif : aucune coupure de couleur.
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Barre invisible au-dessus : le logo reste exactement au centre.
-            const TickerMode(
-              enabled: false,
-              child: ExcludeSemantics(
-                child: Opacity(opacity: 0, child: _Chargement()),
-              ),
-            ),
-            Image.asset(
-              'assets/images/logo.png',
-              width: 240,
-              cacheWidth: 960,
-              semanticLabel: 'SaamBiz',
-            ),
-            FadeTransition(opacity: _fondu, child: const _Chargement()),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// Barre de chargement sous le logo.
-class _Chargement extends StatelessWidget {
-  const _Chargement();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.symmetric(vertical: 32),
-      child: SizedBox(
-        width: 120,
-        child: ClipRRect(
-          borderRadius: BorderRadius.all(Radius.circular(4)),
-          child: LinearProgressIndicator(
-            minHeight: 4,
-            color: Color(0xFF01154B),
-            backgroundColor: Color(0xFFFEF3D6),
-          ),
-        ),
-      ),
-    );
+    // Fond blanc, comme le rideau d'arrivée posé au-dessus.
+    return const Scaffold(backgroundColor: Colors.white);
   }
 }

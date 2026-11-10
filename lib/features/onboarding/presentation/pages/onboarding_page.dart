@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:saambiz/core/theme/police.dart';
 import 'package:saambiz/core/routes/app_router.dart';
+import 'package:saambiz/injection_container.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../core/theme/app_color.dart';
 
@@ -40,6 +42,18 @@ const List<_Slide> _slides = [
 class OnboardingPage extends StatefulWidget {
   const OnboardingPage({super.key});
 
+  static const String _cleVu = 'onboarding_vu';
+
+  /// L'onboarding a-t-il déjà été montré sur cet appareil ? Il ne se montre
+  /// qu'à la première ouverture de l'application.
+  static bool dejaVu() {
+    try {
+      return sl<SharedPreferences>().getBool(_cleVu) ?? false;
+    } catch (_) {
+      return false;
+    }
+  }
+
   @override
   State<OnboardingPage> createState() => _OnboardingPageState();
 }
@@ -47,6 +61,16 @@ class OnboardingPage extends StatefulWidget {
 class _OnboardingPageState extends State<OnboardingPage> {
   final PageController _controller = PageController();
   int _index = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    // Noté dès l'affichage : la prochaine ouverture ne le remontrera pas,
+    // même si l'application est fermée au milieu des trois écrans.
+    sl<SharedPreferences>()
+        .setBool(OnboardingPage._cleVu, true)
+        .catchError((_) => false);
+  }
 
   @override
   void didChangeDependencies() {

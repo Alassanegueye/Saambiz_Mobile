@@ -55,12 +55,14 @@ class _TermsAndPrivacyTextState extends State<TermsAndPrivacyText> {
 
   @override
   Widget build(BuildContext context) {
-    final styleParDefaut = TextStyle(fontFamily: kPolice, 
+    final styleParDefaut = TextStyle(
+      fontFamily: kPolice,
       color: AppColor.kGrayscale40,
       fontWeight: FontWeight.w500,
       fontSize: 14,
     );
-    final styleLien = TextStyle(fontFamily: kPolice, 
+    final styleLien = TextStyle(
+      fontFamily: kPolice,
       color: widget.couleurTermes ?? AppColor.kGrayscaleDark100,
       fontWeight: FontWeight.w600,
       fontSize: 14,

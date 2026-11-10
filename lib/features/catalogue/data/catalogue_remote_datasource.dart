@@ -97,6 +97,31 @@ class CatalogueRemoteDataSource {
         .toList();
   }
 
+  /// Boutiques en ligne, page par page : toutes (les plus récentes d'abord)
+  /// sans [recherche], sinon celles qui y correspondent.
+  Future<({List<Map<String, dynamic>> boutiques, int total, int pages})>
+  listerBoutiques({String recherche = '', int page = 1, int limit = 20}) async {
+    final res = await dio.get(
+      '/catalogue/boutiques',
+      queryParameters: {
+        if (recherche.trim().isNotEmpty) 'q': recherche.trim(),
+        'page': page,
+        'limit': limit,
+      },
+    );
+    final data = res.data as Map;
+    final liste = data['boutiques'];
+    final boutiques = liste is List
+        ? liste
+              .whereType<Map>()
+              .map((b) => Map<String, dynamic>.from(b))
+              .toList()
+        : <Map<String, dynamic>>[];
+    final total = int.tryParse('${data['total']}') ?? boutiques.length;
+    final pages = int.tryParse('${data['pages']}') ?? 1;
+    return (boutiques: boutiques, total: total, pages: pages);
+  }
+
   /// Fiche publique d'une boutique.
   Future<Map<String, dynamic>> boutique(String id) async {
     final res = await dio.get('/catalogue/boutiques/$id');

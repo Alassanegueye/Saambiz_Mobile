@@ -189,7 +189,7 @@ class _CategorieBoutiquesPageState extends State<CategorieBoutiquesPage> {
                 )
               : const SizedBox.shrink();
         }
-        return _LigneBoutique(donnees: _boutiques[i - 1]);
+        return LigneBoutique(donnees: _boutiques[i - 1]);
       },
     );
   }
@@ -267,9 +267,9 @@ class _CategorieBoutiquesPageState extends State<CategorieBoutiquesPage> {
 }
 
 /// Une boutique de la liste : logo, nom, ville, badge de confiance, distance.
-class _LigneBoutique extends StatelessWidget {
+class LigneBoutique extends StatelessWidget {
   final Map<String, dynamic> donnees;
-  const _LigneBoutique({required this.donnees});
+  const LigneBoutique({super.key, required this.donnees});
 
   @override
   Widget build(BuildContext context) {

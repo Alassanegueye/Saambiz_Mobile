@@ -54,7 +54,8 @@ class _PasswordTextFieldState extends State<PasswordTextField> {
           focusNode: widget.focusNode,
           style:
               widget.style ??
-              TextStyle(fontFamily: kPolice, 
+              TextStyle(
+                fontFamily: kPolice,
                 fontSize: 15,
                 fontWeight: FontWeight.w500,
                 color: const Color(0xFF01154B),
@@ -90,7 +91,8 @@ class _PasswordTextFieldState extends State<PasswordTextField> {
               ),
             ),
             hintText: widget.hintText,
-            hintStyle: TextStyle(fontFamily: kPolice, 
+            hintStyle: TextStyle(
+              fontFamily: kPolice,
               color: const Color(0xFFC2CCBA),
               fontWeight: FontWeight.w400,
               fontSize: 14,

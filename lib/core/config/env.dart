@@ -119,6 +119,23 @@ class Env {
     defaultValue: '',
   );
 
+  // Connexion Google
+  /// Identifiant OAuth du client iOS (Google Cloud → Identifiants → iOS).
+  /// Doit aller de pair avec `GOOGLE_REVERSED_CLIENT_ID` dans
+  /// `ios/Flutter/Google.xcconfig`. Vide : bouton Google masqué sur iOS.
+  static const String googleIosClientId = String.fromEnvironment(
+    'GOOGLE_IOS_CLIENT_ID',
+    defaultValue: '',
+  );
+
+  /// Identifiant OAuth du client « Application Web » : destinataire du jeton
+  /// sur Android, où il est obligatoire. Vide : bouton Google masqué sur
+  /// Android.
+  static const String googleServerClientId = String.fromEnvironment(
+    'GOOGLE_SERVER_CLIENT_ID',
+    defaultValue: '',
+  );
+
   // Rapports de plantage
   /// Désactivés en débogage : sinon chaque rechargement à chaud pollue la
   /// console Crashlytics de plantages qui n'existent pas en production.

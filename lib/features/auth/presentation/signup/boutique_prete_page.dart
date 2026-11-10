@@ -58,7 +58,8 @@ class BoutiquePretePage extends StatelessWidget {
                 nomBoutique,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(fontFamily: kPolice, 
+                style: TextStyle(
+                  fontFamily: kPolice,
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                   color: Sb.navy,

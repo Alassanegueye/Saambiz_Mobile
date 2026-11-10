@@ -3,6 +3,7 @@ import 'package:saambiz/core/routes/app_router.dart';
 import 'package:saambiz/core/theme/app_theme.dart';
 import 'package:saambiz/core/utils/app_logger.dart';
 import 'package:saambiz/core/widgets/fermeture_clavier.dart';
+import 'package:saambiz/core/widgets/intro_marque.dart';
 import 'package:saambiz/features/auth/presentation/bloc/auth_bloc.dart'; // <-- IMPORT AJOUTÉ
 import 'package:saambiz/features/auth/presentation/pages/app_bootstrap.dart';
 import 'package:saambiz/injection_container.dart' as di;
@@ -97,7 +98,11 @@ class MyApp extends StatelessWidget {
             systemNavigationBarColor: Colors.white,
             systemNavigationBarIconBrightness: Brightness.dark,
           ),
-          child: FermetureClavier(child: child ?? const SizedBox.shrink()),
+          // Écran d'arrivée (logo animé du site), au-dessus de tout : il se
+          // lève sur le premier écran une fois celui-ci choisi.
+          child: IntroMarque(
+            child: FermetureClavier(child: child ?? const SizedBox.shrink()),
+          ),
         ),
       ),
     );
