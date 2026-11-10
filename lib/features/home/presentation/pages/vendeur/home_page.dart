@@ -33,6 +33,7 @@ import '../../../../../core/widgets/avatar_utilisateur.dart';
 import '../../../../../core/widgets/ui_kit.dart';
 import '../../../../vendeur/presentation/pages/produit_form_page.dart';
 import 'profil_page.dart';
+import '../../../../../core/widgets/page_vendeur.dart';
 
 class _C {
   static const green = Color(0xFF01154B); // navy (héritage de nom)
@@ -312,7 +313,7 @@ class _HomePageState extends State<HomePage>
                     physics: const ClampingScrollPhysics(
                       parent: AlwaysScrollableScrollPhysics(),
                     ),
-                    padding: const EdgeInsets.only(bottom: 24),
+                    padding: EdgeInsets.only(bottom: espaceBasVendeur(context)),
                     children: [
                       _buildBlocChiffres(),
                       Padding(
@@ -352,7 +353,7 @@ class _HomePageState extends State<HomePage>
       child: SafeArea(
         bottom: false,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 8, 10, 8),
+          padding: const EdgeInsets.fromLTRB(20, 10, 18, 10),
           child: Row(
             children: [
               _logoBoutique(boutique),
@@ -403,23 +404,17 @@ class _HomePageState extends State<HomePage>
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
+                padding: const EdgeInsets.only(left: 4, right: 10),
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(21),
                   child: Material(
                     color: Colors.white.withValues(alpha: 0.12),
                     child: InkWell(
                       onTap: _openNotifications,
                       child: Container(
-                        width: 40,
-                        height: 40,
+                        width: 42,
+                        height: 42,
                         alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.22),
-                          ),
-                        ),
                         child: Badge(
                           isLabelVisible: _notifNonLues > 0,
                           backgroundColor: AppColor.kSecondary,
@@ -443,7 +438,6 @@ class _HomePageState extends State<HomePage>
                   ),
                 ),
               ),
-              const SizedBox(width: 2),
               AvatarUtilisateur(
                 utilisateur: _utilisateur,
                 // Le compte n'est plus un onglet : il s'ouvre ici, en haut,

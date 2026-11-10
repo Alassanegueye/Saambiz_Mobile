@@ -1,7 +1,7 @@
 import 'package:saambiz/core/widgets/onglets_conserves.dart';
 import 'package:flutter/material.dart';
-import '../../../../core/widgets/app_app_bar.dart';
-import '../../../../core/widgets/degrade_fond.dart';
+import '../../../../core/widgets/page_vendeur.dart';
+import '../../../../core/widgets/ui_kit.dart';
 import '../../../../core/theme/police.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -18,7 +18,6 @@ class _C {
   static const green = Color(0xFF01154B);
   static const black = Color(0xFF01154B);
   static const white = Color(0xFFFFFFFF);
-  static const bg = Color(0xFFF4F5F8);
   static const sub = Color(0xFF5B6C8A);
   static const border = Color(0xFFE3E8F0);
 }
@@ -63,61 +62,30 @@ class _MesPromotionsView extends StatelessWidget {
     if (res == true) bloc.add(LoadMesPromotions());
   }
 
-  /// Action secondaire, volontairement discrète : un message libre aux abonnés
-  /// (boutique ouverte, nouveautés…).
-  Widget _lienInformer(BuildContext context) {
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: TextButton.icon(
-        onPressed: () => _nouvelleCampagne(context, TypeCampagne.information),
-        icon: const Icon(Icons.campaign_outlined, size: 20),
-        label: const Text(
-          'Informer les abonnés',
-          style: TextStyle(fontWeight: FontWeight.w600),
-        ),
-        style: TextButton.styleFrom(
-          foregroundColor: _C.green,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: _C.bg,
-      appBar: AppAppBar(
-        title: 'Mes promotions',
-        implyLeading: false,
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 12),
-            child: FilledButton.icon(
-              onPressed: () =>
-                  _nouvelleCampagne(context, TypeCampagne.promotion),
-              icon: const Icon(Icons.add_rounded, size: 18),
-              label: const Text('Créer une promo'),
-              style: FilledButton.styleFrom(
-                backgroundColor: AppColor.kSecondary,
-                foregroundColor: AppColor.kPrimary,
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                visualDensity: VisualDensity.compact,
-                textStyle: const TextStyle(fontFamily: kPolice, fontWeight: FontWeight.w700),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            ),
-          ),
-        ],
+    return PageVendeur(
+      titre: 'Promotions',
+      sousTitre: 'Réductions et messages aux abonnés',
+      actions: [
+        BoutonEnteteVendeur(
+          icone: Icons.campaign_outlined,
+          infobulle: 'Informer les abonnés',
+          onTap: () => _nouvelleCampagne(context, TypeCampagne.information),
+        ),
+      ],
+      boutonFlottant: FloatingActionButton.extended(
+        onPressed: () => _nouvelleCampagne(context, TypeCampagne.promotion),
+        backgroundColor: AppColor.kSecondary,
+        foregroundColor: AppColor.kPrimary,
+        elevation: 2,
+        icon: const Icon(Icons.add_rounded),
+        label: const Text(
+          'Créer une promo',
+          style: TextStyle(fontFamily: kPolice, fontWeight: FontWeight.w700),
+        ),
       ),
-      body: FondDegradeSubtil(
-        child: Column(
-        children: [
-          _lienInformer(context),
-          Expanded(
-            child: BlocConsumer<PromotionsBloc, PromotionsState>(
+      corps: BlocConsumer<PromotionsBloc, PromotionsState>(
               buildWhen: (avant, apres) =>
                   !(apres is PromotionsLoading && avant is PromotionsLoaded),
               listener: (context, state) {
@@ -142,7 +110,12 @@ class _MesPromotionsView extends StatelessWidget {
                     onRefresh: () async =>
                         context.read<PromotionsBloc>().add(LoadMesPromotions()),
                     child: ListView.separated(
-                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 90),
+                      padding: EdgeInsets.fromLTRB(
+                        16,
+                        16,
+                        16,
+                        espaceBasVendeur(context) + 72,
+                      ),
                       itemCount: state.promotions.length,
                       separatorBuilder: (_, __) => const SizedBox(height: 12),
                       itemBuilder: (context, i) {
@@ -216,74 +189,24 @@ class _MesPromotionsView extends StatelessWidget {
                 return const SizedBox.shrink();
               },
             ),
-          ),
-        ],
-      ),
-      ),
     );
   }
 }
 
-/// État vide : le message, et un conseil sur ce qu'il faut faire ensuite.
+/// État vide : ce qu'est une promo, et le conseil de prévenir ses abonnés.
 class _AucunePromotion extends StatelessWidget {
   const _AucunePromotion();
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(24, 0, 24, 48),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              'Aucune promotion en cours pour le moment.',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w500,
-                color: _C.black,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: _C.green,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Row(
-                children: [
-                  Icon(
-                    Icons.campaign_outlined,
-                    color: AppColor.kSecondary,
-                    size: 24,
-                  ),
-                  SizedBox(width: 12),
-                  Expanded(
-                    child: Text.rich(
-                      TextSpan(
-                        text: 'Pensez à informer vos abonnés ',
-                        children: [
-                          TextSpan(
-                            text:
-                                'après avoir créé votre promotion pour booster vos ventes !',
-                            style: TextStyle(fontWeight: FontWeight.w700),
-                          ),
-                        ],
-                      ),
-                      style: TextStyle(
-                        fontSize: 13,
-                        height: 1.4,
-                        color: _C.white,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
+    return Padding(
+      padding: EdgeInsets.only(bottom: espaceBasVendeur(context)),
+      child: const EtatVide(
+        icone: Icons.local_offer_outlined,
+        titre: 'Aucune promotion en cours',
+        message:
+            'Créez une réduction sur vos produits, puis prévenez vos abonnés '
+            'pour booster vos ventes.',
       ),
     );
   }

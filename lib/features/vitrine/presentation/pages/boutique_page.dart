@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:saambiz/core/theme/police.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../../../core/theme/app_color.dart';
+import '../../../../core/widgets/page_vendeur.dart';
 import '../../../../core/widgets/ui_kit.dart';
 import '../../../../injection_container.dart';
 import '../../../boutique/presentation/pages/ma_boutique_page.dart';
@@ -56,13 +56,17 @@ class _VueBoutique extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: _C.bg,
-      body: Column(
-        children: [
-          const _BarreHaut(),
-          Expanded(
-            child: BlocConsumer<VitrineBloc, VitrineState>(
+    return PageVendeur(
+      titre: 'Ma boutique',
+      sousTitre: 'Votre site en ligne',
+      actions: [
+        BoutonEnteteVendeur(
+          icone: Icons.refresh_rounded,
+          infobulle: 'Actualiser',
+          onTap: () => context.read<VitrineBloc>().add(ChargerVitrine()),
+        ),
+      ],
+      corps: BlocConsumer<VitrineBloc, VitrineState>(
               listener: (context, state) {
                 if (state is VitrineErreur) {
                   ScaffoldMessenger.of(
@@ -119,56 +123,6 @@ class _VueBoutique extends StatelessWidget {
                 return const SizedBox.shrink();
               },
             ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Barre du haut, bleu foncé comme les autres onglets vendeur.
-class _BarreHaut extends StatelessWidget {
-  const _BarreHaut();
-
-  @override
-  Widget build(BuildContext context) {
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.light.copyWith(
-        statusBarColor: Colors.transparent,
-      ),
-      child: Container(
-        color: AppColor.kPrimary,
-        child: SafeArea(
-          bottom: false,
-          child: SizedBox(
-            height: kToolbarHeight,
-            child: Row(
-              children: [
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Text(
-                    'Ma boutique',
-                    style: TextStyle(fontFamily: kPolice, 
-                      fontSize: 17,
-                      fontWeight: FontWeight.w600,
-                      color: AppColor.kWhite,
-                    ),
-                  ),
-                ),
-                IconButton(
-                  tooltip: 'Actualiser',
-                  onPressed: () =>
-                      context.read<VitrineBloc>().add(ChargerVitrine()),
-                  icon: const Icon(
-                    Icons.refresh_rounded,
-                    color: AppColor.kWhite,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
     );
   }
 }
@@ -184,7 +138,7 @@ class _BoutiqueAcreer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(20, 24, 20, 28),
+      padding: EdgeInsets.fromLTRB(20, 24, 20, espaceBasVendeur(context)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -298,7 +252,7 @@ class _Configuration extends StatelessWidget {
         .length;
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(16, 14, 16, 28),
+      padding: EdgeInsets.fromLTRB(16, 18, 16, espaceBasVendeur(context)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
