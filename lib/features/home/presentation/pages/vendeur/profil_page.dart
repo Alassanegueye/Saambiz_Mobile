@@ -68,9 +68,9 @@ class _ProfilPageState extends State<ProfilPage> with RetourSurOnglet {
   }
 
   Future<void> _ouvrirCertification() async {
-    await Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => const CertificationPage()),
-    );
+    await Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => const CertificationPage()));
     _chargerCertification();
   }
 
@@ -179,164 +179,171 @@ class _ProfilPageState extends State<ProfilPage> with RetourSurOnglet {
           }
         },
         child: Scaffold(
-        backgroundColor: AppColor.kBackground,
-        appBar: AppAppBar(
-          title: 'Compte',
-          implyLeading: false,
-          leading: Navigator.of(context).canPop()
-              ? IconButton(
-                  icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
-                  color: AppColor.kGrayscaleDark100,
-                  tooltip: 'Retour à l\'accueil',
-                  onPressed: () => Navigator.of(context).maybePop(),
-                )
-              : null,
-        ),
-        body: ListView(
-          physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.fromLTRB(20, 8, 20, kEspaceBarreBas),
-          children: [
-            _CarteSolde(montant: _user?.soldeDisponible ?? 0),
-            const SizedBox(height: 14),
-            CarteEnteteProfil(
-              nom: _nomComplet,
-              initiales: _initiales,
-              email: _user?.email ?? '',
-              role: _user?.role ?? 'VENDEUR',
-              photo: _user?.photoProfil,
-              onTap: _onEditProfil,
-            ),
-            // Tant que la boutique n'est pas certifiée, l'invitation reste en
-            // haut du compte : c'est ce qu'annonce le point rouge de l'accueil.
-            if (_certification != null && _certification!.actionRequise) ...[
+          backgroundColor: AppColor.kBackground,
+          appBar: AppAppBar(
+            title: 'Compte',
+            implyLeading: false,
+            leading: Navigator.of(context).canPop()
+                ? IconButton(
+                    icon: const Icon(
+                      Icons.arrow_back_ios_new_rounded,
+                      size: 20,
+                    ),
+                    color: AppColor.kGrayscaleDark100,
+                    tooltip: 'Retour à l\'accueil',
+                    onPressed: () => Navigator.of(context).maybePop(),
+                  )
+                : null,
+          ),
+          body: ListView(
+            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, kEspaceBarreBas),
+            children: [
+              _CarteSolde(montant: _user?.soldeDisponible ?? 0),
               const SizedBox(height: 14),
-              _CarteCertification(
-                rejetee: _certification!.rejete,
-                onTap: _ouvrirCertification,
+              CarteEnteteProfil(
+                nom: _nomComplet,
+                initiales: _initiales,
+                email: _user?.email ?? '',
+                role: _user?.role ?? 'VENDEUR',
+                photo: _user?.photoProfil,
+                onTap: _onEditProfil,
               ),
-            ],
-            const SizedBox(height: 24),
-            SectionProfil(
-              titre: 'Ma boutique',
-              entrees: [
-                LigneProfil(
-                  icone: Icons.verified_outlined,
-                  libelle: 'Certification',
-                  sousTitre: switch (_certification?.statut) {
-                    'approuve' => 'Votre boutique est certifiée',
-                    'en_attente' => 'Demande en cours d\'examen',
-                    'rejete' => 'Demande refusée : renvoyez vos photos',
-                    _ => 'Faites certifier votre boutique',
-                  },
-                  fin: _certification != null && _certification!.actionRequise
-                      ? Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Container(
-                              width: 9,
-                              height: 9,
-                              decoration: const BoxDecoration(
-                                color: AppColor.kErreur,
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                            const SizedBox(width: 6),
-                            const Icon(
-                              Icons.chevron_right_rounded,
-                              color: AppColor.kGrayscale30,
-                            ),
-                          ],
-                        )
-                      : _certification?.certifie == true
-                      ? const Icon(Icons.verified_rounded, color: AppColor.kSucces)
-                      : null,
+              // Tant que la boutique n'est pas certifiée, l'invitation reste en
+              // haut du compte : c'est ce qu'annonce le point rouge de l'accueil.
+              if (_certification != null && _certification!.actionRequise) ...[
+                const SizedBox(height: 14),
+                _CarteCertification(
+                  rejetee: _certification!.rejete,
                   onTap: _ouvrirCertification,
                 ),
-                LigneProfil(
-                  icone: Icons.storefront_outlined,
-                  libelle: 'Ma boutique',
-                  sousTitre: 'Nom, logo, catégories, pause',
-                  onTap: () => _ouvrir(const MaBoutiquePage()),
-                ),
-                LigneProfil(
-                  icone: Icons.workspace_premium_outlined,
-                  libelle: 'Mon abonnement',
-                  sousTitre: 'Formule et historique des paiements',
-                  onTap: () => _ouvrir(const MonAbonnementPage()),
-                ),
-                LigneProfil(
-                  icone: Icons.notifications_none_rounded,
-                  libelle: 'Notifications',
-                  sousTitre: 'Nouvelles commandes et alertes',
-                  onTap: () => _ouvrir(const NotificationsPage()),
-                ),
-                LigneProfil(
-                  icone: Icons.chat_bubble_outline_rounded,
-                  libelle: 'Messages',
-                  sousTitre: 'Vos conversations avec vos clients',
-                  onTap: () => _ouvrir(const ConversationsPage()),
-                ),
               ],
-            ),
-            const SizedBox(height: 20),
-            SectionProfil(
-              titre: 'Sécurité',
-              entrees: [
-                LigneProfil(
-                  icone: Icons.lock_outline_rounded,
-                  libelle: 'Mot de passe',
-                  sousTitre: 'Modifier votre mot de passe',
-                  onTap: () => _ouvrir(const ChangePasswordPage()),
-                ),
-                LigneProfil(
-                  icone: Icons.delete_outline_rounded,
-                  libelle: 'Supprimer mon compte',
-                  sousTitre: 'Suppression définitive de vos données',
-                  danger: true,
-                  onTap: _onSupprimerCompte,
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            SectionProfil(
-              titre: 'Aide et informations',
-              entrees: [
-                LigneProfil(
-                  icone: Icons.help_outline_rounded,
-                  libelle: 'Centre d\'aide',
-                  sousTitre: 'Questions fréquentes',
-                  onTap: () => _ouvrir(const AidePage()),
-                ),
-                LigneProfil(
-                  icone: Icons.support_agent_outlined,
-                  libelle: 'Nous contacter',
-                  sousTitre: 'WhatsApp, e-mail ou téléphone',
-                  onTap: () => _ouvrir(const AidePage(contactSeulement: true)),
-                ),
-                LigneProfil(
-                  icone: Icons.star_border_rounded,
-                  libelle: 'Noter l\'application',
-                  sousTitre: 'Votre avis compte',
-                  onTap: () => UrlExterne.lancer(InfosApp.lienPlayStore),
-                ),
-                LigneProfil(
-                  icone: Icons.info_outline_rounded,
-                  libelle: 'À propos',
-                  sousTitre:
-                      'Version ${InfosApp.version}, conditions, confidentialité',
-                  onTap: () => _ouvrir(const AProposPage()),
-                ),
-              ],
-            ),
-            const SizedBox(height: 28),
-            BoutonChangerCompte(onPressed: _changerDeCompte),
-            const SizedBox(height: 10),
-            BoutonDeconnexion(onPressed: _onLogout),
-            const SizedBox(height: 12),
-            const VersionApp(),
-          ],
+              const SizedBox(height: 24),
+              SectionProfil(
+                titre: 'Ma boutique',
+                entrees: [
+                  LigneProfil(
+                    icone: Icons.verified_outlined,
+                    libelle: 'Certification',
+                    sousTitre: switch (_certification?.statut) {
+                      'approuve' => 'Votre boutique est certifiée',
+                      'en_attente' => 'Demande en cours d\'examen',
+                      'rejete' => 'Demande refusée : renvoyez vos photos',
+                      _ => 'Faites certifier votre boutique',
+                    },
+                    fin: _certification != null && _certification!.actionRequise
+                        ? Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                width: 9,
+                                height: 9,
+                                decoration: const BoxDecoration(
+                                  color: AppColor.kErreur,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              const Icon(
+                                Icons.chevron_right_rounded,
+                                color: AppColor.kGrayscale30,
+                              ),
+                            ],
+                          )
+                        : _certification?.certifie == true
+                        ? const Icon(
+                            Icons.verified_rounded,
+                            color: AppColor.kSucces,
+                          )
+                        : null,
+                    onTap: _ouvrirCertification,
+                  ),
+                  LigneProfil(
+                    icone: Icons.storefront_outlined,
+                    libelle: 'Ma boutique',
+                    sousTitre: 'Nom, logo, catégories, pause',
+                    onTap: () => _ouvrir(const MaBoutiquePage()),
+                  ),
+                  LigneProfil(
+                    icone: Icons.workspace_premium_outlined,
+                    libelle: 'Mon abonnement',
+                    sousTitre: 'Formule et historique des paiements',
+                    onTap: () => _ouvrir(const MonAbonnementPage()),
+                  ),
+                  LigneProfil(
+                    icone: Icons.notifications_none_rounded,
+                    libelle: 'Notifications',
+                    sousTitre: 'Nouvelles commandes et alertes',
+                    onTap: () => _ouvrir(const NotificationsPage()),
+                  ),
+                  LigneProfil(
+                    icone: Icons.chat_bubble_outline_rounded,
+                    libelle: 'Messages',
+                    sousTitre: 'Vos conversations avec vos clients',
+                    onTap: () => _ouvrir(const ConversationsPage()),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              SectionProfil(
+                titre: 'Sécurité',
+                entrees: [
+                  LigneProfil(
+                    icone: Icons.lock_outline_rounded,
+                    libelle: 'Mot de passe',
+                    sousTitre: 'Modifier votre mot de passe',
+                    onTap: () => _ouvrir(const ChangePasswordPage()),
+                  ),
+                  LigneProfil(
+                    icone: Icons.delete_outline_rounded,
+                    libelle: 'Supprimer mon compte',
+                    sousTitre: 'Suppression définitive de vos données',
+                    danger: true,
+                    onTap: _onSupprimerCompte,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              SectionProfil(
+                titre: 'Aide et informations',
+                entrees: [
+                  LigneProfil(
+                    icone: Icons.help_outline_rounded,
+                    libelle: 'Centre d\'aide',
+                    sousTitre: 'Questions fréquentes',
+                    onTap: () => _ouvrir(const AidePage()),
+                  ),
+                  LigneProfil(
+                    icone: Icons.support_agent_outlined,
+                    libelle: 'Nous contacter',
+                    sousTitre: 'WhatsApp, e-mail ou téléphone',
+                    onTap: () =>
+                        _ouvrir(const AidePage(contactSeulement: true)),
+                  ),
+                  LigneProfil(
+                    icone: Icons.star_border_rounded,
+                    libelle: 'Noter l\'application',
+                    sousTitre: 'Votre avis compte',
+                    onTap: () => UrlExterne.lancer(InfosApp.lienPlayStore),
+                  ),
+                  LigneProfil(
+                    icone: Icons.info_outline_rounded,
+                    libelle: 'À propos',
+                    sousTitre:
+                        'Version ${InfosApp.version}, conditions, confidentialité',
+                    onTap: () => _ouvrir(const AProposPage()),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 28),
+              BoutonChangerCompte(onPressed: _changerDeCompte),
+              const SizedBox(height: 10),
+              BoutonDeconnexion(onPressed: _onLogout),
+              const SizedBox(height: 12),
+              const VersionApp(),
+            ],
+          ),
         ),
-      ),
       ),
     );
   }

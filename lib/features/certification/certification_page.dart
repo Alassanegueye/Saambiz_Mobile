@@ -157,8 +157,14 @@ class _CertificationPageState extends State<CertificationPage> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(_erreur!, style: const TextStyle(color: Color(0xFF5B6C8A))),
-                  TextButton(onPressed: _charger, child: const Text('Réessayer')),
+                  Text(
+                    _erreur!,
+                    style: const TextStyle(color: Color(0xFF5B6C8A)),
+                  ),
+                  TextButton(
+                    onPressed: _charger,
+                    child: const Text('Réessayer'),
+                  ),
                 ],
               ),
             )
@@ -284,7 +290,9 @@ class _CertificationPageState extends State<CertificationPage> {
             backgroundColor: AppColor.kSecondary,
             foregroundColor: AppColor.kPrimary,
             elevation: 0,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
+            ),
           ),
           child: _envoi
               ? const SizedBox(
@@ -297,7 +305,10 @@ class _CertificationPageState extends State<CertificationPage> {
                 )
               : const Text(
                   'Envoyer ma demande',
-                  style: TextStyle(fontFamily: kPolice, fontWeight: FontWeight.w700),
+                  style: TextStyle(
+                    fontFamily: kPolice,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
         ),
       ),
@@ -311,7 +322,11 @@ class _CertificationPageState extends State<CertificationPage> {
             child: Text(
               'Vos photos servent uniquement à vérifier votre identité. '
               'Elles ne sont jamais montrées à vos clients.',
-              style: TextStyle(fontSize: 12.5, height: 1.45, color: Color(0xFF5B6C8A)),
+              style: TextStyle(
+                fontSize: 12.5,
+                height: 1.45,
+                color: Color(0xFF5B6C8A),
+              ),
             ),
           ),
         ],
@@ -435,7 +450,10 @@ class _ZonePhoto extends StatelessWidget {
                     left: 8,
                     bottom: 8,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 9,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: AppColor.kSucces,
                         borderRadius: BorderRadius.circular(999),

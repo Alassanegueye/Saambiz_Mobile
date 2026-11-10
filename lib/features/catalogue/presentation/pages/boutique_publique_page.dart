@@ -16,6 +16,7 @@ import '../../data/catalogue_remote_datasource.dart';
 import '../../data/produit_catalogue.dart';
 import '../widgets/bouton_panier.dart';
 import '../widgets/produit_card.dart';
+import '../../../avis/presentation/feuille_avis_boutique.dart';
 
 const _bleuVerifie = Color(0xFF1D9BF0);
 const _encre = Color(0xFF1B1F27);
@@ -343,24 +344,50 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
         : const <String, dynamic>{};
 
     final meta = <Widget>[
-      if (note is num && nombreAvis > 0)
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.star_rounded, size: 18, color: Color(0xFFF5B301)),
-            const SizedBox(width: 3),
-            Text(
-              '$note',
-              style: const TextStyle(
-                fontFamily: kPolice,
-                fontSize: 13.5,
-                fontWeight: FontWeight.w700,
-                color: _encre,
-              ),
-            ),
-            Text(' ($nombreAvis avis)', style: texteDiscret(13)),
-          ],
+      // Toujours affichée, même sans avis : c'est le seul chemin vers la
+      // feuille des avis, et une boutique qui n'en a aucun est précisément
+      // celle où le premier compte le plus.
+      InkWell(
+        onTap: () => ouvrirAvisBoutique(
+          context,
+          boutiqueId: widget.boutiqueId,
+          nomBoutique: nom,
         ),
+        borderRadius: BorderRadius.circular(8),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 2),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.star_rounded,
+                size: 18,
+                color: Color(0xFFF5B301),
+              ),
+              const SizedBox(width: 3),
+              if (note is num && nombreAvis > 0) ...[
+                Text(
+                  '$note',
+                  style: const TextStyle(
+                    fontFamily: kPolice,
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w700,
+                    color: _encre,
+                  ),
+                ),
+                Text(' ($nombreAvis avis)', style: texteDiscret(13)),
+              ] else
+                Text('Donner votre avis', style: texteDiscret(13)),
+              const SizedBox(width: 2),
+              const Icon(
+                Icons.chevron_right_rounded,
+                size: 16,
+                color: Color(0xFF8A93A6),
+              ),
+            ],
+          ),
+        ),
+      ),
       if (depuis != null)
         Row(
           mainAxisSize: MainAxisSize.min,

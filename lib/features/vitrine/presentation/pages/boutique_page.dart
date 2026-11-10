@@ -88,98 +88,96 @@ class _VueBoutiqueState extends State<_VueBoutique> {
         ),
       ],
       corps: BlocConsumer<VitrineBloc, VitrineState>(
-              listener: (context, state) {
-                if (state is VitrineErreur) {
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(SnackBar(content: Text(state.message)));
-                }
-                // Retour de l'assistant ou d'un enregistrement : on recharge
-                // pour repartir d'un état sûr, plutôt que de recomposer
-                // l'écran à partir de ce qui vient d'être renvoyé.
-                if (state is VitrineCreee || state is VitrineEnregistree) {
-                  context.read<VitrineBloc>().add(ChargerVitrine());
-                }
-              },
-              builder: (context, state) {
-                if (state is VitrineChargee) {
-                  _derniere = state.vitrine;
-                  _secteurs = state.secteurs;
-                }
-                final apercu = _derniere;
-                final enCours =
-                    state is VitrineChargement ||
-                    state is VitrineEnregistree ||
-                    state is VitrineCreee;
+        listener: (context, state) {
+          if (state is VitrineErreur) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(state.message)));
+          }
+          // Retour de l'assistant ou d'un enregistrement : on recharge
+          // pour repartir d'un état sûr, plutôt que de recomposer
+          // l'écran à partir de ce qui vient d'être renvoyé.
+          if (state is VitrineCreee || state is VitrineEnregistree) {
+            context.read<VitrineBloc>().add(ChargerVitrine());
+          }
+        },
+        builder: (context, state) {
+          if (state is VitrineChargee) {
+            _derniere = state.vitrine;
+            _secteurs = state.secteurs;
+          }
+          final apercu = _derniere;
+          final enCours =
+              state is VitrineChargement ||
+              state is VitrineEnregistree ||
+              state is VitrineCreee;
 
-                // Une boutique déjà publiée reste affichée pendant les
-                // enregistrements, et même après une erreur (le message
-                // part en bandeau) : le vendeur ne perd pas sa page.
-                if (apercu != null &&
-                    apercu.configuree &&
-                    (state is VitrineChargee ||
-                        enCours ||
-                        state is VitrineErreur)) {
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      SizedBox(
-                        height: 3,
-                        child: enCours
-                            ? const LinearProgressIndicator(
-                                color: _C.navy,
-                                backgroundColor: _C.navyLight,
-                              )
-                            : null,
-                      ),
-                      Expanded(
-                        child: _Configuration(
-                          vitrine: apercu,
-                          secteurs: _secteurs,
-                          ouvrirProduits: widget.ouvrirProduits,
-                          occupe: enCours,
-                        ),
-                      ),
-                    ],
-                  );
-                }
+          // Une boutique déjà publiée reste affichée pendant les
+          // enregistrements, et même après une erreur (le message
+          // part en bandeau) : le vendeur ne perd pas sa page.
+          if (apercu != null &&
+              apercu.configuree &&
+              (state is VitrineChargee || enCours || state is VitrineErreur)) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                SizedBox(
+                  height: 3,
+                  child: enCours
+                      ? const LinearProgressIndicator(
+                          color: _C.navy,
+                          backgroundColor: _C.navyLight,
+                        )
+                      : null,
+                ),
+                Expanded(
+                  child: _Configuration(
+                    vitrine: apercu,
+                    secteurs: _secteurs,
+                    ouvrirProduits: widget.ouvrirProduits,
+                    occupe: enCours,
+                  ),
+                ),
+              ],
+            );
+          }
 
-                if (state is VitrineChargement || state is VitrineInitial) {
-                  return const Center(
-                    child: CircularProgressIndicator(color: _C.navy),
-                  );
-                }
+          if (state is VitrineChargement || state is VitrineInitial) {
+            return const Center(
+              child: CircularProgressIndicator(color: _C.navy),
+            );
+          }
 
-                if (state is VitrineSansBoutique) {
-                  return Center(
-                    child: EtatVide(
-                      icone: Icons.storefront_outlined,
-                      titre: 'Créez d\'abord votre boutique',
-                      message: state.message,
-                    ),
-                  );
-                }
+          if (state is VitrineSansBoutique) {
+            return Center(
+              child: EtatVide(
+                icone: Icons.storefront_outlined,
+                titre: 'Créez d\'abord votre boutique',
+                message: state.message,
+              ),
+            );
+          }
 
-                if (state is VitrineErreur) {
-                  return Center(
-                    child: EtatVide(
-                      icone: Icons.wifi_off_rounded,
-                      titre: 'Chargement impossible',
-                      message: state.message,
-                      action: 'Réessayer',
-                      onAction: () =>
-                          context.read<VitrineBloc>().add(ChargerVitrine()),
-                    ),
-                  );
-                }
+          if (state is VitrineErreur) {
+            return Center(
+              child: EtatVide(
+                icone: Icons.wifi_off_rounded,
+                titre: 'Chargement impossible',
+                message: state.message,
+                action: 'Réessayer',
+                onAction: () =>
+                    context.read<VitrineBloc>().add(ChargerVitrine()),
+              ),
+            );
+          }
 
-                if (state is VitrineChargee) {
-                  return _BoutiqueAcreer(secteurs: state.secteurs);
-                }
+          if (state is VitrineChargee) {
+            return _BoutiqueAcreer(secteurs: state.secteurs);
+          }
 
-                return const SizedBox.shrink();
-              },
-            ),
+          return const SizedBox.shrink();
+        },
+      ),
     );
   }
 }
@@ -213,7 +211,8 @@ class _BoutiqueAcreer extends StatelessWidget {
           Text(
             'Mettez votre boutique en ligne',
             textAlign: TextAlign.center,
-            style: TextStyle(fontFamily: kPolice, 
+            style: TextStyle(
+              fontFamily: kPolice,
               fontSize: 19,
               fontWeight: FontWeight.w800,
               color: _C.navy,
@@ -242,7 +241,8 @@ class _BoutiqueAcreer extends StatelessWidget {
             icon: const Icon(Icons.auto_awesome_rounded, size: 19),
             label: Text(
               'Créer ma boutique en ligne',
-              style: TextStyle(fontFamily: kPolice, 
+              style: TextStyle(
+                fontFamily: kPolice,
                 fontSize: 15,
                 fontWeight: FontWeight.w700,
               ),
@@ -365,10 +365,9 @@ class _ConfigurationState extends State<_Configuration> {
     );
   }
 
-  void _dire(String message, {SnackBarAction? action}) =>
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(message), action: action));
+  void _dire(String message, {SnackBarAction? action}) => ScaffoldMessenger.of(
+    context,
+  ).showSnackBar(SnackBar(content: Text(message), action: action));
 
   Future<void> _ajouterSection() async {
     if (_sections.length >= maxSections) {
@@ -397,7 +396,10 @@ class _ConfigurationState extends State<_Configuration> {
             ? 'Créez d\'abord des produits pour remplir cette section.'
             : 'Vos produits sont en cours de chargement…',
         action: _produitsCharges && widget.ouvrirProduits != null
-            ? SnackBarAction(label: 'Produits', onPressed: widget.ouvrirProduits!)
+            ? SnackBarAction(
+                label: 'Produits',
+                onPressed: widget.ouvrirProduits!,
+              )
             : null,
       );
       return;
@@ -532,11 +534,11 @@ class _ConfigurationState extends State<_Configuration> {
               onTap: () => Navigator.of(ctx).pop('promo'),
             ),
             if (section >= 0)
-            _ActionMenu(
-              icone: Icons.remove_circle_outline_rounded,
-              texte: 'Retirer de cette section',
-              onTap: () => Navigator.of(ctx).pop('retirer'),
-            ),
+              _ActionMenu(
+                icone: Icons.remove_circle_outline_rounded,
+                texte: 'Retirer de cette section',
+                onTap: () => Navigator.of(ctx).pop('retirer'),
+              ),
             _ActionMenu(
               icone: Icons.delete_outline_rounded,
               texte: 'Supprimer le produit',
@@ -568,7 +570,9 @@ class _ConfigurationState extends State<_Configuration> {
         case 'retirer':
           final maj = [..._sections];
           maj[section] = maj[section].copyWith(
-            produitIds: maj[section].produitIds.where((id) => id != p.id).toList(),
+            produitIds: maj[section].produitIds
+                .where((id) => id != p.id)
+                .toList(),
           );
           _enregistrer(maj);
         case 'supprimer':
@@ -600,7 +604,8 @@ class _ConfigurationState extends State<_Configuration> {
           _dire('Produit supprimé.');
       }
     } catch (_) {
-      if (mounted) _dire('Action impossible. Vérifiez votre connexion et réessayez.');
+      if (mounted)
+        _dire('Action impossible. Vérifiez votre connexion et réessayez.');
     }
   }
 
@@ -774,7 +779,8 @@ class _ConfigurationState extends State<_Configuration> {
               if (_sections.isEmpty)
                 _SectionSite(
                   titre: 'Nos produits',
-                  note: 'Votre site montre tous vos produits. Créez des '
+                  note:
+                      'Votre site montre tous vos produits. Créez des '
                       'sections (Nouveautés, Promos…) pour en mettre en avant.',
                   produits: _produits,
                   teintes: teintes,
@@ -1349,7 +1355,9 @@ class _PastilleAction extends StatelessWidget {
       child: Material(
         color: principal ? _C.gold : _C.white,
         shape: CircleBorder(
-          side: principal ? BorderSide.none : const BorderSide(color: _C.border),
+          side: principal
+              ? BorderSide.none
+              : const BorderSide(color: _C.border),
         ),
         elevation: principal ? 0 : 1.5,
         shadowColor: _C.navy.withValues(alpha: 0.25),
@@ -1478,7 +1486,7 @@ class _EnteteSite extends StatelessWidget {
         children: [
           Row(
             children: [
-              Container(
+              DecoratedBox(
                 decoration: BoxDecoration(
                   borderRadius: rayon,
                   border: Border.all(color: _S.ligne),
@@ -1846,17 +1854,16 @@ class _SectionSite extends StatelessWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.add_circle_outline_rounded,
-                          color: _C.muted),
+                      const Icon(
+                        Icons.add_circle_outline_rounded,
+                        color: _C.muted,
+                      ),
                       const SizedBox(width: 8),
                       Text(
                         onAjouter == null
                             ? 'Aucun produit pour l\'instant'
                             : 'Ajoutez des produits à cette section',
-                        style: const TextStyle(
-                          color: _C.muted,
-                          fontSize: 12.8,
-                        ),
+                        style: const TextStyle(color: _C.muted, fontSize: 12.8),
                       ),
                     ],
                   ),
@@ -1940,8 +1947,10 @@ class _ProduitSite extends StatelessWidget {
                   color: _S.papierFonce,
                   padding: const EdgeInsets.all(9),
                   child: produit.image.isEmpty
-                      ? const Icon(Icons.image_not_supported_outlined,
-                          color: _S.encrePale)
+                      ? const Icon(
+                          Icons.image_not_supported_outlined,
+                          color: _S.encrePale,
+                        )
                       : ImageReseau(
                           produit.image,
                           largeurServeur: 320,

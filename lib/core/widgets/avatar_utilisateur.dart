@@ -53,7 +53,12 @@ class AvatarUtilisateur extends StatelessWidget {
                 shape: BoxShape.circle,
               ),
               child: photo != null && photo.isNotEmpty
-                  ? ImageReseau(photo, largeurServeur: 128, fit: BoxFit.cover, repli: initiales)
+                  ? ImageReseau(
+                      photo,
+                      largeurServeur: 128,
+                      fit: BoxFit.cover,
+                      repli: initiales,
+                    )
                   : initiales,
             ),
             if (pastille)
