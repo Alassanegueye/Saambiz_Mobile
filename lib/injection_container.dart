@@ -101,6 +101,7 @@ import 'core/services/config_publique_service.dart';
 import 'core/services/token_service.dart';
 import 'core/services/socket_service.dart';
 import 'core/connection/rejeu_reseau.dart';
+import 'core/utils/journal_sensible.dart';
 
 // Service Locator
 final sl = GetIt.instance;
@@ -223,13 +224,20 @@ Future<void> init() async {
               final formData = options.data as FormData;
               _log('FormData fields:');
               for (var field in formData.fields) {
-                _log('${field.key}: ${field.value}');
+                // Masqué : un envoi multipart porte aussi des champs
+                // sensibles, le mot de passe à la création de compte notamment.
+                _log(
+                  '${field.key}: '
+                  '${masquerChampMultipart(field.key, field.value)}',
+                );
               }
               for (var file in formData.files) {
                 _log('${file.key}: ${file.value.filename}');
               }
             } else {
-              _log('Body: ${options.data}');
+              // Masqué : ce corps porte le mot de passe sur /auth/login et
+              // le jeton d'identité sur /auth/social.
+              _log('Body: ${masquerDonneesSensibles(options.data)}');
             }
           }
 
@@ -266,7 +274,9 @@ Future<void> init() async {
             ' [RESPONSE] ${response.statusCode} ${response.requestOptions.path}',
           );
           if (response.data != null && response.data is Map) {
-            _log('Data: ${response.data}');
+            // Masqué : la réponse de connexion porte le jeton de session et
+            // son jeton de renouvellement.
+            _log('Data: ${masquerDonneesSensibles(response.data)}');
           }
           return handler.next(response);
         },
@@ -298,7 +308,7 @@ Future<void> init() async {
           _log('Message: ${e.message}');
           if (e.response != null) {
             _log('Status: ${e.response!.statusCode}');
-            _log('Data: ${e.response!.data}');
+            _log('Data: ${masquerDonneesSensibles(e.response!.data)}');
           }
           return handler.next(e);
         },
