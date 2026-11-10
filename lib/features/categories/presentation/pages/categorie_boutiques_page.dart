@@ -128,7 +128,6 @@ class _CategorieBoutiquesPageState extends State<CategorieBoutiquesPage> {
           style: TextStyle(fontFamily: kPolice, 
             fontSize: 17,
             fontWeight: FontWeight.w700,
-            color: Colors.white,
           ),
         ),
       ),

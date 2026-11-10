@@ -13,7 +13,6 @@ import '../../../../core/widgets/toastNotif.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
-import '../widgets/boutons_connexion_sociale.dart';
 import '../widgets/choix_compte.dart';
 import '../widgets/mise_en_page_auth.dart';
 
@@ -169,12 +168,6 @@ class _LoginPageState extends State<LoginPage> {
               );
               return;
             }
-            showToast(
-              context,
-              'Connexion réussie',
-              'Bienvenue sur SaamBiz !',
-              ToastificationType.success,
-            );
             Navigator.of(context).pushNamedAndRemoveUntil(
               route,
               (_) => false,
@@ -229,10 +222,6 @@ class _LoginPageState extends State<LoginPage> {
                           children: [
                             _EnteteConnexion(
                               titre: choix ? 'Bon retour !' : 'Connexion',
-                              sousTitre: choix
-                                  ? 'Touchez votre compte pour y revenir.'
-                                  : 'Vos boutiques, commandes et favoris '
-                                        'vous attendent.',
                             ),
                             Expanded(
                               child: Container(
@@ -414,21 +403,18 @@ class _LoginPageState extends State<LoginPage> {
           fond: AppColor.kSecondary,
           couleurTexte: AppColor.kPrimary,
         ),
-        // Google / Apple sous le formulaire, après un séparateur « ou ».
-        const BoutonsConnexionSociale(),
       ],
     );
   }
 }
 
-/// En-tête marine : logo clair, nom de la marque, titre et sous-titre en
+/// En-tête marine : pictogramme seul, titre en
 /// blanc, avec un trait jaune sous le titre. La feuille blanche du
 /// formulaire remonte ensuite par-dessus.
 class _EnteteConnexion extends StatelessWidget {
-  const _EnteteConnexion({required this.titre, required this.sousTitre});
+  const _EnteteConnexion({required this.titre});
 
   final String titre;
-  final String sousTitre;
 
   @override
   Widget build(BuildContext context) {
@@ -449,26 +435,6 @@ class _EnteteConnexion extends StatelessWidget {
                       height: 34,
                       fit: BoxFit.contain,
                       excludeFromSemantics: true,
-                    ),
-                    const SizedBox(width: 10),
-                    const Text.rich(
-                      TextSpan(
-                        text: 'Saam',
-                        children: [
-                          TextSpan(
-                            text: 'Biz',
-                            style: TextStyle(color: AppColor.kSecondary),
-                          ),
-                        ],
-                      ),
-                      semanticsLabel: 'SaamBiz',
-                      style: TextStyle(
-                        fontFamily: kPolice,
-                        fontSize: 21,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: -0.5,
-                        color: AppColor.kWhite,
-                      ),
                     ),
                   ],
                 ),
@@ -495,16 +461,6 @@ class _EnteteConnexion extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: AppColor.kSecondary,
                     borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  sousTitre,
-                  style: TextStyle(
-                    fontFamily: kPolice,
-                    fontSize: 15,
-                    height: 1.45,
-                    color: AppColor.kWhite.withValues(alpha: 0.72),
                   ),
                 ),
               ],

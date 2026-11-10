@@ -77,6 +77,14 @@ class ChangerStatutCommande extends CommandeEvent {
   List<Object?> get props => [commandeId, statut];
 }
 
+/// Vendeur : confirmer qu'une commande réglée à la livraison a été payée
+class ConfirmerPaiementCommande extends CommandeEvent {
+  final String commandeId;
+  ConfirmerPaiementCommande(this.commandeId);
+  @override
+  List<Object?> get props => [commandeId];
+}
+
 /// Acheteur : demander un retour sur une commande livrée
 class DemanderRetourCommande extends CommandeEvent {
   final String commandeId;

@@ -26,6 +26,8 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>SaamBiz utilise l'appareil photo pour photographier votre pièce d'identité lors de la certification de votre boutique.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>SaamBiz accède à vos photos pour que vous choisissiez une image de profil, un logo ou la photo d'un produit.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>

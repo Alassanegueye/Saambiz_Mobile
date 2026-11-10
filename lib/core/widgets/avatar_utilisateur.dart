@@ -11,10 +11,15 @@ class AvatarUtilisateur extends StatelessWidget {
   final User? utilisateur;
   final VoidCallback onTap;
 
+  /// Point rouge sur l'avatar : une action attend le vendeur dans son compte
+  /// (par exemple, faire certifier sa boutique).
+  final bool pastille;
+
   const AvatarUtilisateur({
     super.key,
     required this.utilisateur,
     required this.onTap,
+    this.pastille = false,
   });
 
   @override
@@ -32,20 +37,39 @@ class AvatarUtilisateur extends StatelessWidget {
     );
     return Semantics(
       button: true,
-      label: 'Mon compte',
+      label: pastille ? 'Mon compte, une action vous attend' : 'Mon compte',
       child: GestureDetector(
         onTap: onTap,
-        child: Container(
-          width: 38,
-          height: 38,
-          clipBehavior: Clip.antiAlias,
-          decoration: const BoxDecoration(
-            color: AppColor.kSecondary,
-            shape: BoxShape.circle,
-          ),
-          child: photo != null && photo.isNotEmpty
-              ? ImageReseau(photo, largeurServeur: 128, fit: BoxFit.cover, repli: initiales)
-              : initiales,
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Container(
+              width: 38,
+              height: 38,
+              clipBehavior: Clip.antiAlias,
+              decoration: const BoxDecoration(
+                color: AppColor.kSecondary,
+                shape: BoxShape.circle,
+              ),
+              child: photo != null && photo.isNotEmpty
+                  ? ImageReseau(photo, largeurServeur: 128, fit: BoxFit.cover, repli: initiales)
+                  : initiales,
+            ),
+            if (pastille)
+              Positioned(
+                top: -1,
+                right: -1,
+                child: Container(
+                  width: 13,
+                  height: 13,
+                  decoration: BoxDecoration(
+                    color: AppColor.kErreur,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: AppColor.kWhite, width: 2),
+                  ),
+                ),
+              ),
+          ],
         ),
       ),
     );

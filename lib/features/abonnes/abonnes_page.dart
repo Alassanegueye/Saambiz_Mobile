@@ -113,7 +113,6 @@ class _AbonnesPageState extends State<AbonnesPage> {
           style: TextStyle(fontFamily: kPolice, 
             fontSize: 17,
             fontWeight: FontWeight.w700,
-            color: AppColor.kWhite,
           ),
         ),
       ),

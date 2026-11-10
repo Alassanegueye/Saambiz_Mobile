@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/page_vendeur.dart';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -269,7 +270,7 @@ class _AssistantVitrinePageState extends State<AssistantVitrinePage> {
 
         return PopScope(
           canPop: !genere,
-          child: Scaffold(
+          child: ScaffoldMarine(
             backgroundColor: _C.bg,
             appBar: AppBar(
               leading: IconButton(
@@ -279,7 +280,6 @@ class _AssistantVitrinePageState extends State<AssistantVitrinePage> {
               title: Text(
                 _modification ? 'Modifier mon site' : 'Créer mon site',
                 style: const TextStyle(
-                  color: Colors.white,
                   fontWeight: FontWeight.w700,
                   fontSize: 17,
                 ),
@@ -289,8 +289,8 @@ class _AssistantVitrinePageState extends State<AssistantVitrinePage> {
                 child: LinearProgressIndicator(
                   value: (_etape + 1) / _nombreEtapes,
                   minHeight: 3,
-                  backgroundColor: _C.navyLight,
-                  valueColor: const AlwaysStoppedAnimation(_C.navy),
+                  backgroundColor: Colors.white24,
+                  valueColor: const AlwaysStoppedAnimation(Color(0xFFFBB900)),
                 ),
               ),
             ),

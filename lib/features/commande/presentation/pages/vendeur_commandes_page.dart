@@ -12,6 +12,8 @@ import '../bloc/commande_event.dart';
 import '../bloc/commande_state.dart';
 import '../widgets/commande_card.dart';
 import 'commande_detail_page.dart';
+import 'nouvelle_commande_vendeur_page.dart';
+import '../../../../core/theme/police.dart';
 
 class VendeurCommandesPage extends StatelessWidget {
   const VendeurCommandesPage({super.key});
@@ -23,9 +25,28 @@ class VendeurCommandesPage extends StatelessWidget {
       child: ActualiserAuRetour(
         onRetour: (context) =>
             context.read<CommandeBloc>().add(LoadCommandesVendeur()),
-        child: PageVendeur(
+        child: Builder(
+          builder: (context) => PageVendeur(
           titre: 'Commandes',
-          sousTitre: 'Reçues de vos clients',
+          boutonFlottant: FloatingActionButton.extended(
+            onPressed: () async {
+              final bloc = context.read<CommandeBloc>();
+              final creee = await Navigator.of(context).push<bool>(
+                MaterialPageRoute(
+                  builder: (_) => const NouvelleCommandeVendeurPage(),
+                ),
+              );
+              if (creee == true) bloc.add(LoadCommandesVendeur());
+            },
+            backgroundColor: AppColor.kSecondary,
+            foregroundColor: AppColor.kPrimary,
+            elevation: 2,
+            icon: const Icon(Icons.add_rounded),
+            label: const Text(
+              'Nouvelle commande',
+              style: TextStyle(fontFamily: kPolice, fontWeight: FontWeight.w700),
+            ),
+          ),
           corps: BlocBuilder<CommandeBloc, CommandeState>(
             buildWhen: (avant, apres) =>
                 !(apres is CommandeLoading && avant is CommandesLoaded),
@@ -59,6 +80,7 @@ class VendeurCommandesPage extends StatelessWidget {
               return const SizedBox.shrink();
             },
           ),
+        ),
         ),
       ),
     );
@@ -98,11 +120,18 @@ class _ListeCommandesState extends State<_ListeCommandes> {
         : widget.commandes.where((c) => statuts.contains(c.statut)).toList();
     return Column(
       children: [
-        SizedBox(
-          height: 56,
+        // Les puces restent DANS la feuille : marge haute qui dépasse
+        // l'arrondi des coins, et défilement coupé avant les bords pour
+        // qu'aucune puce ne glisse sur la courbe.
+        Padding(
+          padding: const EdgeInsets.fromLTRB(14, 22, 14, 8),
+          child: SizedBox(
+          height: 40,
+          child: ClipRRect(
+          borderRadius: BorderRadius.circular(20),
           child: ListView(
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.fromLTRB(16, 14, 16, 6),
+            padding: const EdgeInsets.symmetric(horizontal: 2),
             children: [
               for (final entree in _filtres.entries) ...[
                 PuceFiltre(
@@ -115,6 +144,8 @@ class _ListeCommandesState extends State<_ListeCommandes> {
                 const SizedBox(width: 8),
               ],
             ],
+          ),
+          ),
           ),
         ),
         Expanded(
@@ -138,7 +169,8 @@ class _ListeCommandesState extends State<_ListeCommandes> {
                     ],
                   )
                 : ListView.separated(
-                    padding: EdgeInsets.fromLTRB(16, 4, 16, espaceBasVendeur(context)),
+                    // +72 : le bouton « Nouvelle commande » ne masque pas la dernière carte.
+                    padding: EdgeInsets.fromLTRB(16, 4, 16, espaceBasVendeur(context) + 72),
                     itemCount: visibles.length,
                     separatorBuilder: (_, __) => const SizedBox(height: 10),
                     itemBuilder: (context, i) {

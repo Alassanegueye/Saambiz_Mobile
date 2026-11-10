@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/page_vendeur.dart';
 import 'package:saambiz/core/widgets/libelle_obligatoire.dart';
 import 'package:saambiz/core/widgets/image_reseau.dart';
 import 'package:dio/dio.dart';
@@ -45,7 +46,14 @@ class _ProduitChoix {
 /// abonnés qui ont activé la cloche de la boutique la reçoivent.
 class NouvelleCampagnePage extends StatefulWidget {
   final TypeCampagne type;
-  const NouvelleCampagnePage({super.key, this.type = TypeCampagne.promotion});
+
+  /// Produit déjà coché à l'ouverture (« Mettre en promo » depuis la boutique).
+  final String? produitId;
+  const NouvelleCampagnePage({
+    super.key,
+    this.type = TypeCampagne.promotion,
+    this.produitId,
+  });
 
   @override
   State<NouvelleCampagnePage> createState() => _NouvelleCampagnePageState();
@@ -62,7 +70,9 @@ class _NouvelleCampagnePageState extends State<NouvelleCampagnePage> {
 
   // Promotion
   List<_ProduitChoix>? _produits;
-  final Set<String> _produitsChoisis = {};
+  late final Set<String> _produitsChoisis = {
+    if (widget.produitId != null) widget.produitId!,
+  };
   double _pourcentage = 10;
   int _duree = 7;
 
@@ -217,7 +227,7 @@ class _NouvelleCampagnePageState extends State<NouvelleCampagnePage> {
   // Écran
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return ScaffoldMarine(
       backgroundColor: AppColor.kBackground,
       appBar: AppBar(
         title: Text(

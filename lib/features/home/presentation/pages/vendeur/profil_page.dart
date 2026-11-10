@@ -1,5 +1,8 @@
 import 'package:saambiz/core/widgets/onglets_conserves.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:saambiz/features/certification/certification_page.dart';
+import 'package:saambiz/features/certification/certification_service.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:saambiz/core/theme/police.dart';
 import 'package:saambiz/features/auth/domain/entities/user.dart';
@@ -47,10 +50,28 @@ class _ProfilPageState extends State<ProfilPage> with RetourSurOnglet {
   late final CompteBloc _compteBloc = sl<CompteBloc>();
   User? _liveUser;
 
+  /// Nul tant que le statut n'est pas connu : rien ne s'affiche alors.
+  StatutCertification? _certification;
+
   @override
   void initState() {
     super.initState();
     _compteBloc.add(LoadCompte());
+    _chargerCertification();
+  }
+
+  Future<void> _chargerCertification() async {
+    try {
+      final s = await CertificationService(sl<Dio>()).statut();
+      if (mounted) setState(() => _certification = s);
+    } catch (_) {}
+  }
+
+  Future<void> _ouvrirCertification() async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const CertificationPage()),
+    );
+    _chargerCertification();
   }
 
   @override
@@ -148,9 +169,29 @@ class _ProfilPageState extends State<ProfilPage> with RetourSurOnglet {
           ).showSnackBar(SnackBar(content: Text(state.message)));
         }
       },
-      child: Scaffold(
+      // Un glissé de la gauche vers la droite, n'importe où sur l'écran,
+      // ramène à l'accueil.
+      child: GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onHorizontalDragEnd: (details) {
+          if ((details.primaryVelocity ?? 0) > 300) {
+            Navigator.of(context).maybePop();
+          }
+        },
+        child: Scaffold(
         backgroundColor: AppColor.kBackground,
-        appBar: AppAppBar(title: 'Compte', implyLeading: false),
+        appBar: AppAppBar(
+          title: 'Compte',
+          implyLeading: false,
+          leading: Navigator.of(context).canPop()
+              ? IconButton(
+                  icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+                  color: AppColor.kGrayscaleDark100,
+                  tooltip: 'Retour à l\'accueil',
+                  onPressed: () => Navigator.of(context).maybePop(),
+                )
+              : null,
+        ),
         body: ListView(
           physics: const BouncingScrollPhysics(),
           padding: const EdgeInsets.fromLTRB(20, 8, 20, kEspaceBarreBas),
@@ -165,10 +206,52 @@ class _ProfilPageState extends State<ProfilPage> with RetourSurOnglet {
               photo: _user?.photoProfil,
               onTap: _onEditProfil,
             ),
+            // Tant que la boutique n'est pas certifiée, l'invitation reste en
+            // haut du compte : c'est ce qu'annonce le point rouge de l'accueil.
+            if (_certification != null && _certification!.actionRequise) ...[
+              const SizedBox(height: 14),
+              _CarteCertification(
+                rejetee: _certification!.rejete,
+                onTap: _ouvrirCertification,
+              ),
+            ],
             const SizedBox(height: 24),
             SectionProfil(
               titre: 'Ma boutique',
               entrees: [
+                LigneProfil(
+                  icone: Icons.verified_outlined,
+                  libelle: 'Certification',
+                  sousTitre: switch (_certification?.statut) {
+                    'approuve' => 'Votre boutique est certifiée',
+                    'en_attente' => 'Demande en cours d\'examen',
+                    'rejete' => 'Demande refusée : renvoyez vos photos',
+                    _ => 'Faites certifier votre boutique',
+                  },
+                  fin: _certification != null && _certification!.actionRequise
+                      ? Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              width: 9,
+                              height: 9,
+                              decoration: const BoxDecoration(
+                                color: AppColor.kErreur,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            const Icon(
+                              Icons.chevron_right_rounded,
+                              color: AppColor.kGrayscale30,
+                            ),
+                          ],
+                        )
+                      : _certification?.certifie == true
+                      ? const Icon(Icons.verified_rounded, color: AppColor.kSucces)
+                      : null,
+                  onTap: _ouvrirCertification,
+                ),
                 LigneProfil(
                   icone: Icons.storefront_outlined,
                   libelle: 'Ma boutique',
@@ -254,6 +337,7 @@ class _ProfilPageState extends State<ProfilPage> with RetourSurOnglet {
           ],
         ),
       ),
+      ),
     );
   }
 }
@@ -317,6 +401,77 @@ class _CarteSolde extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Invitation à faire certifier la boutique, en haut du compte.
+class _CarteCertification extends StatelessWidget {
+  final bool rejetee;
+  final VoidCallback onTap;
+  const _CarteCertification({required this.rejetee, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: AppColor.kErreurLight,
+      borderRadius: BorderRadius.circular(18),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(18),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: const BoxDecoration(
+                  color: AppColor.kErreur,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.verified_outlined,
+                  color: AppColor.kWhite,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      rejetee
+                          ? 'Certification refusée'
+                          : 'Faites certifier votre boutique',
+                      style: const TextStyle(
+                        fontFamily: kPolice,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: AppColor.kGrayscaleDark100,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      rejetee
+                          ? 'Renvoyez les photos de votre pièce d\'identité.'
+                          : 'Envoyez votre pièce d\'identité (recto et verso) pour '
+                                'gagner la confiance de vos clients.',
+                      style: const TextStyle(
+                        fontSize: 13,
+                        height: 1.4,
+                        color: Color(0xFF5B6C8A),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(Icons.chevron_right_rounded, color: AppColor.kErreur),
+            ],
+          ),
+        ),
       ),
     );
   }

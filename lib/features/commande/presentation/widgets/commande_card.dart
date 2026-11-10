@@ -224,8 +224,11 @@ class CommandeCard extends StatelessWidget {
           clipBehavior: Clip.antiAlias,
           child: Stack(
             children: [
-              // Ruban diagonal de statut en haut à droite
-              _RubanCoinStatut(label: statutRuban, couleur: statutCouleur),
+              // Ruban diagonal de statut en haut à droite — côté client
+              // seulement : dans les commandes reçues, le vendeur lit déjà
+              // l'étape sous l'en-tête, le ruban faisait doublon.
+              if (!isVendeur)
+                _RubanCoinStatut(label: statutRuban, couleur: statutCouleur),
               // Contenu principal
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
@@ -255,7 +258,8 @@ class CommandeCard extends StatelessWidget {
                         const SizedBox(width: 12),
                         Expanded(
                           child: Padding(
-                            padding: const EdgeInsets.only(right: 48), // Espace pour le ruban
+                            // Espace pour le ruban, quand il est affiché.
+                            padding: EdgeInsets.only(right: isVendeur ? 0 : 48),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [

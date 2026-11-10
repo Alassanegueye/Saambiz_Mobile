@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/page_vendeur.dart';
 import 'package:flutter/material.dart';
 import 'package:saambiz/core/widgets/image_reseau.dart';
 import 'package:saambiz/core/theme/police.dart';
@@ -30,6 +31,90 @@ class _C {
 const int maxSections = 12;
 const int maxProduitsParSection = 60;
 const int maxCaracteresTitre = 60;
+
+/// Saisie du nom d'une section (création ou renommage). Partagée avec la
+/// page Boutique, qui permet d'ajouter une section sans passer par cet écran.
+Future<String?> demanderTitreSection(
+  BuildContext context, {
+  String initial = '',
+}) {
+  return showDialog<String>(
+    context: context,
+    builder: (_) => _DialogueTitreSection(initial: initial),
+  );
+}
+
+/// Le dialogue garde son propre contrôleur et le libère à sa disparition :
+/// le libérer dès le retour de `showDialog` plantait l'animation de
+/// fermeture, pendant laquelle le champ est encore affiché.
+class _DialogueTitreSection extends StatefulWidget {
+  final String initial;
+  const _DialogueTitreSection({required this.initial});
+
+  @override
+  State<_DialogueTitreSection> createState() => _DialogueTitreSectionState();
+}
+
+class _DialogueTitreSectionState extends State<_DialogueTitreSection> {
+  late final TextEditingController _controleur =
+      TextEditingController(text: widget.initial);
+  final _cleForm = GlobalKey<FormState>();
+
+  @override
+  void dispose() {
+    _controleur.dispose();
+    super.dispose();
+  }
+
+  void _valider() {
+    if (_cleForm.currentState!.validate()) {
+      Navigator.of(context).pop(_controleur.text.trim());
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      backgroundColor: _C.white,
+      title: Text(
+        widget.initial.isEmpty ? 'Nouvelle section' : 'Renommer la section',
+        style: TextStyle(fontFamily: kPolice, 
+          fontSize: 16,
+          fontWeight: FontWeight.w700,
+          color: _C.navy,
+        ),
+      ),
+      content: Form(
+        key: _cleForm,
+        child: TextFormField(
+          controller: _controleur,
+          autofocus: true,
+          maxLength: maxCaracteresTitre,
+          textCapitalization: TextCapitalization.sentences,
+          decoration: const InputDecoration(
+            hintText: 'Nouveautés, Promos du mois…',
+            helperText: 'Ce nom s\'affiche sur votre site.',
+          ),
+          validator: (v) => (v ?? '').trim().isEmpty
+              ? 'Donnez un nom à cette section.'
+              : null,
+          onFieldSubmitted: (_) => _valider(),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Annuler'),
+        ),
+        FilledButton(
+          style: FilledButton.styleFrom(backgroundColor: _C.navy),
+          onPressed: _valider,
+          child: const Text('Valider'),
+        ),
+      ],
+    );
+  }
+}
 
 /// Composition des rayons de la boutique.
 ///
@@ -134,64 +219,8 @@ class _SectionsBoutiquePageState extends State<SectionsBoutiquePage> {
   /// Saisie du nom d'une section. Le titre est obligatoire côté serveur :
   /// on le refuse ici, avec le motif, plutôt que de laisser l'enregistrement
   /// échouer sur l'ensemble des sections pour un seul champ vide.
-  Future<String?> _demanderTitre({String initial = ''}) async {
-    final controleur = TextEditingController(text: initial);
-    final cleForm = GlobalKey<FormState>();
-
-    final titre = await showDialog<String>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: _C.white,
-        title: Text(
-          initial.isEmpty ? 'Nouvelle section' : 'Renommer la section',
-          style: TextStyle(fontFamily: kPolice, 
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
-            color: _C.navy,
-          ),
-        ),
-        content: Form(
-          key: cleForm,
-          child: TextFormField(
-            controller: controleur,
-            autofocus: true,
-            maxLength: maxCaracteresTitre,
-            textCapitalization: TextCapitalization.sentences,
-            decoration: const InputDecoration(
-              hintText: 'Nouveautés, Promos du mois…',
-              helperText: 'Ce nom s\'affiche sur votre site.',
-            ),
-            validator: (v) => (v ?? '').trim().isEmpty
-                ? 'Donnez un nom à cette section.'
-                : null,
-            onFieldSubmitted: (_) {
-              if (cleForm.currentState!.validate()) {
-                Navigator.of(ctx).pop(controleur.text.trim());
-              }
-            },
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Annuler'),
-          ),
-          FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: _C.navy),
-            onPressed: () {
-              if (cleForm.currentState!.validate()) {
-                Navigator.of(ctx).pop(controleur.text.trim());
-              }
-            },
-            child: const Text('Valider'),
-          ),
-        ],
-      ),
-    );
-
-    controleur.dispose();
-    return titre;
-  }
+  Future<String?> _demanderTitre({String initial = ''}) =>
+      demanderTitreSection(context, initial: initial);
 
   Future<void> _supprimer(int i) async {
     final section = _sections[i];
@@ -235,7 +264,7 @@ class _SectionsBoutiquePageState extends State<SectionsBoutiquePage> {
   Future<void> _choisirProduits(int i) async {
     final choix = await Navigator.of(context).push<List<String>>(
       MaterialPageRoute(
-        builder: (_) => _SelecteurProduits(
+        builder: (_) => SelecteurProduits(
           titreSection: _sections[i].titre,
           produits: _produits,
           dejaChoisis: _sections[i].produitIds,
@@ -310,13 +339,12 @@ class _SectionsBoutiquePageState extends State<SectionsBoutiquePage> {
         final navigateur = Navigator.of(context);
         if (await _confirmerSortie()) navigateur.pop();
       },
-      child: Scaffold(
+      child: ScaffoldMarine(
         backgroundColor: _C.bg,
         appBar: AppBar(
           title: Text(
             'Sections de ma boutique',
             style: TextStyle(fontFamily: kPolice, 
-              color: Colors.white,
               fontWeight: FontWeight.w700,
               fontSize: 17,
             ),
@@ -328,7 +356,7 @@ class _SectionsBoutiquePageState extends State<SectionsBoutiquePage> {
                 child: Text(
                   'Enregistrer',
                   style: TextStyle(fontFamily: kPolice, 
-                    color: _modifie ? _C.gold : Colors.white38,
+                    color: _modifie ? const Color(0xFFFBB900) : Colors.white54,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -397,7 +425,7 @@ class _SectionsBoutiquePageState extends State<SectionsBoutiquePage> {
         icone: Icons.dashboard_customize_outlined,
         titre: 'Aucune section',
         message:
-            'Rangez vos produits en rayons — « Nouveautés », « Promos » — pour '
+            'Rangez vos produits en sections — « Nouveautés », « Promos » — pour '
             'que vos clients s\'y retrouvent. Sans section, votre site '
             'affiche simplement tous vos produits.',
         action: 'Créer une section',
@@ -647,22 +675,22 @@ class _Vignette extends StatelessWidget {
 /// Aucune création ici : c'est la page « Produits » qui crée, celle-ci ne
 /// fait que ranger. L'ordre des coches est conservé, c'est celui que le site
 /// affichera.
-class _SelecteurProduits extends StatefulWidget {
+class SelecteurProduits extends StatefulWidget {
   final String titreSection;
   final List<ProduitModel> produits;
   final List<String> dejaChoisis;
 
-  const _SelecteurProduits({
+  const SelecteurProduits({
     required this.titreSection,
     required this.produits,
     required this.dejaChoisis,
   });
 
   @override
-  State<_SelecteurProduits> createState() => _SelecteurProduitsState();
+  State<SelecteurProduits> createState() => SelecteurProduitsState();
 }
 
-class _SelecteurProduitsState extends State<_SelecteurProduits> {
+class SelecteurProduitsState extends State<SelecteurProduits> {
   /// Liste et non ensemble : l'ordre des coches est l'ordre d'affichage sur
   /// le site, et un `Set` le perdrait. On repart des identifiants encore
   /// valides, pour ne pas réenregistrer un produit supprimé entre-temps.
@@ -706,14 +734,13 @@ class _SelecteurProduitsState extends State<_SelecteurProduits> {
   Widget build(BuildContext context) {
     final visibles = _visibles;
 
-    return Scaffold(
+    return ScaffoldMarine(
       backgroundColor: _C.bg,
       appBar: AppBar(
         title: Text(
           widget.titreSection,
           overflow: TextOverflow.ellipsis,
           style: TextStyle(fontFamily: kPolice, 
-            color: Colors.white,
             fontWeight: FontWeight.w700,
             fontSize: 17,
           ),
@@ -724,7 +751,7 @@ class _SelecteurProduitsState extends State<_SelecteurProduits> {
             child: Text(
               'Valider',
               style: TextStyle(fontFamily: kPolice, 
-                color: _C.gold,
+                color: const Color(0xFFFBB900),
                 fontWeight: FontWeight.w700,
               ),
             ),

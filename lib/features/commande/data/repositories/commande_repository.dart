@@ -43,6 +43,9 @@ class CommandeRepository {
   Future<CommandeModel> changerStatut(String id, String statut) =>
       remote.changerStatut(id, statut);
 
+  Future<CommandeModel> confirmerPaiement(String id) =>
+      remote.confirmerPaiement(id);
+
   Future<void> demandeRetour(String id, {required String raison}) =>
       remote.demandeRetour(id, raison: raison);
 }

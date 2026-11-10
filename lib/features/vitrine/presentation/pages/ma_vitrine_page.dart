@@ -59,7 +59,6 @@ class _VueVitrine extends StatelessWidget {
         title: const Text(
           'Mon site web',
           style: TextStyle(
-            color: Colors.white,
             fontWeight: FontWeight.w700,
             fontSize: 17,
           ),
