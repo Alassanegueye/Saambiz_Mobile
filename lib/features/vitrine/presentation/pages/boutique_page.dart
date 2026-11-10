@@ -19,7 +19,6 @@ import 'sections_boutique_page.dart';
 class _C {
   static const navy = Color(0xFF01154B);
   static const navyLight = Color(0xFFE8EDF7);
-  static const bg = Color(0xFFF7F9FC);
   static const white = Color(0xFFFFFFFF);
   static const border = Color(0xFFE2E7F0);
   static const muted = Color(0xFF5B6C8A);

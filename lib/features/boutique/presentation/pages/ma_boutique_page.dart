@@ -17,7 +17,6 @@ class _C {
   static const bg = Color(0xFFF4F5F8);
   static const sub = Color(0xFF5B6C8A);
   static const border = Color(0xFFE3E8F0);
-  static const orange = Color(0xFFFF8F00);
 }
 
 /// Écran de gestion de la boutique du vendeur connecté.

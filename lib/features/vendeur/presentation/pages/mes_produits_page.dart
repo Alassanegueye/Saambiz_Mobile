@@ -16,11 +16,8 @@ import 'package:saambiz/core/utils/texte.dart';
 
 class _C {
   static const green = Color(0xFF01154B);
-  static const navyDk = Color(0xFF060F26);
-  static const gold = Color(0xFFFBB900);
   static const black = Color(0xFF01154B);
   static const white = Color(0xFFFFFFFF);
-  static const bg = Color(0xFFF4F5F8);
   static const sub = Color(0xFF5B6C8A);
   static const border = Color(0xFFE6EAF0);
   static const success = Color(0xFF1E9E62);
