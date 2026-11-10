@@ -1,3 +1,4 @@
+import 'package:saambiz/core/services/fcm_service.dart';
 import 'package:saambiz/core/widgets/onglets_conserves.dart';
 import 'package:flutter/material.dart';
 import 'package:saambiz/features/auth/domain/entities/user.dart';
@@ -35,6 +36,11 @@ class _MainAcheteurPageState extends State<MainAcheteurPage> {
   void initState() {
     super.initState();
     ongletAcheteurDemande.addListener(_surOngletDemande);
+    // Notifications push des boutiques suivies (cloche) : compte connecté
+    // seulement, un invité n'a pas d'abonnements.
+    if (!widget.isGuest) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => FcmService.init());
+    }
   }
 
   @override

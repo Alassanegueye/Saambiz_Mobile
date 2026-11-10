@@ -1,7 +1,11 @@
 import 'package:saambiz/core/widgets/page_vendeur.dart';
 import 'package:saambiz/core/widgets/libelle_obligatoire.dart';
 import 'package:saambiz/core/widgets/image_reseau.dart';
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:dio/dio.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:saambiz/core/theme/police.dart';
 import 'package:intl/intl.dart';
@@ -83,6 +87,15 @@ class _NouvelleCampagnePageState extends State<NouvelleCampagnePage> {
 
   bool _envoi = false;
 
+  /// Promotion : prévenir les clients (cloche active) avec un message écrit
+  /// par le vendeur. Une information, elle, est toujours envoyée.
+  bool _notifier = true;
+
+  /// Image jointe à la notification (facultative), envoyée sur Cloudinary.
+  File? _image;
+
+  bool get _avecMessage => _type == TypeCampagne.information || _notifier;
+
   @override
   void initState() {
     super.initState();
@@ -106,9 +119,9 @@ class _NouvelleCampagnePageState extends State<NouvelleCampagnePage> {
 
   void _appliquerModele() {
     if (_type == TypeCampagne.promotion) {
+      // Le titre est proposé ; le message, le vendeur l'écrit lui-même
+      // (une suggestion reste à un geste, sous le champ).
       _titre.text = 'Promotion -${_pourcentage.round()} %';
-      _message.text =
-          'Profitez de -${_pourcentage.round()} % sur une sélection de produits, pendant $_duree jour${_duree > 1 ? 's' : ''} seulement !';
       return;
     }
     final m = _modelesInformation.firstWhere((x) => x.$1 == _modele);
@@ -167,19 +180,32 @@ class _NouvelleCampagnePageState extends State<NouvelleCampagnePage> {
 
   String _prix(double v) => '${_francs.format(v.round())} FCFA';
 
+  String get _suggestionPromo =>
+      'Profitez de -${_pourcentage.round()} % sur une sélection de produits, '
+      'pendant $_duree jour${_duree > 1 ? 's' : ''} seulement !';
+
+  Future<void> _choisirImage() async {
+    final x = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 1600,
+      imageQuality: 85,
+    );
+    if (x != null && mounted) setState(() => _image = File(x.path));
+  }
+
   Future<void> _envoyer() async {
     FocusScope.of(context).unfocus();
     String? probleme;
     if (_type == TypeCampagne.promotion && _produitsChoisis.isEmpty) {
       probleme = 'Choisissez au moins un produit.';
     }
-    if (_titre.text.trim().isEmpty) {
+    if (_avecMessage && _titre.text.trim().isEmpty) {
       probleme ??= 'Donnez un titre à votre message.';
     }
-    if (_message.text.trim().isEmpty) {
-      probleme ??= 'Écrivez le message à envoyer.';
+    if (_avecMessage && _message.text.trim().isEmpty) {
+      probleme ??= 'Écrivez le message que vos clients recevront.';
     }
-    if (!_tous && _clientsChoisis.isEmpty) {
+    if (_avecMessage && !_tous && _clientsChoisis.isEmpty) {
       probleme ??= 'Choisissez au moins un client.';
     }
     if (probleme != null) {
@@ -188,19 +214,34 @@ class _NouvelleCampagnePageState extends State<NouvelleCampagnePage> {
     }
     setState(() => _envoi = true);
     try {
+      final promo = _type == TypeCampagne.promotion;
+      final champs = <String, dynamic>{
+        'type': promo ? 'promotion' : 'information',
+        'notifier': _avecMessage,
+        'titre': _titre.text.trim(),
+        if (_avecMessage) 'message': _message.text.trim(),
+        if (promo) ...{
+          'produitIds': _produitsChoisis.toList(),
+          'pourcentage': _pourcentage.round(),
+          'dureeJours': _duree,
+        },
+        'destinataires': _tous ? 'tous' : _clientsChoisis.toList(),
+      };
+      final image = _avecMessage ? _image : null;
+      // Avec une image : envoi en plusieurs parties (le serveur la dépose sur
+      // Cloudinary) ; les listes voyagent alors en JSON.
       final res = await _dio.post(
         '/promotions/campagne',
-        data: {
-          'type': _type == TypeCampagne.promotion ? 'promotion' : 'information',
-          'titre': _titre.text.trim(),
-          'message': _message.text.trim(),
-          if (_type == TypeCampagne.promotion) ...{
-            'produitIds': _produitsChoisis.toList(),
-            'pourcentage': _pourcentage.round(),
-            'dureeJours': _duree,
-          },
-          'destinataires': _tous ? 'tous' : _clientsChoisis.toList(),
-        },
+        data: image == null
+            ? champs
+            : FormData.fromMap({
+                for (final e in champs.entries)
+                  e.key: e.value is List ? jsonEncode(e.value) : '${e.value}',
+                'image': await MultipartFile.fromFile(
+                  image.path,
+                  filename: image.path.split(Platform.pathSeparator).last,
+                ),
+              }),
       );
       if (!mounted) return;
       final message = res.data is Map
@@ -279,10 +320,19 @@ class _NouvelleCampagnePageState extends State<NouvelleCampagnePage> {
                   ..._sectionPromotion()
                 else
                   _sectionInformation(),
+                if (_type == TypeCampagne.promotion) _carteNotifier(),
+                if (_avecMessage)
                 _carte(
                   titre: 'Votre message',
                   enfant: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
+                      Text(
+                        'Personnalisez le message : c\'est exactement ce que '
+                        'vos clients liront dans la notification.',
+                        style: _discret(),
+                      ),
+                      const SizedBox(height: 12),
                       TextField(
                         controller: _titre,
                         maxLength: 80,
@@ -294,18 +344,33 @@ class _NouvelleCampagnePageState extends State<NouvelleCampagnePage> {
                       const SizedBox(height: 10),
                       TextField(
                         controller: _message,
+                        onChanged: (_) => setState(() {}),
                         maxLength: 500,
                         minLines: 3,
                         maxLines: 6,
                         decoration: _deco(
                           'Message',
-                          'Ce que vos clients liront dans la notification',
+                          'Ex. : -20 % sur toute la collection jusqu\'à dimanche !',
                         ),
                       ),
+                      if (_type == TypeCampagne.promotion &&
+                          _message.text.trim().isEmpty)
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: TextButton.icon(
+                            onPressed: () => setState(
+                              () => _message.text = _suggestionPromo,
+                            ),
+                            icon: const Icon(Icons.auto_awesome_outlined, size: 18),
+                            label: const Text('Utiliser une suggestion'),
+                          ),
+                        ),
+                      const SizedBox(height: 6),
+                      _choixImage(),
                     ],
                   ),
                 ),
-                _sectionDestinataires(),
+                if (_avecMessage) _sectionDestinataires(),
               ],
             ),
           ),
@@ -328,9 +393,11 @@ class _NouvelleCampagnePageState extends State<NouvelleCampagnePage> {
                         )
                       : const Icon(Icons.send_rounded, size: 20),
                   label: Text(
-                    _type == TypeCampagne.promotion
-                        ? 'Créer et notifier'
-                        : 'Envoyer',
+                    _type == TypeCampagne.information
+                        ? 'Envoyer'
+                        : _notifier
+                        ? 'Créer et notifier mes clients'
+                        : 'Créer la promotion',
                     style: const TextStyle(
                       fontFamily: kPolice,
                       fontSize: 15.5,
@@ -492,6 +559,80 @@ class _NouvelleCampagnePageState extends State<NouvelleCampagnePage> {
     ];
   }
 
+  /// Le bouton « Notifier mes clients » d'une promotion.
+  Widget _carteNotifier() {
+    return _carte(
+      titre: 'Prévenir mes clients',
+      enfant: SwitchListTile.adaptive(
+        value: _notifier,
+        onChanged: (v) => setState(() => _notifier = v),
+        contentPadding: EdgeInsets.zero,
+        activeTrackColor: AppColor.kPrimary,
+        secondary: Icon(
+          _notifier
+              ? Icons.notifications_active_outlined
+              : Icons.notifications_off_outlined,
+          color: AppColor.kPrimary,
+        ),
+        title: const Text(
+          'Notifier mes clients',
+          style: TextStyle(fontFamily: kPolice, fontWeight: FontWeight.w700),
+        ),
+        subtitle: Text(
+          _notifier
+              ? 'Vos abonnés qui ont activé la cloche recevront votre message.'
+              : 'La promotion est créée sans prévenir personne.',
+          style: _discret(),
+        ),
+      ),
+    );
+  }
+
+  /// Image facultative jointe à la notification.
+  Widget _choixImage() {
+    final image = _image;
+    if (image == null) {
+      return OutlinedButton.icon(
+        onPressed: _choisirImage,
+        icon: const Icon(Icons.add_photo_alternate_outlined, size: 20),
+        label: const Text('Ajouter une image (facultatif)'),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: AppColor.kPrimary,
+          minimumSize: const Size.fromHeight(46),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      );
+    }
+    return Stack(
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: Image.file(
+            image,
+            height: 160,
+            width: double.infinity,
+            fit: BoxFit.cover,
+          ),
+        ),
+        Positioned(
+          top: 6,
+          right: 6,
+          child: Material(
+            color: Colors.black54,
+            shape: const CircleBorder(),
+            child: IconButton(
+              tooltip: 'Retirer l\'image',
+              icon: const Icon(Icons.close_rounded, color: Colors.white),
+              onPressed: () => setState(() => _image = null),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _sectionInformation() {
     return _carte(
       titre: 'Que voulez-vous annoncer ?',
@@ -608,14 +749,18 @@ class _NouvelleCampagnePageState extends State<NouvelleCampagnePage> {
     ),
   );
 
-  Widget _carte({required String titre, required Widget enfant}) => Container(
-    margin: const EdgeInsets.only(bottom: 14),
-    padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
-    decoration: BoxDecoration(
-      color: AppColor.kWhite,
+  // Un Material (et non un Container coloré) : les cases et boutons radio
+  // dessinent leur effet de toucher dessus.
+  Widget _carte({required String titre, required Widget enfant}) => Padding(
+    padding: const EdgeInsets.only(bottom: 14),
+    child: Material(
+    color: AppColor.kWhite,
+    shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(16),
-      border: Border.all(color: AppColor.kLine),
+      side: const BorderSide(color: AppColor.kLine),
     ),
+    child: Padding(
+    padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -631,6 +776,8 @@ class _NouvelleCampagnePageState extends State<NouvelleCampagnePage> {
         const SizedBox(height: 8),
         enfant,
       ],
+    ),
+    ),
     ),
   );
 }

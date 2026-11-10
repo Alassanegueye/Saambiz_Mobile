@@ -14,6 +14,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:saambiz/core/connection/auth_interceptor.dart';
 import 'core/routes/observateur_routes.dart';
+import 'core/services/fcm_service.dart';
 
 void main() async {
   // Capture toute erreur non interceptée (synchrone ou asynchrone) pour éviter
@@ -59,6 +60,9 @@ void main() async {
 
       // dotenv est chargé une seule fois, à l'intérieur de di.init().
       await di.init();
+
+      // Notifications push (Firebase), sans effet si non configuré.
+      await initialiserFirebase();
 
       // Captures App Store : les photos des produits de démonstration sont
       // embarquées, rien n'est téléchargé. Sans --dart-define=DEMO=true,

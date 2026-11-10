@@ -1,5 +1,6 @@
 import 'package:saambiz/core/widgets/onglets_conserves.dart';
 import 'package:flutter/material.dart';
+import 'package:saambiz/core/services/fcm_service.dart';
 import 'package:saambiz/features/auth/domain/entities/user.dart';
 
 import '../../../../../core/theme/app_color.dart';
@@ -34,6 +35,13 @@ class _MainVendeurPageState extends State<MainVendeurPage> {
   int _selectedIndex = 0;
 
   void _ouvrirOnglet(int i) => setState(() => _selectedIndex = i);
+
+  @override
+  void initState() {
+    super.initState();
+    // Notifications push : autorisation et jeton de l'appareil.
+    WidgetsBinding.instance.addPostFrameCallback((_) => FcmService.init());
+  }
 
   late final List<Widget> _pages = [
     HomePage(user: widget.user, ouvrirOnglet: _ouvrirOnglet),

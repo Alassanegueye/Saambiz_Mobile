@@ -4,6 +4,7 @@ import 'package:saambiz/core/services/session_service.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../../../core/services/token_service.dart';
+import '../../../../core/services/fcm_service.dart';
 import '../../../../injection_container.dart';
 import '../../data/datasources/connexion_sociale_source.dart';
 import '../../data/models/user_model.dart';
@@ -199,6 +200,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     emit(AuthLoading());
     try {
+      // Avant de quitter la session : ce téléphone ne reçoit plus les
+      // notifications push du compte qui part.
+      await FcmService.desinscrire();
       if (event.compteSupprime) {
         final id = await sl<FlutterSecureStorage>().read(key: 'user_id');
         if (id != null) await sl<ComptesMemorises>().oublier(id);

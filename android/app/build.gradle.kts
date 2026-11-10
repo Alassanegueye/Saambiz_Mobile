@@ -9,6 +9,15 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+// Notifications push (Firebase Cloud Messaging). Le plugin Google Services
+// lit android/app/google-services.json, à télécharger depuis la console
+// Firebase (application Android « com.saambiz.app »). Tant que le fichier
+// manque, on ne l'applique pas : l'application se construit et tourne, sans
+// notifications push.
+if (file("google-services.json").exists()) {
+    apply(plugin = "com.google.gms.google-services")
+}
+
 // Chargement des identifiants de signature release depuis android/key.properties
 // (ce fichier ne doit PAS être versionné — voir .gitignore). Si absent, on retombe
 // sur les clés debug pour que `flutter run` continue de fonctionner.
@@ -24,6 +33,8 @@ android {
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
+        // Requis par flutter_local_notifications (API java.time via desugaring).
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
@@ -78,6 +89,11 @@ android {
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    // Requis par flutter_local_notifications.
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 }
 
 // Kotlin 2.2 : `kotlinOptions` dans le bloc android n'est plus accepté.

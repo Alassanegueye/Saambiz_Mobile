@@ -3,6 +3,8 @@
          (API, Socket.IO, images Cloudinary) en dehors des builds debug/profile,
          qui héritent cette permission d'un manifeste séparé fourni par Flutter. -->
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- Android 13+ : autorisation d'afficher les notifications push. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <!-- Position du client, pour lui proposer les boutiques proches.
          Facultative : l'application fonctionne sans, avec les seuls
          centres d'intérêt. -->
@@ -44,6 +46,15 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+
+        <!-- Canal FCM par défaut (Android 8+) : le même que FcmService et
+             que le serveur (push.service.js). -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="saambiz_push_channel" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@mipmap/ic_launcher" />
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and

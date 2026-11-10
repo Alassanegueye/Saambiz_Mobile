@@ -5,6 +5,9 @@
 	<!-- « Se connecter avec Apple ». À activer aussi sur l'App ID
 	     com.saambiz.app (developer.apple.com → Identifiers → Sign In with
 	     Apple) ; la signature automatique de Xcode le fait d'elle-même. -->
+	<!-- Notifications push (APNs), relayées par Firebase. -->
+	<key>aps-environment</key>
+	<string>production</string>
 	<key>com.apple.developer.applesignin</key>
 	<array>
 		<string>Default</string>
