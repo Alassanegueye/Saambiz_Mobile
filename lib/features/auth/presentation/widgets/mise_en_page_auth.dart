@@ -196,7 +196,7 @@ class LibelleChamp extends StatelessWidget {
       color: AppColor.kGrayscaleDark100,
     );
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8, left: 2),
+      padding: const EdgeInsets.only(bottom: 6, left: 2),
       child: obligatoire
           ? LibelleObligatoire(texte, style: style)
           : Text(texte, style: style),
@@ -301,8 +301,18 @@ InputDecoration decorationChampAuth({
     filled: true,
     fillColor: AppColor.kSurface,
     isDense: true,
-    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-    prefixIcon: prefixe,
+    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+    // Icone fine et grise, avec de l'air avant le texte saisi.
+    prefixIcon: prefixe == null
+        ? null
+        : Padding(
+            padding: const EdgeInsets.only(left: 16, right: 12),
+            child: IconTheme.merge(
+              data: const IconThemeData(color: AppColor.kGrayscale30, size: 19),
+              child: prefixe,
+            ),
+          ),
+    prefixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
     suffixIcon: suffixe,
     border: bord(AppColor.kLine),
     enabledBorder: bord(AppColor.kLine),
@@ -362,9 +372,7 @@ class ChampFormulaire extends StatelessWidget {
           ),
           decoration: decorationChampAuth(
             hint: hint,
-            prefixe: icone == null
-                ? null
-                : Icon(icone, color: AppColor.kPrimary, size: 20),
+            prefixe: icone == null ? null : Icon(icone),
           ),
         ),
       ],
@@ -416,19 +424,15 @@ class _ChampMotDePasseState extends State<ChampMotDePasse> {
       ),
       decoration: decorationChampAuth(
         hint: widget.hint,
-        prefixe: const Icon(
-          Icons.lock_outline_rounded,
-          color: AppColor.kPrimary,
-          size: 20,
-        ),
+        prefixe: const Icon(Icons.lock_outline_rounded),
         suffixe: IconButton(
           tooltip: _masque
               ? 'Afficher le mot de passe'
               : 'Masquer le mot de passe',
           icon: Icon(
             _masque ? Icons.visibility_outlined : Icons.visibility_off_outlined,
-            color: AppColor.kGrayscale40,
-            size: 20,
+            color: AppColor.kGrayscale30,
+            size: 19,
           ),
           onPressed: () => setState(() => _masque = !_masque),
         ),
@@ -443,25 +447,29 @@ class BoutonAuth extends StatelessWidget {
   final String texte;
   final VoidCallback? onPressed;
   final bool chargement;
+  final Color fond;
+  final Color couleurTexte;
 
   const BoutonAuth({
     super.key,
     required this.texte,
     this.onPressed,
     this.chargement = false,
+    this.fond = AppColor.kPrimary,
+    this.couleurTexte = AppColor.kWhite,
   });
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       width: double.infinity,
-      height: 52,
+      height: 48,
       child: ElevatedButton(
         onPressed: chargement ? null : onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColor.kPrimary,
-          foregroundColor: AppColor.kWhite,
-          disabledBackgroundColor: AppColor.kPrimary.withValues(alpha: 0.7),
+          backgroundColor: fond,
+          foregroundColor: couleurTexte,
+          disabledBackgroundColor: fond.withValues(alpha: 0.7),
           elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
@@ -473,12 +481,12 @@ class BoutonAuth extends StatelessWidget {
           ),
         ),
         child: chargement
-            ? const SizedBox(
+            ? SizedBox(
                 width: 22,
                 height: 22,
                 child: CircularProgressIndicator(
                   strokeWidth: 2.5,
-                  valueColor: AlwaysStoppedAnimation(AppColor.kWhite),
+                  valueColor: AlwaysStoppedAnimation(couleurTexte),
                 ),
               )
             : Text(texte),

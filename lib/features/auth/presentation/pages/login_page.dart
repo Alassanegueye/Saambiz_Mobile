@@ -44,6 +44,17 @@ class _LoginPageState extends State<LoginPage> {
   /// `null` tant que la liste n'est pas lue : rien ne clignote.
   bool? _formulaireVisible;
 
+  /// Onglet choisi au-dessus du champ identifiant : e-mail ou telephone.
+  bool _parTelephone = false;
+
+  void _choisirMode(bool parTelephone) {
+    if (parTelephone == _parTelephone) return;
+    setState(() {
+      _parTelephone = parTelephone;
+      _identifiantController.clear();
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -75,6 +86,7 @@ class _LoginPageState extends State<LoginPage> {
   void _reconnecter(CompteMemorise compte) {
     setState(() {
       _formulaireVisible = true;
+      _parTelephone = !compte.identifiant.contains('@');
       _identifiantController.text = compte.identifiant;
       _passwordController.clear();
     });
@@ -119,12 +131,12 @@ class _LoginPageState extends State<LoginPage> {
     FocusScope.of(context).unfocus();
     if (!_formKey.currentState!.validate()) return;
     final input = _identifiantController.text.trim();
-    // E-mail ou telephone : le serveur attend l'un ou l'autre.
-    final isEmail = RegExp(r'\S+@\S+\.\S+').hasMatch(input);
+    // E-mail ou telephone, selon l'onglet choisi : le serveur attend l'un ou
+    // l'autre.
     context.read<AuthBloc>().add(
       LoginRequested(
-        email: isEmail ? input : null,
-        telephone: isEmail ? null : input,
+        email: _parTelephone ? null : input,
+        telephone: _parTelephone ? input : null,
         mot_de_passe: _passwordController.text,
       ),
     );
@@ -232,7 +244,7 @@ class _LoginPageState extends State<LoginPage> {
                                 ),
                                 padding: EdgeInsets.fromLTRB(
                                   24,
-                                  28,
+                                  20,
                                   24,
                                   16 + MediaQuery.paddingOf(context).bottom,
                                 ),
@@ -277,7 +289,7 @@ class _LoginPageState extends State<LoginPage> {
                                               ),
                                       ),
                                     const Spacer(),
-                                    const SizedBox(height: 24),
+                                    const SizedBox(height: 8),
                                     _CreerCompte(
                                       onTap: () => Navigator.of(
                                         context,
@@ -328,19 +340,40 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
           ),
-        ChampFormulaire(
-          libelle: 'E-mail ou téléphone',
-          hint: 'exemple@mail.com ou 77 000 00 00',
-          controller: _identifiantController,
-          icone: Icons.alternate_email_rounded,
-          clavier: TextInputType.emailAddress,
-          action: TextInputAction.next,
-          autofill: const [AutofillHints.username, AutofillHints.email],
-          validator: (v) => (v == null || v.trim().isEmpty)
-              ? 'E-mail ou téléphone requis'
-              : null,
+        _ChoixIdentifiant(
+          parTelephone: _parTelephone,
+          onChange: isLoading ? null : _choisirMode,
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 14),
+        // La cle reconstruit le champ a chaque changement d'onglet : le
+        // clavier et l'erreur affichee repartent de zero.
+        ChampFormulaire(
+          key: ValueKey(_parTelephone),
+          libelle: _parTelephone ? 'Numéro de téléphone' : 'E-mail',
+          hint: _parTelephone ? '77 000 00 00' : 'exemple@mail.com',
+          controller: _identifiantController,
+          icone: _parTelephone
+              ? Icons.smartphone_outlined
+              : Icons.mail_outline_rounded,
+          clavier: _parTelephone
+              ? TextInputType.phone
+              : TextInputType.emailAddress,
+          action: TextInputAction.next,
+          autofill: _parTelephone
+              ? const [AutofillHints.telephoneNumber]
+              : const [AutofillHints.username, AutofillHints.email],
+          validator: (v) {
+            final s = v?.trim() ?? '';
+            if (_parTelephone) {
+              return s.isEmpty ? 'Numéro de téléphone requis' : null;
+            }
+            if (s.isEmpty) return 'E-mail requis';
+            return RegExp(r'^\S+@\S+\.\S+$').hasMatch(s)
+                ? null
+                : 'E-mail invalide';
+          },
+        ),
+        const SizedBox(height: 12),
         const LibelleChamp('Mot de passe'),
         ChampMotDePasse(
           controller: _passwordController,
@@ -356,27 +389,30 @@ class _LoginPageState extends State<LoginPage> {
             onPressed: () =>
                 Navigator.of(context).pushNamed(AppRouter.forgotPasswordRoute),
             style: TextButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
             child: const Text(
               'Mot de passe oublié ?',
               style: TextStyle(
                 fontFamily: kPolice,
-                color: AppColor.kPrimaryMedium,
+                color: AppColor.kPrimary,
                 fontWeight: FontWeight.w600,
                 fontSize: 13,
               ),
             ),
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 4),
         BoutonAuth(
           texte: 'Se connecter',
           onPressed: _onLoginPressed,
           // Le bouton ne tourne que pour une connexion par mot de passe :
           // pendant Google / Apple, c'est leur bouton qui tourne.
           chargement: isLoading && state is! AuthSocialEnCours,
+          // Jaune de la marque sur fond blanc, texte marine.
+          fond: AppColor.kSecondary,
+          couleurTexte: AppColor.kPrimary,
         ),
         // Google / Apple sous le formulaire, après un séparateur « ou ».
         const BoutonsConnexionSociale(),
@@ -386,8 +422,8 @@ class _LoginPageState extends State<LoginPage> {
 }
 
 /// En-tête marine : logo clair, nom de la marque, titre et sous-titre en
-/// blanc, posés sur deux halos aux couleurs de la marque. La feuille blanche
-/// du formulaire remonte ensuite par-dessus.
+/// blanc, avec un trait jaune sous le titre. La feuille blanche du
+/// formulaire remonte ensuite par-dessus.
 class _EnteteConnexion extends StatelessWidget {
   const _EnteteConnexion({required this.titre, required this.sousTitre});
 
@@ -399,26 +435,10 @@ class _EnteteConnexion extends StatelessWidget {
     return Stack(
       clipBehavior: Clip.none,
       children: [
-        Positioned(
-          top: -120,
-          right: -90,
-          child: _Halo(
-            taille: 300,
-            couleur: AppColor.kSecondary.withValues(alpha: 0.28),
-          ),
-        ),
-        Positioned(
-          bottom: -60,
-          left: -100,
-          child: _Halo(
-            taille: 260,
-            couleur: AppColor.kPrimaryMedium.withValues(alpha: 0.55),
-          ),
-        ),
         SafeArea(
           bottom: false,
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(24, 20, 24, 36),
+            padding: const EdgeInsets.fromLTRB(24, 8, 24, 22),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -452,7 +472,7 @@ class _EnteteConnexion extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 44),
+                const SizedBox(height: 18),
                 AnimatedSwitcher(
                   duration: const Duration(milliseconds: 220),
                   child: Text(
@@ -460,12 +480,21 @@ class _EnteteConnexion extends StatelessWidget {
                     key: ValueKey(titre),
                     style: const TextStyle(
                       fontFamily: kPolice,
-                      fontSize: 32,
+                      fontSize: 28,
                       fontWeight: FontWeight.w800,
                       letterSpacing: -0.9,
                       height: 1.1,
                       color: AppColor.kWhite,
                     ),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Container(
+                  width: 36,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: AppColor.kSecondary,
+                    borderRadius: BorderRadius.circular(2),
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -487,25 +516,70 @@ class _EnteteConnexion extends StatelessWidget {
   }
 }
 
-class _Halo extends StatelessWidget {
-  const _Halo({required this.taille, required this.couleur});
+/// Deux onglets en pilule, « E-mail » et « Téléphone », au-dessus du champ
+/// identifiant.
+class _ChoixIdentifiant extends StatelessWidget {
+  const _ChoixIdentifiant({required this.parTelephone, this.onChange});
 
-  final double taille;
-  final Color couleur;
+  final bool parTelephone;
+  final ValueChanged<bool>? onChange;
 
   @override
-  Widget build(BuildContext context) => IgnorePointer(
-    child: Container(
-      width: taille,
-      height: taille,
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        gradient: RadialGradient(
-          colors: [couleur, couleur.withValues(alpha: 0)],
+        color: AppColor.kSurface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColor.kLine),
+      ),
+      child: Row(
+        children: [
+          _onglet('E-mail', false),
+          _onglet('Téléphone', true),
+        ],
+      ),
+    );
+  }
+
+  Widget _onglet(String texte, bool valeur) {
+    final actif = parTelephone == valeur;
+    final couleur = actif ? AppColor.kWhite : AppColor.kGrayscale60;
+    return Expanded(
+      child: Semantics(
+        button: true,
+        selected: actif,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: onChange == null
+              ? null
+              : () {
+                  HapticFeedback.selectionClick();
+                  onChange!(valeur);
+                },
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 180),
+            curve: Curves.easeOut,
+            height: 38,
+            decoration: BoxDecoration(
+              color: actif ? AppColor.kPrimary : Colors.transparent,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            alignment: Alignment.center,
+            child: Text(
+              texte,
+              style: TextStyle(
+                fontFamily: kPolice,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: couleur,
+              ),
+            ),
+          ),
         ),
       ),
-    ),
-  );
+    );
+  }
 }
 
 /// Bas de page : lien d'inscription, sobre mais bien visible.
@@ -521,7 +595,7 @@ class _CreerCompte extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
         child: const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           child: Text.rich(
             TextSpan(
               text: 'Pas encore de compte ?  ',

@@ -46,9 +46,9 @@ class BoutonsConnexionSociale extends StatelessWidget {
         return Column(
           children: [
             if (!separateurApres) ...[
-              const SizedBox(height: 20),
+              const SizedBox(height: 14),
               DividerRow(title: separateur),
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
             ],
             for (final f in fournisseurs) ...[
               _BoutonFournisseur(
@@ -63,7 +63,7 @@ class BoutonsConnexionSociale extends StatelessWidget {
                         );
                       },
               ),
-              if (f != fournisseurs.last) const SizedBox(height: 12),
+              if (f != fournisseurs.last) const SizedBox(height: 10),
             ],
             if (separateurApres) ...[
               const SizedBox(height: 22),
@@ -90,15 +90,16 @@ class _BoutonFournisseur extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Apple : bouton noir, logo blanc (règles d'Apple). Google : bouton
-    // blanc bordé, « G » en couleurs (règles de Google).
+    // Les deux boutons blancs bordés : variante « blanc avec contour »
+    // admise par Apple, et style standard de Google. Logo Apple noir, « G »
+    // en couleurs.
     final apple = fournisseur == FournisseurSocial.apple;
-    final fond = apple ? Colors.black : AppColor.kWhite;
-    final texte = apple ? Colors.white : const Color(0xFF1F1F1F);
+    const fond = AppColor.kWhite;
+    const texte = AppColor.kNoir;
 
     return SizedBox(
       width: double.infinity,
-      height: 52,
+      height: 48,
       child: OutlinedButton(
         onPressed: onPressed,
         style: OutlinedButton.styleFrom(
@@ -106,7 +107,7 @@ class _BoutonFournisseur extends StatelessWidget {
           foregroundColor: texte,
           disabledBackgroundColor: fond.withValues(alpha: 0.6),
           disabledForegroundColor: texte.withValues(alpha: 0.6),
-          side: BorderSide(color: apple ? Colors.black : AppColor.kGrayscale20),
+          side: const BorderSide(color: AppColor.kGrayscale20),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
           ),
