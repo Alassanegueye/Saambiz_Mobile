@@ -44,8 +44,12 @@ class Sb {
     height: 1.25,
   );
 
-  static TextStyle body([double size = 14]) =>
-      TextStyle(fontFamily: kPolice, fontSize: size, color: textMid, height: 1.55);
+  static TextStyle body([double size = 14]) => TextStyle(
+    fontFamily: kPolice,
+    fontSize: size,
+    color: textMid,
+    height: 1.55,
+  );
 
   static TextStyle label() => const TextStyle(
     fontFamily: kPolice,

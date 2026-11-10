@@ -80,9 +80,9 @@ class _MainAcheteurPageState extends State<MainAcheteurPage> {
             label: 'Accueil',
           ),
           NavigationDestination(
-            icon: Icon(Icons.grid_view_outlined),
-            selectedIcon: Icon(Icons.grid_view_rounded),
-            label: 'Catégories',
+            icon: Icon(Icons.storefront_outlined),
+            selectedIcon: Icon(Icons.storefront_rounded),
+            label: 'Explorer',
           ),
           NavigationDestination(
             icon: Icon(Icons.favorite_border_rounded),

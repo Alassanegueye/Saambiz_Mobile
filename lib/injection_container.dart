@@ -4,7 +4,9 @@ import 'package:saambiz/core/routes/app_router.dart';
 import 'dart:io';
 
 import 'package:dio/io.dart';
+import 'package:saambiz/core/services/comptes_memorises.dart';
 import 'package:saambiz/features/auth/data/datasources/auth_remote_datasource.dart';
+import 'package:saambiz/features/auth/data/datasources/connexion_sociale_source.dart';
 import 'package:saambiz/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:saambiz/features/auth/domain/repositories/auth_repository.dart';
 import 'package:saambiz/features/auth/domain/usecases/login_user.dart';
@@ -153,9 +155,11 @@ Future<void> init() async {
   // Services
   sl.registerLazySingleton(() => TokenService(secureStorage: sl()));
   sl.registerLazySingleton(() => ConfigPubliqueService(sl()));
+  sl.registerLazySingleton(() => ComptesMemorises(stockage: sl()));
   sl.registerLazySingleton(
     () => SessionService(
       jetons: sl(),
+      comptes: sl(),
       dio: Dio(
         BaseOptions(
           baseUrl: Env.apiBaseUrlEffective,
@@ -318,7 +322,10 @@ Future<void> init() async {
   sl.registerLazySingleton(() => LoginUser(sl()));
 
   // BLoC
-  sl.registerFactory(() => AuthBloc(loginUser: sl()));
+  sl.registerLazySingleton(() => ConnexionSocialeSource());
+  sl.registerFactory(
+    () => AuthBloc(loginUser: sl(), repository: sl(), connexionSociale: sl()),
+  );
 
   //================================================
   // FEATURES - HOME (PRODUITS / BOUTIQUES)

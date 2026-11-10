@@ -67,5 +67,21 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<!-- Pas de clé ~ipad : l'application est déclarée iPhone seul
+	     (TARGETED_DEVICE_FAMILY = 1). Une configuration qui ne s'applique
+	     à rien finit par faire croire qu'elle s'applique à quelque chose. -->
+	<!-- Retour de la fenêtre « Se connecter avec Google » : schéma défini
+	     dans ios/Flutter/Google.xcconfig (GOOGLE_REVERSED_CLIENT_ID). -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>$(GOOGLE_REVERSED_CLIENT_ID)</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>

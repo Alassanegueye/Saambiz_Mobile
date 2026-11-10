@@ -3,11 +3,14 @@ import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../../../../core/errors/failure.dart';
+import '../../../../core/services/comptes_memorises.dart';
 import '../../../../core/services/token_service.dart';
 import '../../../../injection_container.dart';
 import '../../domain/entities/user.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../datasources/auth_remote_datasource.dart';
+import '../datasources/connexion_sociale_source.dart';
+import '../models/user_model.dart';
 
 /// Connexion uniquement.
 ///
@@ -22,12 +25,18 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Either<Failure, User>> login(
     String identifiant,
     String motDePasse,
+  ) => _ouvrir(() => remoteDataSource.login(identifiant, motDePasse));
+
+  @override
+  Future<Either<Failure, User>> connexionSociale(IdentiteSociale identite) =>
+      _ouvrir(() => remoteDataSource.connexionSociale(identite));
+
+  /// Appelle le serveur, puis enregistre la session obtenue.
+  Future<Either<Failure, User>> _ouvrir(
+    Future<AuthResponseModel> Function() appel,
   ) async {
     try {
-      final authResponse = await remoteDataSource.login(
-        identifiant,
-        motDePasse,
-      );
+      final authResponse = await appel();
 
       await sl<TokenService>().setToken(authResponse.token);
       await sl<TokenService>().setRefreshToken(authResponse.refreshToken);
@@ -36,6 +45,15 @@ class AuthRepositoryImpl implements AuthRepository {
         key: 'user_id',
         value: authResponse.user.id.toString(),
       );
+
+      // Proposé ensuite sur l'écran de connexion (choix du compte). Une
+      // panne ici ne doit pas empêcher d'entrer.
+      try {
+        await sl<ComptesMemorises>().enregistrer(
+          authResponse.user,
+          authResponse.refreshToken,
+        );
+      } catch (_) {}
 
       return Right(authResponse.user);
     } on DioException catch (e) {

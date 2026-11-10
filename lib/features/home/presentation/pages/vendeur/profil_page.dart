@@ -15,6 +15,7 @@ import '../../../../../core/widgets/profil_kit.dart';
 import '../../../../../injection_container.dart';
 import '../../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../../auth/presentation/bloc/auth_event.dart';
+import '../../../../auth/presentation/bloc/auth_state.dart';
 import '../../../../compte/presentation/bloc/compte_bloc.dart';
 import '../../../../compte/presentation/bloc/compte_event.dart';
 import '../../../../compte/presentation/bloc/compte_state.dart';
@@ -80,11 +81,32 @@ class _ProfilPageState extends State<ProfilPage> with RetourSurOnglet {
   void _ouvrir(Widget page) =>
       Navigator.of(context).push(MaterialPageRoute(builder: (_) => page));
 
-  void _deconnecter() {
-    context.read<AuthBloc>().add(LogoutRequested());
-    Navigator.of(
-      context,
-    ).pushNamedAndRemoveUntil(AppRouter.loginRoute, (_) => false);
+  /// Retour à l'écran de connexion. La session du compte y reste proposée
+  /// (sans mot de passe), sauf s'il vient d'être supprimé.
+  Future<void> _deconnecter({bool compteSupprime = false}) async {
+    final bloc = context.read<AuthBloc>();
+    final navigateur = Navigator.of(context);
+    final fin = bloc.stream.firstWhere(
+      (s) => s is AuthInitial || s is AuthFailure,
+    );
+    bloc.add(
+      LogoutRequested(compteQuitte: _user, compteSupprime: compteSupprime),
+    );
+    await fin;
+    navigateur.pushNamedAndRemoveUntil(AppRouter.loginRoute, (_) => false);
+  }
+
+  /// Quitte ce compte sans fermer sa session, puis l'écran de connexion
+  /// propose les comptes du téléphone.
+  Future<void> _changerDeCompte() async {
+    final bloc = context.read<AuthBloc>();
+    final navigateur = Navigator.of(context);
+    final fin = bloc.stream.firstWhere(
+      (s) => s is AuthInitial || s is AuthFailure,
+    );
+    bloc.add(ChangementDeCompteDemande(compteQuitte: _user));
+    await fin;
+    navigateur.pushNamedAndRemoveUntil(AppRouter.loginRoute, (_) => false);
   }
 
   Future<void> _onLogout() async {
@@ -92,7 +114,8 @@ class _ProfilPageState extends State<ProfilPage> with RetourSurOnglet {
       context,
       icone: Icons.logout_rounded,
       titre: 'Se déconnecter ?',
-      message: 'Vous devrez vous reconnecter pour accéder à votre compte.',
+      message:
+          'Votre compte restera proposé sur l\'écran de connexion : vous y reviendrez d\'un toucher, sans mot de passe.',
       action: 'Se déconnecter',
     );
     if (ok && mounted) _deconnecter();
@@ -118,7 +141,7 @@ class _ProfilPageState extends State<ProfilPage> with RetourSurOnglet {
         if (state is CompteLoaded) {
           setState(() => _liveUser = state.user);
         } else if (state is CompteAccountDeleted) {
-          _deconnecter();
+          _deconnecter(compteSupprime: true);
         } else if (state is CompteError) {
           ScaffoldMessenger.of(
             context,
@@ -223,7 +246,9 @@ class _ProfilPageState extends State<ProfilPage> with RetourSurOnglet {
               ],
             ),
             const SizedBox(height: 28),
-            BoutonDeconnexion(onPressed: _onLogout),
+            BoutonChangerCompte(onPressed: _changerDeCompte),
+              const SizedBox(height: 10),
+              BoutonDeconnexion(onPressed: _onLogout),
             const SizedBox(height: 12),
             const VersionApp(),
           ],

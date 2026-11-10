@@ -11,20 +11,17 @@ class DividerRow extends StatelessWidget {
     return Row(
       children: [
         Expanded(child: Divider(color: AppColor.kLine)),
-        Flexible(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: Text(
-              title,
-              maxLines: 1,
-              softWrap: false,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
-              style: TextStyle(fontFamily: kPolice, 
-                color: AppColor.kGrayscale40,
-                fontWeight: FontWeight.w500,
-                fontSize: 14,
-              ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          child: Text(
+            title,
+            maxLines: 1,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontFamily: kPolice,
+              color: AppColor.kGrayscale40,
+              fontWeight: FontWeight.w500,
+              fontSize: 14,
             ),
           ),
         ),

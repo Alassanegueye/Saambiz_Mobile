@@ -1,7 +1,6 @@
 import 'package:saambiz/core/widgets/onglets_conserves.dart';
 import 'package:flutter/material.dart';
-import '../../../../core/widgets/app_app_bar.dart';
-import '../../../../core/widgets/degrade_fond.dart';
+import '../../../../core/widgets/page_vendeur.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../injection_container.dart';
 import '../../../../core/theme/app_color.dart';
@@ -24,11 +23,10 @@ class VendeurCommandesPage extends StatelessWidget {
       child: ActualiserAuRetour(
         onRetour: (context) =>
             context.read<CommandeBloc>().add(LoadCommandesVendeur()),
-        child: Scaffold(
-          backgroundColor: AppColor.kBackground,
-          appBar: const AppAppBar(title: 'Commandes reçues', implyLeading: false),
-          body: FondDegradeSubtil(
-            child: BlocBuilder<CommandeBloc, CommandeState>(
+        child: PageVendeur(
+          titre: 'Commandes',
+          sousTitre: 'Reçues de vos clients',
+          corps: BlocBuilder<CommandeBloc, CommandeState>(
             buildWhen: (avant, apres) =>
                 !(apres is CommandeLoading && avant is CommandesLoaded),
             builder: (context, state) {
@@ -60,7 +58,6 @@ class VendeurCommandesPage extends StatelessWidget {
               }
               return const SizedBox.shrink();
             },
-            ),
           ),
         ),
       ),
@@ -105,7 +102,7 @@ class _ListeCommandesState extends State<_ListeCommandes> {
           height: 56,
           child: ListView(
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 6),
             children: [
               for (final entree in _filtres.entries) ...[
                 PuceFiltre(
@@ -141,7 +138,7 @@ class _ListeCommandesState extends State<_ListeCommandes> {
                     ],
                   )
                 : ListView.separated(
-                    padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+                    padding: EdgeInsets.fromLTRB(16, 4, 16, espaceBasVendeur(context)),
                     itemCount: visibles.length,
                     separatorBuilder: (_, __) => const SizedBox(height: 10),
                     itemBuilder: (context, i) {

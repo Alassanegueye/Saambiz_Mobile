@@ -45,6 +45,9 @@ class AppColor {
   static const Color kWhite = Color(0xFFFFFFFF);
   static const Color kBlack = Color(0xFF0A1330);
 
+  /// Noir franc, sans reflet bleu : en-tête et accents de la connexion.
+  static const Color kNoir = Color(0xFF0B0B0D);
+
   /// Titres et texte fort.
   static const Color kGrayscaleDark100 = Color(0xFF0B1638);
 

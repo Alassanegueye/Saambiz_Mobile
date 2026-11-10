@@ -1,0 +1,10 @@
+// Connexion Google sur iOS.
+//
+// Identifiant client iOS inversé, tel qu'affiché par Google Cloud Console
+// (API et services → Identifiants → client iOS → « Schéma d'URL iOS »), par
+// exemple : com.googleusercontent.apps.1234567890-abcdefg
+//
+// Il doit correspondre à l'identifiant passé à la compilation :
+//   --dart-define=GOOGLE_IOS_CLIENT_ID=1234567890-abcdefg.apps.googleusercontent.com
+// Vide : le bouton Google reste masqué sur iOS.
+GOOGLE_REVERSED_CLIENT_ID =

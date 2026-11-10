@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import '../models/user_model.dart';
+import 'connexion_sociale_source.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../../../../core/utils/app_logger.dart';
 
@@ -12,6 +13,9 @@ import '../../../../core/utils/app_logger.dart';
 /// plus lequel est joué.
 abstract class AuthRemoteDataSource {
   Future<AuthResponseModel> login(String identifiant, String motDePasse);
+
+  /// Connexion Google / Apple : le serveur vérifie le jeton du fournisseur.
+  Future<AuthResponseModel> connexionSociale(IdentiteSociale identite);
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -53,5 +57,11 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       logDebug('ERROR: ${e.response?.data}');
       rethrow;
     }
+  }
+
+  @override
+  Future<AuthResponseModel> connexionSociale(IdentiteSociale identite) async {
+    final response = await dio.post('/auth/social', data: identite.toJson());
+    return AuthResponseModel.fromJson(response.data);
   }
 }

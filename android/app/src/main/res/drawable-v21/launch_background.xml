@@ -1,11 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Écran de lancement natif (avant Android 12) : fond blanc et pictogramme
-     SaamBiz bleu marine au centre. Android 12+ : voir values-v31/styles.xml. -->
+<!-- Écran de lancement natif : fond blanc uni, sans logo. Le logo SaamBiz
+     s'anime ensuite dans l'application (IntroMarque), puis reste affiché. -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:drawable="@android:color/white" />
-    <item>
-        <bitmap
-            android:gravity="center"
-            android:src="@drawable/splash_picto" />
-    </item>
 </layer-list>
