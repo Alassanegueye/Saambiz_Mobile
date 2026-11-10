@@ -7,4 +7,4 @@
 // Il doit correspondre à l'identifiant passé à la compilation :
 //   --dart-define=GOOGLE_IOS_CLIENT_ID=1234567890-abcdefg.apps.googleusercontent.com
 // Vide : le bouton Google reste masqué sur iOS.
-GOOGLE_REVERSED_CLIENT_ID =
+GOOGLE_REVERSED_CLIENT_ID = com.googleusercontent.apps.402258191800-u1u2gkrkihuig586i47t805k3s7tiq3h
