@@ -98,6 +98,14 @@ class BoutiqueEndpoints {
   static const modifierBoutique = '/vendeur/modifier-boutique';
   static const pause = '/vendeur/boutique/pause';
   static const reactiver = '/vendeur/boutique/reactiver';
+
+  /// Badge « Boutique vérifiée » : état de la demande, et dépôt du dossier.
+  static const statutVerification = '/vendeur/statut-verification';
+  static const soumettreVerification = '/vendeur/soumettre-verification';
+
+  /// Abonnés de la boutique, et fiche d'un abonné.
+  static const abonnes = '/vendeur/abonnes';
+  static String abonne(String id) => '/vendeur/abonnes/$id';
 }
 
 /// Le site web public de la boutique, « vitrine ».
@@ -112,6 +120,9 @@ class VitrineEndpoints {
   static const analyserLogo = '/vendeur/vitrine/analyser-logo';
   static const generer = '/vendeur/vitrine/generer';
   static const maVitrine = '/vendeur/ma-vitrine';
+
+  /// Rendu du site tel qu'il sera publié, avant de le mettre en ligne.
+  static const apercu = '/vendeur/ma-vitrine/apercu';
 }
 
 /// Abonnement vendeur.
@@ -174,6 +185,25 @@ class PromotionsEndpoints {
   static const actives = '/promotions/actives';
   static const promotions = '/promotions';
   static String parId(String id) => '/promotions/$id';
+}
+
+/// Avis laissés par les acheteurs sur une boutique.
+class AvisEndpoints {
+  AvisEndpoints._();
+
+  static const avis = '/avis';
+  static String boutique(String boutiqueId) => '/avis/boutique/$boutiqueId';
+  static String monAvis(String boutiqueId) =>
+      '/avis/boutique/$boutiqueId/mon-avis';
+}
+
+/// Catégories du catalogue.
+class CategorieEndpoints {
+  CategorieEndpoints._();
+
+  static const categories = '/categories';
+  static String categorie(String idOuSlug) => '/categories/$idOuSlug';
+  static String boutiques(String idOuSlug) => '/categories/$idOuSlug/boutiques';
 }
 
 /// Signalements.

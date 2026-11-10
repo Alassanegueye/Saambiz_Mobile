@@ -75,8 +75,13 @@ class MessagerieRemoteDataSourceImpl implements MessagerieRemoteDataSource {
   Future<int> nombreNonLus() async {
     final res = await dio.get(MessagerieEndpoints.nonLus);
     final data = res.data;
-    if (data is Map && data['nombre'] != null) {
-      return int.tryParse(data['nombre'].toString()) ?? 0;
+    if (data is! Map) return 0;
+    // La clé lue était `nombre`, que le backend n'envoie pas : il répond
+    // `{ nonLus: 4 }`. Le compteur restait donc à zéro en permanence, et
+    // l'utilisateur n'était jamais averti d'un message en attente.
+    for (final cle in ['nonLus', 'nombre', 'count', 'total']) {
+      final valeur = data[cle];
+      if (valeur != null) return int.tryParse(valeur.toString()) ?? 0;
     }
     return 0;
   }

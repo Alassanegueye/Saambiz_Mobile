@@ -19,6 +19,12 @@ abstract class ProduitRemoteDataSource {
   Future<List<ProduitModel>> getProduitsByBoutique(String boutiqueId);
   Future<String> getWhatsappUrl(String produitId);
   Future<Map<String, dynamic>> getAvisBoutique(String boutiqueId);
+
+  /// L'avis que l'acheteur connecté a déjà laissé sur cette boutique.
+  Future<Map<String, dynamic>?> monAvis(String boutiqueId);
+
+  /// Retire l'avis de l'acheteur connecté.
+  Future<void> supprimerMonAvis(String boutiqueId);
   Future<Map<String, dynamic>> laisserAvis(
     String boutiqueId,
     int note,
@@ -260,7 +266,7 @@ class ProduitRemoteDataSourceImpl implements ProduitRemoteDataSource {
   @override
   Future<Map<String, dynamic>> getAvisBoutique(String boutiqueId) async {
     try {
-      final response = await dio.get('/avis/boutique/$boutiqueId');
+      final response = await dio.get(AvisEndpoints.boutique(boutiqueId));
       final data = response.data;
       return data is Map<String, dynamic>
           ? data
@@ -279,7 +285,7 @@ class ProduitRemoteDataSourceImpl implements ProduitRemoteDataSource {
   ) async {
     try {
       final response = await dio.post(
-        '/avis',
+        AvisEndpoints.avis,
         data: {
           'boutiqueId': boutiqueId,
           'note': note,
@@ -289,6 +295,42 @@ class ProduitRemoteDataSourceImpl implements ProduitRemoteDataSource {
       );
       final data = response.data;
       return data is Map<String, dynamic> ? data : {};
+    } catch (e) {
+      _handleAuthError(e);
+      rethrow;
+    }
+  }
+
+  // Relecture et retrait de son propre avis : les deux routes existaient côté
+  // backend sans être appelées. Un acheteur ne pouvait donc ni revoir ce qu'il
+  // avait écrit, ni le retirer.
+
+  @override
+  Future<Map<String, dynamic>?> monAvis(String boutiqueId) async {
+    try {
+      final response = await dio.get(
+        AvisEndpoints.monAvis(boutiqueId),
+        options: await _getOptions(),
+      );
+      final data = response.data;
+      if (data is! Map) return null;
+      final avis = data['avis'];
+      if (avis is Map) return Map<String, dynamic>.from(avis);
+      // Pas d'avis encore laissé : le backend répond un objet sans `avis`.
+      return data.containsKey('note') ? Map<String, dynamic>.from(data) : null;
+    } catch (e) {
+      _handleAuthError(e);
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> supprimerMonAvis(String boutiqueId) async {
+    try {
+      await dio.delete(
+        AvisEndpoints.boutique(boutiqueId),
+        options: await _getOptions(),
+      );
     } catch (e) {
       _handleAuthError(e);
       rethrow;
