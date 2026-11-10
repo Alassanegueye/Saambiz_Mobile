@@ -69,6 +69,9 @@ class VitrineEnregistree extends VitrineState {
   List<Object?> get props => [vitrine];
 }
 
+/// Le site public a été retiré. La boutique, elle, reste.
+class VitrineSupprimee extends VitrineState {}
+
 class VitrineErreur extends VitrineState {
   final String message;
   const VitrineErreur(this.message);

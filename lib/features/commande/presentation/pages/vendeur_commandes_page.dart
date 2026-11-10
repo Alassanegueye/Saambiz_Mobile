@@ -27,60 +27,63 @@ class VendeurCommandesPage extends StatelessWidget {
             context.read<CommandeBloc>().add(LoadCommandesVendeur()),
         child: Builder(
           builder: (context) => PageVendeur(
-          titre: 'Commandes',
-          boutonFlottant: FloatingActionButton.extended(
-            onPressed: () async {
-              final bloc = context.read<CommandeBloc>();
-              final creee = await Navigator.of(context).push<bool>(
-                MaterialPageRoute(
-                  builder: (_) => const NouvelleCommandeVendeurPage(),
-                ),
-              );
-              if (creee == true) bloc.add(LoadCommandesVendeur());
-            },
-            backgroundColor: AppColor.kSecondary,
-            foregroundColor: AppColor.kPrimary,
-            elevation: 2,
-            icon: const Icon(Icons.add_rounded),
-            label: const Text(
-              'Nouvelle commande',
-              style: TextStyle(fontFamily: kPolice, fontWeight: FontWeight.w700),
-            ),
-          ),
-          corps: BlocBuilder<CommandeBloc, CommandeState>(
-            buildWhen: (avant, apres) =>
-                !(apres is CommandeLoading && avant is CommandesLoaded),
-            builder: (context, state) {
-              if (state is CommandeLoading || state is CommandeInitial) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              if (state is CommandeError) {
-                return Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        state.message,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(color: Color(0xFF5B6C8A)),
-                      ),
-                      TextButton(
-                        onPressed: () => context.read<CommandeBloc>().add(
-                          LoadCommandesVendeur(),
-                        ),
-                        child: const Text('Réessayer'),
-                      ),
-                    ],
+            titre: 'Commandes',
+            boutonFlottant: FloatingActionButton.extended(
+              onPressed: () async {
+                final bloc = context.read<CommandeBloc>();
+                final creee = await Navigator.of(context).push<bool>(
+                  MaterialPageRoute(
+                    builder: (_) => const NouvelleCommandeVendeurPage(),
                   ),
                 );
-              }
-              if (state is CommandesLoaded) {
-                return _ListeCommandes(commandes: state.commandes);
-              }
-              return const SizedBox.shrink();
-            },
+                if (creee == true) bloc.add(LoadCommandesVendeur());
+              },
+              backgroundColor: AppColor.kSecondary,
+              foregroundColor: AppColor.kPrimary,
+              elevation: 2,
+              icon: const Icon(Icons.add_rounded),
+              label: const Text(
+                'Nouvelle commande',
+                style: TextStyle(
+                  fontFamily: kPolice,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+            corps: BlocBuilder<CommandeBloc, CommandeState>(
+              buildWhen: (avant, apres) =>
+                  !(apres is CommandeLoading && avant is CommandesLoaded),
+              builder: (context, state) {
+                if (state is CommandeLoading || state is CommandeInitial) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (state is CommandeError) {
+                  return Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          state.message,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(color: Color(0xFF5B6C8A)),
+                        ),
+                        TextButton(
+                          onPressed: () => context.read<CommandeBloc>().add(
+                            LoadCommandesVendeur(),
+                          ),
+                          child: const Text('Réessayer'),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+                if (state is CommandesLoaded) {
+                  return _ListeCommandes(commandes: state.commandes);
+                }
+                return const SizedBox.shrink();
+              },
+            ),
           ),
-        ),
         ),
       ),
     );
@@ -126,26 +129,26 @@ class _ListeCommandesState extends State<_ListeCommandes> {
         Padding(
           padding: const EdgeInsets.fromLTRB(14, 22, 14, 8),
           child: SizedBox(
-          height: 40,
-          child: ClipRRect(
-          borderRadius: BorderRadius.circular(20),
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 2),
-            children: [
-              for (final entree in _filtres.entries) ...[
-                PuceFiltre(
-                  libelle: entree.value == null
-                      ? entree.key
-                      : '${entree.key} (${widget.commandes.where((c) => entree.value!.contains(c.statut)).length})',
-                  active: _filtre == entree.key,
-                  onTap: () => setState(() => _filtre = entree.key),
-                ),
-                const SizedBox(width: 8),
-              ],
-            ],
-          ),
-          ),
+            height: 40,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(20),
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 2),
+                children: [
+                  for (final entree in _filtres.entries) ...[
+                    PuceFiltre(
+                      libelle: entree.value == null
+                          ? entree.key
+                          : '${entree.key} (${widget.commandes.where((c) => entree.value!.contains(c.statut)).length})',
+                      active: _filtre == entree.key,
+                      onTap: () => setState(() => _filtre = entree.key),
+                    ),
+                    const SizedBox(width: 8),
+                  ],
+                ],
+              ),
+            ),
           ),
         ),
         Expanded(
@@ -170,7 +173,12 @@ class _ListeCommandesState extends State<_ListeCommandes> {
                   )
                 : ListView.separated(
                     // +72 : le bouton « Nouvelle commande » ne masque pas la dernière carte.
-                    padding: EdgeInsets.fromLTRB(16, 4, 16, espaceBasVendeur(context) + 72),
+                    padding: EdgeInsets.fromLTRB(
+                      16,
+                      4,
+                      16,
+                      espaceBasVendeur(context) + 72,
+                    ),
                     itemCount: visibles.length,
                     separatorBuilder: (_, __) => const SizedBox(height: 10),
                     itemBuilder: (context, i) {

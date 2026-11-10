@@ -254,9 +254,7 @@ class ScaffoldMarine extends StatelessWidget {
         body: Padding(
           padding: const EdgeInsets.only(top: 6),
           child: ClipRRect(
-            borderRadius: const BorderRadius.vertical(
-              top: Radius.circular(28),
-            ),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
             child: Material(
               color: backgroundColor ?? AppColor.kBackground,
               child: body ?? const SizedBox.shrink(),

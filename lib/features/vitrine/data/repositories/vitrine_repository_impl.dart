@@ -87,4 +87,8 @@ class VitrineRepositoryImpl implements VitrineRepository {
   Future<Either<Failure, Vitrine>> modifierVitrine(
     Map<String, dynamic> champs,
   ) => _proteger(() => remoteDataSource.modifierVitrine(champs));
+
+  @override
+  Future<Either<Failure, void>> supprimerVitrine() =>
+      _proteger(() => remoteDataSource.supprimerVitrine());
 }

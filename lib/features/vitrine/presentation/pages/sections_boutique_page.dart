@@ -56,8 +56,9 @@ class _DialogueTitreSection extends StatefulWidget {
 }
 
 class _DialogueTitreSectionState extends State<_DialogueTitreSection> {
-  late final TextEditingController _controleur =
-      TextEditingController(text: widget.initial);
+  late final TextEditingController _controleur = TextEditingController(
+    text: widget.initial,
+  );
   final _cleForm = GlobalKey<FormState>();
 
   @override
@@ -78,7 +79,8 @@ class _DialogueTitreSectionState extends State<_DialogueTitreSection> {
       backgroundColor: _C.white,
       title: Text(
         widget.initial.isEmpty ? 'Nouvelle section' : 'Renommer la section',
-        style: TextStyle(fontFamily: kPolice, 
+        style: TextStyle(
+          fontFamily: kPolice,
           fontSize: 16,
           fontWeight: FontWeight.w700,
           color: _C.navy,

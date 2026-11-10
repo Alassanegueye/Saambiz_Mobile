@@ -35,4 +35,10 @@ abstract class VitrineRepository {
   });
 
   Future<Either<Failure, Vitrine>> modifierVitrine(Map<String, dynamic> champs);
+
+  /// Retire le site public de la boutique.
+  ///
+  /// La boutique reste, seul son site disparaît : le vendeur peut en
+  /// regénérer un ensuite avec l'assistant.
+  Future<Either<Failure, void>> supprimerVitrine();
 }

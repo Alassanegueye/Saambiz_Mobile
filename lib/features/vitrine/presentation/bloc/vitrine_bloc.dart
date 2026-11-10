@@ -7,6 +7,7 @@ import '../../domain/usecases/generer_vitrine.dart';
 import '../../domain/usecases/get_ma_vitrine.dart';
 import '../../domain/usecases/get_secteurs_vitrine.dart';
 import '../../domain/usecases/modifier_vitrine.dart';
+import '../../domain/usecases/supprimer_vitrine.dart';
 import 'vitrine_event.dart';
 import 'vitrine_state.dart';
 
@@ -16,6 +17,7 @@ class VitrineBloc extends Bloc<VitrineEvent, VitrineState> {
   final AnalyserLogo analyserLogo;
   final GenererVitrine genererVitrine;
   final ModifierVitrine modifierVitrine;
+  final SupprimerVitrine supprimerVitrine;
 
   /// Les secteurs ne changent pas d'un écran à l'autre : une fois chargés, on
   /// les garde pour ne pas les redemander à chaque retour dans l'assistant.
@@ -27,11 +29,13 @@ class VitrineBloc extends Bloc<VitrineEvent, VitrineState> {
     required this.analyserLogo,
     required this.genererVitrine,
     required this.modifierVitrine,
+    required this.supprimerVitrine,
   }) : super(VitrineInitial()) {
     on<ChargerVitrine>(_onCharger);
     on<AnalyserLogoDemande>(_onAnalyser);
     on<GenererVitrineDemande>(_onGenerer);
     on<ModifierVitrineDemande>(_onModifier);
+    on<SupprimerVitrineDemande>(_onSupprimer);
   }
 
   Future<void> _onCharger(
@@ -115,6 +119,18 @@ class VitrineBloc extends Bloc<VitrineEvent, VitrineState> {
     r.fold(
       (f) => emit(VitrineErreur(f.errorMessage)),
       (v) => emit(VitrineEnregistree(v)),
+    );
+  }
+
+  Future<void> _onSupprimer(
+    SupprimerVitrineDemande event,
+    Emitter<VitrineState> emit,
+  ) async {
+    emit(VitrineChargement());
+    final r = await supprimerVitrine();
+    r.fold(
+      (f) => emit(VitrineErreur(f.errorMessage)),
+      (_) => emit(VitrineSupprimee()),
     );
   }
 }

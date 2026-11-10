@@ -209,7 +209,9 @@ class _NouvelleCommandeVendeurPageState
                           requis: true,
                           clavier: TextInputType.phone,
                           formats: [
-                            FilteringTextInputFormatter.allow(RegExp(r'[0-9+ ]')),
+                            FilteringTextInputFormatter.allow(
+                              RegExp(r'[0-9+ ]'),
+                            ),
                           ],
                         ),
                       ],
@@ -297,8 +299,14 @@ class _NouvelleCommandeVendeurPageState
       return _Carte(
         child: Column(
           children: [
-            Text(_erreurProduits!, style: const TextStyle(color: AppColor.kErreur)),
-            TextButton(onPressed: _chargerProduits, child: const Text('Réessayer')),
+            Text(
+              _erreurProduits!,
+              style: const TextStyle(color: AppColor.kErreur),
+            ),
+            TextButton(
+              onPressed: _chargerProduits,
+              child: const Text('Réessayer'),
+            ),
           ],
         ),
       );
@@ -328,7 +336,10 @@ class _NouvelleCommandeVendeurPageState
               padding: const EdgeInsets.only(bottom: 8),
               child: TextField(
                 controller: _rechercheCtrl,
-                decoration: _deco('Rechercher un produit', Icons.search_rounded),
+                decoration: _deco(
+                  'Rechercher un produit',
+                  Icons.search_rounded,
+                ),
               ),
             ),
           for (final p in visibles) _ligneProduit(p),
@@ -368,7 +379,10 @@ class _NouvelleCommandeVendeurPageState
                   epuise
                       ? 'Épuisé'
                       : '${_fcfa(_prix(p))} · ${p.quantite} en stock',
-                  style: const TextStyle(fontSize: 12.5, color: Color(0xFF5B6C8A)),
+                  style: const TextStyle(
+                    fontSize: 12.5,
+                    color: Color(0xFF5B6C8A),
+                  ),
                 ),
               ],
             ),
@@ -412,7 +426,11 @@ class _NouvelleCommandeVendeurPageState
       decoration: const BoxDecoration(
         color: AppColor.kWhite,
         boxShadow: [
-          BoxShadow(color: Color(0x14000000), blurRadius: 12, offset: Offset(0, -2)),
+          BoxShadow(
+            color: Color(0x14000000),
+            blurRadius: 12,
+            offset: Offset(0, -2),
+          ),
         ],
       ),
       child: Row(

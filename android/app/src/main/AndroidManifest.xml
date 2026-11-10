@@ -11,13 +11,19 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
 
+    <!-- `usesCleartextTraffic` : le trafic HTTP non chiffré est REFUSÉ.
+         Il était autorisé pour tous les builds, vestige du développement
+         contre l'émulateur (http://10.0.2.2) : l'application acceptait
+         alors des échanges en clair, qu'un intermédiaire sur le réseau
+         peut lire et modifier. Les builds de développement le
+         réautorisent à eux seuls, voir src/debug/AndroidManifest.xml. -->
     <application
         android:label="SaamBiz"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:allowBackup="false"
         android:fullBackupContent="false"
-        android:usesCleartextTraffic="true"
+        android:usesCleartextTraffic="false"
         android:enableOnBackInvokedCallback="true">
         <activity
             android:name=".MainActivity"
