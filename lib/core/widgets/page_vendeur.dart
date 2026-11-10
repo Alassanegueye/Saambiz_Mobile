@@ -14,8 +14,13 @@ import '../theme/police.dart';
 /// un peu d'air. Le repli (barre 68 + 16 de marge) sert si ce padding
 /// n'est pas transmis.
 double espaceBasVendeur(BuildContext context) {
-  final mq = MediaQuery.of(context);
-  return math.max(mq.padding.bottom, 84 + mq.viewPadding.bottom) + 16;
+  // `paddingOf` et `viewPaddingOf` ne réabonnent le widget qu'aux marges
+  // système ; `MediaQuery.of` le reconstruisait aussi à chaque ouverture du
+  // clavier et à chaque changement de densité de texte, alors que cette
+  // fonction n'en dépend pas.
+  final marges = MediaQuery.paddingOf(context);
+  final margesVue = MediaQuery.viewPaddingOf(context);
+  return math.max(marges.bottom, 84 + margesVue.bottom) + 16;
 }
 
 /// Gabarit commun des onglets vendeur, dans l'esprit de la page de

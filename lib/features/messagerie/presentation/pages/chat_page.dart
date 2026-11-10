@@ -131,7 +131,7 @@ class _ChatViewState extends State<_ChatView> {
                               ),
                               constraints: BoxConstraints(
                                 maxWidth:
-                                    MediaQuery.of(context).size.width * 0.75,
+                                    MediaQuery.sizeOf(context).width * 0.75,
                               ),
                               decoration: BoxDecoration(
                                 color: mine ? _C.green : _C.white,

@@ -14,6 +14,7 @@ import '../bloc/messagerie_bloc.dart';
 import '../bloc/messagerie_event.dart';
 import '../bloc/messagerie_state.dart';
 import 'chat_page.dart';
+import '../../../../core/utils/dates.dart';
 
 class _C {
   static const green = Color(0xFF01154B);
@@ -139,7 +140,7 @@ class _ConversationsViewState extends State<_ConversationsView> {
                       children: [
                         if (c.dateDernierMessage != null)
                           Text(
-                            DateFormat('HH:mm').format(c.dateDernierMessage!),
+                            heureCourte.format(c.dateDernierMessage!),
                             style: const TextStyle(fontSize: 11, color: _C.sub),
                           ),
                         if (c.nombreNonLus > 0)

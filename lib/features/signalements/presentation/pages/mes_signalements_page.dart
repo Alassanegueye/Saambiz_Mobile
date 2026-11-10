@@ -6,6 +6,7 @@ import '../../../../injection_container.dart';
 import '../bloc/signalements_bloc.dart';
 import '../bloc/signalements_event.dart';
 import '../bloc/signalements_state.dart';
+import '../../../../core/utils/dates.dart';
 
 class _C {
   static const black = Color(0xFF01154B);
@@ -123,7 +124,7 @@ class _MesSignalementsView extends StatelessWidget {
                         if (s.createdAt != null) ...[
                           const SizedBox(height: 6),
                           Text(
-                            DateFormat('dd/MM/yyyy').format(s.createdAt!),
+                            dateCourte.format(s.createdAt!),
                             style: const TextStyle(fontSize: 11, color: _C.sub),
                           ),
                         ],

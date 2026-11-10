@@ -13,6 +13,7 @@ import '../bloc/promotions_event.dart';
 import '../bloc/promotions_state.dart';
 import 'nouvelle_campagne_page.dart';
 import 'promotion_form_page.dart';
+import '../../../../core/utils/dates.dart';
 
 class _C {
   static const green = Color(0xFF01154B);
@@ -150,7 +151,7 @@ class _MesPromotionsView extends StatelessWidget {
                               ),
                               if (p.dateFin != null)
                                 Text(
-                                  'Jusqu\'au ${DateFormat('dd/MM/yyyy').format(p.dateFin!)}',
+                                  'Jusqu\'au ${dateCourte.format(p.dateFin!)}',
                                   style: const TextStyle(
                                     fontSize: 11,
                                     color: _C.sub,
