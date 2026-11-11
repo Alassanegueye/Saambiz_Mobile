@@ -13,6 +13,7 @@ import '../../../../core/widgets/degrade_fond.dart';
 import '../../../../injection_container.dart';
 import '../../data/catalogue_remote_datasource.dart';
 import '../../data/produit_catalogue.dart';
+import '../../../signalements/presentation/ouvrir_signalement.dart';
 import '../widgets/bouton_panier.dart';
 import '../widgets/compte_a_rebours.dart';
 import '../widgets/produit_card.dart';
@@ -145,7 +146,10 @@ class _ProduitDetailPageState extends State<ProduitDetailPage> {
             fontWeight: FontWeight.w700,
           ),
         ),
-        actions: const [BoutonPanier(), SizedBox(width: 6)],
+        actions: [
+          const BoutonPanier(),
+          MenuSignaler(type: 'produit', cibleId: widget.produit.id),
+        ],
       ),
       body: FondDegradeSubtil(
         child: RefreshIndicator(

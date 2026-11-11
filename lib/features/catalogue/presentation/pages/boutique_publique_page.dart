@@ -17,6 +17,7 @@ import '../../data/produit_catalogue.dart';
 import '../widgets/bouton_panier.dart';
 import '../widgets/produit_card.dart';
 import '../../../avis/presentation/feuille_avis_boutique.dart';
+import '../../../signalements/presentation/ouvrir_signalement.dart';
 
 const _bleuVerifie = Color(0xFF1D9BF0);
 const _encre = Color(0xFF1B1F27);
@@ -283,7 +284,12 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
     final sections = _sections;
     return Scaffold(
       backgroundColor: AppColor.kWhite,
-      appBar: AppBar(actions: const [BoutonPanier(), SizedBox(width: 6)]),
+      appBar: AppBar(
+        actions: [
+          const BoutonPanier(),
+          MenuSignaler(type: 'boutique', cibleId: widget.boutiqueId),
+        ],
+      ),
       body: RefreshIndicator(
         color: AppColor.kPrimary,
         onRefresh: () async => Future.wait([_chargerBoutique(), _charger()]),
