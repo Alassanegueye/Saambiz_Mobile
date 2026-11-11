@@ -15,6 +15,7 @@ import '../../data/produit_catalogue.dart';
 import '../widgets/bouton_panier.dart';
 import 'boutique_publique_page.dart';
 import '../widgets/produit_card.dart';
+import '../../../../core/widgets/page_vendeur.dart';
 
 /// Liste de produits : une catégorie, une recherche ou les promotions.
 /// Tri en un geste (récents, populaires, prix), défilement infini.
@@ -159,49 +160,66 @@ class _ProduitsPageState extends State<ProduitsPage> {
   @override
   Widget build(BuildContext context) {
     final c = widget.categorie;
-    return Scaffold(
+    return ScaffoldMarine(
       backgroundColor: AppColor.kBackground,
+      // Un seul bloc bleu : titre, panier et recherche y sont posés
+      // directement, sans barre distincte ni bande blanche dessous.
       appBar: AppBar(
         titleSpacing: 0,
         title: Row(
           children: [
-            if (c != null) ...[
-              PastilleIcone(iconeCategorie(c.icone), taille: 34),
-              const SizedBox(width: 10),
-            ] else if (widget.promotions) ...[
-              const PastilleIcone(
-                Icons.local_offer_outlined,
-                accent: true,
-                taille: 34,
+            if (c != null || widget.promotions) ...[
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: AppColor.kWhite.withValues(alpha: 0.12),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  c != null
+                      ? iconeCategorie(c.icone)
+                      : Icons.local_offer_outlined,
+                  size: 19,
+                  color: widget.promotions
+                      ? AppColor.kSecondary
+                      : AppColor.kWhite,
+                ),
               ),
               const SizedBox(width: 10),
             ],
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    widget.titre,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontFamily: kPolice,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  if (!_chargement)
-                    Text(
-                      '$_total produit${_total > 1 ? 's' : ''}',
-                      style: texteDiscret(11.5).copyWith(color: Colors.white70),
-                    ),
-                ],
+              child: Text(
+                widget.titre,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],
         ),
-        actions: const [BoutonPanier(), SizedBox(width: 6)],
+        actions: const [
+          BoutonPanier(couleur: AppColor.kWhite),
+          SizedBox(width: 6),
+        ],
+        bottom: widget.promotions
+            ? null
+            : PreferredSize(
+                preferredSize: const Size.fromHeight(64),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                  child: ChampRecherche(
+                    controleur: _rechercheCtrl,
+                    surFondClair: true,
+                    indication: c != null
+                        ? 'Rechercher dans ${c.nom}'
+                        : 'Rechercher un produit, une boutique',
+                    onSubmitted: (v) {
+                      _recherche = v;
+                      _charger();
+                    },
+                  ),
+                ),
+              ),
       ),
       body: FondDegradeSubtil(
         child: RefreshIndicator(
@@ -235,24 +253,13 @@ class _ProduitsPageState extends State<ProduitsPage> {
 
   Widget _barreOutils() {
     final c = widget.categorie;
-    return Container(
-      color: AppColor.kWhite,
-      padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+    // Les filtres sur le fond de la feuille, sans bande blanche : rien ne
+    // sépare l'en-tête de la liste.
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (!widget.promotions)
-            ChampRecherche(
-              controleur: _rechercheCtrl,
-              indication: c != null
-                  ? 'Rechercher dans ${c.nom}'
-                  : 'Rechercher un produit, une boutique',
-              onSubmitted: (v) {
-                _recherche = v;
-                _charger();
-              },
-            ),
-          const SizedBox(height: 10),
           SizedBox(
             height: 36,
             child: ListView(

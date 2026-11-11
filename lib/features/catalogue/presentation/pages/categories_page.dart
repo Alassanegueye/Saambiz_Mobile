@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/page_vendeur.dart';
 import 'dart:async';
 
 import 'package:dio/dio.dart';
@@ -7,8 +8,6 @@ import 'package:saambiz/core/theme/police.dart';
 import '../../../../core/theme/app_color.dart';
 import '../../../../core/utils/texte.dart';
 import '../../../../core/widgets/animations.dart';
-import '../../../../core/widgets/app_app_bar.dart';
-import '../../../../core/widgets/degrade_fond.dart';
 import '../../../../core/widgets/barre_navigation_verre.dart'
     show kEspaceBarreBas;
 import '../../../../core/widgets/empty_state.dart';
@@ -40,7 +39,8 @@ class CategoriesPage extends StatefulWidget {
 
 class _CategoriesPageState extends State<CategoriesPage> {
   final _ctrl = TextEditingController();
-  _Onglet _onglet = _Onglet.boutiques;
+  // Les catégories d'abord : premier onglet, à gauche.
+  _Onglet _onglet = _Onglet.categories;
 
   // Catégories
   List<Categorie> _categories = const [];
@@ -183,16 +183,9 @@ class _CategoriesPageState extends State<CategoriesPage> {
 
   @override
   Widget build(BuildContext context) {
-    return FondDegradeSubtil(
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        appBar: const AppAppBar(
-          title: 'Explorer',
-          centerTitle: true,
-          implyLeading: false,
-          couleurFond: Colors.transparent,
-        ),
-        body: Column(
+    return PageVendeur(
+      titre: 'Explorer',
+      corps: Column(
           children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
@@ -220,7 +213,6 @@ class _CategoriesPageState extends State<CategoriesPage> {
             ),
           ],
         ),
-      ),
     );
   }
 
@@ -372,7 +364,6 @@ class _CategoriesPageState extends State<CategoriesPage> {
                   _tuile(
                     rang: i + 1,
                     nom: c.nom,
-                    nombre: c.nombreProduits,
                     icone: iconeCategorie(c.icone),
                     onTap: () =>
                         _ouvrir(ProduitsPage(titre: c.nom, categorie: c)),
@@ -454,15 +445,12 @@ class _CategoriesPageState extends State<CategoriesPage> {
                         color: AppColor.kGrayscaleDark100,
                       ),
                     ),
-                    // Nombre de produits en vente, sous le nom.
-                    if (nombre != null || mise) ...[
+                    // Pas de nombre de produits sous le nom : seule la
+                    // tuile des promotions garde sa ligne.
+                    if (mise) ...[
                       const SizedBox(height: 2),
                       Text(
-                        mise
-                            ? 'Offres en cours'
-                            : nombre == 0
-                            ? 'Bientôt des produits'
-                            : '$nombre produit${nombre! > 1 ? 's' : ''}',
+                        'Offres en cours',
                         maxLines: 1,
                         style: texteDiscret(11.5),
                       ),
@@ -496,8 +484,8 @@ class _SelecteurOnglet extends StatelessWidget {
       ),
       child: Row(
         children: [
-          _bouton(_Onglet.boutiques, Icons.storefront_rounded, 'Boutiques'),
           _bouton(_Onglet.categories, Icons.grid_view_rounded, 'Catégories'),
+          _bouton(_Onglet.boutiques, Icons.storefront_rounded, 'Boutiques'),
         ],
       ),
     );

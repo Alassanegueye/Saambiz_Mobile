@@ -1,3 +1,4 @@
+import 'package:saambiz/core/utils/fichier_envoi.dart';
 import 'package:saambiz/core/widgets/page_vendeur.dart';
 import 'package:saambiz/core/widgets/libelle_obligatoire.dart';
 import 'package:saambiz/core/widgets/image_reseau.dart';
@@ -237,10 +238,7 @@ class _NouvelleCampagnePageState extends State<NouvelleCampagnePage> {
             : FormData.fromMap({
                 for (final e in champs.entries)
                   e.key: e.value is List ? jsonEncode(e.value) : '${e.value}',
-                'image': await MultipartFile.fromFile(
-                  image.path,
-                  filename: image.path.split(Platform.pathSeparator).last,
-                ),
+                'image': await fichierAEnvoyer(image.path),
               }),
       );
       if (!mounted) return;

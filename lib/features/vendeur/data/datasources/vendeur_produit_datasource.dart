@@ -1,3 +1,4 @@
+import 'package:saambiz/core/utils/fichier_envoi.dart';
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
@@ -51,7 +52,9 @@ class VendeurProduitDataSource {
     ).map((e) => CategorieModel.fromJson(e as Map<String, dynamic>)).toList();
   }
 
-  Future<void> ajouterProduit({
+  /// Crée le produit et renvoie son identifiant (pour y joindre ensuite les
+  /// photos supplémentaires), ou `null` si la réponse ne le donne pas.
+  Future<String?> ajouterProduit({
     required String nom,
     required String description,
     required num prix,
@@ -68,9 +71,14 @@ class VendeurProduitDataSource {
       'categorieId': categorieId,
       // Caractéristiques de la catégorie, en JSON (formulaire multipart).
       if (attributs != null) 'attributs': jsonEncode(attributs),
-      if (imagePath != null) 'image': await MultipartFile.fromFile(imagePath),
+      if (imagePath != null) 'image': await fichierAEnvoyer(imagePath),
     });
-    await dio.post(VendeurProduitEndpoints.ajouterProduit, data: form);
+    final res = await dio.post(VendeurProduitEndpoints.ajouterProduit, data: form);
+    final data = res.data;
+    if (data is Map && data['produit'] is Map) {
+      return (data['produit'] as Map)['id']?.toString();
+    }
+    return null;
   }
 
   Future<void> modifierProduit({
@@ -90,7 +98,7 @@ class VendeurProduitDataSource {
       if (prix != null) 'prix': prix,
       if (quantite != null) 'quantite': quantite,
       if (categorieId != null) 'categorieId': categorieId,
-      if (imagePath != null) 'image': await MultipartFile.fromFile(imagePath),
+      if (imagePath != null) 'image': await fichierAEnvoyer(imagePath),
     });
     await dio.put(VendeurProduitEndpoints.modifierProduit(id), data: form);
   }
@@ -113,7 +121,7 @@ class VendeurProduitDataSource {
   Future<void> ajouterImages(String produitId, List<String> imagePaths) async {
     final form = FormData.fromMap({
       'images': [
-        for (final path in imagePaths) await MultipartFile.fromFile(path),
+        for (final path in imagePaths) await fichierAEnvoyer(path),
       ],
     });
     await dio.post(VendeurProduitEndpoints.images(produitId), data: form);

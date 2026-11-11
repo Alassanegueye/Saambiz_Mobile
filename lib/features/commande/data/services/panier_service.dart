@@ -5,9 +5,14 @@ import '../models/panier_item.dart';
 
 /// Service de gestion du panier local (persisté via SharedPreferences).
 ///
-/// Règle métier alignée sur le backend : **un panier ne contient les produits
-/// que d'UN SEUL vendeur**. Tenter d'ajouter un produit d'un autre vendeur
-/// lève [PanierVendeurDifferentException].
+/// Le panier peut contenir les produits de plusieurs boutiques ; l'écran les
+/// range par boutique. Règle métier alignée sur le backend : **une commande
+/// = une boutique**. Le client coche les produits à commander, tous d'une
+/// même boutique ([basculer] remplace la sélection quand il change de
+/// boutique), et ne peut valider qu'avec au moins un produit coché.
+///
+/// [PanierVendeurDifferentException] n'est plus levée ; elle reste déclarée
+/// pour les écrans qui l'attrapent encore.
 class PanierVendeurDifferentException implements Exception {
   final String message;
   PanierVendeurDifferentException([
@@ -24,6 +29,10 @@ class PanierService extends ChangeNotifier {
 
   List<PanierItem> _items = [];
 
+  /// Lignes cochées pour la prochaine commande (clés `PanierItem.cle`),
+  /// toutes du même vendeur.
+  final Set<String> _selection = {};
+
   PanierService({required this.prefs}) {
     _charger();
   }
@@ -33,6 +42,79 @@ class PanierService extends ChangeNotifier {
   double get total => _items.fold(0.0, (sum, it) => sum + it.sousTotal);
   bool get estVide => _items.isEmpty;
   String? get vendeurId => _items.isEmpty ? null : _items.first.vendeurId;
+
+  /// Les lignes du panier rangées par boutique, dans l'ordre d'ajout.
+  Map<String, List<PanierItem>> get parBoutique {
+    final groupes = <String, List<PanierItem>>{};
+    for (final it in _items) {
+      groupes.putIfAbsent(it.vendeurId, () => []).add(it);
+    }
+    return groupes;
+  }
+
+  // ── Sélection pour la commande ─────────────────────────────────────
+  bool estSelectionne(String cle) => _selection.contains(cle);
+  List<PanierItem> get selection =>
+      _items.where((e) => _selection.contains(e.cle)).toList();
+  bool get selectionVide => selection.isEmpty;
+  int get nombreSelectionnes => selection.fold(0, (s, it) => s + it.quantite);
+  double get totalSelection => selection.fold(0.0, (s, it) => s + it.sousTotal);
+  String? get vendeurSelection =>
+      selection.isEmpty ? null : selection.first.vendeurId;
+
+  /// Coche ou décoche une ligne. Cocher une ligne d'une autre boutique
+  /// remplace la sélection : renvoie `true` dans ce cas, pour que l'écran
+  /// l'explique (une commande ne regroupe qu'une boutique).
+  bool basculer(String cle) {
+    final item = _items.where((e) => e.cle == cle).firstOrNull;
+    if (item == null) return false;
+    var changement = false;
+    if (_selection.contains(cle)) {
+      _selection.remove(cle);
+    } else {
+      final autre = vendeurSelection;
+      if (autre != null && autre != item.vendeurId) {
+        _selection.clear();
+        changement = true;
+      }
+      _selection.add(cle);
+    }
+    notifyListeners();
+    return changement;
+  }
+
+  /// Coche (ou décoche, si elle l'est déjà entièrement) toute une boutique.
+  /// Renvoie `true` si une autre boutique était sélectionnée.
+  bool basculerBoutique(String vendeur) {
+    final lignes = _items.where((e) => e.vendeurId == vendeur).map((e) => e.cle);
+    final toutes = lignes.every(_selection.contains);
+    var changement = false;
+    if (toutes) {
+      _selection.removeAll(lignes);
+    } else {
+      final autre = vendeurSelection;
+      if (autre != null && autre != vendeur) {
+        _selection.clear();
+        changement = true;
+      }
+      _selection.addAll(lignes);
+    }
+    notifyListeners();
+    return changement;
+  }
+
+  bool boutiqueEntierementSelectionnee(String vendeur) {
+    final lignes = _items.where((e) => e.vendeurId == vendeur);
+    return lignes.isNotEmpty && lignes.every((e) => _selection.contains(e.cle));
+  }
+
+  /// Après une commande : retire du panier les lignes commandées, garde le
+  /// reste (les autres boutiques, les produits non cochés).
+  Future<void> retirerSelection() async {
+    _items.removeWhere((e) => _selection.contains(e.cle));
+    _selection.clear();
+    await _sauvegarder();
+  }
 
   void _charger() {
     final raw = prefs.getString(_key);
@@ -55,9 +137,6 @@ class PanierService extends ChangeNotifier {
 
   /// Ajoute un produit. Si déjà présent, incrémente la quantité.
   Future<void> ajouter(PanierItem item) async {
-    if (_items.isNotEmpty && _items.first.vendeurId != item.vendeurId) {
-      throw PanierVendeurDifferentException();
-    }
     final index = _items.indexWhere((e) => e.cle == item.cle);
     if (index >= 0) {
       _items[index].quantite += item.quantite;
@@ -72,6 +151,7 @@ class PanierService extends ChangeNotifier {
     final index = _items.indexWhere((e) => e.cle == cle);
     if (index < 0) return;
     if (quantite <= 0) {
+      _selection.remove(_items[index].cle);
       _items.removeAt(index);
     } else {
       _items[index].quantite = quantite;
@@ -80,19 +160,22 @@ class PanierService extends ChangeNotifier {
   }
 
   Future<void> retirer(String cle) async {
+    _selection.remove(cle);
     _items.removeWhere((e) => e.cle == cle);
     await _sauvegarder();
   }
 
   Future<void> vider() async {
     _items = [];
+    _selection.clear();
     await prefs.remove(_key);
     notifyListeners();
   }
 
-  /// Transforme le panier en payload `items` pour l'API de création de commande.
+  /// Les lignes COCHÉES, en payload `items` pour l'API de création de
+  /// commande : une seule boutique, au moins un produit.
   List<Map<String, dynamic>> toApiItems() {
-    return _items
+    return selection
         .map(
           (e) => {
             'produitId': e.produitId,

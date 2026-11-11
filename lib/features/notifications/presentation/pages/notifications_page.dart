@@ -3,7 +3,6 @@ import 'package:saambiz/core/widgets/ui_kit.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import '../../../../core/widgets/app_app_bar.dart';
 import '../../../../core/widgets/degrade_fond.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -13,6 +12,7 @@ import '../../../../core/services/socket_service.dart';
 import '../bloc/notifications_bloc.dart';
 import '../bloc/notifications_event.dart';
 import '../bloc/notifications_state.dart';
+import '../../../../core/widgets/page_vendeur.dart';
 
 class _C {
   static const bg = Color(0xFFF4F5F8);
@@ -60,10 +60,10 @@ class _NotificationsViewState extends State<_NotificationsView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return ScaffoldMarine(
       backgroundColor: _C.bg,
-      appBar: AppAppBar(
-        title: 'Notifications',
+      appBar: AppBar(
+        title: const Text('Notifications'),
         actions: [
           IconButton(
             icon: const Icon(Icons.done_all),

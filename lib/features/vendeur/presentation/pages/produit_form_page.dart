@@ -1,3 +1,4 @@
+import 'package:saambiz/core/errors/message_erreur.dart';
 import 'package:saambiz/core/widgets/libelle_obligatoire.dart';
 import 'package:saambiz/core/widgets/image_reseau.dart';
 import 'dart:io';
@@ -53,8 +54,13 @@ class _ProduitFormPageState extends State<ProduitFormPage> {
   bool _loadingCats = true;
   String? _erreurCats;
 
-  // Galerie multi-images (mode édition uniquement)
+  // Photos supplémentaires. En édition, elles partent tout de suite ; à la
+  // création, elles attendent ici et sont envoyées juste après le produit.
   late List<ProduitImage> _imagesExistantes;
+  final List<String> _photosEnAttente = [];
+
+  /// Plafond du serveur (upload.array('images', 8)).
+  static const int _maxPhotos = 8;
   bool _uploadingImages = false;
   String? _suppressionImageId;
 
@@ -120,13 +126,25 @@ class _ProduitFormPageState extends State<ProduitFormPage> {
   }
 
   Future<void> _ajouterPhotosSupplementaires() async {
-    if (!_isEdit) return;
+    final reste = _maxPhotos - _imagesExistantes.length - _photosEnAttente.length;
+    if (reste <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('8 photos supplémentaires au maximum.')),
+      );
+      return;
+    }
     final picker = ImagePicker();
-    final fichiers = await picker.pickMultiImage(
+    var fichiers = await picker.pickMultiImage(
       imageQuality: 80,
       maxWidth: 1200,
     );
-    if (fichiers.isEmpty) return;
+    if (fichiers.isEmpty || !mounted) return;
+    if (fichiers.length > reste) fichiers = fichiers.take(reste).toList();
+    // Nouveau produit : les photos attendent l'enregistrement.
+    if (!_isEdit) {
+      setState(() => _photosEnAttente.addAll(fichiers.map((f) => f.path)));
+      return;
+    }
     setState(() => _uploadingImages = true);
     try {
       await _ds.ajouterImages(
@@ -165,7 +183,7 @@ class _ProduitFormPageState extends State<ProduitFormPage> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erreur : $e'), backgroundColor: Colors.red),
+        SnackBar(content: Text(messageErreurReseau(e)), backgroundColor: Colors.red),
       );
     } finally {
       if (mounted) setState(() => _suppressionImageId = null);
@@ -206,7 +224,7 @@ class _ProduitFormPageState extends State<ProduitFormPage> {
           attributs: _attributs,
         );
       } else {
-        await _ds.ajouterProduit(
+        final id = await _ds.ajouterProduit(
           nom: _nomCtrl.text.trim(),
           description: _descCtrl.text.trim(),
           prix: prix,
@@ -215,13 +233,32 @@ class _ProduitFormPageState extends State<ProduitFormPage> {
           imagePath: _imagePath,
           attributs: _attributs,
         );
+        // Les photos supplémentaires suivent le produit. Si leur envoi
+        // échoue, le produit reste créé : on le dit, sans tout annuler.
+        if (_photosEnAttente.isNotEmpty) {
+          try {
+            if (id == null) throw Exception('identifiant manquant');
+            await _ds.ajouterImages(id, List.of(_photosEnAttente));
+          } catch (_) {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text(
+                    'Produit créé, mais les photos supplémentaires n\'ont '
+                    'pas pu être envoyées. Ajoutez-les en modifiant le produit.',
+                  ),
+                ),
+              );
+            }
+          }
+        }
       }
       if (!mounted) return;
       Navigator.of(context).pop(true);
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erreur : $e'), backgroundColor: Colors.red),
+        SnackBar(content: Text(messageErreurReseau(e)), backgroundColor: Colors.red),
       );
     } finally {
       if (mounted) setState(() => _loading = false);
@@ -299,10 +336,8 @@ class _ProduitFormPageState extends State<ProduitFormPage> {
                 }),
               ),
             ],
-            if (_isEdit) ...[
-              const SizedBox(height: 24),
-              _photosSupplementairesSection(),
-            ],
+            const SizedBox(height: 24),
+            _photosSupplementairesSection(),
             const SizedBox(height: 24),
             ElevatedButton(
               onPressed: _loading ? null : _soumettre,
@@ -407,12 +442,57 @@ class _ProduitFormPageState extends State<ProduitFormPage> {
             ],
           ),
           const SizedBox(height: 8),
-          if (_imagesExistantes.isEmpty)
-            const Text(
-              'Aucune photo supplémentaire pour ce produit.',
-              style: TextStyle(color: _C.sub, fontSize: 13),
+          if (_photosEnAttente.isNotEmpty) ...[
+            SizedBox(
+              height: 90,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: _photosEnAttente.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 10),
+                itemBuilder: (context, i) => Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.file(
+                        File(_photosEnAttente[i]),
+                        width: 90,
+                        height: 90,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    Positioned(
+                      top: -6,
+                      right: -6,
+                      child: GestureDetector(
+                        onTap: () =>
+                            setState(() => _photosEnAttente.removeAt(i)),
+                        child: const CircleAvatar(
+                          radius: 12,
+                          backgroundColor: Colors.red,
+                          child: Icon(
+                            Icons.close,
+                            size: 14,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+          ],
+          if (_imagesExistantes.isEmpty && _photosEnAttente.isEmpty)
+            Text(
+              _isEdit
+                  ? 'Aucune photo supplémentaire pour ce produit.'
+                  : 'Ajoutez d\'autres photos du produit si vous le souhaitez '
+                        '(8 au maximum).',
+              style: const TextStyle(color: _C.sub, fontSize: 13),
             )
-          else
+          else if (_imagesExistantes.isNotEmpty)
             SizedBox(
               height: 90,
               child: ListView.separated(

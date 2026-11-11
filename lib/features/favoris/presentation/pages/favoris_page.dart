@@ -1,8 +1,7 @@
+import 'package:saambiz/core/widgets/page_vendeur.dart';
 import 'package:saambiz/core/widgets/onglets_conserves.dart';
 import 'package:saambiz/core/widgets/image_reseau.dart';
 import 'package:flutter/material.dart';
-import '../../../../core/widgets/app_app_bar.dart';
-import '../../../../core/widgets/degrade_fond.dart';
 import 'package:saambiz/core/widgets/logo_boutique.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -43,16 +42,9 @@ class _FavorisView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FondDegradeSubtil(
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        appBar: const AppAppBar(
-          title: 'Mes favoris',
-          centerTitle: true,
-          implyLeading: false,
-          couleurFond: Colors.transparent,
-        ),
-        body: Column(
+    return PageVendeur(
+      titre: 'Mes favoris',
+      corps: Column(
           children: [
             // Produits aimés (cœur des cartes produits), puis boutiques suivies.
             const _ProduitsAimes(),
@@ -181,7 +173,6 @@ class _FavorisView extends StatelessWidget {
             ),
           ],
         ),
-      ),
     );
   }
 

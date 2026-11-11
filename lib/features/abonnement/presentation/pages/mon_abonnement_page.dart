@@ -1,5 +1,7 @@
 import 'package:saambiz/core/theme/app_color.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:saambiz/core/utils/telephone.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -45,6 +47,9 @@ class _MonAbonnementViewState extends State<_MonAbonnementView> {
 
   Future<void> _renouveler(BuildContext context) async {
     final numeroCtrl = TextEditingController();
+    // Orange Money et Wave : numéros sénégalais uniquement.
+    final paysPaiement = ValueNotifier<PaysTelephone>(senegal);
+    String? erreurNumero;
     String methode = 'orange_money';
     final res = await showDialog<bool>(
       context: context,
@@ -57,8 +62,12 @@ class _MonAbonnementViewState extends State<_MonAbonnementView> {
               TextField(
                 controller: numeroCtrl,
                 keyboardType: TextInputType.phone,
-                decoration: const InputDecoration(
+                inputFormatters: [FormatTelephone(paysPaiement)],
+                decoration: InputDecoration(
                   labelText: 'Numéro de téléphone',
+                  hintText: senegal.exemple,
+                  prefixText: '${senegal.drapeau} ${senegal.indicatif}  ',
+                  errorText: erreurNumero,
                 ),
               ),
               const SizedBox(height: 12),
@@ -83,7 +92,14 @@ class _MonAbonnementViewState extends State<_MonAbonnementView> {
               child: const Text('Annuler'),
             ),
             TextButton(
-              onPressed: () => Navigator.pop(ctx, true),
+              onPressed: () {
+                final erreur = verifierTelephone(numeroCtrl.text, senegal);
+                if (erreur != null) {
+                  setStateDialog(() => erreurNumero = erreur);
+                  return;
+                }
+                Navigator.pop(ctx, true);
+              },
               child: const Text('Payer'),
             ),
           ],
@@ -122,7 +138,7 @@ class _MonAbonnementViewState extends State<_MonAbonnementView> {
       bloc.add(
         PayerAbonnement(
           montant: montant,
-          numeroTelephone: numeroCtrl.text.trim(),
+          numeroTelephone: chiffresNationaux(numeroCtrl.text, senegal),
           methode: methode,
         ),
       );

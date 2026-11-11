@@ -226,6 +226,10 @@ class ConfigEndpoints {
   /// `{ prix: 2000, devise: 'FCFA' }`
   static const prixAbonnement = '/prix-abonnement';
 
+  /// `{ contacts: { whatsapp, email, telephone }, questions: [...] }`,
+  /// rédigés depuis le dashboard admin.
+  static const centreAide = '/centre-aide';
+
   /// `{ minVersionAndroid, minVersionIos, maintenance, message }`
   static const appConfig = '/app/config';
 }

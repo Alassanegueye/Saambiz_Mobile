@@ -339,6 +339,10 @@ class ChampFormulaire extends StatelessWidget {
   final Iterable<String>? autofill;
   final bool obligatoire;
 
+  /// Remplace l'icône de gauche (sélecteur de pays d'un téléphone).
+  final Widget? prefixe;
+  final List<TextInputFormatter>? formats;
+
   const ChampFormulaire({
     super.key,
     required this.libelle,
@@ -350,6 +354,8 @@ class ChampFormulaire extends StatelessWidget {
     this.action,
     this.autofill,
     this.obligatoire = false,
+    this.prefixe,
+    this.formats,
   });
 
   @override
@@ -361,6 +367,7 @@ class ChampFormulaire extends StatelessWidget {
         TextFormField(
           controller: controller,
           keyboardType: clavier,
+          inputFormatters: formats,
           textInputAction: action,
           autofillHints: autofill,
           validator: validator,
@@ -372,7 +379,7 @@ class ChampFormulaire extends StatelessWidget {
           ),
           decoration: decorationChampAuth(
             hint: hint,
-            prefixe: icone == null ? null : Icon(icone),
+            prefixe: prefixe ?? (icone == null ? null : Icon(icone)),
           ),
         ),
       ],

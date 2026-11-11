@@ -1,8 +1,13 @@
+import 'package:saambiz/core/widgets/toastNotif.dart';
+import 'package:toastification/toastification.dart';
 import 'package:saambiz/core/widgets/page_vendeur.dart';
 import 'package:saambiz/core/widgets/libelle_obligatoire.dart';
 import 'package:saambiz/core/widgets/image_reseau.dart';
 import 'dart:io';
+import 'package:saambiz/core/utils/telephone.dart';
+import 'package:saambiz/core/widgets/bouton_indicatif.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -53,9 +58,10 @@ class _BoutiqueFormViewState extends State<_BoutiqueFormView> {
   late final _localisationCtrl = TextEditingController(
     text: widget.boutique?.localisation ?? '',
   );
-  late final _telephoneCtrl = TextEditingController(
-    text: widget.boutique?.telephone ?? '',
-  );
+  // Le numéro enregistré (« +221771234567 ») est découpé en pays + numéro.
+  late final _telLu = lireTelephone(widget.boutique?.telephone);
+  late final _telephoneCtrl = TextEditingController(text: _telLu.national);
+  late final _paysTel = ValueNotifier<PaysTelephone>(_telLu.pays);
   String? _logoPath;
   late List<String> _categories = List.of(
     widget.boutique?.categories ?? const <String>[],
@@ -70,6 +76,7 @@ class _BoutiqueFormViewState extends State<_BoutiqueFormView> {
     _descCtrl.dispose();
     _localisationCtrl.dispose();
     _telephoneCtrl.dispose();
+    _paysTel.dispose();
     super.dispose();
   }
 
@@ -98,7 +105,7 @@ class _BoutiqueFormViewState extends State<_BoutiqueFormView> {
           nom: _nomCtrl.text.trim(),
           description: _descCtrl.text.trim(),
           localisation: _localisationCtrl.text.trim(),
-          telephone: _telephoneCtrl.text.trim(),
+          telephone: telephoneInternational(_telephoneCtrl.text, _paysTel.value),
           categories: _categories,
           logoPath: _logoPath,
         ),
@@ -109,7 +116,7 @@ class _BoutiqueFormViewState extends State<_BoutiqueFormView> {
           nom: _nomCtrl.text.trim(),
           description: _descCtrl.text.trim(),
           localisation: _localisationCtrl.text.trim(),
-          telephone: _telephoneCtrl.text.trim(),
+          telephone: telephoneInternational(_telephoneCtrl.text, _paysTel.value),
           categories: _categories,
           logoPath: _logoPath,
         ),
@@ -134,6 +141,14 @@ class _BoutiqueFormViewState extends State<_BoutiqueFormView> {
               ),
             );
           } else if (state is BoutiqueLoaded) {
+            showToast(
+              context,
+              _isEdit ? 'Modifications enregistrées' : 'Boutique créée',
+              _isEdit
+                  ? 'Les informations de votre boutique sont à jour.'
+                  : 'Votre boutique est prête.',
+              ToastificationType.success,
+            );
             Navigator.of(context).pop(state.boutique);
           }
         },
@@ -162,6 +177,12 @@ class _BoutiqueFormViewState extends State<_BoutiqueFormView> {
                   _telephoneCtrl,
                   'Téléphone',
                   keyboard: TextInputType.phone,
+                  verifier: (v) => verifierTelephone(v, _paysTel.value),
+                  formats: [FormatTelephone(_paysTel)],
+                  prefixe: BoutonIndicatif(
+                    pays: _paysTel,
+                    onChange: () => setState(_telephoneCtrl.clear),
+                  ),
                 ),
                 const SizedBox(height: 20),
                 SelecteurCategories(
@@ -238,16 +259,20 @@ class _BoutiqueFormViewState extends State<_BoutiqueFormView> {
     TextInputType? keyboard,
     int maxLines = 1,
     String? Function(String)? verifier,
+    List<TextInputFormatter>? formats,
+    Widget? prefixe,
   }) {
     return TextFormField(
       controller: c,
       keyboardType: keyboard,
       maxLines: maxLines,
+      inputFormatters: formats,
       validator: (v) => (v == null || v.trim().isEmpty)
           ? '$label requis'
           : verifier?.call(v.trim()),
       decoration: InputDecoration(
         label: LibelleObligatoire(label),
+        prefixIcon: prefixe,
         filled: true,
         fillColor: _C.white,
         contentPadding: const EdgeInsets.symmetric(

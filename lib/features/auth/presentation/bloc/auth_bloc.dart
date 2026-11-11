@@ -144,6 +144,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
             message: 'Connexion impossible. Vérifiez votre accès à internet.',
           ),
         );
+      case ResultatRenouvellement.serveurIndisponible:
+        emit(
+          const AuthFailure(
+            message:
+                'Le service est momentanément indisponible. Réessayez dans un instant.',
+          ),
+        );
     }
   }
 
@@ -158,11 +165,32 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     await effacerInteretsLocaux();
   }
 
-  /// Quitte le compte courant en gardant sa session sur le téléphone, pour y
-  /// revenir d'un toucher depuis l'écran de connexion.
-  Future<void> _quitterCompte(User? quitte) async {
+  /// Quitte le compte courant.
+  ///
+  /// [garderSession] : changement de compte — la session reste sur le
+  /// téléphone pour revenir d'un toucher. Sinon (déconnexion), la session est
+  /// fermée sur le serveur : le compte reste proposé sur l'écran de
+  /// connexion, mais son mot de passe est redemandé.
+  Future<void> _quitterCompte(User? quitte, {bool garderSession = true}) async {
     final jetons = sl<TokenService>();
     final refresh = await jetons.getRefreshToken();
+    if (!garderSession) {
+      var compte = quitte;
+      if (compte == null) {
+        try {
+          compte = UserModel.fromJson(
+            Jwt.parseJwt(await jetons.getToken() ?? ''),
+          );
+        } catch (_) {}
+      }
+      // Le serveur oublie la session : le jeton ne vaut plus rien.
+      await sl<SessionService>().revoquer();
+      if (compte != null) {
+        await sl<ComptesMemorises>().enregistrer(compte, null);
+      }
+      await _oublierCompteCourant();
+      return;
+    }
     if (refresh != null && refresh.isNotEmpty) {
       var compte = quitte;
       if (compte == null) {
@@ -187,7 +215,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     emit(AuthLoading());
     try {
-      await _quitterCompte(event.compteQuitte);
+      // Changer de profil ferme la session du compte quitté : pour y revenir,
+      // son mot de passe sera demandé.
+      await FcmService.desinscrire();
+      await _quitterCompte(event.compteQuitte, garderSession: false);
       emit(AuthInitial());
     } catch (e) {
       emit(AuthFailure(message: 'Erreur lors du changement de compte : $e'));
@@ -208,10 +239,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         if (id != null) await sl<ComptesMemorises>().oublier(id);
         await _oublierCompteCourant();
       } else {
-        // Pas de révocation ici : la session reste mémorisée. Elle n'est
-        // fermée sur le serveur que par « Retirer ce compte » (écran de
-        // connexion).
-        await _quitterCompte(event.compteQuitte);
+        // Déconnexion : la session est fermée sur le serveur. Le compte reste
+        // proposé sur l'écran de connexion, avec le mot de passe à saisir.
+        await _quitterCompte(event.compteQuitte, garderSession: false);
       }
       emit(AuthInitial());
     } catch (e) {

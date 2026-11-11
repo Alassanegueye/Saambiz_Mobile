@@ -97,6 +97,14 @@ class VendeurProduitBloc
     ToggleDispoProduit event,
     Emitter<VendeurProduitState> emit,
   ) async {
+    // Bascule immédiate à l'écran, puis confirmation par le serveur.
+    final actuel = state;
+    if (actuel is VendeurProduitLoaded) {
+      emit(VendeurProduitLoaded([
+        for (final p in actuel.produits)
+          p.id == event.id ? p.avecDisponible(!p.disponible) : p,
+      ]));
+    }
     final result = await toggleDisponibilite(event.id);
     await result.fold(
       (failure) async => emit(VendeurProduitError(failure.errorMessage)),

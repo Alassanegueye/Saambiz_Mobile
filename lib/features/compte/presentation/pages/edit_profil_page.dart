@@ -3,6 +3,9 @@ import 'package:saambiz/core/widgets/image_reseau.dart';
 
 import 'package:saambiz/core/widgets/libelle_obligatoire.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:saambiz/core/utils/telephone.dart';
+import 'package:saambiz/core/widgets/bouton_indicatif.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -50,9 +53,10 @@ class _EditProfileViewState extends State<_EditProfileView> {
   late final _adresseCtrl = TextEditingController(
     text: widget.user?.adresse ?? '',
   );
-  late final _telephoneCtrl = TextEditingController(
-    text: widget.user?.telephone ?? '',
-  );
+  // Le numéro enregistré (« +221771234567 ») est découpé en pays + numéro.
+  late final _telLu = lireTelephone(widget.user?.telephone ?? '');
+  late final _telephoneCtrl = TextEditingController(text: _telLu.national);
+  late final _paysTel = ValueNotifier<PaysTelephone>(_telLu.pays);
   String? _photoPath;
 
   @override
@@ -61,6 +65,7 @@ class _EditProfileViewState extends State<_EditProfileView> {
     _prenomCtrl.dispose();
     _adresseCtrl.dispose();
     _telephoneCtrl.dispose();
+    _paysTel.dispose();
     super.dispose();
   }
 
@@ -124,7 +129,7 @@ class _EditProfileViewState extends State<_EditProfileView> {
         nom: _nomCtrl.text.trim(),
         prenom: _prenomCtrl.text.trim(),
         adresse: _adresseCtrl.text.trim(),
-        telephone: _telephoneCtrl.text.trim(),
+        telephone: telephoneInternational(_telephoneCtrl.text, _paysTel.value),
         photoProfilPath: _photoPath,
       ),
     );
@@ -165,6 +170,12 @@ class _EditProfileViewState extends State<_EditProfileView> {
                   _telephoneCtrl,
                   'Téléphone',
                   keyboard: TextInputType.phone,
+                  verifier: (v) => verifierTelephone(v, _paysTel.value),
+                  formats: [FormatTelephone(_paysTel)],
+                  prefixe: BoutonIndicatif(
+                    pays: _paysTel,
+                    onChange: () => setState(_telephoneCtrl.clear),
+                  ),
                 ),
                 const SizedBox(height: 12),
                 _input(_adresseCtrl, 'Adresse'),
@@ -205,14 +216,20 @@ class _EditProfileViewState extends State<_EditProfileView> {
     TextEditingController c,
     String label, {
     TextInputType? keyboard,
+    String? Function(String)? verifier,
+    List<TextInputFormatter>? formats,
+    Widget? prefixe,
   }) {
     return TextFormField(
       controller: c,
       keyboardType: keyboard,
-      validator: (v) =>
-          (v == null || v.trim().isEmpty) ? '$label requis' : null,
+      inputFormatters: formats,
+      validator: (v) => (v == null || v.trim().isEmpty)
+          ? '$label requis'
+          : verifier?.call(v.trim()),
       decoration: InputDecoration(
         label: LibelleObligatoire(label),
+        prefixIcon: prefixe,
         filled: true,
         fillColor: _C.white,
         contentPadding: const EdgeInsets.symmetric(

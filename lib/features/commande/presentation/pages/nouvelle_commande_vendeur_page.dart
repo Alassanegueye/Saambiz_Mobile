@@ -5,6 +5,8 @@ import 'package:toastification/toastification.dart';
 
 import '../../../../core/theme/app_color.dart';
 import '../../../../core/theme/police.dart';
+import '../../../../core/utils/telephone.dart';
+import '../../../../core/widgets/bouton_indicatif.dart';
 import '../../../../core/widgets/page_vendeur.dart';
 import '../../../../core/widgets/toastNotif.dart';
 import '../../../../injection_container.dart';
@@ -29,6 +31,7 @@ class _NouvelleCommandeVendeurPageState
   final _prenomCtrl = TextEditingController();
   final _nomCtrl = TextEditingController();
   final _telCtrl = TextEditingController();
+  final _paysTel = ValueNotifier<PaysTelephone>(senegal);
   final _adresseCtrl = TextEditingController();
   final _noteCtrl = TextEditingController();
   final _rechercheCtrl = TextEditingController();
@@ -59,6 +62,7 @@ class _NouvelleCommandeVendeurPageState
     ]) {
       c.dispose();
     }
+    _paysTel.dispose();
     super.dispose();
   }
 
@@ -105,7 +109,9 @@ class _NouvelleCommandeVendeurPageState
 
   void _changerQuantite(ProduitModel p, int delta) {
     final actuelle = _quantites[p.id] ?? 0;
-    final nouvelle = (actuelle + delta).clamp(0, p.quantite);
+    // Le vendeur peut commander au-delà du stock, rupture comprise : il sait
+    // ce qu'il a réellement (réassort, stock non saisi…).
+    final nouvelle = (actuelle + delta).clamp(0, 9999);
     setState(() {
       if (nouvelle == 0) {
         _quantites.remove(p.id);
@@ -132,7 +138,7 @@ class _NouvelleCommandeVendeurPageState
         'client': {
           'prenom': _prenomCtrl.text.trim(),
           'nom': _nomCtrl.text.trim(),
-          'telephone': _telCtrl.text.trim(),
+          'telephone': telephoneInternational(_telCtrl.text, _paysTel.value),
         },
         'items': [
           for (final e in _quantites.entries)
@@ -208,11 +214,12 @@ class _NouvelleCommandeVendeurPageState
                           icone: Icons.phone_outlined,
                           requis: true,
                           clavier: TextInputType.phone,
-                          formats: [
-                            FilteringTextInputFormatter.allow(
-                              RegExp(r'[0-9+ ]'),
-                            ),
-                          ],
+                          formats: [FormatTelephone(_paysTel)],
+                          prefixe: BoutonIndicatif(
+                            pays: _paysTel,
+                            onChange: () => setState(_telCtrl.clear),
+                          ),
+                          verifier: (v) => verifierTelephone(v, _paysTel.value),
                         ),
                       ],
                     ),
@@ -355,6 +362,7 @@ class _NouvelleCommandeVendeurPageState
 
   Widget _ligneProduit(ProduitModel p) {
     final qte = _quantites[p.id] ?? 0;
+    // En rupture, le produit reste sélectionnable : seule la mention change.
     final epuise = p.quantite <= 0;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
@@ -371,13 +379,13 @@ class _NouvelleCommandeVendeurPageState
                   style: TextStyle(
                     fontFamily: kPolice,
                     fontWeight: FontWeight.w600,
-                    color: epuise ? const Color(0xFF9AA6BC) : AppColor.kPrimary,
+                    color: AppColor.kPrimary,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   epuise
-                      ? 'Épuisé'
+                      ? '${_fcfa(_prix(p))} · rupture de stock'
                       : '${_fcfa(_prix(p))} · ${p.quantite} en stock',
                   style: const TextStyle(
                     fontSize: 12.5,
@@ -387,7 +395,7 @@ class _NouvelleCommandeVendeurPageState
               ],
             ),
           ),
-          if (!epuise) ...[
+          ...[
             _BoutonQte(
               icone: Icons.remove_rounded,
               onTap: qte > 0 ? () => _changerQuantite(p, -1) : null,
@@ -407,7 +415,7 @@ class _NouvelleCommandeVendeurPageState
             _BoutonQte(
               icone: Icons.add_rounded,
               principal: true,
-              onTap: qte < p.quantite ? () => _changerQuantite(p, 1) : null,
+              onTap: () => _changerQuantite(p, 1),
             ),
           ],
         ],
@@ -518,17 +526,22 @@ class _NouvelleCommandeVendeurPageState
     List<TextInputFormatter>? formats,
     TextCapitalization capitalisation = TextCapitalization.none,
     int lignes = 1,
+    Widget? prefixe,
+    String? Function(String?)? verifier,
   }) {
+    final deco = _deco(libelle, icone);
     return TextFormField(
       controller: c,
       keyboardType: clavier,
       inputFormatters: formats,
       textCapitalization: capitalisation,
       maxLines: lignes,
-      decoration: _deco(libelle, icone),
-      validator: requis
-          ? (v) => (v == null || v.trim().isEmpty) ? '$libelle requis' : null
-          : null,
+      decoration: prefixe == null ? deco : deco.copyWith(prefixIcon: prefixe),
+      validator: verifier ??
+          (requis
+              ? (v) =>
+                    (v == null || v.trim().isEmpty) ? '$libelle requis' : null
+              : null),
     );
   }
 }

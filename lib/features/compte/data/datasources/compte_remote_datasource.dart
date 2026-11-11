@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'package:saambiz/core/utils/fichier_envoi.dart';
 import 'package:dio/dio.dart';
 
 import '../../../../core/constants/api_endpoints.dart';
@@ -55,10 +55,7 @@ class CompteRemoteDataSourceImpl implements CompteRemoteDataSource {
       if (adresse != null) 'adresse': adresse,
       if (telephone != null) 'telephone': telephone,
       if (photoProfilPath != null)
-        'photoProfil': await MultipartFile.fromFile(
-          photoProfilPath,
-          filename: File(photoProfilPath).uri.pathSegments.last,
-        ),
+        'photoProfil': await fichierAEnvoyer(photoProfilPath),
     });
     final res = await dio.put(CompteEndpoints.modifierProfil, data: form);
     return CompteModel.fromJson(res.data as Map<String, dynamic>);

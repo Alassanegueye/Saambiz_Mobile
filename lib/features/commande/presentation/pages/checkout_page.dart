@@ -1,5 +1,8 @@
 import 'package:saambiz/core/widgets/libelle_obligatoire.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:saambiz/core/utils/telephone.dart';
+import 'package:saambiz/core/widgets/bouton_indicatif.dart';
 import 'package:saambiz/core/theme/app_color.dart';
 import 'package:saambiz/features/commande/presentation/widgets/commande_card.dart'
     show montantFcfa;
@@ -10,6 +13,7 @@ import '../../data/services/panier_service.dart';
 import '../bloc/commande_bloc.dart';
 import '../bloc/commande_event.dart';
 import '../bloc/commande_state.dart';
+import '../../../../core/widgets/page_vendeur.dart';
 
 class _C {
   static const green = Color(0xFF01154B);
@@ -42,6 +46,7 @@ class _CheckoutViewState extends State<_CheckoutView> {
   final _formKey = GlobalKey<FormState>();
   final _adresseCtrl = TextEditingController();
   final _telCtrl = TextEditingController();
+  final _paysTel = ValueNotifier<PaysTelephone>(senegal);
   final _noteCtrl = TextEditingController();
 
   String _modeLivraison = 'livraison';
@@ -53,11 +58,21 @@ class _CheckoutViewState extends State<_CheckoutView> {
   void dispose() {
     _adresseCtrl.dispose();
     _telCtrl.dispose();
+    _paysTel.dispose();
     _noteCtrl.dispose();
     super.dispose();
   }
 
   void _soumettre(BuildContext context) {
+    // Au moins un produit coché, d'une seule boutique (voir PanierService).
+    if (_panier.selectionVide) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Choisissez au moins un produit dans votre panier.'),
+        ),
+      );
+      return;
+    }
     if (!_formKey.currentState!.validate()) return;
     context.read<CommandeBloc>().add(
       CreerCommande(
@@ -67,7 +82,7 @@ class _CheckoutViewState extends State<_CheckoutView> {
         adresseLivraison: _modeLivraison == 'livraison'
             ? _adresseCtrl.text.trim()
             : null,
-        numeroTelephone: _telCtrl.text.trim(),
+        numeroTelephone: telephoneInternational(_telCtrl.text, _paysTel.value),
         note: _noteCtrl.text.trim().isEmpty ? null : _noteCtrl.text.trim(),
       ),
     );
@@ -75,7 +90,7 @@ class _CheckoutViewState extends State<_CheckoutView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return ScaffoldMarine(
       backgroundColor: _C.bg,
       appBar: AppBar(title: const Text('Validation de la commande')),
       body: BlocConsumer<CommandeBloc, CommandeState>(
@@ -89,7 +104,8 @@ class _CheckoutViewState extends State<_CheckoutView> {
             );
           } else if (state is CommandeCreee) {
             // Le client paie plus tard, une fois la commande acceptée.
-            await _panier.vider();
+            // Seuls les produits commandés quittent le panier.
+            await _panier.retirerSelection();
             if (!context.mounted) return;
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -141,9 +157,12 @@ class _CheckoutViewState extends State<_CheckoutView> {
                     'Téléphone',
                     obligatoire: true,
                     keyboard: TextInputType.phone,
-                    validator: (v) => (v == null || v.trim().isEmpty)
-                        ? 'Téléphone requis'
-                        : null,
+                    formats: [FormatTelephone(_paysTel)],
+                    prefixe: BoutonIndicatif(
+                      pays: _paysTel,
+                      onChange: () => setState(_telCtrl.clear),
+                    ),
+                    validator: (v) => verifierTelephone(v, _paysTel.value),
                   ),
                   const SizedBox(height: 20),
                   _section('Paiement'),
@@ -199,8 +218,8 @@ class _CheckoutViewState extends State<_CheckoutView> {
                           )
                         : Text(
                             _modeLivraison == 'livraison'
-                                ? 'Confirmer · ${montantFcfa(_panier.total)} + livraison'
-                                : 'Confirmer · ${montantFcfa(_panier.total)}',
+                                ? 'Confirmer · ${montantFcfa(_panier.totalSelection)} + livraison'
+                                : 'Confirmer · ${montantFcfa(_panier.totalSelection)}',
                             style: const TextStyle(fontWeight: FontWeight.w700),
                           ),
                   ),
@@ -239,13 +258,17 @@ class _CheckoutViewState extends State<_CheckoutView> {
     TextInputType? keyboard,
     int maxLines = 1,
     String? Function(String?)? validator,
+    List<TextInputFormatter>? formats,
+    Widget? prefixe,
   }) {
     return TextFormField(
       controller: c,
       keyboardType: keyboard,
       maxLines: maxLines,
       validator: validator,
+      inputFormatters: formats,
       decoration: InputDecoration(
+        prefixIcon: prefixe,
         hintText: obligatoire ? null : hint,
         label: obligatoire ? LibelleObligatoire(hint) : null,
         filled: true,

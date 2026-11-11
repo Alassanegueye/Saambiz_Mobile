@@ -1,3 +1,4 @@
+import 'package:saambiz/core/utils/fichier_envoi.dart';
 import 'package:dio/dio.dart';
 
 /// Où en est la certification du vendeur.
@@ -44,8 +45,8 @@ class CertificationService {
   }) async {
     final form = FormData.fromMap({
       'typePiece': "Pièce d'identité",
-      'recto': await MultipartFile.fromFile(rectoPath, filename: 'recto.jpg'),
-      'verso': await MultipartFile.fromFile(versoPath, filename: 'verso.jpg'),
+      'recto': await fichierAEnvoyer(rectoPath, nom: 'recto.jpg'),
+      'verso': await fichierAEnvoyer(versoPath, nom: 'verso.jpg'),
     });
     final res = await dio.post('/vendeur/soumettre-verification', data: form);
     final data = res.data;

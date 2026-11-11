@@ -100,6 +100,17 @@ class _VueBoutiqueState extends State<_VueBoutique> {
           if (state is VitrineCreee || state is VitrineEnregistree) {
             context.read<VitrineBloc>().add(ChargerVitrine());
           }
+          // Chaque modification de la boutique est confirmée.
+          if (state is VitrineEnregistree) {
+            ScaffoldMessenger.of(context)
+              ..removeCurrentSnackBar()
+              ..showSnackBar(
+                const SnackBar(
+                  content: Text('Modifications enregistrées.'),
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+          }
           if (state is VitrineSupprimee) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
@@ -751,11 +762,8 @@ class _ConfigurationState extends State<_Configuration> {
     context.read<VitrineBloc>().add(
       ModifierVitrineDemande({'active': enLigne}),
     );
-    _dire(
-      enLigne
-          ? 'Votre boutique est en ligne : vos clients peuvent la visiter.'
-          : 'Votre boutique est hors ligne.',
-    );
+    // La confirmation « Modifications enregistrées » arrive avec la réponse
+    // du serveur (page Boutique).
   }
 
   // ── Affichage ───────────────────────────────────────────────────────
@@ -939,11 +947,18 @@ class _Teintes {
   /// Pied de page.
   final Color pied;
 
+  /// Fond du haut du site (l'identité de la boutique) : l'accent fondu dans
+  /// le blanc, comme sur saambiz.com (variable --bq-teinte du site).
+  final Color teinte;
+  final Color teinteLigne;
+
   const _Teintes({
     required this.texte,
     required this.bouton,
     required this.surBouton,
     required this.pied,
+    required this.teinte,
+    required this.teinteLigne,
   });
 
   static const _encre = Color(0xFF121418);
@@ -992,6 +1007,8 @@ class _Teintes {
       bouton: bouton,
       surBouton: surBouton,
       pied: pied,
+      teinte: Color.lerp(Colors.white, accent, 0.07)!,
+      teinteLigne: Color.lerp(Colors.white, accent, 0.16)!,
     );
   }
 }
@@ -1317,16 +1334,19 @@ class _CadreSite extends StatelessWidget {
   final String adresse;
   final Color pied;
   final String nomBoutique;
+  final Widget? barre;
   final List<Widget> enfants;
   const _CadreSite({
     required this.adresse,
     required this.pied,
     required this.nomBoutique,
+    this.barre,
     required this.enfants,
   });
 
   @override
   Widget build(BuildContext context) {
+    final barreSite = barre;
     return Container(
       decoration: BoxDecoration(
         color: _C.white,
@@ -1371,6 +1391,7 @@ class _CadreSite extends StatelessWidget {
               ),
             ),
           ),
+          if (barreSite != null) barreSite,
           ...enfants,
           Container(
             color: pied,
@@ -1538,135 +1559,141 @@ class _EnteteSite extends StatelessWidget {
     final whatsapp = (vitrine.reseaux['whatsapp'] ?? b?.telephone ?? '').trim();
     final telephone = (b?.telephone ?? '').trim();
 
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 22, 16, 22),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            children: [
-              DecoratedBox(
-                decoration: BoxDecoration(
-                  borderRadius: rayon,
-                  border: Border.all(color: _S.ligne),
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: teintes.teinte,
+        border: Border(bottom: BorderSide(color: teintes.teinteLigne)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 22, 16, 22),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                    borderRadius: rayon,
+                    border: Border.all(color: _S.ligne),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: rayon,
+                    child: (b?.logo ?? '').isEmpty
+                        ? initiale
+                        : ImageReseau(
+                            b!.logo,
+                            largeurServeur: 200,
+                            width: cote,
+                            height: cote,
+                            fit: BoxFit.cover,
+                            repli: initiale,
+                          ),
+                  ),
                 ),
-                child: ClipRRect(
-                  borderRadius: rayon,
-                  child: (b?.logo ?? '').isEmpty
-                      ? initiale
-                      : ImageReseau(
-                          b!.logo,
-                          largeurServeur: 200,
-                          width: cote,
-                          height: cote,
-                          fit: BoxFit.cover,
-                          repli: initiale,
-                        ),
-                ),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Padding(
-                  // Laisse la place au crayon, en haut à droite.
-                  padding: const EdgeInsets.only(right: 34),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text.rich(
-                        TextSpan(
-                          text: nom,
-                          children: [
-                            if (verifiee)
-                              const WidgetSpan(
-                                alignment: PlaceholderAlignment.middle,
-                                child: Padding(
-                                  padding: EdgeInsets.only(left: 6),
-                                  child: Icon(
-                                    Icons.verified_rounded,
-                                    size: 20,
-                                    color: _S.verifie,
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Padding(
+                    // Laisse la place au crayon, en haut à droite.
+                    padding: const EdgeInsets.only(right: 34),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text.rich(
+                          TextSpan(
+                            text: nom,
+                            children: [
+                              if (verifiee)
+                                const WidgetSpan(
+                                  alignment: PlaceholderAlignment.middle,
+                                  child: Padding(
+                                    padding: EdgeInsets.only(left: 6),
+                                    child: Icon(
+                                      Icons.verified_rounded,
+                                      size: 20,
+                                      color: _S.verifie,
+                                    ),
                                   ),
                                 ),
-                              ),
-                          ],
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontFamily: kPolice,
-                          fontSize: 21,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: -0.4,
-                          height: 1.18,
-                          color: _S.encre,
-                        ),
-                      ),
-                      if (sousTitre.isNotEmpty) ...[
-                        const SizedBox(height: 3),
-                        Text(
-                          sousTitre,
+                            ],
+                          ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
-                            fontSize: 14,
-                            height: 1.4,
-                            color: _S.encreDouce,
+                            fontFamily: kPolice,
+                            fontSize: 21,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: -0.4,
+                            height: 1.18,
+                            color: _S.encre,
                           ),
                         ),
+                        if (sousTitre.isNotEmpty) ...[
+                          const SizedBox(height: 3),
+                          Text(
+                            sousTitre,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              height: 1.4,
+                              color: _S.encreDouce,
+                            ),
+                          ),
+                        ],
                       ],
-                    ],
+                    ),
                   ),
                 ),
-              ),
-            ],
-          ),
-          if (adresse.isNotEmpty || horaires.isNotEmpty) ...[
-            const SizedBox(height: 14),
-            Wrap(
-              spacing: 18,
-              runSpacing: 8,
-              children: [
-                if (adresse.isNotEmpty)
-                  _Repere(icone: Icons.place_outlined, texte: adresse),
-                if (horaires.isNotEmpty)
-                  _Repere(icone: Icons.schedule_rounded, texte: horaires),
               ],
             ),
-          ],
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              if (whatsapp.isNotEmpty) ...[
-                Expanded(
-                  child: _ActionSite(
-                    icone: Icons.chat_outlined,
-                    texte: 'WhatsApp',
-                    fond: teintes.bouton,
-                    couleur: teintes.surBouton,
+            if (adresse.isNotEmpty || horaires.isNotEmpty) ...[
+              const SizedBox(height: 14),
+              Wrap(
+                spacing: 18,
+                runSpacing: 8,
+                children: [
+                  if (adresse.isNotEmpty)
+                    _Repere(icone: Icons.place_outlined, texte: adresse),
+                  if (horaires.isNotEmpty)
+                    _Repere(icone: Icons.schedule_rounded, texte: horaires),
+                ],
+              ),
+            ],
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                if (whatsapp.isNotEmpty) ...[
+                  Expanded(
+                    child: _ActionSite(
+                      icone: Icons.chat_outlined,
+                      texte: 'WhatsApp',
+                      fond: teintes.bouton,
+                      couleur: teintes.surBouton,
+                    ),
                   ),
-                ),
-                const SizedBox(width: 8),
-              ],
-              if (telephone.isNotEmpty) ...[
+                  const SizedBox(width: 8),
+                ],
+                if (telephone.isNotEmpty) ...[
+                  Expanded(
+                    child: _ActionSite(
+                      icone: Icons.call_outlined,
+                      texte: 'Appeler',
+                      couleurIcone: teintes.texte,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                ],
                 Expanded(
                   child: _ActionSite(
-                    icone: Icons.call_outlined,
-                    texte: 'Appeler',
+                    icone: Icons.share_outlined,
+                    texte: 'Partager',
                     couleurIcone: teintes.texte,
                   ),
                 ),
-                const SizedBox(width: 8),
               ],
-              Expanded(
-                child: _ActionSite(
-                  icone: Icons.share_outlined,
-                  texte: 'Partager',
-                  couleurIcone: teintes.texte,
-                ),
-              ),
-            ],
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }

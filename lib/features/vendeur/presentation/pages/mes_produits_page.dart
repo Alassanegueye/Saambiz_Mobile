@@ -53,8 +53,10 @@ class _MesProduitsViewState extends State<_MesProduitsView> {
   bool _rechercheOuverte = false;
   String _recherche = '';
 
-  // Un produit est "en ligne" s'il a du stock disponible.
-  bool _enLigne(ProduitModel p) => p.quantite > 0;
+  // « En ligne » = mis en ligne par le vendeur (interrupteur). C'était
+  // déduit du stock : l'interrupteur changeait bien le produit sur le
+  // serveur, mais l'écran restait figé tant qu'il y avait du stock.
+  bool _enLigne(ProduitModel p) => p.disponible;
 
   Future<void> _ouvrirForm(BuildContext context, {dynamic produit}) async {
     final bloc = context.read<VendeurProduitBloc>();
@@ -282,9 +284,11 @@ class _MesProduitsViewState extends State<_MesProduitsView> {
                 ),
                 const SizedBox(height: 3),
                 Text(
-                  enLigne
+                  !enLigne
+                      ? 'Hors ligne · invisible pour vos clients'
+                      : p.quantite > 0
                       ? 'En ligne · ${p.quantite} en stock'
-                      : 'Hors ligne · rupture de stock',
+                      : 'En ligne · rupture de stock',
                   style: TextStyle(
                     fontFamily: kPolice,
                     fontSize: 12,

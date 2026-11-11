@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:saambiz/core/theme/police.dart';
 
 import '../../../../core/routes/app_router.dart';
+import '../../../../core/utils/telephone.dart';
+import '../../../../core/widgets/bouton_indicatif.dart';
 import '../../../../injection_container.dart';
 import '../../../boutique/domain/usecases/creer_boutique.dart';
 import '../../domain/entities/user.dart';
@@ -39,6 +41,8 @@ class CreerBoutiquePage extends StatefulWidget {
 class _CreerBoutiquePageState extends State<CreerBoutiquePage> {
   final _nomCtrl = TextEditingController();
   final _telCtrl = TextEditingController();
+  final _paysTel = ValueNotifier<PaysTelephone>(senegal);
+  String? _telError;
   // Slugs choisis (1 à 3) ; la liste vient du serveur, gérée dans le dashboard.
   List<String> _categories = const [];
   String? _categoriesError;
@@ -94,6 +98,7 @@ class _CreerBoutiquePageState extends State<CreerBoutiquePage> {
   void dispose() {
     _nomCtrl.dispose();
     _telCtrl.dispose();
+    _paysTel.dispose();
     super.dispose();
   }
 
@@ -105,8 +110,15 @@ class _CreerBoutiquePageState extends State<CreerBoutiquePage> {
       _categoriesError = _categories.isEmpty
           ? 'Choisissez au moins une catégorie.'
           : null;
+      _telError = verifierTelephone(
+        _telCtrl.text,
+        _paysTel.value,
+        obligatoire: false,
+      );
     });
-    if (_nomError != null || _categoriesError != null) return;
+    if (_nomError != null || _categoriesError != null || _telError != null) {
+      return;
+    }
 
     setState(() {
       _loading = true;
@@ -119,7 +131,7 @@ class _CreerBoutiquePageState extends State<CreerBoutiquePage> {
       // la demande pas ici pour garder la création en trois champs.
       description: 'Boutique à $_ville',
       localisation: _ville,
-      telephone: _telCtrl.text.trim(),
+      telephone: telephoneInternational(_telCtrl.text, _paysTel.value),
       categories: _categories,
     );
 
@@ -211,11 +223,20 @@ class _CreerBoutiquePageState extends State<CreerBoutiquePage> {
             const SizedBox(height: 16),
             SbField(
               label: 'WhatsApp de la boutique (facultatif)',
-              hint: '+221 77 000 00 00',
+              hint: _paysTel.value.exemple,
               icon: Icons.phone_outlined,
+              prefixe: BoutonIndicatif(
+                pays: _paysTel,
+                onChange: () => setState(() {
+                  _telCtrl.clear();
+                  _telError = null;
+                }),
+              ),
               controller: _telCtrl,
               keyboardType: TextInputType.phone,
               textInputAction: TextInputAction.done,
+              formatters: [FormatTelephone(_paysTel)],
+              errorText: _telError,
             ),
           ],
           const SizedBox(height: 22),
