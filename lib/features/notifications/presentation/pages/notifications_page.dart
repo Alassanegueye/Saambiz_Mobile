@@ -3,8 +3,7 @@ import 'package:saambiz/core/widgets/ui_kit.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import '../../../../core/widgets/app_app_bar.dart';
-import '../../../../core/widgets/degrade_fond.dart';
+import '../../../../core/widgets/page_vendeur.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
@@ -15,7 +14,6 @@ import '../bloc/notifications_event.dart';
 import '../bloc/notifications_state.dart';
 
 class _C {
-  static const bg = Color(0xFFF4F5F8);
   static const sub = Color(0xFF5B6C8A);
 }
 
@@ -60,136 +58,128 @@ class _NotificationsViewState extends State<_NotificationsView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: _C.bg,
-      appBar: AppAppBar(
-        title: 'Notifications',
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.done_all),
-            tooltip: 'Tout marquer comme lu',
-            onPressed: () =>
-                context.read<NotificationsBloc>().add(MarquerToutesLues()),
-          ),
-        ],
-      ),
-      body: FondDegradeSubtil(
-        child: BlocConsumer<NotificationsBloc, NotificationsState>(
-          listener: (context, state) {
-            if (state is NotificationsError) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(state.message),
-                  backgroundColor: Colors.red,
-                ),
-              );
-            }
-          },
-          builder: (context, state) {
-            if (state is NotificationsLoading ||
-                state is NotificationsInitial) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            if (state is NotificationsLoaded) {
-              if (state.notifications.isEmpty) {
-                return const Center(
-                  child: EtatVide(
-                    icone: Icons.notifications_none_rounded,
-                    titre: 'Aucune notification',
-                    message: 'Vos commandes et vos alertes apparaîtront ici.',
-                  ),
-                );
-              }
-              return RefreshIndicator(
-                color: AppColor.kPrimary,
-                onRefresh: () async =>
-                    context.read<NotificationsBloc>().add(LoadNotifications()),
-                child: ListView.separated(
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-                  itemCount: state.notifications.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 8),
-                  itemBuilder: (context, i) {
-                    final n = state.notifications[i];
-                    return Material(
-                      color: n.lue ? AppColor.kWhite : AppColor.kPrimaryLight,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                        side: BorderSide(
-                          color: n.lue ? AppColor.kLine : Colors.transparent,
-                        ),
-                      ),
-                      clipBehavior: Clip.antiAlias,
-                      child: InkWell(
-                        onTap: () => context.read<NotificationsBloc>().add(
-                          MarquerNotificationLue(n.id),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(14),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              CircleAvatar(
-                                radius: 20,
-                                backgroundColor: n.lue
-                                    ? AppColor.kPrimaryLight
-                                    : AppColor.kPrimary,
-                                child: Icon(
-                                  Icons.notifications_none_rounded,
-                                  size: 20,
-                                  color: n.lue
-                                      ? AppColor.kPrimary
-                                      : AppColor.kWhite,
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      n.titre,
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        color: AppColor.kGrayscaleDark100,
-                                        fontWeight: n.lue
-                                            ? FontWeight.w500
-                                            : FontWeight.w700,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      n.message,
-                                      style: const TextStyle(
-                                        fontSize: 13,
-                                        height: 1.35,
-                                        color: _C.sub,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 6),
-                                    Text(
-                                      DateFormat(
-                                        'dd/MM à HH:mm',
-                                      ).format(n.date),
-                                      style: const TextStyle(
-                                        fontSize: 11.5,
-                                        color: _C.sub,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              );
-            }
-            return const SizedBox.shrink();
-          },
+    return PageVendeur(
+      titre: 'Notifications',
+      actions: [
+        BoutonEnteteVendeur(
+          icone: Icons.done_all_rounded,
+          infobulle: 'Tout marquer comme lu',
+          onTap: () =>
+              context.read<NotificationsBloc>().add(MarquerToutesLues()),
         ),
+      ],
+      corps: BlocConsumer<NotificationsBloc, NotificationsState>(
+        listener: (context, state) {
+          if (state is NotificationsError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        },
+        builder: (context, state) {
+          if (state is NotificationsLoading || state is NotificationsInitial) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (state is NotificationsLoaded) {
+            if (state.notifications.isEmpty) {
+              return const Center(
+                child: EtatVide(
+                  icone: Icons.notifications_none_rounded,
+                  titre: 'Aucune notification',
+                  message: 'Vos commandes et vos alertes apparaîtront ici.',
+                ),
+              );
+            }
+            return RefreshIndicator(
+              color: AppColor.kPrimary,
+              onRefresh: () async =>
+                  context.read<NotificationsBloc>().add(LoadNotifications()),
+              child: ListView.separated(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+                itemCount: state.notifications.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 8),
+                itemBuilder: (context, i) {
+                  final n = state.notifications[i];
+                  return Material(
+                    color: n.lue ? AppColor.kWhite : AppColor.kPrimaryLight,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      side: BorderSide(
+                        color: n.lue ? AppColor.kLine : Colors.transparent,
+                      ),
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: InkWell(
+                      onTap: () => context.read<NotificationsBloc>().add(
+                        MarquerNotificationLue(n.id),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(14),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            CircleAvatar(
+                              radius: 20,
+                              backgroundColor: n.lue
+                                  ? AppColor.kPrimaryLight
+                                  : AppColor.kPrimary,
+                              child: Icon(
+                                Icons.notifications_none_rounded,
+                                size: 20,
+                                color: n.lue
+                                    ? AppColor.kPrimary
+                                    : AppColor.kWhite,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    n.titre,
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: AppColor.kGrayscaleDark100,
+                                      fontWeight: n.lue
+                                          ? FontWeight.w500
+                                          : FontWeight.w700,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    n.message,
+                                    style: const TextStyle(
+                                      fontSize: 13,
+                                      height: 1.35,
+                                      color: _C.sub,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    DateFormat('dd/MM à HH:mm').format(n.date),
+                                    style: const TextStyle(
+                                      fontSize: 11.5,
+                                      color: _C.sub,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            );
+          }
+          return const SizedBox.shrink();
+        },
       ),
     );
   }
