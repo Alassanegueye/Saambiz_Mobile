@@ -54,8 +54,8 @@ application publiée.
 |---|---|---|
 | `ENVIRONNEMENT` | `prod` ou `dev` | `dev` : pas de contrôle de cohérence, pas d'épinglage |
 | `API_BASE_URL` | adresse de l'API | la production, en dur par défaut |
-| `GOOGLE_SERVER_CLIENT_ID` | client OAuth « Application Web » | bouton Google **masqué sur Android** |
-| `GOOGLE_IOS_CLIENT_ID` | client OAuth iOS | bouton Google masqué sur iOS |
+| `GOOGLE_SERVER_CLIENT_ID` | client OAuth « Application Web » — *sans objet aujourd'hui, voir plus bas* | bouton Google masqué sur Android |
+| `GOOGLE_IOS_CLIENT_ID` | client OAuth iOS — *idem* | bouton Google masqué sur iOS |
 | `URL_CONFIG_APP` | version minimale exigée, maintenance | contrôle de mise à jour inactif |
 | `EMPREINTES_CERTIFICAT` | épinglage TLS (`sha256/…`) | validation système seule |
 
@@ -76,9 +76,12 @@ flutter test
 flutter build appbundle --release \
   --dart-define=ENVIRONNEMENT=prod \
   --dart-define=API_BASE_URL=https://api.saambiz.com/saambiz/v1 \
-  --dart-define=GOOGLE_SERVER_CLIENT_ID=<identifiant client Web> \
   --obfuscate --split-debug-info=build/symboles-android
 ```
+
+Pas de `GOOGLE_SERVER_CLIENT_ID` : les boutons de connexion sociale ne sont
+plus affichés (voir « Connexion Google et Apple — débranchée »). Le jour où ils
+reviennent, c'est la ligne à ajouter ici.
 
 Le résultat : `build/app/outputs/bundle/release/app-release.aab`.
 
@@ -159,31 +162,47 @@ l'application Android `com.saambiz.app` → *google-services.json*.
 
 ---
 
-## Connexion Google sur Android
+## Connexion Google et Apple — débranchée
 
-Deux choses, et les deux sont nécessaires :
+**Il n'y a rien à configurer aujourd'hui.** Les boutons « Continuer avec
+Google » et « Continuer avec Apple » ne sont plus affichés : le commit
+`3a4cfd2` (10/11/2026) a retiré `BoutonsConnexionSociale` de
+`login_page.dart`, et aucune autre page ne l'utilise. Rien n'émet donc
+`ConnexionSocialeDemandee`.
 
-1. **`GOOGLE_SERVER_CLIENT_ID`** à la compilation : l'identifiant du client
-   OAuth de type *Application Web*, celui que le serveur vérifie. Sans lui, le
-   bouton Google est masqué sur Android (`ConnexionSocialeSource.googleDisponible`).
-2. **Les empreintes SHA-1 et SHA-256** du certificat de signature, déclarées
-   dans Google Cloud (ou Firebase, qui les y recopie) pour le paquet
-   `com.saambiz.app`. Google refuse la connexion d'une application dont
-   l'empreinte lui est inconnue.
+Tout le reste de la chaîne est encore là et fonctionne : le widget, le
+datasource (`ConnexionSocialeSource`), l'événement du bloc, la route
+`/auth/social` côté API. **Dormant, pas supprimé.**
 
-Il y en a **deux à déclarer**, et c'est le piège classique : celle de votre clé
-de téléversement, et celle de la clé que Google utilise pour signer ce qu'il
-distribue (Play Console → Configuration → Intégrité de l'application → Play App
-Signing). Avec la seule première, la connexion marche depuis votre `.aab` local
-et échoue pour tout utilisateur venu du Play Store.
+Pour le rebrancher, il suffit de remettre le widget dans `login_page.dart`.
+Il faut alors, et alors seulement :
 
-```bash
-keytool -list -v -keystore ~/cles-android/saambiz-upload.jks -alias upload
-```
+1. **`GOOGLE_SERVER_CLIENT_ID`** à la compilation (client OAuth « Application
+   Web ») pour Android, **`GOOGLE_IOS_CLIENT_ID`** pour iOS. Sans eux le bouton
+   reste masqué — `ConnexionSocialeSource.googleDisponible` le vérifie, pour ne
+   pas proposer une connexion qui ne peut pas aboutir.
+2. **L'empreinte SHA-1** du certificat de signature, déclarée comme client
+   OAuth Android pour le paquet `com.saambiz.app` — dans **le projet Google
+   Cloud `402258191800`**, celui qui porte déjà le client iOS, et **non** dans
+   le projet Firebase (`994725734865`) qui ne sert qu'aux notifications. Ce
+   sont deux projets distincts, et c'est le piège.
 
-La connexion Apple, elle, n'est proposée que sur iPhone : sur Android elle
-passerait par un détour web qui n'est pas mis en place
-(`ConnexionSocialeSource.appleDisponible`).
+   ```bash
+   keytool -list -v -keystore ~/cles-android/saambiz-upload.jks -alias upload
+   ```
+
+   Il y en a **deux à déclarer** : celle de votre clé de téléversement, et
+   celle de la clé que Google utilise pour signer ce qu'il distribue (Play
+   Console → Configuration → Intégrité de l'application). Avec la première
+   seule, la connexion marche depuis votre `.aab` local et échoue pour tout
+   utilisateur venu du Play Store.
+
+La connexion Apple n'est de toute façon proposée que sur iPhone : sur Android
+elle passerait par un détour web qui n'est pas mis en place
+(`ConnexionSocialeSource.appleDisponible`). Conséquence utile tant que les deux
+boutons restent débranchés : la règle 4.8 de l'App Store, qui impose « Se
+connecter avec Apple » dès qu'une connexion tierce est proposée, ne s'applique
+pas.
 
 ---
 
