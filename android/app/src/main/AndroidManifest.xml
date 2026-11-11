@@ -72,5 +72,21 @@
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
         </intent>
+
+        <!-- Depuis Android 11 (API 30), une application ne voit plus les autres
+             à moins de les déclarer ici. Conséquence directe : `canLaunchUrl`
+             répondait TOUJOURS faux, et le bouton « Contacter sur WhatsApp »
+             affichait « Vérifiez que l'application est installée » même quand
+             WhatsApp l'était. L'API renvoie une adresse https://wa.me/… (voir
+             acheteurs.service.js), d'où cette déclaration : les liens web.
+
+             Volontairement minimale. Un filtre large revient à demander la
+             liste des applications installées, ce que Google Play fait
+             justifier. On ne déclare que ce dont le code a besoin : rien
+             n'appelle `canLaunchUrl` sur tel:, mailto: ou sms:. -->
+        <intent>
+            <action android:name="android.intent.action.VIEW"/>
+            <data android:scheme="https"/>
+        </intent>
     </queries>
 </manifest>

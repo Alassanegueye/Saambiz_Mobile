@@ -1,8 +1,8 @@
-# Politique de confidentialité — Fait Maison
+# Politique de confidentialité — SaamBiz
 
 _Dernière mise à jour : [À COMPLÉTER — date de publication]_
 
-Ce document décrit comment l'application mobile **Fait Maison** (« l'Application »), éditée par **[À COMPLÉTER — raison sociale / nom de l'éditeur]** (« nous »), collecte, utilise et protège les données des utilisateurs (acheteurs et vendeurs).
+Ce document décrit comment l'application mobile **SaamBiz** (« l'Application »), éditée par **[À COMPLÉTER — raison sociale / nom de l'éditeur]** (« nous »), collecte, utilise et protège les données des utilisateurs (acheteurs et vendeurs).
 
 > ⚠️ Ce texte est un modèle générique basé sur les données réellement traitées par l'application au moment de la rédaction. Il doit être relu par une personne habilitée (vous-même ou un conseil juridique) avant publication, complété avec vos informations réelles (raison sociale, adresse, email de contact), puis **hébergé sur une page web accessible publiquement** (site vitrine, GitHub Pages, Notion, etc.). L'URL de cette page doit être renseignée dans Google Play Console (fiche de l'application → Politique de confidentialité) et dans le formulaire *Data Safety*.
 
@@ -33,13 +33,36 @@ Ce document décrit comment l'application mobile **Fait Maison** (« l'Applicati
 - Journaux techniques anonymisés (erreurs, performance) à des fins de maintenance.
 - Si vous activez les notifications : un identifiant d'appareil (device token) permettant de vous envoyer des notifications push.
 
-Nous **ne collectons pas** de données de localisation précise à ce jour, ni de données publicitaires, ni d'identifiants publicitaires.
+### 1.6 Localisation
+
+Si — et seulement si — vous l'autorisez, l'Application relève **votre position
+approximative** pour vous proposer les boutiques proches de vous. Ces
+coordonnées sont conservées sur votre appareil et transmises à notre serveur
+avec la demande d'accueil, le temps de calculer cette liste.
+
+Le relevé se fait à une précision volontairement moyenne (de l'ordre d'une
+centaine de mètres) : nous n'avons pas besoin de savoir où vous êtes
+exactement pour vous montrer les boutiques de votre quartier. Nous ne suivons
+pas vos déplacements, et l'Application ne relève jamais votre position
+lorsqu'elle est fermée ou en arrière-plan.
+
+Tout cela est facultatif. Un refus n'empêche rien : l'accueil se contente
+alors de vos centres d'intérêt. L'autorisation se retire à tout moment dans
+les réglages du téléphone.
+
+### 1.7 Ce que nous ne collectons pas
+
+Ni données publicitaires, ni identifiant publicitaire, ni historique de
+navigation hors de l'Application. Nous ne pratiquons aucun profilage
+publicitaire et ne suivons pas votre activité dans d'autres applications ou
+sur d'autres sites.
 
 ## 2. Comment nous utilisons ces données
 
 - Créer et gérer votre compte, vous authentifier.
 - Permettre l'achat et la vente de produits sur la plateforme (commandes, paiement, livraison).
 - Afficher les boutiques, produits, avis et promotions.
+- Vous proposer les boutiques proches de vous, si vous avez autorisé la localisation.
 - Vous envoyer des notifications liées à votre activité (nouvelle commande, message, changement de statut).
 - Assurer la sécurité de la plateforme (modération des signalements, prévention de la fraude).
 - Répondre à vos demandes de support.
@@ -56,6 +79,7 @@ Certaines données sont transmises à des prestataires techniques strictement n�
 | Orange Money / Wave | Montant, numéro de téléphone de paiement | Traitement des paiements |
 | Resend | Adresse e-mail | Envoi d'e-mails transactionnels (confirmation, réinitialisation de mot de passe) |
 | Firebase (Google) | Identifiant d'appareil | Notifications push (si activées) |
+| Google, Apple | Adresse e-mail, nom (fournis par eux, à votre demande) | Connexion « Continuer avec Google » / « Continuer avec Apple », si vous l'utilisez |
 
 Ces prestataires n'utilisent vos données que pour exécuter les services demandés et sont soumis à leurs propres obligations de confidentialité.
 
