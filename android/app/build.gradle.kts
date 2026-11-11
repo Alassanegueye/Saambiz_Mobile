@@ -69,11 +69,28 @@ android {
     buildTypes {
         release {
             // Signature release si key.properties présent, sinon repli sur debug
-            // (permet de continuer à lancer `flutter run` sans keystore).
-            signingConfig = if (keystorePropertiesFile.exists())
-                signingConfigs.getByName("release")
-            else
-                signingConfigs.getByName("debug")
+            // (permet de continuer à lancer `flutter run --release` sans
+            // keystore).
+            //
+            // Ce repli est commode et dangereux : un `flutter build appbundle`
+            // lancé sans keystore produit un .aab d'apparence normale, signé
+            // avec la clé de débogage — que Google Play refuse, mais seulement
+            // au moment du téléversement, après le temps de construction et
+            // d'envoi. D'où l'avertissement, qui nomme le fichier manquant.
+            if (keystorePropertiesFile.exists()) {
+                signingConfig = signingConfigs.getByName("release")
+            } else {
+                logger.warn(
+                    "\n" +
+                    "┌───────────────────────────────────────────────────────────────┐\n" +
+                    "│ SaamBiz : android/key.properties est ABSENT.                  │\n" +
+                    "│ Cette release sera signée avec la clé de DÉBOGAGE.            │\n" +
+                    "│ Google Play la refusera au téléversement.                     │\n" +
+                    "│ Voir android/key.properties.example.                          │\n" +
+                    "└───────────────────────────────────────────────────────────────┘\n"
+                )
+                signingConfig = signingConfigs.getByName("debug")
+            }
 
             // Shrink + obfuscation R8 pour la release : réduit la taille de l'AAB
             // et complique la rétro-ingénierie (règles de conservation dans proguard-rules.pro).

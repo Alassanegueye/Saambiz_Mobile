@@ -17,6 +17,7 @@ import '../../data/produit_catalogue.dart';
 import '../widgets/bouton_panier.dart';
 import '../widgets/produit_card.dart';
 import '../../../avis/presentation/feuille_avis_boutique.dart';
+import '../../../signalements/presentation/ouvrir_signalement.dart';
 
 const _bleuVerifie = Color(0xFF1D9BF0);
 const _encre = Color(0xFF1B1F27);
@@ -319,6 +320,16 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
                     ),
                   const Spacer(),
                   const _PastilleBarre(child: BoutonPanier()),
+                  const SizedBox(width: 8),
+                  // Le signalement vivait dans l'AppBar que cette barre
+                  // flottante remplace : il la suit, sinon le formulaire
+                  // redevient inatteignable.
+                  _PastilleBarre(
+                    child: MenuSignaler(
+                      type: 'boutique',
+                      cibleId: widget.boutiqueId,
+                    ),
+                  ),
                 ],
               ),
             ),
