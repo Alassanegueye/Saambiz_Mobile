@@ -220,11 +220,33 @@ Lisible dans `android/app/src/main/AndroidManifest.xml`, et figé par
 | Sauvegarde système | désactivée |
 | R8 | réduction + obfuscation + `shrinkResources` |
 
-Quatre permissions, pas une de plus : `INTERNET`, `POST_NOTIFICATIONS`,
+Nous en déclarons **quatre** : `INTERNET`, `POST_NOTIFICATIONS`,
 `ACCESS_COARSE_LOCATION` et `ACCESS_FINE_LOCATION`. Les deux dernières servent
-aux boutiques proches, et un refus n'empêche rien. Il n'y a pas de permission
-caméra : `image_picker` passe par l'application appareil photo du système, qui
-n'en demande pas.
+aux boutiques proches, et un refus n'empêche rien. Il n'y a **pas** de
+permission caméra : `image_picker` passe par l'application appareil photo du
+système, qui n'en demande pas.
+
+Mais le paquet final en porte **neuf** : les plugins ajoutent les leurs à la
+fusion, et c'est le manifeste fusionné qui compte pour Google Play. Les voir
+pour de vrai, après un build :
+
+```bash
+grep -oE 'android:name="android\.permission\.[A-Z_]+"' \
+  build/app/intermediates/merged_manifest/release/*/AndroidManifest.xml | sort -u
+```
+
+| Ajoutée par | Permissions |
+|---|---|
+| `firebase_messaging` | `WAKE_LOCK`, `ACCESS_NETWORK_STATE`, `c2dm.permission.RECEIVE` |
+| `flutter_local_notifications` | `VIBRATE` |
+| `androidx.biometric` (via `flutter_secure_storage`) | `USE_BIOMETRIC`, `USE_FINGERPRINT` |
+
+Aucune n'est sensible au sens de Google Play : elles ne déclenchent pas de
+demande d'autorisation et n'appellent aucune justification. `USE_FINGERPRINT`
+est dépréciée et ne vient que de la compatibilité d'`androidx.biometric` avec
+les anciennes versions. Le rapport qui dit d'où vient chaque ligne est écrit à
+chaque build dans
+`build/app/intermediates/manifest_merge_blame_file/release/`.
 
 Le bloc `<queries>` déclare les liens `https` parce que depuis Android 11 une
 application ne voit plus les autres : sans cette ligne, `canLaunchUrl`
