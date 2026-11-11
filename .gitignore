@@ -49,3 +49,27 @@ app.*.map.json
 android/key.properties
 *.jks
 *.keystore
+
+# ── Visuels qui ne partent PAS dans l'application ────────────────────────────
+#
+# `design/` ne contient que des sources et des livrables pour les magasins :
+# illustrations d'origine en pleine résolution, icône 512, bannière 1024×500,
+# captures de la fiche Play. Rien de tout cela n'est embarqué dans l'APK ni
+# dans l'IPA — ce qui l'est vit dans `assets/images/`, `android/.../res/` et
+# `ios/Runner/Assets.xcassets/`, et reste versionné.
+#
+# 23 Mo d'images qui n'ont aucune raison d'être clonées par qui veut
+# construire l'application. Les SOURCES REPRODUCTIBLES, elles, restent
+# suivies : `design/play-store/banniere.html`, `convertir-captures.html` et les
+# README expliquent comment regénérer chaque image en une commande.
+#
+# Symboles de désobfuscation : à garder hors du dépôt ET à archiver ailleurs,
+# ils sont le seul moyen de relire les plantages d'une version publiée.
+design/**/*.png
+design/**/*.jpg
+design/**/*.jpeg
+design/**/*.webp
+design/**/*.gif
+design/**/*.mp4
+symboles-android/
+symboles-ios/
