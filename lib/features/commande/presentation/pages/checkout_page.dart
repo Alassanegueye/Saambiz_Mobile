@@ -180,6 +180,15 @@ class _CheckoutViewState extends State<_CheckoutView> {
                       ),
                     },
                     (v) => setState(() => _modePaiement = v),
+                    // Les logos des opérateurs remplacent l'icône : on
+                    // reconnaît Wave et Orange Money d'un coup d'œil, bien
+                    // avant d'avoir lu « Wave ou Orange Money ».
+                    logos: const {
+                      'en_ligne': [
+                        'assets/images/wave.jpg',
+                        'assets/images/OM.png',
+                      ],
+                    },
                   ),
                   if (_modePaiement == 'en_ligne')
                     const Padding(
@@ -293,17 +302,29 @@ class _CheckoutViewState extends State<_CheckoutView> {
     );
   }
 
+  /// Deux cartes côte à côte. `logos` est facultatif : une option qui n'y
+  /// figure pas garde son icône (c'est le cas du mode de livraison).
   Widget _choix(
     List<String> valeurs,
     String selected,
     Map<String, (IconData, String)> options,
-    ValueChanged<String> onSelect,
-  ) {
+    ValueChanged<String> onSelect, {
+    Map<String, List<String>> logos = const {},
+  }) {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         for (var i = 0; i < valeurs.length; i++) ...[
           if (i > 0) const SizedBox(width: 10),
-          Expanded(child: _option(valeurs[i], selected, options, onSelect)),
+          Expanded(
+            child: _option(
+              valeurs[i],
+              selected,
+              options,
+              onSelect,
+              logos: logos[valeurs[i]] ?? const [],
+            ),
+          ),
         ],
       ],
     );
@@ -313,8 +334,9 @@ class _CheckoutViewState extends State<_CheckoutView> {
     String v,
     String selected,
     Map<String, (IconData, String)> options,
-    ValueChanged<String> onSelect,
-  ) {
+    ValueChanged<String> onSelect, {
+    List<String> logos = const [],
+  }) {
     final sel = v == selected;
     final (icone, libelle) = options[v]!;
     return Material(
@@ -333,7 +355,18 @@ class _CheckoutViewState extends State<_CheckoutView> {
           padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
           child: Column(
             children: [
-              Icon(icone, size: 22, color: sel ? _C.green : _C.sub),
+              if (logos.isEmpty)
+                Icon(icone, size: 22, color: sel ? _C.green : _C.sub)
+              else
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    for (var i = 0; i < logos.length; i++) ...[
+                      if (i > 0) const SizedBox(width: 6),
+                      _LogoOperateur(logos[i], estime: sel),
+                    ],
+                  ],
+                ),
               const SizedBox(height: 6),
               Text(
                 libelle,
@@ -348,6 +381,46 @@ class _CheckoutViewState extends State<_CheckoutView> {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Le logo carré d'un opérateur de paiement.
+///
+/// Même gabarit que l'icône qu'il remplace (22 px) pour que les deux
+/// cartes gardent la même hauteur. Les sources sont carrées (400×400 et
+/// 447×447) : `cacheWidth` évite de décoder 200 ko d'image pour en
+/// afficher 22 px.
+///
+/// Atténué quand la carte n'est pas choisie, pour que la sélection reste
+/// lisible — un logo en couleurs attire l'œil autant qu'une bordure.
+class _LogoOperateur extends StatelessWidget {
+  final String chemin;
+  final bool estime;
+  const _LogoOperateur(this.chemin, {required this.estime});
+
+  @override
+  Widget build(BuildContext context) {
+    final image = ClipRRect(
+      borderRadius: BorderRadius.circular(5),
+      child: Image.asset(
+        chemin,
+        width: 22,
+        height: 22,
+        fit: BoxFit.cover,
+        cacheWidth: 66, // 22 px à 3× : net sur les écrans denses.
+        // Un asset manquant ne doit pas afficher la croix rouge de Flutter
+        // par-dessus le formulaire de commande.
+        errorBuilder: (_, __, ___) => const Icon(
+          Icons.phone_iphone_rounded,
+          size: 22,
+          color: _C.sub,
+        ),
+      ),
+    );
+    return Semantics(
+      excludeSemantics: true, // Le libellé de la carte dit déjà lesquels.
+      child: estime ? image : Opacity(opacity: 0.55, child: image),
     );
   }
 }
