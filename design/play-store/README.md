@@ -40,3 +40,24 @@ Les **captures d'écran** (2 minimum, 8 maximum pour le téléphone). Celles de
 l'App Store sont au format iPhone : une encoche et des coins d'iPhone sur une
 fiche Android se repèrent au premier coup d'œil. À refaire depuis un émulateur
 Android.
+
+## Captures d'écran — `captures-telephone/`
+
+Huit visuels **1080 × 1920**, soit exactement le 9:16 qu'exige Play (sides
+entre 320 et 3840 px, 8 Mo maximum chacun). Les huit dépassent 1080 × 1080,
+donc la fiche reste éligible à la mise en avant, qui demande au moins quatre
+captures à cette résolution.
+
+Ils sont dérivés des visuels App Store (`captures-saambiz-ios`, 1206 × 2622).
+Ce format fait un rapport de 0,46 ; Play veut 0,5625. Il faut donc **élargir et
+non rogner** : rogner mangerait le titre en haut ou le téléphone en bas.
+
+Le remplissage des bandes latérales a d'abord été fait en étirant la colonne de
+1 px du bord. C'est joli là où le bord est du fond — les cercles décoratifs se
+prolongent sans couture — mais désastreux sur `01-onboarding`, dont le bord
+traverse des téléphones : le blanc et le texte partaient en traînées. D'où
+l'aplat marine, qui ne ment jamais : la composition devient une carte centrée
+sur son propre fond.
+
+Régénérer : servir ce dossier, placer les sources dans `sources-ios/`, ouvrir
+`convertir-captures.html`.
