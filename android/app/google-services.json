@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "994725734865",
+    "project_id": "saambiz-ca926",
+    "storage_bucket": "saambiz-ca926.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:994725734865:android:d7f8e20131efcb3c6d18f0",
+        "android_client_info": {
+          "package_name": "com.saambiz.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCGe26xrNHuF040rRKSG_4ihU2i-Wgo0yQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
