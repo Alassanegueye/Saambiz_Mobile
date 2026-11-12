@@ -174,4 +174,65 @@ void main() {
       expect(duManifeste!.group(1), duDart!.group(1));
     });
   });
+
+  group('L’allure de la notification', () {
+    test('la petite icône n’est pas l’icône de lancement', () {
+      // Depuis Android 5, le système ne garde que le CANAL ALPHA de la petite
+      // icône : la forme est remplie d'une couleur unie et le dessin est
+      // perdu. `@mipmap/ic_launcher` est un carré plein de marine — il donnait
+      // donc un carré blanc dans la barre d'état, le « blob » bien connu.
+      final icone = RegExp(
+        r'default_notification_icon"\s*\n?\s*android:resource="([^"]+)"',
+      ).firstMatch(manifestePrincipal);
+      expect(icone, isNotNull, reason: 'icône de notification absente');
+      expect(
+        icone!.group(1),
+        isNot('@mipmap/ic_launcher'),
+        reason: 'une icône de lancement pleine devient un carré blanc',
+      );
+      expect(icone.group(1), '@drawable/ic_launcher_foreground');
+
+      // Et le fichier existe vraiment, dans plusieurs densités.
+      final densites = Directory('android/app/src/main/res')
+          .listSync()
+          .whereType<Directory>()
+          .where(
+            (d) => File(
+              '${d.path}/ic_launcher_foreground.png',
+            ).existsSync(),
+          );
+      expect(densites.length, greaterThanOrEqualTo(4));
+    });
+
+    test('la teinte de la notification est déclarée', () {
+      expect(manifestePrincipal, contains('default_notification_color'));
+      final couleurs = File(
+        'android/app/src/main/res/values/colors.xml',
+      ).readAsStringSync();
+      expect(couleurs, contains('couleur_notification'));
+    });
+
+    test('l’image est affichée aussi quand l’application est ouverte', () {
+      // `android.notification.imageUrl` envoyé par le serveur n'est honoré
+      // que lorsque le SYSTÈME dessine la notification — application fermée
+      // ou en arrière-plan. Au premier plan, c'est l'application qui dessine,
+      // et sans style « grande image » le logo de la boutique disparaissait.
+      expect(fcmDart, contains('BigPictureStyleInformation'));
+      expect(fcmDart, contains('ByteArrayAndroidBitmap'));
+      // L'image vient de la clé `image`, celle que push.service.js ajoute.
+      expect(fcmDart, contains("donnees['image']"));
+    });
+
+    test('les trois états de réception sont câblés', () {
+      // Application ouverte : c'est nous qui affichons.
+      expect(fcmDart, contains('FirebaseMessaging.onMessage'));
+      // Application en arrière-plan, notification touchée.
+      expect(fcmDart, contains('onMessageOpenedApp'));
+      // Application lancée DEPUIS la notification, après avoir été fermée.
+      expect(fcmDart, contains('getInitialMessage'));
+      // Et le gestionnaire d'arrière-plan, qui doit rester de haut niveau.
+      expect(fcmDart, contains("@pragma('vm:entry-point')"));
+      expect(fcmDart, contains('onBackgroundMessage'));
+    });
+  });
 }

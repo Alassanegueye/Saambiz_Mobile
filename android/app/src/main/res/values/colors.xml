@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="ic_launcher_background">#01154B</color>
+    <!-- Teinte de la petite icône et du titre dans la zone de notification.
+         L'or de la charte se détache sur les deux thèmes d'Android ; le marine
+         disparaîtrait sur un fond sombre. -->
+    <color name="couleur_notification">#FBB900</color>
 </resources>

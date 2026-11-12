@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
+import 'package:dio/dio.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -160,21 +162,72 @@ class FcmService {
     }
   }
 
+  /// Petite icône de la barre d'état : voir le manifeste. Android n'en garde
+  /// que le canal alpha, donc le picto sur fond transparent et non l'icône de
+  /// lancement, qui est un carré plein et deviendrait un carré blanc.
+  static const _kPetiteIcone = '@drawable/ic_launcher_foreground';
+
+  /// Télécharge l'image d'une notification, ou rend `null`.
+  ///
+  /// Le serveur demande déjà à Cloudinary une version ≤ 1024 px (voir
+  /// `imagePourPush` côté API) ; la limite de taille et le délai ci-dessous
+  /// ne sont qu'un garde-fou : une notification ne doit jamais faire attendre,
+  /// et mieux vaut l'afficher sans image que pas du tout.
+  static Future<Uint8List?> _imageDeLaNotification(String? url) async {
+    if (url == null || !url.startsWith('https://')) return null;
+    try {
+      final reponse = await Dio()
+          .get<List<int>>(
+            url,
+            options: Options(responseType: ResponseType.bytes),
+          )
+          .timeout(const Duration(seconds: 6));
+      final octets = reponse.data;
+      if (octets == null || octets.isEmpty || octets.length > 1024 * 1024) {
+        return null;
+      }
+      return Uint8List.fromList(octets);
+    } catch (e) {
+      logDebug('Image de notification non récupérée : $e');
+      return null;
+    }
+  }
+
   static Future<void> _afficher({
     required String titre,
     required String texte,
     Map<String, dynamic> donnees = const {},
   }) async {
-    const details = NotificationDetails(
+    // Application OUVERTE : c'est nous qui dessinons la notification, et
+    // `android.notification.imageUrl` du serveur ne s'applique pas — il n'est
+    // honoré que lorsque le système affiche lui-même le message, donc
+    // application fermée ou en arrière-plan. Sans ce qui suit, la même
+    // notification montrait le logo de la boutique hors de l'application et
+    // rien du tout dedans.
+    final image = await _imageDeLaNotification(donnees['image']?.toString());
+
+    final details = NotificationDetails(
       android: AndroidNotificationDetails(
         _kCanalId,
         _kCanalNom,
         channelDescription: _kCanalDescription,
         importance: Importance.high,
         priority: Priority.high,
-        icon: '@mipmap/ic_launcher',
+        icon: _kPetiteIcone,
+        color: const Color(0xFFFBB900),
+        styleInformation: image == null
+            ? null
+            : BigPictureStyleInformation(
+                ByteArrayAndroidBitmap(image),
+                // Vignette ronde à droite, repliée ; la grande image se
+                // découvre quand on déplie la notification.
+                largeIcon: ByteArrayAndroidBitmap(image),
+                contentTitle: titre,
+                summaryText: texte,
+                hideExpandedLargeIcon: true,
+              ),
       ),
-      iOS: DarwinNotificationDetails(
+      iOS: const DarwinNotificationDetails(
         presentAlert: true,
         presentSound: true,
         presentBadge: true,
