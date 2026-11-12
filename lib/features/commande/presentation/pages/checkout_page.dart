@@ -9,7 +9,9 @@ import 'package:saambiz/features/commande/presentation/widgets/commande_card.dar
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../injection_container.dart';
 import '../../../../core/routes/app_router.dart';
+import '../../data/models/panier_item.dart';
 import '../../data/services/panier_service.dart';
+import 'package:saambiz/core/widgets/image_reseau.dart';
 import '../bloc/commande_bloc.dart';
 import '../bloc/commande_event.dart';
 import '../bloc/commande_state.dart';
@@ -125,112 +127,104 @@ class _CheckoutViewState extends State<_CheckoutView> {
             absorbing: loading,
             child: Form(
               key: _formKey,
-              child: ListView(
-                padding: const EdgeInsets.all(16),
+              child: Column(
                 children: [
-                  _section('Mode de réception'),
-                  _choix(
-                    ['livraison', 'retrait'],
-                    _modeLivraison,
-                    {
-                      'livraison': (Icons.local_shipping_outlined, 'Livraison'),
-                      'retrait': (Icons.storefront_outlined, 'Retrait'),
-                    },
-                    (v) => setState(() => _modeLivraison = v),
-                  ),
-                  if (_modeLivraison == 'livraison') ...[
-                    const SizedBox(height: 12),
-                    _input(
-                      _adresseCtrl,
-                      'Adresse de livraison',
-                      obligatoire: true,
-                      validator: (v) =>
-                          (_modeLivraison == 'livraison' &&
-                              (v == null || v.trim().isEmpty))
-                          ? 'Adresse requise'
-                          : null,
-                    ),
-                  ],
-                  const SizedBox(height: 12),
-                  _input(
-                    _telCtrl,
-                    'Téléphone',
-                    obligatoire: true,
-                    keyboard: TextInputType.phone,
-                    formats: [FormatTelephone(_paysTel)],
-                    prefixe: BoutonIndicatif(
-                      pays: _paysTel,
-                      onChange: () => setState(_telCtrl.clear),
-                    ),
-                    validator: (v) => verifierTelephone(v, _paysTel.value),
-                  ),
-                  const SizedBox(height: 20),
-                  _section('Paiement'),
-                  _choix(
-                    ['en_ligne', 'a_la_livraison'],
-                    _modePaiement,
-                    {
-                      'en_ligne': (
-                        Icons.phone_iphone_rounded,
-                        'Wave ou Orange Money',
-                      ),
-                      'a_la_livraison': (
-                        Icons.payments_outlined,
-                        'À la réception',
-                      ),
-                    },
-                    (v) => setState(() => _modePaiement = v),
-                    // Les logos des opérateurs remplacent l'icône : on
-                    // reconnaît Wave et Orange Money d'un coup d'œil, bien
-                    // avant d'avoir lu « Wave ou Orange Money ».
-                    logos: const {
-                      'en_ligne': [
-                        'assets/images/wave.jpg',
-                        'assets/images/OM.png',
-                      ],
-                    },
-                  ),
-                  if (_modePaiement == 'en_ligne')
-                    const Padding(
-                      padding: EdgeInsets.only(top: 8),
-                      child: Text(
-                        'Vous paierez une fois la commande acceptée par le vendeur.',
-                        style: TextStyle(fontSize: 12.5, color: _C.sub),
-                      ),
-                    ),
-                  const SizedBox(height: 20),
-                  _section('Note (optionnel)'),
-                  _input(
-                    _noteCtrl,
-                    'Une précision pour le vendeur ?',
-                    maxLines: 3,
-                  ),
-                  const SizedBox(height: 24),
-                  ElevatedButton(
-                    onPressed: loading ? null : () => _soumettre(context),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: _C.green,
-                      foregroundColor: _C.white,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                    ),
-                    child: loading
-                        ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
+                  Expanded(
+                    child: ListView(
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+                      children: [
+                        _section('Récapitulatif'),
+                        _Recapitulatif(lignes: _panier.selection),
+                        const SizedBox(height: 20),
+                        _section('Mode de réception'),
+                        _choix(
+                          ['livraison', 'retrait'],
+                          _modeLivraison,
+                          {
+                            'livraison': (
+                              Icons.local_shipping_outlined,
+                              'Livraison',
                             ),
-                          )
-                        : Text(
-                            _modeLivraison == 'livraison'
-                                ? 'Confirmer · ${montantFcfa(_panier.totalSelection)} + livraison'
-                                : 'Confirmer · ${montantFcfa(_panier.totalSelection)}',
-                            style: const TextStyle(fontWeight: FontWeight.w700),
+                            'retrait': (Icons.storefront_outlined, 'Retrait'),
+                          },
+                          (v) => setState(() => _modeLivraison = v),
+                        ),
+                        if (_modeLivraison == 'livraison') ...[
+                          const SizedBox(height: 12),
+                          _input(
+                            _adresseCtrl,
+                            'Adresse de livraison',
+                            obligatoire: true,
+                            validator: (v) =>
+                                (_modeLivraison == 'livraison' &&
+                                    (v == null || v.trim().isEmpty))
+                                ? 'Adresse requise'
+                                : null,
                           ),
+                        ],
+                        const SizedBox(height: 12),
+                        _input(
+                          _telCtrl,
+                          'Téléphone',
+                          obligatoire: true,
+                          keyboard: TextInputType.phone,
+                          formats: [FormatTelephone(_paysTel)],
+                          prefixe: BoutonIndicatif(
+                            pays: _paysTel,
+                            onChange: () => setState(_telCtrl.clear),
+                          ),
+                          validator: (v) =>
+                              verifierTelephone(v, _paysTel.value),
+                        ),
+                        const SizedBox(height: 20),
+                        _section('Paiement'),
+                        _choix(
+                          ['en_ligne', 'a_la_livraison'],
+                          _modePaiement,
+                          {
+                            'en_ligne': (
+                              Icons.phone_iphone_rounded,
+                              'Wave ou Orange Money',
+                            ),
+                            'a_la_livraison': (
+                              Icons.payments_outlined,
+                              'À la réception',
+                            ),
+                          },
+                          (v) => setState(() => _modePaiement = v),
+                          // Les logos des opérateurs remplacent l'icône : on
+                          // reconnaît Wave et Orange Money d'un coup d'œil, bien
+                          // avant d'avoir lu « Wave ou Orange Money ».
+                          logos: const {
+                            'en_ligne': [
+                              'assets/images/wave.jpg',
+                              'assets/images/OM.png',
+                            ],
+                          },
+                        ),
+                        if (_modePaiement == 'en_ligne')
+                          const Padding(
+                            padding: EdgeInsets.only(top: 8),
+                            child: Text(
+                              'Vous paierez une fois la commande acceptée par le vendeur.',
+                              style: TextStyle(fontSize: 12.5, color: _C.sub),
+                            ),
+                          ),
+                        const SizedBox(height: 20),
+                        _section('Note (optionnel)'),
+                        _input(
+                          _noteCtrl,
+                          'Une précision pour le vendeur ?',
+                          maxLines: 3,
+                        ),
+                      ],
+                    ),
+                  ),
+                  _BarreConfirmation(
+                    total: _panier.totalSelection,
+                    livraison: _modeLivraison == 'livraison',
+                    loading: loading,
+                    onConfirmer: () => _soumettre(context),
                   ),
                 ],
               ),
@@ -311,22 +305,27 @@ class _CheckoutViewState extends State<_CheckoutView> {
     ValueChanged<String> onSelect, {
     Map<String, List<String>> logos = const {},
   }) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        for (var i = 0; i < valeurs.length; i++) ...[
-          if (i > 0) const SizedBox(width: 10),
-          Expanded(
-            child: _option(
-              valeurs[i],
-              selected,
-              options,
-              onSelect,
-              logos: logos[valeurs[i]] ?? const [],
+    // IntrinsicHeight borne la rangée : sans lui, `stretch` dans une
+    // ListView demande une hauteur infinie, la mise en page échoue et tout
+    // le formulaire disparaît sous « Mode de réception ».
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (var i = 0; i < valeurs.length; i++) ...[
+            if (i > 0) const SizedBox(width: 10),
+            Expanded(
+              child: _option(
+                valeurs[i],
+                selected,
+                options,
+                onSelect,
+                logos: logos[valeurs[i]] ?? const [],
+              ),
             ),
-          ),
+          ],
         ],
-      ],
+      ),
     );
   }
 
@@ -411,16 +410,223 @@ class _LogoOperateur extends StatelessWidget {
         cacheWidth: 66, // 22 px à 3× : net sur les écrans denses.
         // Un asset manquant ne doit pas afficher la croix rouge de Flutter
         // par-dessus le formulaire de commande.
-        errorBuilder: (_, __, ___) => const Icon(
-          Icons.phone_iphone_rounded,
-          size: 22,
-          color: _C.sub,
-        ),
+        errorBuilder: (_, __, ___) =>
+            const Icon(Icons.phone_iphone_rounded, size: 22, color: _C.sub),
       ),
     );
     return Semantics(
       excludeSemantics: true, // Le libellé de la carte dit déjà lesquels.
       child: estime ? image : Opacity(opacity: 0.55, child: image),
+    );
+  }
+}
+
+/// Les produits cochés dans le panier : la boutique, chaque ligne avec sa
+/// quantité et son sous-total, puis le total des produits.
+class _Recapitulatif extends StatelessWidget {
+  final List<PanierItem> lignes;
+  const _Recapitulatif({required this.lignes});
+
+  @override
+  Widget build(BuildContext context) {
+    final total = lignes.fold<double>(0, (s, it) => s + it.sousTotal);
+    final boutique = lignes.isEmpty ? '' : lignes.first.vendeurNom;
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: _C.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: _C.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (boutique.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.storefront_rounded,
+                    size: 18,
+                    color: _C.green,
+                  ),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      boutique,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w800,
+                        color: _C.black,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          for (final it in lignes)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 6),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: it.image.isNotEmpty
+                        ? ImageReseau(
+                            it.image,
+                            width: 44,
+                            height: 44,
+                            fit: BoxFit.cover,
+                            repli: const _Vignette(),
+                          )
+                        : const _Vignette(),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          it.nom,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w700,
+                            color: _C.black,
+                          ),
+                        ),
+                        Text(
+                          [
+                            if (it.options.isNotEmpty) it.libelleOptions,
+                            '${it.quantite} × ${montantFcfa(it.prix)}',
+                          ].join(' · '),
+                          style: const TextStyle(fontSize: 12, color: _C.sub),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    montantFcfa(it.sousTotal),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w700,
+                      color: _C.black,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          const Divider(height: 20, color: _C.border),
+          Row(
+            children: [
+              const Expanded(
+                child: Text('Total produits', style: TextStyle(color: _C.sub)),
+              ),
+              Text(
+                montantFcfa(total),
+                style: const TextStyle(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 15,
+                  color: _C.black,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Vignette extends StatelessWidget {
+  const _Vignette();
+  @override
+  Widget build(BuildContext context) => Container(
+    width: 44,
+    height: 44,
+    color: _C.bg,
+    child: const Icon(Icons.shopping_bag_outlined, size: 20, color: _C.sub),
+  );
+}
+
+/// Total et bouton de confirmation, toujours visibles en bas de l'écran.
+class _BarreConfirmation extends StatelessWidget {
+  final double total;
+  final bool livraison;
+  final bool loading;
+  final VoidCallback onConfirmer;
+  const _BarreConfirmation({
+    required this.total,
+    required this.livraison,
+    required this.loading,
+    required this.onConfirmer,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+      decoration: const BoxDecoration(
+        color: _C.white,
+        boxShadow: [BoxShadow(color: Color(0x14000000), blurRadius: 14)],
+      ),
+      child: SafeArea(
+        top: false,
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    montantFcfa(total),
+                    style: const TextStyle(
+                      fontSize: 19,
+                      fontWeight: FontWeight.w800,
+                      color: _C.black,
+                    ),
+                  ),
+                  Text(
+                    livraison ? '+ frais de livraison' : 'Retrait en boutique',
+                    style: const TextStyle(fontSize: 12, color: _C.sub),
+                  ),
+                ],
+              ),
+            ),
+            ElevatedButton(
+              onPressed: loading ? null : onConfirmer,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: _C.green,
+                foregroundColor: _C.white,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 26,
+                  vertical: 15,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+              ),
+              child: loading
+                  ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : const Text(
+                      'Confirmer la commande',
+                      style: TextStyle(fontWeight: FontWeight.w700),
+                    ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

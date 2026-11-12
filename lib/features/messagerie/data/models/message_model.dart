@@ -49,15 +49,27 @@ class ConversationModel {
   factory ConversationModel.fromJson(Map<String, dynamic> json) {
     final interlocuteur =
         (json['interlocuteur'] ?? json['utilisateur']) as Map<String, dynamic>?;
+    // Un vendeur se présente par sa boutique : son nom et son logo passent
+    // avant son nom personnel et sa photo de profil.
+    final boutique = interlocuteur?['boutique'] is Map
+        ? interlocuteur!['boutique'] as Map<String, dynamic>
+        : null;
+    String? texte(dynamic v) {
+      final t = v?.toString().trim();
+      return (t == null || t.isEmpty) ? null : t;
+    }
+
+    final nomPersonne = interlocuteur != null
+        ? '${interlocuteur['prenom'] ?? ''} ${interlocuteur['nom'] ?? ''}'
+              .trim()
+        : (json['interlocuteurNom']?.toString() ?? '');
     final dernierMessage = json['dernierMessage'];
     return ConversationModel(
       interlocuteurId:
           (json['interlocuteurId'] ?? interlocuteur?['id'])?.toString() ?? '',
-      interlocuteurNom: interlocuteur != null
-          ? '${interlocuteur['prenom'] ?? ''} ${interlocuteur['nom'] ?? ''}'
-                .trim()
-          : (json['interlocuteurNom']?.toString() ?? ''),
-      interlocuteurPhoto: interlocuteur?['photoProfil']?.toString(),
+      interlocuteurNom: texte(boutique?['nom']) ?? nomPersonne,
+      interlocuteurPhoto:
+          texte(boutique?['logo']) ?? texte(interlocuteur?['photoProfil']),
       dernierMessage: dernierMessage is Map
           ? (dernierMessage['contenu']?.toString() ?? '')
           : (json['contenu']?.toString() ?? ''),

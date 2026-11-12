@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:saambiz/core/errors/message_erreur.dart';
@@ -42,12 +44,24 @@ void main() {
       expect(m, 'Le téléphone est invalide');
     });
 
+    test('une coupure signalée en « unknown » par le système aussi', () {
+      final requete = RequestOptions(path: '/test');
+      final m = messageErreurReseau(
+        DioException(
+          requestOptions: requete,
+          type: DioExceptionType.unknown,
+          error: const SocketException("Failed host lookup: 'api.saambiz.com'"),
+        ),
+      );
+      expect(m, contains("n'êtes pas connecté à internet"));
+    });
+
     test('une coupure réseau parle français', () {
       // Avant, l'utilisateur lisait le texte anglais de Dio.
       final m = messageErreurReseau(
         _erreur(type: DioExceptionType.connectionError),
       );
-      expect(m, contains('connexion internet'));
+      expect(m, contains("n'êtes pas connecté à internet"));
       expect(m.toLowerCase(), isNot(contains('host lookup')));
     });
 
