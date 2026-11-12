@@ -1,0 +1,66 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Captures SaamBiz → format Play (9:16)</title>
+<!--
+  Les visuels App Store font 1206 x 2622, soit un rapport de 0,46. Google Play
+  exige 9:16 (0,5625) : il faut donc ELARGIR, pas rogner — rogner mangerait le
+  titre en haut ou le telephone en bas.
+
+  Les bandes laterales ne sont pas remplies d'un aplat : on etire la colonne de
+  1 px du bord. Le fond des visuels porte des cercles plus clairs qui touchent
+  les bords ; un aplat marine y laisserait une couture nette. L'etirement les
+  prolonge, et la jonction devient invisible.
+-->
+<style>body{margin:0;background:#111;color:#ccc;font:14px system-ui;padding:16px}
+canvas{max-width:180px;margin:4px;vertical-align:top;border:1px solid #333}</style>
+<div id="etat">…</div>
+<div id="apercu"></div>
+<script>
+const L = 1080, H = 1920;     // 9:16
+const FICHIERS = ["01-onboarding.png", "02-choix-espace.png", "03-inscription.png", "04-connexion.png", "05-tableau-de-bord.png", "06-mes-produits.png", "07-nouveau-produit.png", "08-commandes.png"];
+
+function convertir(img) {
+  const c = document.createElement('canvas');
+  c.width = L; c.height = H;
+  const x = c.getContext('2d');
+  x.imageSmoothingQuality = 'high';
+
+  // Le visuel, mis a l'echelle sur la HAUTEUR : rien n'est perdu.
+  const l = Math.round(img.width * H / img.height);   // ~883
+  const gauche = Math.round((L - l) / 2);
+
+  // Bandes laterales en aplat marine, la couleur de fond des visuels.
+  //
+  // L'etirement de la colonne de bord avait ete essaye d'abord : il prolonge
+  // joliment les cercles decoratifs, mais sur les visuels dont le bord traverse
+  // un telephone (01-onboarding), il etire du blanc et du texte en trainees
+  // visibles. L'aplat ne ment jamais : la composition devient une carte
+  // centree sur son propre marine.
+  x.fillStyle = '#01154B';
+  x.fillRect(0, 0, L, H);
+
+  x.drawImage(img, gauche, 0, l, H);
+  return c;
+}
+
+(async () => {
+  const etat = document.getElementById('etat');
+  for (const nom of FICHIERS) {
+    const img = await new Promise((ok, ko) => {
+      const i = new Image(); i.onload = () => ok(i); i.onerror = ko;
+      i.src = 'sources-ios/' + nom;
+    });
+    const c = convertir(img);
+    const rep = await fetch('/' + nom.replace('.png', ''), {
+      method: 'POST', body: c.toDataURL('image/png'),
+    });
+    etat.textContent = nom + ' → ' + (await rep.text());
+    const vignette = document.createElement('canvas');
+    vignette.width = L; vignette.height = H;
+    vignette.getContext('2d').drawImage(c, 0, 0);
+    document.getElementById('apercu').appendChild(vignette);
+  }
+  etat.textContent = 'TERMINÉ : ' + FICHIERS.length + ' visuels';
+  window.__fini = true;
+})();
+</script>

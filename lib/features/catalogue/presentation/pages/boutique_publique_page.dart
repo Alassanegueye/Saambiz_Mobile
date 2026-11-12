@@ -18,6 +18,7 @@ import '../../data/produit_catalogue.dart';
 import '../widgets/bouton_panier.dart';
 import '../widgets/produit_card.dart';
 import '../../../avis/presentation/feuille_avis_boutique.dart';
+import '../../../signalements/presentation/ouvrir_signalement.dart';
 
 const _bleuVerifie = Color(0xFF1D9BF0);
 const _encre = Color(0xFF1B1F27);
@@ -310,7 +311,6 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
     final sections = _sections;
     return Scaffold(
       backgroundColor: AppColor.kWhite,
-      appBar: AppBar(actions: const [BoutonPanier(), SizedBox(width: 6)]),
       body: RefreshIndicator(
         color: AppColor.kPrimary,
         onRefresh: () async => Future.wait([_chargerBoutique(), _charger()]),
@@ -318,6 +318,48 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
           controller: _scroll,
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
+            // Pas de barre grise au-dessus de la boutique : le retour et le
+            // panier sont posés sur la page, dans des pastilles rondes. Ils
+            // reviennent dès qu'on remonte un peu.
+            SliverAppBar(
+              floating: true,
+              snap: true,
+              backgroundColor: AppColor.kWhite,
+              surfaceTintColor: Colors.transparent,
+              elevation: 0,
+              scrolledUnderElevation: 0,
+              automaticallyImplyLeading: false,
+              toolbarHeight: 60,
+              titleSpacing: 12,
+              title: Row(
+                children: [
+                  if (Navigator.of(context).canPop())
+                    _PastilleBarre(
+                      child: IconButton(
+                        tooltip: 'Retour',
+                        onPressed: () => Navigator.of(context).maybePop(),
+                        icon: const Icon(
+                          Icons.arrow_back_ios_new_rounded,
+                          size: 19,
+                          color: AppColor.kPrimary,
+                        ),
+                      ),
+                    ),
+                  const Spacer(),
+                  const _PastilleBarre(child: BoutonPanier()),
+                  const SizedBox(width: 8),
+                  // Le signalement vivait dans l'AppBar que cette barre
+                  // flottante remplace : il la suit, sinon le formulaire
+                  // redevient inatteignable.
+                  _PastilleBarre(
+                    child: MenuSignaler(
+                      type: 'boutique',
+                      cibleId: widget.boutiqueId,
+                    ),
+                  ),
+                ],
+              ),
+            ),
             SliverToBoxAdapter(child: _entete()),
             if (sections.isNotEmpty)
               ...sections.map(
@@ -835,7 +877,7 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
             separatorBuilder: (_, __) => const SizedBox(width: 12),
             itemBuilder: (_, i) => SizedBox(
               width: largeur,
-              child: ProduitCard(produit: s.produits[i]),
+              child: ProduitCard(produit: s.produits[i], avecAjout: true),
             ),
           ),
         ),
@@ -890,7 +932,7 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
         sliver: SliverGrid(
           gridDelegate: grilleProduits(context),
           delegate: SliverChildBuilderDelegate(
-            (_, i) => ProduitCard(produit: _produits[i]),
+            (_, i) => ProduitCard(produit: _produits[i], avecAjout: true),
             childCount: _produits.length,
           ),
         ),
@@ -984,6 +1026,26 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
   }
 }
 
+/// Pastille ronde gris clair autour d'un bouton de la barre de la boutique.
+class _PastilleBarre extends StatelessWidget {
+  final Widget child;
+  const _PastilleBarre({required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 44,
+      height: 44,
+      decoration: const BoxDecoration(
+        color: Color(0xFFF1F4F9),
+        shape: BoxShape.circle,
+      ),
+      alignment: Alignment.center,
+      child: child,
+    );
+  }
+}
+
 /// « Voir tout » d'une section : tous ses produits en grille.
 class _SectionPage extends StatelessWidget {
   final String titre;
@@ -995,6 +1057,8 @@ class _SectionPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColor.kWhite,
       appBar: AppBar(
+        backgroundColor: AppColor.kWhite,
+        scrolledUnderElevation: 0,
         title: Text(
           titre,
           style: const TextStyle(
@@ -1009,7 +1073,7 @@ class _SectionPage extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         gridDelegate: grilleProduits(context),
         itemCount: produits.length,
-        itemBuilder: (_, i) => ProduitCard(produit: produits[i]),
+        itemBuilder: (_, i) => ProduitCard(produit: produits[i], avecAjout: true),
       ),
     );
   }

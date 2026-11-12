@@ -11,6 +11,7 @@ import '../../../../../core/widgets/degrade_fond.dart';
 import '../../../../../core/widgets/barre_navigation_verre.dart'
     show kEspaceBarreBas;
 import '../../../../../core/widgets/profil_kit.dart';
+import '../../../../../core/widgets/activer_localisation.dart';
 import '../../../../../injection_container.dart';
 import '../../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../../auth/presentation/bloc/auth_event.dart';
@@ -238,6 +239,20 @@ class _ProfilPageState extends State<ProfilPage>
                       libelle: 'Mes signalements',
                       sousTitre: 'Contenus que vous avez signalés',
                       onTap: () => _ouvrir(const MesSignalementsPage()),
+                    ),
+                    // La section « Près de chez vous » de l'accueil en dépend.
+                    LigneProfil(
+                      icone: localisationActivee()
+                          ? Icons.my_location_rounded
+                          : Icons.location_off_outlined,
+                      libelle: 'Géolocalisation',
+                      sousTitre: localisationActivee()
+                          ? 'Activée — touchez pour mettre à jour votre position'
+                          : 'Activer pour voir les boutiques près de chez vous',
+                      onTap: () async {
+                        await activerLocalisation(context);
+                        if (mounted) setState(() {});
+                      },
                     ),
                   ],
                 ),

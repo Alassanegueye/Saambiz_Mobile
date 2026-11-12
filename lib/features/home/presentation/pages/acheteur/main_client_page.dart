@@ -5,6 +5,7 @@ import 'package:saambiz/features/auth/domain/entities/user.dart';
 
 import '../../../../../core/theme/app_color.dart';
 import '../../../../../core/widgets/barre_navigation_verre.dart';
+import '../../../../../core/widgets/page_vendeur.dart';
 import 'accueil_boutiques_page.dart';
 import 'profil_page.dart';
 import 'guest_profil_page.dart';
@@ -77,6 +78,8 @@ class _MainAcheteurPageState extends State<MainAcheteurPage> {
           : AppColor.kBackground,
       body: OngletsConserves(index: _selectedIndex, pages: _pages),
       bottomNavigationBar: BarreNavigationVerre(
+        // Un peu plus bas que chez le vendeur : plus de place pour le contenu.
+        margeBas: 4,
         selectedIndex: _selectedIndex,
         onDestinationSelected: (i) => setState(() => _selectedIndex = i),
         destinations: const [
@@ -116,21 +119,18 @@ class _FavorisInvite extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      extendBody: true,
-      backgroundColor: AppColor.kBackground,
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            child: EtatVide(
-              icone: Icons.favorite_border_rounded,
-              titre: 'Vos boutiques préférées',
-              message:
-                  'Connectez-vous pour suivre des boutiques et recevoir leurs nouveautés et promotions en premier.',
-              action: 'Se connecter',
-              onAction: () =>
-                  Navigator.of(context).pushNamed(AppRouter.loginRoute),
-            ),
+    return PageVendeur(
+      titre: 'Mes favoris',
+      corps: Center(
+        child: SingleChildScrollView(
+          child: EtatVide(
+            icone: Icons.favorite_border_rounded,
+            titre: 'Vos boutiques préférées',
+            message:
+                'Connectez-vous pour suivre des boutiques et recevoir leurs nouveautés et promotions en premier.',
+            action: 'Se connecter',
+            onAction: () =>
+                Navigator.of(context).pushNamed(AppRouter.loginRoute),
           ),
         ),
       ),

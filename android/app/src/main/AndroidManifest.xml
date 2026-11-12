@@ -58,9 +58,20 @@
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"
             android:value="saambiz_push_channel" />
+        <!-- PETITE ICÔNE de la barre d'état.
+             Depuis Android 5, le système n'en garde que le CANAL ALPHA : la
+             forme est remplie d'une couleur unie, le dessin est perdu.
+             `@mipmap/ic_launcher` est un carré plein de marine — il donnait
+             donc un carré blanc, le fameux « blob » que tout le monde connaît.
+             `ic_launcher_foreground` est le picto sur fond transparent : sa
+             silhouette reste le sac SaamBiz, reconnaissable. -->
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
-            android:resource="@mipmap/ic_launcher" />
+            android:resource="@drawable/ic_launcher_foreground" />
+        <!-- Teinte appliquée à cette silhouette et au nom de l'application. -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@color/couleur_notification" />
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and
@@ -71,6 +82,22 @@
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
+        </intent>
+
+        <!-- Depuis Android 11 (API 30), une application ne voit plus les autres
+             à moins de les déclarer ici. Conséquence directe : `canLaunchUrl`
+             répondait TOUJOURS faux, et le bouton « Contacter sur WhatsApp »
+             affichait « Vérifiez que l'application est installée » même quand
+             WhatsApp l'était. L'API renvoie une adresse https://wa.me/… (voir
+             acheteurs.service.js), d'où cette déclaration : les liens web.
+
+             Volontairement minimale. Un filtre large revient à demander la
+             liste des applications installées, ce que Google Play fait
+             justifier. On ne déclare que ce dont le code a besoin : rien
+             n'appelle `canLaunchUrl` sur tel:, mailto: ou sms:. -->
+        <intent>
+            <action android:name="android.intent.action.VIEW"/>
+            <data android:scheme="https"/>
         </intent>
     </queries>
 </manifest>

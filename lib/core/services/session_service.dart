@@ -11,8 +11,13 @@ enum ResultatRenouvellement {
   /// reconnecter.
   refuse,
 
-  /// Réseau ou serveur indisponible : la session reste valable, on réessaiera.
+  /// Pas de réseau (ou serveur qui ne répond pas) : la session reste
+  /// valable, on réessaiera.
   injoignable,
+
+  /// Le serveur a répondu, mais par une erreur (5xx, trop de requêtes) : la
+  /// session reste valable, c'est lui qui est en cause, pas le réseau.
+  serveurIndisponible,
 
   /// Aucune session à renouveler (visiteur, ou compte connecté avant que
   /// l'application ne garde ce jeton).
@@ -66,15 +71,37 @@ class SessionService {
       await comptes?.majJeton(await _idCourant(), nouveau);
       return ResultatRenouvellement.renouvele;
     } on DioException catch (e) {
-      final statut = e.response?.statusCode;
-      if (statut == 400 || statut == 401 || statut == 403) {
+      final resultat = _classer(e);
+      if (resultat == ResultatRenouvellement.refuse) {
         await comptes?.majJeton(await _idCourant(), null);
         await jetons.clearToken();
-        return ResultatRenouvellement.refuse;
       }
-      return ResultatRenouvellement.injoignable;
+      return resultat;
     }
   }
+
+  /// Ce que dit l'échec d'un `/auth/refresh` :
+  /// - le serveur refuse le jeton (4xx) → il faut le mot de passe ;
+  /// - il répond par une erreur (5xx, 429) → c'est lui, pas le réseau ;
+  /// - il ne répond pas → réseau.
+  static ResultatRenouvellement _classer(DioException e) {
+    final statut = e.response?.statusCode;
+    if (statut == null) return ResultatRenouvellement.injoignable;
+    if (statut >= 400 && statut < 500 && statut != 408 && statut != 429) {
+      return ResultatRenouvellement.refuse;
+    }
+    return ResultatRenouvellement.serveurIndisponible;
+  }
+
+  /// Le serveur hébergé s'endort après un moment sans visite : le premier
+  /// appel peut échouer le temps qu'il se réveille. Une seconde tentative
+  /// évite d'annoncer un problème de réseau qui n'en est pas un.
+  static bool _vautUneRelance(DioException e) =>
+      e.response == null &&
+      (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout ||
+          e.type == DioExceptionType.connectionError ||
+          e.type == DioExceptionType.unknown);
 
   /// Revenir sur un compte mémorisé dont la session est restée ouverte : son
   /// jeton de rafraîchissement est échangé contre une session neuve, qui
@@ -82,10 +109,20 @@ class SessionService {
   Future<ResultatRenouvellement> reprendre(CompteMemorise compte) async {
     if (!compte.sessionOuverte) return ResultatRenouvellement.aucune;
     try {
-      final res = await dio.post(
-        '/auth/refresh',
-        data: {'refreshToken': compte.refreshToken},
-      );
+      Response res;
+      try {
+        res = await dio.post(
+          '/auth/refresh',
+          data: {'refreshToken': compte.refreshToken},
+        );
+      } on DioException catch (e) {
+        if (!_vautUneRelance(e)) rethrow;
+        await Future<void>.delayed(const Duration(seconds: 2));
+        res = await dio.post(
+          '/auth/refresh',
+          data: {'refreshToken': compte.refreshToken},
+        );
+      }
       final nouveau = res.data['refreshToken']?.toString();
       await jetons.setRefreshToken(nouveau);
       await jetons.secureStorage.write(key: 'user_id', value: compte.id);
@@ -93,12 +130,11 @@ class SessionService {
       await comptes?.majJeton(compte.id, nouveau);
       return ResultatRenouvellement.renouvele;
     } on DioException catch (e) {
-      final statut = e.response?.statusCode;
-      if (statut == 400 || statut == 401 || statut == 403) {
+      final resultat = _classer(e);
+      if (resultat == ResultatRenouvellement.refuse) {
         await comptes?.majJeton(compte.id, null);
-        return ResultatRenouvellement.refuse;
       }
-      return ResultatRenouvellement.injoignable;
+      return resultat;
     }
   }
 

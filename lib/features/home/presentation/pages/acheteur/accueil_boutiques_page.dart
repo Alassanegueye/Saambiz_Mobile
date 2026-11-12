@@ -5,12 +5,10 @@ import 'package:saambiz/core/theme/police.dart';
 import 'package:saambiz/core/widgets/image_reseau.dart';
 import 'package:saambiz/core/widgets/logo_boutique.dart';
 
-import '../../../../../core/routes/app_router.dart';
 import '../../../../../core/routes/observateur_routes.dart';
 import '../../../../../core/services/localisation_service.dart';
 import '../../../../../core/theme/app_color.dart';
 import '../../../../../core/widgets/animations.dart';
-import '../../../../../core/widgets/app_app_bar.dart';
 import '../../../../../core/widgets/barre_navigation_verre.dart'
     show kEspaceBarreBas;
 import '../../../../../core/widgets/empty_state.dart';
@@ -31,6 +29,8 @@ import '../../../../notifications/data/datasources/notifications_remote_datasour
 import '../../../../notifications/presentation/pages/notifications_page.dart';
 import '../../../data/datasources/accueil_remote_datasource.dart';
 import 'main_client_page.dart' show ongletAcheteurDemande;
+import '../../../../../core/widgets/page_vendeur.dart';
+import '../../../../../core/widgets/activer_localisation.dart';
 
 /// Accueil du client (connecté ou invité), dans la disposition d'origine :
 ///
@@ -106,9 +106,12 @@ class _AccueilBoutiquesPageState extends State<AccueilBoutiquesPage>
   }
 
   Future<void> _ouvrirNotifications() async {
-    // Un invité n'a pas de notifications : on lui propose de se connecter.
+    // Un invité n'a pas de notifications : la page s'ouvre quand même, et
+    // dit simplement qu'il n'y en a aucune (pas de détour par la connexion).
     if (widget.isGuest) {
-      Navigator.of(context).pushNamed(AppRouter.loginRoute);
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => const _NotificationsInvite()),
+      );
       return;
     }
     await Navigator.of(
@@ -206,25 +209,38 @@ class _AccueilBoutiquesPageState extends State<AccueilBoutiquesPage>
     Navigator.of(context).push(MaterialPageRoute(builder: (_) => page));
   }
 
+  // L'en-tête bleu est posé PAR-DESSUS la page : la liste défile dessous, et
+  // ce qui passe derrière ses coins arrondis reste visible (au lieu d'un
+  // fond blanc dans les coins). Sa hauteur, mesurée après le rendu, réserve
+  // la place du début de la liste.
+  final GlobalKey _cleEntete = GlobalKey();
+  double _hauteurEntete = 200;
+
+  void _mesurerEntete() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final boite = _cleEntete.currentContext?.findRenderObject();
+      if (!mounted || boite is! RenderBox || !boite.hasSize) return;
+      final h = boite.size.height;
+      if ((h - _hauteurEntete).abs() > 0.5) {
+        setState(() => _hauteurEntete = h);
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    _mesurerEntete();
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.dark.copyWith(
+      value: SystemUiOverlayStyle.light.copyWith(
         statusBarColor: Colors.transparent,
       ),
       child: Scaffold(
         backgroundColor: AppColor.kWhite,
-        body: Column(
+        body: Stack(
           children: [
-            _EnteteAccueil(
-              user: widget.user,
-              isGuest: widget.isGuest,
-              nonLues: _nonLues,
-              onNotifications: _ouvrirNotifications,
-              onRecherche: _rechercher,
-            ),
-            Expanded(
+            Positioned.fill(
               child: RefreshIndicator(
+                edgeOffset: _hauteurEntete,
                 onRefresh: () async {
                   _chargerNonLues();
                   await _charger();
@@ -236,11 +252,29 @@ class _AccueilBoutiquesPageState extends State<AccueilBoutiquesPage>
                     parent: BouncingScrollPhysics(),
                   ),
                   slivers: [
+                    SliverToBoxAdapter(
+                      child: SizedBox(height: _hauteurEntete),
+                    ),
                     ..._corps(),
                     const SliverToBoxAdapter(
                       child: SizedBox(height: kEspaceBarreBas),
                     ),
                   ],
+                ),
+              ),
+            ),
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: KeyedSubtree(
+                key: _cleEntete,
+                child: _EnteteAccueil(
+                  user: widget.user,
+                  isGuest: widget.isGuest,
+                  nonLues: _nonLues,
+                  onNotifications: _ouvrirNotifications,
+                  onRecherche: _rechercher,
                 ),
               ),
             ),
@@ -312,8 +346,18 @@ class _AccueilBoutiquesPageState extends State<AccueilBoutiquesPage>
     for (final cle in ordre) {
       final s = parCle[cle];
       if (s == null) {
-        if (cle == 'proches' && !accueil.positionConnue) {
-          blocs.add(const _InviteLocalisation());
+        // L'invitation ne s'affiche que tant que la position n'est pas
+        // connue : une fois la géolocalisation activée, elle disparaît.
+        if (cle == 'proches' &&
+            !accueil.positionConnue &&
+            !localisationActivee()) {
+          blocs.add(
+            _InviteLocalisation(
+              onActiver: () async {
+                if (await activerLocalisation(context)) _charger();
+              },
+            ),
+          );
         }
         continue;
       }
@@ -805,19 +849,6 @@ class _BlocPromotions extends StatelessWidget {
         ),
         child: Stack(
           children: [
-            // Le disque or des visuels SaamBiz, en écho.
-            Positioned(
-              bottom: -70,
-              right: -50,
-              child: Container(
-                width: 170,
-                height: 170,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: AppColor.kSecondary.withValues(alpha: 0.14),
-                ),
-              ),
-            ),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -910,7 +941,11 @@ class _BlocPromotions extends StatelessWidget {
                     separatorBuilder: (_, __) => const SizedBox(width: 10),
                     itemBuilder: (_, i) => SizedBox(
                       width: largeurCarte,
-                      child: ProduitCard(produit: produits[i], surFond: true),
+                      child: ProduitCard(
+                        produit: produits[i],
+                        surFond: true,
+                        avecAjout: true,
+                      ),
                     ),
                   ),
                 ),
@@ -969,6 +1004,7 @@ class _SectionProduits extends StatelessWidget {
               width: largeurCarte,
               child: ProduitCard(
                 produit: ProduitCatalogue.fromJson(section.elements[i]),
+                avecAjout: true,
               ),
             ),
           ),
@@ -1210,7 +1246,8 @@ class _CarteBoutique extends StatelessWidget {
 /// « Près de chez vous » sans position connue : une ligne qui propose
 /// d'activer la localisation, à la place de la section.
 class _InviteLocalisation extends StatelessWidget {
-  const _InviteLocalisation();
+  final VoidCallback onActiver;
+  const _InviteLocalisation({required this.onActiver});
 
   @override
   Widget build(BuildContext context) {
@@ -1233,8 +1270,22 @@ class _InviteLocalisation extends StatelessWidget {
                   Text('Près de chez vous', style: titreSection(14.5)),
                   const SizedBox(height: 2),
                   Text(
-                    'Activez la localisation dans votre compte pour voir les boutiques de votre quartier.',
+                    'Activez la géolocalisation pour voir les boutiques de votre quartier.',
                     style: texteDiscret(12.5),
+                  ),
+                  const SizedBox(height: 10),
+                  FilledButton.icon(
+                    onPressed: onActiver,
+                    icon: const Icon(Icons.my_location_rounded, size: 18),
+                    label: const Text('Activer la géolocalisation'),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AppColor.kPrimary,
+                      foregroundColor: AppColor.kWhite,
+                      visualDensity: VisualDensity.compact,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -1305,9 +1356,9 @@ class _SectionAccueilPageState extends State<SectionAccueilPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return ScaffoldMarine(
       backgroundColor: AppColor.kWhite,
-      appBar: AppAppBar(title: widget.titre, couleurFond: AppColor.kWhite),
+      appBar: AppBar(title: Text(widget.titre)),
       body: _corps(),
     );
   }
@@ -1354,7 +1405,10 @@ class _SectionAccueilPageState extends State<SectionAccueilPage> {
               ),
         itemCount: elements.length,
         itemBuilder: (_, i) => produits
-            ? ProduitCard(produit: ProduitCatalogue.fromJson(elements[i]))
+            ? ProduitCard(
+                produit: ProduitCatalogue.fromJson(elements[i]),
+                avecAjout: true,
+              )
             : LayoutBuilder(
                 builder: (_, c) =>
                     _CarteBoutique(donnees: elements[i], largeur: c.maxWidth),
@@ -1593,6 +1647,11 @@ class _CarteProduitPourVous extends StatelessWidget {
                         ),
                       ),
                     ),
+                  Positioned(
+                    right: 6,
+                    bottom: 6,
+                    child: BoutonAjoutPanier(produit: produit),
+                  ),
                   // Bouton favoris en haut a droite
                   Positioned(
                     top: 6,
@@ -1732,6 +1791,27 @@ class _CarteProduitPourVous extends StatelessWidget {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+
+/// Notifications d'un invité : il n'en reçoit pas, la page le dit.
+class _NotificationsInvite extends StatelessWidget {
+  const _NotificationsInvite();
+
+  @override
+  Widget build(BuildContext context) {
+    return ScaffoldMarine(
+      backgroundColor: AppColor.kBackground,
+      appBar: AppBar(title: const Text('Notifications')),
+      body: const Center(
+        child: EtatVide(
+          icone: Icons.notifications_none_rounded,
+          titre: 'Aucune notification',
+          message: 'Vos commandes et vos alertes apparaîtront ici.',
         ),
       ),
     );

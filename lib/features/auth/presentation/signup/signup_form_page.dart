@@ -4,6 +4,9 @@ import 'package:flutter/services.dart';
 import 'package:saambiz/core/theme/police.dart';
 
 import '../../../../core/routes/app_router.dart';
+import '../../../../core/utils/email.dart';
+import '../../../../core/utils/telephone.dart';
+import '../../../../core/widgets/bouton_indicatif.dart';
 import '../../../../injection_container.dart';
 import '../../data/datasources/signup_remote_datasource.dart';
 import 'signup_kit.dart';
@@ -58,6 +61,7 @@ class _SignupFormPageState extends State<SignupFormPage> {
   final _nameCtrl = TextEditingController();
   final _emailCtrl = TextEditingController();
   final _telCtrl = TextEditingController();
+  final _paysTel = ValueNotifier<PaysTelephone>(senegal);
   final _passCtrl = TextEditingController();
 
   int _page = 0;
@@ -83,6 +87,7 @@ class _SignupFormPageState extends State<SignupFormPage> {
     _nameCtrl.dispose();
     _emailCtrl.dispose();
     _telCtrl.dispose();
+    _paysTel.dispose();
     _passCtrl.dispose();
     super.dispose();
   }
@@ -94,7 +99,8 @@ class _SignupFormPageState extends State<SignupFormPage> {
     return (parts.first, parts.sublist(1).join(' '));
   }
 
-  String get _telNormalise => _telCtrl.text.replaceAll(RegExp(r'[\s.-]'), '');
+  /// Le numéro au format international (« +221771234567 »), ou vide.
+  String get _telNormalise => telephoneInternational(_telCtrl.text, _paysTel.value);
 
   bool _valider() {
     setState(() {
@@ -105,18 +111,13 @@ class _SignupFormPageState extends State<SignupFormPage> {
               ? 'Indiquez votre nom.'
               : null;
         case 1:
-          _emailError = kEmailRegExp.hasMatch(_emailCtrl.text.trim())
-              ? null
-              : 'Adresse e-mail invalide.';
-          final tel = _telNormalise;
-          if (tel.isEmpty) {
+          _emailError = verifierEmail(_emailCtrl.text);
+          if (_telCtrl.text.trim().isEmpty) {
             _telError = _isVendeur
                 ? 'Vos clients vous contacteront sur ce numéro.'
                 : null;
           } else {
-            _telError = RegExp(r'^\+?\d{8,15}$').hasMatch(tel)
-                ? null
-                : 'Numéro invalide.';
+            _telError = verifierTelephone(_telCtrl.text, _paysTel.value);
           }
         default:
           _passError = validateMotDePasse(_passCtrl.text);
@@ -278,19 +279,27 @@ class _SignupFormPageState extends State<SignupFormPage> {
         controller: _emailCtrl,
         keyboardType: TextInputType.emailAddress,
         autofillHint: AutofillHints.email,
+        formatters: formatsEmail,
         errorText: _emailError,
       ),
       const SizedBox(height: 16),
       SbField(
         obligatoire: _isVendeur,
         label: _isVendeur ? 'WhatsApp' : 'Téléphone (facultatif)',
-        hint: 'Ex. 77 123 45 67',
+        hint: 'Ex. ${_paysTel.value.exemple}',
         icon: Icons.phone_outlined,
+        prefixe: BoutonIndicatif(
+          pays: _paysTel,
+          onChange: () => setState(() {
+            _telCtrl.clear();
+            _telError = null;
+          }),
+        ),
         controller: _telCtrl,
         keyboardType: TextInputType.phone,
         autofillHint: AutofillHints.telephoneNumber,
         textInputAction: TextInputAction.done,
-        formatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9+ ]'))],
+        formatters: [FormatTelephone(_paysTel)],
         errorText: _telError,
         onSubmitted: (_) => _suivant(),
       ),

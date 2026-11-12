@@ -15,6 +15,7 @@ import '../bloc/commande_event.dart';
 import '../bloc/commande_state.dart';
 import '../widgets/commande_card.dart'
     show couleurStatutCommande, iconeStatutCommande, montantFcfa;
+import '../../../../core/widgets/page_vendeur.dart';
 
 /// Argument de navigation pour la page détail.
 class CommandeDetailArgs {
@@ -311,7 +312,7 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
         : _statutSuivant[commande.statut];
     final retournable = !isVendeur && commande.statut == 'livree';
 
-    return Scaffold(
+    return ScaffoldMarine(
       backgroundColor: _C.bg,
       appBar: AppBar(
         title: Column(

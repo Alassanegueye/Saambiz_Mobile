@@ -7,6 +7,9 @@ import 'package:toastification/toastification.dart';
 import '../../../../core/routes/app_router.dart';
 import '../../../../core/services/comptes_memorises.dart';
 import '../../../../core/services/session_service.dart';
+import '../../../../core/utils/email.dart';
+import '../../../../core/utils/telephone.dart';
+import '../../../../core/widgets/bouton_indicatif.dart';
 import '../../../../injection_container.dart';
 import '../../../../core/theme/app_color.dart';
 import '../../../../core/widgets/toastNotif.dart';
@@ -46,6 +49,9 @@ class _LoginPageState extends State<LoginPage> {
   /// Onglet choisi au-dessus du champ identifiant : e-mail ou telephone.
   bool _parTelephone = false;
 
+  /// Pays du numéro, en mode téléphone.
+  final _paysTel = ValueNotifier<PaysTelephone>(senegal);
+
   void _choisirMode(bool parTelephone) {
     if (parTelephone == _parTelephone) return;
     setState(() {
@@ -74,6 +80,7 @@ class _LoginPageState extends State<LoginPage> {
     _identifiantController.dispose();
     _passwordController.dispose();
     _focusMotDePasse.dispose();
+    _paysTel.dispose();
     super.dispose();
   }
 
@@ -86,7 +93,13 @@ class _LoginPageState extends State<LoginPage> {
     setState(() {
       _formulaireVisible = true;
       _parTelephone = !compte.identifiant.contains('@');
-      _identifiantController.text = compte.identifiant;
+      if (_parTelephone) {
+        final lu = lireTelephone(compte.identifiant);
+        _paysTel.value = lu.pays;
+        _identifiantController.text = lu.national;
+      } else {
+        _identifiantController.text = compte.identifiant;
+      }
       _passwordController.clear();
     });
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -134,8 +147,10 @@ class _LoginPageState extends State<LoginPage> {
     // l'autre.
     context.read<AuthBloc>().add(
       LoginRequested(
-        email: _parTelephone ? null : input,
-        telephone: _parTelephone ? input : null,
+        email: _parTelephone ? null : input.toLowerCase(),
+        telephone: _parTelephone
+            ? telephoneInternational(input, _paysTel.value)
+            : null,
         mot_de_passe: _passwordController.text,
       ),
     );
@@ -144,7 +159,9 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColor.kPrimary,
+      // Blanc comme la feuille du formulaire : quand le clavier monte, ce qui
+      // se voit derrière ses coins arrondis est la feuille, pas un liseré bleu.
+      backgroundColor: AppColor.kWhite,
       body: BlocConsumer<AuthBloc, AuthState>(
         listenWhen: (prev, curr) => prev != curr,
         listener: (context, state) {
@@ -217,7 +234,11 @@ class _LoginPageState extends State<LoginPage> {
                     child: Form(
                       key: _formKey,
                       child: AutofillGroup(
-                        child: Column(
+                        child: ColoredBox(
+                          // Le bleu de l'en-tête, derrière les coins arrondis
+                          // de la feuille blanche.
+                          color: AppColor.kPrimary,
+                          child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             _EnteteConnexion(
@@ -290,6 +311,7 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                           ],
                         ),
+                        ),
                       ),
                     ),
                   ),
@@ -339,7 +361,14 @@ class _LoginPageState extends State<LoginPage> {
         ChampFormulaire(
           key: ValueKey(_parTelephone),
           libelle: _parTelephone ? 'Numéro de téléphone' : 'E-mail',
-          hint: _parTelephone ? '77 000 00 00' : 'exemple@mail.com',
+          hint: _parTelephone ? _paysTel.value.exemple : 'exemple@mail.com',
+          prefixe: _parTelephone
+              ? BoutonIndicatif(
+                  pays: _paysTel,
+                  onChange: () => setState(_identifiantController.clear),
+                )
+              : null,
+          formats: _parTelephone ? [FormatTelephone(_paysTel)] : formatsEmail,
           controller: _identifiantController,
           icone: _parTelephone
               ? Icons.smartphone_outlined
@@ -352,14 +381,8 @@ class _LoginPageState extends State<LoginPage> {
               ? const [AutofillHints.telephoneNumber]
               : const [AutofillHints.username, AutofillHints.email],
           validator: (v) {
-            final s = v?.trim() ?? '';
-            if (_parTelephone) {
-              return s.isEmpty ? 'Numéro de téléphone requis' : null;
-            }
-            if (s.isEmpty) return 'E-mail requis';
-            return RegExp(r'^\S+@\S+\.\S+$').hasMatch(s)
-                ? null
-                : 'E-mail invalide';
+            if (_parTelephone) return verifierTelephone(v, _paysTel.value);
+            return verifierEmail(v);
           },
         ),
         const SizedBox(height: 12),

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:saambiz/core/theme/police.dart';
 
 import '../../../../core/constants/infos_app.dart';
+import '../../../../core/services/config_publique_service.dart';
+import '../../../../injection_container.dart';
 import '../../../../core/theme/app_color.dart';
 import '../../../../core/utils/url_externe.dart';
 import '../../../../core/widgets/app_app_bar.dart';
@@ -9,11 +11,45 @@ import '../../../../core/widgets/profil_kit.dart';
 
 /// Centre d'aide : questions fréquentes et moyens de contacter SaamBiz.
 /// [contactSeulement] ouvre directement sur les moyens de contact.
-class AidePage extends StatelessWidget {
+///
+/// Les questions et les coordonnées sont rédigées depuis le dashboard admin
+/// (Configuration → Centre d'aide). Les textes ci-dessous ne servent que si
+/// le serveur est injoignable.
+class AidePage extends StatefulWidget {
   final bool contactSeulement;
   const AidePage({super.key, this.contactSeulement = false});
 
-  static const _faq = <(String, String)>[
+  @override
+  State<AidePage> createState() => _AidePageState();
+}
+
+class _AidePageState extends State<AidePage> {
+  CentreAide? _centre;
+  bool _charge = false;
+
+  bool get contactSeulement => widget.contactSeulement;
+
+  @override
+  void initState() {
+    super.initState();
+    sl<ConfigPubliqueService>().centreAide().then((c) {
+      if (mounted) setState(() {
+        _centre = c;
+        _charge = true;
+      });
+    });
+  }
+
+  List<(String, String)> get _faq {
+    final q = _centre?.questions ?? const [];
+    return q.isNotEmpty ? q : _faqIntegree;
+  }
+
+  String get _whatsapp => _centre?.whatsapp ?? InfosApp.supportWhatsapp;
+  String get _email => _centre?.email ?? InfosApp.supportEmail;
+  String get _telephone => _centre?.telephone ?? InfosApp.supportTelephone;
+
+  static const _faqIntegree = <(String, String)>[
     (
       'SaamBiz est-il gratuit ?',
       "Oui. Ouvrir une boutique, publier des produits et recevoir des commandes ne coûte rien, et SaamBiz ne prélève aucune commission sur vos ventes.",
@@ -24,7 +60,7 @@ class AidePage extends StatelessWidget {
     ),
     (
       'Où trouver le lien de ma boutique ?',
-      "Dans Compte, puis Mon site web. Votre boutique a sa propre adresse, saambiz.com/b/votre-boutique : partagez-la sur WhatsApp ou Instagram, vos clients commandent sans installer l'application.",
+      "Dans l'onglet Boutique. Votre boutique a sa propre adresse, saambiz.com/b/votre-boutique : partagez-la sur WhatsApp ou Instagram, vos clients commandent sans installer l'application.",
     ),
     (
       'Je n\'ai pas reçu le code de confirmation',
@@ -42,7 +78,7 @@ class AidePage extends StatelessWidget {
     ),
     (
       'Comment supprimer mon compte ?',
-      'Compte, puis Sécurité, puis Supprimer mon compte. La suppression est définitive.',
+      'Compte, puis Sécurité, puis Supprimer mon compte.',
     ),
   ];
 
@@ -56,6 +92,12 @@ class AidePage extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
         children: [
+          // Fine barre le temps de lire le contenu à jour.
+          if (!_charge)
+            const Padding(
+              padding: EdgeInsets.only(bottom: 8),
+              child: LinearProgressIndicator(minHeight: 2),
+            ),
           if (!contactSeulement) ...[
             const Padding(
               padding: EdgeInsets.only(left: 4, bottom: 10),
@@ -137,22 +179,23 @@ class AidePage extends StatelessWidget {
                 sousTitre: 'Réponse rapide, 7j/7',
                 onTap: () => _ouvrir(
                   context,
-                  'https://wa.me/${InfosApp.supportWhatsapp}',
+                  'https://wa.me/${_whatsapp.replaceAll(RegExp(r'\D'), '')}',
                 ),
               ),
               LigneProfil(
                 icone: Icons.email_outlined,
-                libelle: InfosApp.supportEmail,
+                libelle: _email,
                 sousTitre: 'Par e-mail',
-                onTap: () =>
-                    _ouvrir(context, 'mailto:${InfosApp.supportEmail}'),
+                onTap: () => _ouvrir(context, 'mailto:$_email'),
               ),
               LigneProfil(
                 icone: Icons.phone_outlined,
-                libelle: InfosApp.supportTelephone,
+                libelle: _telephone,
                 sousTitre: 'Par téléphone',
-                onTap: () =>
-                    _ouvrir(context, 'tel:${InfosApp.supportTelephone}'),
+                onTap: () => _ouvrir(
+                  context,
+                  'tel:${_telephone.replaceAll(RegExp(r'[^\d+]'), '')}',
+                ),
               ),
             ],
           ),

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:saambiz/core/theme/police.dart';
 import 'package:saambiz/core/routes/app_router.dart';
 import 'package:saambiz/injection_container.dart';
+import 'package:saambiz/core/services/comptes_memorises.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../core/theme/app_color.dart';
@@ -88,11 +89,20 @@ class _OnboardingPageState extends State<OnboardingPage> {
     super.dispose();
   }
 
-  void _finish() {
+  Future<void> _finish() async {
+    // Des comptes ont déjà été utilisés sur ce téléphone : on les propose
+    // (écran de connexion, choix du compte). Sinon, première connexion :
+    // l'inscription, qui commence par le choix du profil client ou vendeur.
+    var dejaConnecte = false;
+    try {
+      dejaConnecte = (await sl<ComptesMemorises>().lister()).isNotEmpty;
+    } catch (_) {
+      dejaConnecte = false;
+    }
     if (!mounted) return;
-    // L'onboarding débouche sur le choix du profil : c'est là que se décide
-    // le parcours client ou vendeur.
-    Navigator.of(context).pushReplacementNamed(AppRouter.profileChoiceRoute);
+    Navigator.of(context).pushReplacementNamed(
+      dejaConnecte ? AppRouter.loginRoute : AppRouter.profileChoiceRoute,
+    );
   }
 
   void _next() {

@@ -1,3 +1,4 @@
+import 'package:saambiz/core/utils/fichier_envoi.dart';
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
@@ -71,7 +72,7 @@ class VitrineRemoteDataSourceImpl implements VitrineRemoteDataSource {
     String? activite,
   }) async {
     final form = FormData.fromMap({
-      'logo': await MultipartFile.fromFile(logoPath),
+      'logo': await fichierAEnvoyer(logoPath),
       // Le secteur accompagne le fichier : le serveur renvoie ainsi l'analyse
       // ET le site proposé en un seul aller-retour. Sur une connexion mobile,
       // deux requêtes pour peindre un écran se voient.
@@ -103,7 +104,7 @@ class VitrineRemoteDataSourceImpl implements VitrineRemoteDataSource {
     // second appel pour le fichier laisserait un site créé sans son logo si le
     // réseau lâchait entre les deux.
     final form = FormData.fromMap({
-      if (logoPath != null) 'logo': await MultipartFile.fromFile(logoPath),
+      if (logoPath != null) 'logo': await fichierAEnvoyer(logoPath),
       'secteur': secteur,
       if (activite != null) 'activite': activite,
       if (modele != null) 'modele': modele,

@@ -1,12 +1,36 @@
+import 'dart:math' as math;
 import 'dart:ui';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../theme/app_color.dart';
 import '../theme/police.dart';
 
-/// Espace a laisser en bas des listes d'un onglet, au-dessus de la barre flottante.
-const double kEspaceBarreBas = 96;
+/// Espace a laisser en bas des listes d'un onglet, au-dessus de la barre
+/// flottante. Calé sur le cas le plus haut (Android avec ses trois boutons) :
+/// le dernier élément d'une liste n'est jamais caché sous la barre.
+const double kEspaceBarreBas = 128;
+
+/// Hauteur de la barre d'onglets elle-même.
+const double kHauteurBarreNavigation = 68;
+
+/// Distance entre le bas de l'écran et la barre d'onglets, pour un même
+/// rendu sur iPhone et sur Android :
+/// - iPhone : l'indicateur d'accueil n'est qu'un trait, pas un bouton ; la
+///   barre peut descendre sur sa zone au lieu de flotter au-dessus ;
+/// - Android avec boutons (retour, accueil…) ou barre de gestes : la barre se
+///   pose juste au-dessus, sans jamais les recouvrir ;
+/// - aucune barre système : un petit écart fixe.
+double basBarreNavigation(BuildContext context) {
+  const ecart = 8.0;
+  final systeme = MediaQuery.viewPaddingOf(context).bottom;
+  if (systeme <= 0) return 12 + ecart;
+  if (defaultTargetPlatform == TargetPlatform.iOS) {
+    return math.max(systeme - 18, 8) + ecart;
+  }
+  return systeme + ecart;
+}
 
 /// Barre de navigation du bas en « liquide glace » (verre depoli / frosted glass),
 /// flottant au-dessus du contenu comme sur la maquette de reference.
@@ -15,25 +39,31 @@ class BarreNavigationVerre extends StatelessWidget {
   final ValueChanged<int> onDestinationSelected;
   final List<NavigationDestination> destinations;
 
+  /// Conservé pour compatibilité : l'espace sous la barre est désormais
+  /// calculé par [basBarreNavigation], le même pour clients et vendeurs.
+  final double margeBas;
+
   const BarreNavigationVerre({
     super.key,
     required this.selectedIndex,
     required this.onDestinationSelected,
     required this.destinations,
+    this.margeBas = 16,
   });
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       top: false,
+      bottom: false,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+        padding: EdgeInsets.fromLTRB(20, 0, 20, basBarreNavigation(context)),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(36),
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
             child: Container(
-              height: 68,
+              height: kHauteurBarreNavigation,
               decoration: BoxDecoration(
                 color: Colors.white.withValues(alpha: 0.78),
                 borderRadius: BorderRadius.circular(36),

@@ -1,6 +1,7 @@
 import 'package:saambiz/core/widgets/messages.dart';
 import 'package:saambiz/core/widgets/libelle_obligatoire.dart';
 import 'package:flutter/material.dart';
+import 'package:saambiz/core/utils/email.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../injection_container.dart';
@@ -95,8 +96,8 @@ class _ForgotPasswordViewState extends State<_ForgotPasswordView> {
                 TextFormField(
                   controller: _emailCtrl,
                   keyboardType: TextInputType.emailAddress,
-                  validator: (v) =>
-                      (v == null || !v.contains('@')) ? 'Email invalide' : null,
+                  inputFormatters: formatsEmail,
+                  validator: verifierEmail,
                   decoration: InputDecoration(
                     label: const LibelleObligatoire('E-mail'),
                     filled: true,

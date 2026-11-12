@@ -1,10 +1,8 @@
 import 'package:dio/dio.dart';
-import '../../../../core/routes/app_router.dart';
 import '../models/produit_model.dart';
 import '../models/boutique_model.dart';
 import '../../../../core/services/token_service.dart';
 import '../../../../injection_container.dart';
-import '../../../../core/connection/auth_interceptor.dart';
 import '../../../../core/utils/app_logger.dart';
 import '../../../../core/constants/api_endpoints.dart';
 
@@ -37,27 +35,11 @@ class ProduitRemoteDataSourceImpl implements ProduitRemoteDataSource {
 
   ProduitRemoteDataSourceImpl(this.dio);
 
-  //  Gestion centralisée erreur token
-  void _handleAuthError(dynamic e) {
-    if (e is DioException) {
-      final data = e.response?.data;
-
-      if (data is Map && data['message'] == 'Token expiré') {
-        AuthInterceptor.navigatorKey.currentState?.pushNamedAndRemoveUntil(
-          AppRouter.loginRoute,
-          (route) => false,
-        );
-      }
-
-      // Bonus : gérer aussi 401
-      if (e.response?.statusCode == 401) {
-        AuthInterceptor.navigatorKey.currentState?.pushNamedAndRemoveUntil(
-          AppRouter.loginRoute,
-          (route) => false,
-        );
-      }
-    }
-  }
+  // Erreurs de jeton : rien à faire ici. L'intercepteur Dio renouvelle la
+  // session tout seul et ne renvoie à l'écran de connexion que si le serveur
+  // la refuse vraiment. Renvoyer ici au moindre 401 déconnectait
+  // l'utilisateur dès qu'un renouvellement échouait faute de réseau.
+  void _handleAuthError(dynamic e) {}
 
   //  Extract list helper
   List<dynamic> _extractList(dynamic raw) {

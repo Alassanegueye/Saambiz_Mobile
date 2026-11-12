@@ -1,11 +1,39 @@
-# Modèle pour la signature de release Android.
-# 1) Copier ce fichier en "key.properties" (même dossier android/).
-# 2) Générer un keystore (une seule fois) :
-#    keytool -genkey -v -keystore upload-keystore.jks -keyalg RSA -keysize 2048 -validity 10000 -alias upload
-# 3) Renseigner les valeurs ci-dessous. NE JAMAIS versionner key.properties ni le .jks.
+# ============================================================================
+#  Signature de la version Android — MODÈLE
+#
+#  Copier ce fichier en `android/key.properties` et le remplir. Le vrai
+#  fichier n'est PAS versionné (android/.gitignore), et le keystore non plus :
+#  une clé de signature publiée dans un dépôt permet à n'importe qui de
+#  fabriquer une mise à jour que les téléphones accepteront comme la vôtre.
+#
+#  Créer le keystore, une seule fois, et le garder hors du dépôt :
+#
+#    keytool -genkey -v \
+#      -keystore ~/cles-android/saambiz-upload.jks \
+#      -keyalg RSA -keysize 2048 -validity 10000 \
+#      -alias upload
+#
+#  keytool demande un mot de passe (deux fois), puis votre identité (nom,
+#  organisation, ville, pays) : ces valeurs figurent dans le certificat, elles
+#  n'ont aucun effet technique. Le mot de passe, si.
+#
+#  CE FICHIER ET CE KEYSTORE SONT IRREMPLAÇABLES tant que Play App Signing
+#  n'est pas activé. Sauvegardez-les ailleurs que sur ce Mac — un gestionnaire
+#  de mots de passe pour les mots de passe, un disque chiffré pour le .jks.
+#  Perdre la clé de téléversement sans Play App Signing, c'est ne plus jamais
+#  pouvoir mettre l'application à jour : il faut republier sous un autre
+#  identifiant, et les utilisateurs installés ne suivent pas.
+# ============================================================================
 
-storePassword=VOTRE_MOT_DE_PASSE_STORE
-keyPassword=VOTRE_MOT_DE_PASSE_CLE
+# Nom de la clé dans le keystore (l'« alias » passé à keytool).
 keyAlias=upload
-# Chemin vers le keystore (absolu, ou relatif au dossier android/app)
-storeFile=../upload-keystore.jks
+
+# Mot de passe de la clé, puis celui du keystore. keytool propose souvent le
+# même pour les deux ; c'est admis.
+keyPassword=
+storePassword=
+
+# Chemin du keystore. Relatif, il part de android/app/ — préférez un chemin
+# ABSOLU, hors du dépôt, pour qu'aucune copie ne s'y glisse.
+#   storeFile=/Users/vous/cles-android/saambiz-upload.jks
+storeFile=

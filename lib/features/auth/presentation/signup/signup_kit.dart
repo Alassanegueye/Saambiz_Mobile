@@ -306,6 +306,9 @@ class SbField extends StatelessWidget {
   final List<TextInputFormatter>? formatters;
   final bool obligatoire;
 
+  /// Remplace l'icône de gauche (sélecteur de pays d'un téléphone, par ex.).
+  final Widget? prefixe;
+
   const SbField({
     super.key,
     required this.label,
@@ -321,6 +324,7 @@ class SbField extends StatelessWidget {
     this.suffix,
     this.formatters,
     this.obligatoire = false,
+    this.prefixe,
   });
 
   @override
@@ -357,7 +361,7 @@ class SbField extends StatelessWidget {
               horizontal: 14,
               vertical: 16,
             ),
-            prefixIcon: Icon(icon, size: 20, color: Sb.navy),
+            prefixIcon: prefixe ?? Icon(icon, size: 20, color: Sb.navy),
             suffixIcon: suffix,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),

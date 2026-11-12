@@ -39,6 +39,9 @@ class ProduitModel {
   /// Un tableau = variantes que le client choisit ; sinon, une information.
   final Map<String, dynamic> attributs;
 
+  /// Mis en ligne par le vendeur (interrupteur « En ligne / Hors ligne »).
+  final bool disponible;
+
   ProduitModel({
     required this.id,
     required this.nom,
@@ -56,6 +59,7 @@ class ProduitModel {
     this.images,
     this.categorieId = '',
     this.attributs = const {},
+    this.disponible = true,
   });
 
   factory ProduitModel.fromJson(Map<String, dynamic> json) {
@@ -102,6 +106,7 @@ class ProduitModel {
       prix: json['prix']?.toString() ?? '0',
       prixPromo: (json['prix_promo'] ?? json['prixPromo'])?.toString(),
       quantite: (json['quantite'] ?? 0) as int,
+      disponible: json['disponible'] != false && json['disponible'] != 'false',
       image: json['image'] ?? '',
       ville: ville,
       categorie: categorie,
@@ -117,6 +122,27 @@ class ProduitModel {
           : const {},
     );
   }
+
+  /// Copie avec un autre état « en ligne » (bascule immédiate à l'écran).
+  ProduitModel avecDisponible(bool valeur) => ProduitModel(
+    id: id,
+    nom: nom,
+    description: description,
+    prix: prix,
+    prixPromo: prixPromo,
+    quantite: quantite,
+    image: image,
+    ville: ville,
+    categorie: categorie,
+    vendeurNom: vendeurNom,
+    vendeurNumero: vendeurNumero,
+    vendeurId: vendeurId,
+    boutiqueId: boutiqueId,
+    images: images,
+    categorieId: categorieId,
+    attributs: attributs,
+    disponible: valeur,
+  );
 
   Map<String, dynamic> toJson() => {
     'id': id,

@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/page_vendeur.dart';
 import 'package:saambiz/core/widgets/onglets_conserves.dart';
 import 'dart:async';
 
@@ -7,8 +8,6 @@ import 'package:saambiz/core/theme/police.dart';
 
 import '../../../../core/routes/app_router.dart';
 import '../../../../core/theme/app_color.dart';
-import '../../../../core/widgets/app_app_bar.dart';
-import '../../../../core/widgets/degrade_fond.dart';
 import '../../../../core/widgets/barre_navigation_verre.dart'
     show kEspaceBarreBas;
 import '../../../../core/widgets/empty_state.dart';
@@ -156,16 +155,9 @@ class _ListeState extends State<_Liste> with RetourSurOnglet {
 
   @override
   Widget build(BuildContext context) {
-    return FondDegradeSubtil(
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        appBar: const AppAppBar(
-          title: 'Mes commandes',
-          centerTitle: true,
-          implyLeading: false,
-          couleurFond: Colors.transparent,
-        ),
-        body: BlocBuilder<CommandeBloc, CommandeState>(
+    return PageVendeur(
+      titre: 'Mes commandes',
+      corps: BlocBuilder<CommandeBloc, CommandeState>(
           buildWhen: (avant, apres) =>
               !(apres is CommandeLoading && avant is CommandesLoaded),
           builder: (context, state) {
@@ -304,7 +296,6 @@ class _ListeState extends State<_Liste> with RetourSurOnglet {
             return const SizedBox.shrink();
           },
         ),
-      ),
     );
   }
 }
@@ -329,16 +320,9 @@ class _InviteState extends State<_Invite> {
 
   @override
   Widget build(BuildContext context) {
-    return FondDegradeSubtil(
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        appBar: const AppAppBar(
-          title: 'Mes commandes',
-          centerTitle: true,
-          implyLeading: false,
-          couleurFond: Colors.transparent,
-        ),
-        body: Column(
+    return PageVendeur(
+      titre: 'Mes commandes',
+      corps: Column(
           children: [
             // Barre de recherche (identique connecté)
             Padding(
@@ -497,7 +481,6 @@ class _InviteState extends State<_Invite> {
             ),
           ],
         ),
-      ),
     );
   }
 }

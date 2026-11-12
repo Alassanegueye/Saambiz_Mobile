@@ -162,7 +162,15 @@ class BadgeRupture extends StatelessWidget {
 class ProduitCard extends StatelessWidget {
   final ProduitCatalogue produit;
   final bool surFond;
-  const ProduitCard({super.key, required this.produit, this.surFond = false});
+
+  /// Bouton « + » sur la photo, pour ajouter au panier sans ouvrir la fiche.
+  final bool avecAjout;
+  const ProduitCard({
+    super.key,
+    required this.produit,
+    this.surFond = false,
+    this.avecAjout = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -310,6 +318,154 @@ class ProduitCard extends StatelessWidget {
             top: 6,
             child: BoutonFavoriProduit(produit: p, taille: 32),
           ),
+          if (avecAjout)
+            Positioned(
+              right: 6,
+              bottom: 6,
+              child: BoutonAjoutPanier(produit: p),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// « + » rond : ajoute le produit au panier d'un geste. Un produit à options
+/// (taille, couleur…) ouvre sa fiche pour les choisir ; un produit
+/// indisponible ou épuisé n'a pas de bouton.
+class BoutonAjoutPanier extends StatelessWidget {
+  final ProduitCatalogue produit;
+  final double taille;
+  const BoutonAjoutPanier({super.key, required this.produit, this.taille = 32});
+
+  @override
+  Widget build(BuildContext context) {
+    if (!produit.disponible || produit.enRupture) {
+      return const SizedBox.shrink();
+    }
+    if (produit.aDesOptions) return _bouton(context);
+    // Déjà au panier : le « + » devient « − n + », la quantité se règle sur
+    // place. À 1, « − » retire le produit et le « + » revient.
+    final panier = sl<PanierService>();
+    return ListenableBuilder(
+      listenable: panier,
+      builder: (context, _) {
+        PanierItem? ligne;
+        for (final it in panier.items) {
+          if (it.cle == produit.id) ligne = it;
+        }
+        return AnimatedSwitcher(
+          duration: Mouvement.normal,
+          switchInCurve: Curves.easeOutBack,
+          transitionBuilder: (enfant, anim) =>
+              ScaleTransition(scale: anim, child: enfant),
+          child: ligne == null
+              ? KeyedSubtree(key: const ValueKey('ajout'), child: _bouton(context))
+              : _Quantite(
+                  key: const ValueKey('quantite'),
+                  ligne: ligne,
+                  taille: taille,
+                  panier: panier,
+                ),
+        );
+      },
+    );
+  }
+
+  Widget _bouton(BuildContext context) {
+    return Material(
+      color: AppColor.kPrimary,
+      shape: const CircleBorder(),
+      elevation: 2,
+      shadowColor: Colors.black26,
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: () {
+          if (produit.aDesOptions) {
+            ouvrirFicheProduit(context, produit);
+          } else {
+            ajouterAuPanier(context, produit);
+          }
+        },
+        child: Tooltip(
+          message: 'Ajouter au panier',
+          child: SizedBox(
+            width: taille,
+            height: taille,
+            child: Icon(
+              Icons.add_rounded,
+              size: taille * 0.62,
+              color: AppColor.kWhite,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// « − n + » d'un produit déjà au panier, à la hauteur du bouton « + ».
+class _Quantite extends StatelessWidget {
+  final PanierItem ligne;
+  final double taille;
+  final PanierService panier;
+  const _Quantite({
+    super.key,
+    required this.ligne,
+    required this.taille,
+    required this.panier,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    Widget pas(IconData icone, String aide, int quantite) => InkWell(
+          customBorder: const StadiumBorder(),
+          onTap: quantite > 99
+              ? null
+              : () {
+                  HapticFeedback.selectionClick();
+                  panier.changerQuantite(ligne.cle, quantite);
+                },
+          child: Tooltip(
+            message: aide,
+            child: SizedBox(
+              width: taille,
+              height: taille,
+              child: Icon(icone, size: taille * 0.55, color: AppColor.kWhite),
+            ),
+          ),
+        );
+
+    return Material(
+      color: AppColor.kPrimary,
+      shape: const StadiumBorder(),
+      elevation: 2,
+      shadowColor: Colors.black26,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          pas(
+            ligne.quantite <= 1
+                ? Icons.delete_outline_rounded
+                : Icons.remove_rounded,
+            ligne.quantite <= 1 ? 'Retirer du panier' : 'Un de moins',
+            ligne.quantite - 1,
+          ),
+          ConstrainedBox(
+            constraints: BoxConstraints(minWidth: taille * 0.55),
+            child: Text(
+              '${ligne.quantite}',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontFamily: kPolice,
+                fontWeight: FontWeight.w700,
+                fontSize: taille * 0.44,
+                color: AppColor.kWhite,
+                fontFeatures: const [FontFeature.tabularFigures()],
+              ),
+            ),
+          ),
+          pas(Icons.add_rounded, 'Un de plus', ligne.quantite + 1),
         ],
       ),
     );

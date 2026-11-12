@@ -7,7 +7,6 @@ import '../../../../core/services/config_publique_service.dart';
 import '../../../../core/widgets/intro_marque.dart';
 import '../../../../core/services/session_service.dart';
 import '../../data/models/user_model.dart';
-import '../../../onboarding/presentation/pages/onboarding_page.dart';
 import '../../../../injection_container.dart';
 
 /// Premier écran sous le rideau d'arrivée ([IntroMarque]) : il lit la session
@@ -78,26 +77,21 @@ class _AppBootstrapState extends State<AppBootstrap> {
 
     // Jeton expiré : on tente d'en obtenir un autre avant de demander quoi que
     // ce soit à l'utilisateur.
-    var sessionRefusee = false;
     if (token != null && token.isNotEmpty && _expire(token)) {
       final resultat = await sl<SessionService>().renouveler();
       if (resultat == ResultatRenouvellement.renouvele) {
         token = await _lireJeton();
-      } else if (resultat == ResultatRenouvellement.injoignable) {
+      } else if (resultat == ResultatRenouvellement.injoignable ||
+          resultat == ResultatRenouvellement.serveurIndisponible) {
         // Hors ligne : la session reste valable, elle sera renouvelée au retour
         // du réseau par la première requête. On entre quand même.
       } else {
-        token = null;
-        sessionRefusee = true;
+        token = null; // session refusée : retour à l'onboarding
       }
     }
 
     if (!mounted) return;
 
-    if (sessionRefusee) {
-      Navigator.of(context).pushReplacementNamed(AppRouter.loginRoute);
-      return;
-    }
 
     // Session encore valide → on entre directement, selon le rôle.
     if (token != null && token.isNotEmpty) {
@@ -117,19 +111,10 @@ class _AppBootstrapState extends State<AppBootstrap> {
       }
     }
 
-    // Personne n'est connecté. Les trois écrans d'onboarding ne se montrent
-    // qu'à la première ouverture de l'application (voir [OnboardingPage]) ;
-    // ensuite, on arrive directement sur la connexion, qui propose aussi de
-    // créer un compte.
-    //
-    // Le drapeau vit dans les préférences (effacées à la désinstallation sur
-    // iOS comme sur Android) et non dans le stockage sécurisé : le trousseau
-    // iOS survit à la désinstallation, et la sauvegarde automatique d'Android
-    // est coupée (android:allowBackup="false").
-    if (OnboardingPage.dejaVu()) {
-      Navigator.of(context).pushReplacementNamed(AppRouter.loginRoute);
-      return;
-    }
+    // Personne n'est connecté (déconnexion, session refusée ou première
+    // ouverture) : l'onboarding s'affiche à chaque fois. À sa fin, il mène
+    // aux comptes déjà utilisés sur ce téléphone s'il y en a, sinon à
+    // l'inscription (voir [OnboardingPage]).
     Navigator.of(context).pushReplacementNamed(AppRouter.onboardingRoute);
   }
 

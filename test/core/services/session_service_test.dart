@@ -92,7 +92,7 @@ void main() {
   test('panne du serveur : la session est conservée', () async {
     final r = await session(_FauxServeur(500)).renouveler();
 
-    expect(r, ResultatRenouvellement.injoignable);
+    expect(r, ResultatRenouvellement.serveurIndisponible);
     expect(await jetons.getToken(), 'ancien');
   });
 

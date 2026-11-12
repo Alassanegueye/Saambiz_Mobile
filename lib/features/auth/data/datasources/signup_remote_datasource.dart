@@ -162,6 +162,12 @@ class SignupRemoteDataSource {
         e.type == DioExceptionType.connectionError) {
       return 'Connexion impossible. Vérifiez votre réseau.';
     }
+    // Serveur arrêté ou en redémarrage : le proxy répond 502/503 par une page
+    // HTML, sans message à afficher. Le dire plutôt que d'accuser l'envoi.
+    final statut = e.response?.statusCode ?? 0;
+    if (statut >= 500) {
+      return 'Le service est momentanément indisponible. Réessayez dans un instant.';
+    }
     return fallback;
   }
 }

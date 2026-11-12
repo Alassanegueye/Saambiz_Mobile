@@ -36,6 +36,37 @@ class ConfigPubliqueService {
     }
   }
 
+  /// Centre d'aide (questions fréquentes et contacts), géré depuis le
+  /// dashboard admin. `null` si le serveur est injoignable.
+  Future<CentreAide?> centreAide() async {
+    try {
+      final res = await dio.get(ConfigEndpoints.centreAide);
+      final data = res.data;
+      if (data is! Map) return null;
+      final c = data['contacts'] is Map ? data['contacts'] as Map : const {};
+      String? lire(String k) {
+        final v = c[k]?.toString().trim() ?? '';
+        return v.isEmpty ? null : v;
+      }
+
+      final questions = <(String, String)>[
+        for (final q in (data['questions'] is List ? data['questions'] as List : const []))
+          if (q is Map &&
+              (q['question'] ?? '').toString().trim().isNotEmpty &&
+              (q['reponse'] ?? '').toString().trim().isNotEmpty)
+            (q['question'].toString().trim(), q['reponse'].toString().trim()),
+      ];
+      return CentreAide(
+        whatsapp: lire('whatsapp'),
+        email: lire('email'),
+        telephone: lire('telephone'),
+        questions: questions,
+      );
+    } on DioException {
+      return null;
+    }
+  }
+
   /// État de service de l'application.
   Future<ConfigApp?> configApp() async {
     try {
@@ -52,6 +83,21 @@ class ConfigPubliqueService {
       return null;
     }
   }
+}
+
+/// Contenu du centre d'aide rédigé depuis le dashboard admin.
+class CentreAide {
+  final String? whatsapp;
+  final String? email;
+  final String? telephone;
+  final List<(String, String)> questions;
+
+  const CentreAide({
+    this.whatsapp,
+    this.email,
+    this.telephone,
+    this.questions = const [],
+  });
 }
 
 class ConfigApp {

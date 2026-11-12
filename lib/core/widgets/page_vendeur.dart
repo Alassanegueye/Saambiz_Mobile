@@ -1,4 +1,4 @@
-import 'dart:math' as math;
+import 'barre_navigation_verre.dart' show basBarreNavigation, kHauteurBarreNavigation;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -18,9 +18,9 @@ double espaceBasVendeur(BuildContext context) {
   // système ; `MediaQuery.of` le reconstruisait aussi à chaque ouverture du
   // clavier et à chaque changement de densité de texte, alors que cette
   // fonction n'en dépend pas.
-  final marges = MediaQuery.paddingOf(context);
-  final margesVue = MediaQuery.viewPaddingOf(context);
-  return math.max(marges.bottom, 84 + margesVue.bottom) + 16;
+  // Le haut de la barre d'onglets (même calcul que la barre elle-même),
+  // plus un écart.
+  return basBarreNavigation(context) + kHauteurBarreNavigation + 16;
 }
 
 /// Gabarit commun des onglets vendeur, dans l'esprit de la page de

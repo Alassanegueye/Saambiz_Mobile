@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 
 /// Traduit une erreur réseau en une phrase lisible par l'utilisateur.
@@ -12,6 +14,9 @@ import 'package:dio/dio.dart';
 /// le seul à connaître la raison métier (« Ce numéro est déjà utilisé »,
 /// « Le montant doit être positif »). Les libellés génériques ci-dessous ne
 /// servent que lorsqu'il n'y en a pas.
+const _horsLigne =
+    "Vous n'êtes pas connecté à internet. Vérifiez votre réseau puis réessayez.";
+
 String messageErreurReseau(Object erreur, {String? repli}) {
   if (erreur is! DioException) {
     return repli ?? "Une erreur inattendue s'est produite.";
@@ -21,10 +26,16 @@ String messageErreurReseau(Object erreur, {String? repli}) {
   final messageBackend = _messageDuBackend(erreur.response?.data);
   if (messageBackend != null) return messageBackend;
 
-  // 2. Les pannes de transport, qui n'ont pas de réponse du tout.
+  // 2. Les pannes de transport, qui n'ont pas de réponse du tout. Selon la
+  //    plateforme, une coupure arrive aussi en `unknown` avec l'exception
+  //    système en cause : on la reconnaît à celle-ci.
+  if (erreur.response == null &&
+      (erreur.error is SocketException || erreur.error is HttpException)) {
+    return _horsLigne;
+  }
   switch (erreur.type) {
     case DioExceptionType.connectionError:
-      return 'Pas de connexion internet. Vérifiez votre réseau puis réessayez.';
+      return _horsLigne;
     case DioExceptionType.connectionTimeout:
       return "Le serveur met trop de temps à répondre. Vérifiez votre connexion puis réessayez.";
     case DioExceptionType.sendTimeout:

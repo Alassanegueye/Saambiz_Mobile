@@ -165,6 +165,11 @@ class MessagerieEndpoints {
   static const nonLus = '/messages/non-lus';
   static String historique(String userId) => '/messages/$userId';
   static String marquerLu(String messageId) => '/messages/$messageId/lire';
+
+  /// Messages laissés sur la page Contact du site de la boutique.
+  static const site = '/messages/site';
+  static String siteLu(String id) => '/messages/site/$id/lire';
+  static String siteMessage(String id) => '/messages/site/$id';
 }
 
 /// Notifications (temps réel via socket + REST) + device token FCM.
@@ -225,6 +230,10 @@ class ConfigEndpoints {
 
   /// `{ prix: 2000, devise: 'FCFA' }`
   static const prixAbonnement = '/prix-abonnement';
+
+  /// `{ contacts: { whatsapp, email, telephone }, questions: [...] }`,
+  /// rédigés depuis le dashboard admin.
+  static const centreAide = '/centre-aide';
 
   /// `{ minVersionAndroid, minVersionIos, maintenance, message }`
   static const appConfig = '/app/config';

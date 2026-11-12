@@ -1,3 +1,4 @@
+import 'package:saambiz/core/utils/fichier_envoi.dart';
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
@@ -77,7 +78,7 @@ class BoutiqueRemoteDataSourceImpl implements BoutiqueRemoteDataSource {
       if (categories != null && categories.isNotEmpty)
         'categories': jsonEncode(categories),
       if (slogan != null) 'slogan': slogan,
-      if (logoPath != null) 'logo': await MultipartFile.fromFile(logoPath),
+      if (logoPath != null) 'logo': await fichierAEnvoyer(logoPath),
     });
     final res = await dio.post(BoutiqueEndpoints.creerBoutique, data: form);
     return BoutiqueVendeurModel.fromJson(res.data as Map<String, dynamic>);
@@ -104,7 +105,7 @@ class BoutiqueRemoteDataSourceImpl implements BoutiqueRemoteDataSource {
       if (categories != null && categories.isNotEmpty)
         'categories': jsonEncode(categories),
       if (slogan != null) 'slogan': slogan,
-      if (logoPath != null) 'logo': await MultipartFile.fromFile(logoPath),
+      if (logoPath != null) 'logo': await fichierAEnvoyer(logoPath),
     });
     final res = await dio.put(BoutiqueEndpoints.modifierBoutique, data: form);
     return BoutiqueVendeurModel.fromJson(res.data as Map<String, dynamic>);

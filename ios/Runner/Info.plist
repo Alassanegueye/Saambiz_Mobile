@@ -32,6 +32,15 @@
 	<string>SaamBiz utilise l'appareil photo pour photographier vos produits, votre boutique ou votre pièce d'identité lors de la certification de votre boutique.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>SaamBiz utilise votre position pour vous proposer les boutiques proches de vous. Vous pouvez refuser : les boutiques vous seront alors proposées selon vos centres d'intérêt.</string>
+	<!-- Exigée par Apple (avertissement 90683 au téléversement) même si
+	     l'application ne relève JAMAIS la position en arrière-plan : le
+	     contrôle d'Apple est statique, et le binaire de geolocator référence
+	     les API « Always », que SaamBiz n'appelle pas. Sans cette clé, iOS
+	     afficherait une demande d'autorisation sans explication si une
+	     version future du plugin empruntait ce chemin.
+	     Le texte dit donc la vérité : en cours d'utilisation seulement. -->
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>SaamBiz utilise votre position uniquement pendant que vous consultez l'application, pour vous proposer les boutiques proches de vous. Elle ne suit jamais vos déplacements en arrière-plan.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>SaamBiz accède à vos photos pour illustrer vos produits, votre boutique et votre profil. Vous choisissez chaque image vous-même.</string>
 	<key>UIApplicationSceneManifest</key>
