@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/messages.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:saambiz/core/theme/police.dart';
@@ -124,11 +125,9 @@ class _AbonneDetailPageState extends State<AbonneDetailPage> {
   }
 
   Future<void> _ouvrir(String url) async {
-    final messager = ScaffoldMessenger.of(context);
     if (await UrlExterne.lancer(url)) return;
-    messager.showSnackBar(
-      const SnackBar(content: Text('Impossible d\'ouvrir ce contact.')),
-    );
+    if (!mounted) return;
+    afficherErreur(context, 'Impossible d\'ouvrir ce contact.');
   }
 
   @override

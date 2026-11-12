@@ -2,14 +2,12 @@ import 'package:saambiz/core/widgets/messages.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:toastification/toastification.dart';
 
 import '../../../../core/theme/app_color.dart';
 import '../../../../core/theme/police.dart';
 import '../../../../core/utils/telephone.dart';
 import '../../../../core/widgets/bouton_indicatif.dart';
 import '../../../../core/widgets/page_vendeur.dart';
-import '../../../../core/widgets/toastNotif.dart';
 import '../../../../injection_container.dart';
 import '../../../home/data/models/produit_model.dart';
 import '../../../vendeur/data/datasources/vendeur_produit_datasource.dart';
@@ -125,11 +123,10 @@ class _NouvelleCommandeVendeurPageState
   Future<void> _enregistrer() async {
     if (!_formKey.currentState!.validate()) return;
     if (_quantites.isEmpty) {
-      showToast(
+      afficherErreur(
         context,
-        'Aucun produit',
         'Ajoutez au moins un produit à la commande.',
-        ToastificationType.warning,
+        titre: 'Aucun produit',
       );
       return;
     }
@@ -162,14 +159,13 @@ class _NouvelleCommandeVendeurPageState
       final message = data is Map && data['message'] != null
           ? data['message'].toString()
           : 'Vérifiez votre connexion et réessayez.';
-      showToast(context, 'Échec', message, ToastificationType.error);
+      afficherErreur(context, message, titre: 'Échec');
     } catch (_) {
       if (!mounted) return;
-      showToast(
+      afficherErreur(
         context,
-        'Échec',
         'La commande n\'a pas pu être enregistrée.',
-        ToastificationType.error,
+        titre: 'Échec',
       );
     } finally {
       if (mounted) setState(() => _envoi = false);
@@ -536,7 +532,8 @@ class _NouvelleCommandeVendeurPageState
       textCapitalization: capitalisation,
       maxLines: lignes,
       decoration: prefixe == null ? deco : deco.copyWith(prefixIcon: prefixe),
-      validator: verifier ??
+      validator:
+          verifier ??
           (requis
               ? (v) =>
                     (v == null || v.trim().isEmpty) ? '$libelle requis' : null

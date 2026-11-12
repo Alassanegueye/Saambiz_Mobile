@@ -538,6 +538,25 @@ class Donnees {
     {'id': 'n3', 'titre': 'Commande livrée', 'message': 'SB-23988 a été livrée. Donnez votre avis sur Thiossane Épicerie.', 'createdAt': _il(const Duration(days: 6)), 'lue': true},
   ];
 
+  /// Conversations telles que le serveur les renvoie : le dernier message,
+  /// l'interlocuteur et sa boutique quand c'est un vendeur.
+  static List<Map<String, dynamic>> get conversations => [
+    {
+      'id': 'm1', 'contenu': 'Bonjour, la robe Ndeye est disponible en taille M.',
+      'createdAt': _il(const Duration(minutes: 6)),
+      'interlocuteurId': 'v-b1', 'nombreNonLus': 2,
+      'interlocuteur': {'id': 'v-b1', 'prenom': 'Awa', 'nom': 'Ndiaye', 'photoProfil': null,
+        'boutique': {'id': 'b1', 'nom': boutiques[0]['nom'], 'logo': boutiques[0]['logo']}},
+    },
+    {
+      'id': 'm2', 'contenu': 'Votre colis part demain matin.',
+      'createdAt': _il(const Duration(hours: 2)),
+      'interlocuteurId': 'v-b3', 'nombreNonLus': 0,
+      'interlocuteur': {'id': 'v-b3', 'prenom': 'Ibou', 'nom': 'Fall', 'photoProfil': null,
+        'boutique': {'id': 'b3', 'nom': boutiques[2]['nom'], 'logo': boutiques[2]['logo']}},
+    },
+  ];
+
   // ─── Routeur ─────────────────────────────────────────────────────────────
   /// Réponse simulée d'une requête, ou `null` si elle n'est pas prévue.
   static Object? repondre(String methode, String chemin, Map<String, dynamic> params) {
@@ -553,6 +572,8 @@ class Donnees {
     if (c == '/notifications/non-lues') return {'nombre': 2};
     if (c == '/notifications') return {'notifications': notifications};
     if (c == '/messages/non-lus') return {'nombre': 1};
+    if (c == '/messages/site') return {'messages': <Map<String, dynamic>>[]};
+    if (c == '/messages/conversations') return {'conversations': conversations};
     if (c == '/account/me') return {'utilisateur': utilisateur};
     if (c == '/categories') return {'categories': categories};
     if (c == '/catalogue/promotions') return {'produits': [for (final p in produits) if (p['prixPromo'] != null) p]};

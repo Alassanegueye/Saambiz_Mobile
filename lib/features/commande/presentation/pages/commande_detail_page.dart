@@ -130,10 +130,9 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
     if (!mounted) return;
     if (commande.statutPaiement != 'non_paye' ||
         commande.statut != 'acceptee') {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Cette commande vient de changer : vérifiez son état.'),
-        ),
+      afficherInfo(
+        context,
+        'Cette commande vient de changer : vérifiez son état.',
       );
       return;
     }
@@ -340,12 +339,7 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
       body: BlocConsumer<CommandeBloc, CommandeState>(
         listener: (context, state) async {
           if (state is CommandeError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: AppColor.kErreur,
-              ),
-            );
+            afficherErreur(context, state.message);
           } else if (state is CommandeMiseAJour) {
             setState(() => commande = state.commande);
             afficherSucces(context, 'Commande mise à jour avec succès');
@@ -358,13 +352,9 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
                 uri.hasScheme &&
                 await launchUrl(uri, mode: LaunchMode.externalApplication);
             if (!ouvert && context.mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text(
-                    'Le paiement n\'a pas pu s\'ouvrir. Réessayez dans un instant.',
-                  ),
-                  backgroundColor: AppColor.kErreur,
-                ),
+              afficherErreur(
+                context,
+                'Le paiement n\'a pas pu s\'ouvrir. Réessayez dans un instant.',
               );
             }
           }

@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/messages.dart';
 import 'package:saambiz/core/widgets/onglets_conserves.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -115,6 +116,20 @@ class _ProfilPageState extends State<ProfilPage> with RetourSurOnglet {
     );
     await fin;
     navigateur.pushNamedAndRemoveUntil(AppRouter.loginRoute, (_) => false);
+    final ctx = navigateur.context;
+    if (ctx.mounted) {
+      compteSupprime
+          ? afficherSucces(
+              ctx,
+              'Votre compte a été supprimé.',
+              titre: 'Compte supprimé',
+            )
+          : afficherSucces(
+              ctx,
+              'Vous êtes déconnecté. À bientôt !',
+              titre: 'Déconnexion',
+            );
+    }
   }
 
   /// Quitte ce compte sans fermer sa session, puis l'écran de connexion
@@ -128,6 +143,14 @@ class _ProfilPageState extends State<ProfilPage> with RetourSurOnglet {
     bloc.add(ChangementDeCompteDemande(compteQuitte: _user));
     await fin;
     navigateur.pushNamedAndRemoveUntil(AppRouter.loginRoute, (_) => false);
+    final ctx = navigateur.context;
+    if (ctx.mounted) {
+      afficherInfo(
+        ctx,
+        'Choisissez le compte à utiliser.',
+        titre: 'Changer de compte',
+      );
+    }
   }
 
   Future<void> _onLogout() async {
@@ -164,9 +187,7 @@ class _ProfilPageState extends State<ProfilPage> with RetourSurOnglet {
         } else if (state is CompteAccountDeleted) {
           _deconnecter(compteSupprime: true);
         } else if (state is CompteError) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(state.message)));
+          afficherErreur(context, state.message);
         }
       },
       // Un glissé de la gauche vers la droite, n'importe où sur l'écran,

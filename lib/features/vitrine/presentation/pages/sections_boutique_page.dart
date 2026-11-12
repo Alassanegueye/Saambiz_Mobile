@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/messages.dart';
 import 'package:saambiz/core/widgets/page_vendeur.dart';
 import 'package:flutter/material.dart';
 import 'package:saambiz/core/widgets/image_reseau.dart';
@@ -198,7 +199,10 @@ class _SectionsBoutiquePageState extends State<SectionsBoutiquePage> {
 
   Future<void> _ajouterSection() async {
     if (_sections.length >= maxSections) {
-      _dire('Vous avez atteint $maxSections sections, le maximum.');
+      afficherInfo(
+        context,
+        'Vous avez atteint $maxSections sections, le maximum.',
+      );
       return;
     }
     final titre = await _demanderTitre();
@@ -281,15 +285,12 @@ class _SectionsBoutiquePageState extends State<SectionsBoutiquePage> {
     });
   }
 
-  void _dire(String message) => ScaffoldMessenger.of(
-    context,
-  ).showSnackBar(SnackBar(content: Text(message)));
-
   /// Rend la liste à la page Boutique, qui se charge de l'envoyer.
   void _enregistrer() {
     final vides = _sections.where((s) => s.produitIds.isEmpty).length;
     if (vides > 0) {
-      _dire(
+      afficherInfo(
+        context,
         vides == 1
             ? 'Une section sans produit ne s\'affichera pas sur votre site.'
             : '$vides sections sans produit ne s\'afficheront pas sur votre site.',
@@ -735,12 +736,9 @@ class SelecteurProduitsState extends State<SelecteurProduits> {
       return;
     }
     if (_choisis.length >= maxProduitsParSection) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Une section contient au plus $maxProduitsParSection produits.',
-          ),
-        ),
+      afficherInfo(
+        context,
+        'Une section contient au plus $maxProduitsParSection produits.',
       );
       return;
     }

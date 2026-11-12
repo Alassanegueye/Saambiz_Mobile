@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/messages.dart';
 import 'package:saambiz/core/widgets/libelle_obligatoire.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -77,15 +78,10 @@ class _SelecteurCategoriesState extends State<SelecteurCategories> {
       } else if (_choix.length < widget.maximum) {
         _choix.add(c.slug);
       } else {
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(
-            SnackBar(
-              content: Text(
-                '${widget.maximum} catégories au maximum. Retirez-en une d\'abord.',
-              ),
-            ),
-          );
+        afficherInfo(
+          context,
+          '${widget.maximum} catégories au maximum. Retirez-en une d\'abord.',
+        );
         return;
       }
     });

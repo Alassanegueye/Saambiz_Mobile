@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/messages.dart';
 import 'dart:async';
 import 'package:saambiz/core/widgets/image_reseau.dart';
 
@@ -360,7 +361,10 @@ class BoutonAjoutPanier extends StatelessWidget {
           transitionBuilder: (enfant, anim) =>
               ScaleTransition(scale: anim, child: enfant),
           child: ligne == null
-              ? KeyedSubtree(key: const ValueKey('ajout'), child: _bouton(context))
+              ? KeyedSubtree(
+                  key: const ValueKey('ajout'),
+                  child: _bouton(context),
+                )
               : _Quantite(
                   key: const ValueKey('quantite'),
                   ligne: ligne,
@@ -419,22 +423,22 @@ class _Quantite extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget pas(IconData icone, String aide, int quantite) => InkWell(
-          customBorder: const StadiumBorder(),
-          onTap: quantite > 99
-              ? null
-              : () {
-                  HapticFeedback.selectionClick();
-                  panier.changerQuantite(ligne.cle, quantite);
-                },
-          child: Tooltip(
-            message: aide,
-            child: SizedBox(
-              width: taille,
-              height: taille,
-              child: Icon(icone, size: taille * 0.55, color: AppColor.kWhite),
-            ),
-          ),
-        );
+      customBorder: const StadiumBorder(),
+      onTap: quantite > 99
+          ? null
+          : () {
+              HapticFeedback.selectionClick();
+              panier.changerQuantite(ligne.cle, quantite);
+            },
+      child: Tooltip(
+        message: aide,
+        child: SizedBox(
+          width: taille,
+          height: taille,
+          child: Icon(icone, size: taille * 0.55, color: AppColor.kWhite),
+        ),
+      ),
+    );
 
     return Material(
       color: AppColor.kPrimary,
@@ -499,17 +503,10 @@ class BoutonFavoriProduit extends StatelessWidget {
               HapticFeedback.lightImpact();
               final ajoute = await FavorisProduits.basculer(produit);
               if (!context.mounted) return;
-              ScaffoldMessenger.of(context)
-                ..clearSnackBars()
-                ..showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      ajoute ? 'Ajouté à vos favoris' : 'Retiré de vos favoris',
-                    ),
-                    behavior: SnackBarBehavior.floating,
-                    duration: const Duration(seconds: 2),
-                  ),
-                );
+              afficherSucces(
+                context,
+                ajoute ? 'Ajouté à vos favoris' : 'Retiré de vos favoris',
+              );
             },
             child: SizedBox(
               width: taille,

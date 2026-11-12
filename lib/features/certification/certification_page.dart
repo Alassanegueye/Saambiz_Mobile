@@ -103,13 +103,17 @@ class _CertificationPageState extends State<CertificationPage> {
         }
       });
     } catch (_) {
-      _dire("La photo n'a pas pu être récupérée. Réessayez.");
+      afficherErreur(context, "La photo n'a pas pu être récupérée. Réessayez.");
     }
   }
 
   Future<void> _envoyer() async {
     if (_recto == null || _verso == null) {
-      _dire('Ajoutez la photo du recto et celle du verso.');
+      afficherErreur(
+        context,
+        'Ajoutez la photo du recto et celle du verso.',
+        titre: 'Photos manquantes',
+      );
       return;
     }
     setState(() => _envoi = true);
@@ -127,23 +131,18 @@ class _CertificationPageState extends State<CertificationPage> {
       await _charger();
     } on DioException catch (e) {
       final data = e.response?.data;
-      _dire(
+      if (!mounted) return;
+      afficherErreur(
+        context,
         data is Map && data['message'] != null
             ? data['message'].toString()
             : 'Envoi impossible. Vérifiez votre connexion et réessayez.',
       );
     } catch (_) {
-      _dire('Envoi impossible. Réessayez.');
+      if (mounted) afficherErreur(context, 'Envoi impossible. Réessayez.');
     } finally {
       if (mounted) setState(() => _envoi = false);
     }
-  }
-
-  void _dire(String message) {
-    if (!mounted) return;
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override

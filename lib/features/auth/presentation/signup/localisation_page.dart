@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/messages.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
@@ -55,12 +56,9 @@ class _LocalisationPageState extends State<LocalisationPage> {
 
     if (!mounted) return;
     if (position == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Position non disponible. Vous verrez quand même les boutiques qui vous correspondent.',
-          ),
-        ),
+      afficherInfo(
+        context,
+        'Position non disponible. Vous verrez quand même les boutiques qui vous correspondent.',
       );
     }
     await _entrer();

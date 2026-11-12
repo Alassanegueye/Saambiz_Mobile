@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/messages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -39,12 +40,7 @@ class _MesSignalementsView extends StatelessWidget {
       body: BlocConsumer<SignalementsBloc, SignalementsState>(
         listener: (context, state) {
           if (state is SignalementsError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: Colors.red,
-              ),
-            );
+            afficherErreur(context, state.message);
           }
         },
         builder: (context, state) {

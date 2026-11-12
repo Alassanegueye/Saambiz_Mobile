@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/messages.dart';
 import 'package:saambiz/features/messagerie/presentation/pages/chat_page.dart';
 import 'package:dio/dio.dart';
 import 'package:saambiz/core/widgets/image_reseau.dart';
@@ -184,7 +185,11 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
   // Actions
   Future<void> _basculerSuivi() async {
     if (!await sl<TokenService>().isAuthenticated) {
-      _message('Créez un compte ou connectez-vous pour suivre cette boutique.');
+      afficherInfo(
+        context,
+        'Créez un compte ou connectez-vous pour suivre cette boutique.',
+        titre: 'Connexion requise',
+      );
       return;
     }
     final avant = _suivi;
@@ -197,14 +202,15 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
       avant
           ? await ds.supprimer(widget.boutiqueId)
           : await ds.ajouter(widget.boutiqueId);
-      _message(
+      afficherSucces(
+        context,
         avant
             ? 'Vous ne suivez plus cette boutique.'
             : 'Vous suivez cette boutique. Activez la cloche pour recevoir ses promotions et nouveautés.',
       );
     } catch (_) {
       if (mounted) setState(() => _suivi = avant);
-      _message('Action impossible pour le moment.');
+      afficherErreur(context, 'Action impossible pour le moment. Réessayez.');
     }
   }
 
@@ -220,14 +226,15 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
       );
       if (!mounted) return;
       setState(() => _cloche = actif);
-      _message(
+      afficherSucces(
+        context,
         actif
             ? 'Notifications activées : vous serez prévenu des promotions et nouveautés.'
             : 'Notifications désactivées pour cette boutique.',
       );
     } catch (_) {
       if (mounted) setState(() => _cloche = avant);
-      _message('Action impossible pour le moment.');
+      afficherErreur(context, 'Action impossible pour le moment. Réessayez.');
     }
   }
 
@@ -239,11 +246,17 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
   Future<void> _whatsapp(String telephone) async {
     final numero = _numero(telephone);
     if (numero.isEmpty) {
-      _message('Cette boutique n\'a pas indiqué de numéro WhatsApp.');
+      afficherInfo(
+        context,
+        'Cette boutique n\'a pas indiqué de numéro WhatsApp.',
+      );
       return;
     }
     if (!await UrlExterne.lancer('https://wa.me/$numero')) {
-      _message('WhatsApp n\'est pas disponible sur cet appareil.');
+      afficherErreur(
+        context,
+        'WhatsApp n\'est pas disponible sur cet appareil.',
+      );
     }
   }
 
@@ -257,8 +270,10 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
 
   Future<void> _ecrire(String nomBoutique) async {
     if (!await sl<TokenService>().isAuthenticated) {
-      _message(
+      afficherInfo(
+        context,
         'Créez un compte ou connectez-vous pour écrire à cette boutique.',
+        titre: 'Connexion requise',
       );
       return;
     }
@@ -276,7 +291,7 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
   Future<void> _appeler(String telephone) async {
     final numero = telephone.replaceAll(RegExp(r'[^\d+]'), '');
     if (numero.isEmpty || !await UrlExterne.lancer('tel:$numero')) {
-      _message('Appel impossible depuis cet appareil.');
+      afficherErreur(context, 'Appel impossible depuis cet appareil.');
     }
   }
 
@@ -284,17 +299,8 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
     final url =
         'https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent(adresse)}';
     if (!await UrlExterne.lancer(url)) {
-      _message('Impossible d\'ouvrir la carte.');
+      afficherErreur(context, 'Impossible d\'ouvrir la carte.');
     }
-  }
-
-  void _message(String texte) {
-    if (!mounted) return;
-    ScaffoldMessenger.of(context)
-      ..clearSnackBars()
-      ..showSnackBar(
-        SnackBar(content: Text(texte), behavior: SnackBarBehavior.floating),
-      );
   }
 
   Color get _accent {
@@ -1073,7 +1079,8 @@ class _SectionPage extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         gridDelegate: grilleProduits(context),
         itemCount: produits.length,
-        itemBuilder: (_, i) => ProduitCard(produit: produits[i], avecAjout: true),
+        itemBuilder: (_, i) =>
+            ProduitCard(produit: produits[i], avecAjout: true),
       ),
     );
   }

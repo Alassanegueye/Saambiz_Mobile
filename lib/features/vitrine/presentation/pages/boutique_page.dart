@@ -1137,9 +1137,7 @@ class _CarteEnLigne extends StatelessWidget {
                 onTap: () async {
                   await Clipboard.setData(ClipboardData(text: vitrine.url));
                   if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Adresse copiée.')),
-                    );
+                    afficherSucces(context, 'Adresse copiée.');
                   }
                 },
               ),
@@ -2439,11 +2437,7 @@ Future<void> _partagerWhatsapp(BuildContext context, String url) async {
   if (!ouvert && context.mounted) {
     await Clipboard.setData(ClipboardData(text: url));
     if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Adresse copiée : collez-la où vous voulez.'),
-        ),
-      );
+      afficherSucces(context, 'Adresse copiée : collez-la où vous voulez.');
     }
   }
 }

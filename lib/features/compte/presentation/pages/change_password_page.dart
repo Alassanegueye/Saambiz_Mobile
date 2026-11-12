@@ -66,12 +66,7 @@ class _ChangePasswordViewState extends State<_ChangePasswordView> {
       body: BlocConsumer<CompteBloc, CompteState>(
         listener: (context, state) {
           if (state is CompteError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: Colors.red,
-              ),
-            );
+            afficherErreur(context, state.message);
           } else if (state is CompteActionSucces ||
               state is CompteMessageSucces) {
             afficherSucces(context, 'Mot de passe modifié avec succès');

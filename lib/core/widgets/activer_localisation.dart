@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/messages.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 
@@ -18,10 +19,9 @@ Future<bool> activerLocalisation(BuildContext context) async {
   if (!context.mounted) return position != null;
   final messager = ScaffoldMessenger.of(context)..clearSnackBars();
   if (position != null) {
-    messager.showSnackBar(
-      const SnackBar(
-        content: Text('Géolocalisation activée : voici les boutiques proches.'),
-      ),
+    afficherSucces(
+      context,
+      'Géolocalisation activée : voici les boutiques proches.',
     );
     return true;
   }

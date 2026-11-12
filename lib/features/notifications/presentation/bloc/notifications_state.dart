@@ -13,9 +13,12 @@ class NotificationsLoading extends NotificationsState {}
 
 class NotificationsLoaded extends NotificationsState {
   final List<NotificationModel> notifications;
-  NotificationsLoaded(this.notifications);
+
+  /// Confirmation d'une action (« tout marquer comme lu »), `null` sinon.
+  final String? succes;
+  NotificationsLoaded(this.notifications, {this.succes});
   @override
-  List<Object?> get props => [notifications];
+  List<Object?> get props => [notifications, succes];
 }
 
 class NombreNonLuesLoaded extends NotificationsState {

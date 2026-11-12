@@ -144,12 +144,7 @@ class _EditProfileViewState extends State<_EditProfileView> {
       body: BlocConsumer<CompteBloc, CompteState>(
         listener: (context, state) {
           if (state is CompteError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: Colors.red,
-              ),
-            );
+            afficherErreur(context, state.message);
           } else if (state is CompteActionSucces) {
             afficherSucces(context, 'Profil mis à jour avec succès');
             Navigator.of(context).pop(state.user);

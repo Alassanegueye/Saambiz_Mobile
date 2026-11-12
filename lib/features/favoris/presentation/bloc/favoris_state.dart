@@ -13,9 +13,13 @@ class FavorisLoading extends FavorisState {}
 
 class FavorisLoaded extends FavorisState {
   final List<BoutiqueSuivie> boutiques;
-  FavorisLoaded(this.boutiques);
+
+  /// Message à confirmer à l'utilisateur après une action réussie (suivre,
+  /// ne plus suivre, alertes). `null` pour un simple chargement.
+  final String? succes;
+  FavorisLoaded(this.boutiques, {this.succes});
   @override
-  List<Object?> get props => [boutiques];
+  List<Object?> get props => [boutiques, succes];
 }
 
 class FavorisError extends FavorisState {

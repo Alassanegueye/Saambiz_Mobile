@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/messages.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:saambiz/core/widgets/onglets_conserves.dart';
 import 'package:saambiz/core/widgets/image_reseau.dart';
@@ -1040,29 +1041,17 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
       } else {
         // 4. Affiche un message si WhatsApp n'est pas installé
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text(
-                'Impossible d\'ouvrir WhatsApp. Veuillez vérifier que l\'application est installée.',
-                style: TextStyle(fontFamily: kPolice, color: _C.white),
-              ),
-              backgroundColor: _C.orange,
-              behavior: SnackBarBehavior.floating,
-            ),
+          afficherErreur(
+            context,
+            'Impossible d\'ouvrir WhatsApp. Veuillez vérifier que l\'application est installée.',
           );
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Erreur: ${e.toString()}',
-              style: const TextStyle(fontFamily: kPolice, color: _C.white),
-            ),
-            backgroundColor: _C.orange,
-            behavior: SnackBarBehavior.floating,
-          ),
+        afficherErreur(
+          context,
+          'WhatsApp n\'a pas pu s\'ouvrir. Réessayez.',
         );
       }
     }

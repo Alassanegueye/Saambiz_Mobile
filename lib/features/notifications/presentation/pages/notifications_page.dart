@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/messages.dart';
 import 'package:saambiz/core/theme/app_color.dart';
 import 'package:saambiz/core/widgets/ui_kit.dart';
 import 'dart:async';
@@ -71,12 +72,9 @@ class _NotificationsViewState extends State<_NotificationsView> {
       corps: BlocConsumer<NotificationsBloc, NotificationsState>(
         listener: (context, state) {
           if (state is NotificationsError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: Colors.red,
-              ),
-            );
+            afficherErreur(context, state.message);
+          } else if (state is NotificationsLoaded && state.succes != null) {
+            afficherSucces(context, state.succes!);
           }
         },
         builder: (context, state) {

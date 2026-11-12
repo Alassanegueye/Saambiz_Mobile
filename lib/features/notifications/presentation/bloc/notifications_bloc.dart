@@ -43,9 +43,19 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
     Emitter<NotificationsState> emit,
   ) async {
     final result = await repository.marquerToutesLues();
-    result.fold(
+    if (result.isLeft()) {
+      result.fold((f) => emit(NotificationsError(f.errorMessage)), (_) {});
+      return;
+    }
+    final liste = await repository.notifications();
+    liste.fold(
       (f) => emit(NotificationsError(f.errorMessage)),
-      (_) => add(LoadNotifications()),
+      (notifications) => emit(
+        NotificationsLoaded(
+          notifications,
+          succes: 'Toutes vos notifications sont marquées comme lues.',
+        ),
+      ),
     );
   }
 

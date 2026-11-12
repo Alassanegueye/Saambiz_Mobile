@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/messages.dart';
 import 'package:flutter/material.dart';
 import 'package:saambiz/core/widgets/image_reseau.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -42,12 +43,7 @@ class _PromotionsActivesView extends StatelessWidget {
       body: BlocConsumer<PromotionsBloc, PromotionsState>(
         listener: (context, state) {
           if (state is PromotionsError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: Colors.red,
-              ),
-            );
+            afficherErreur(context, state.message);
           }
         },
         builder: (context, state) {

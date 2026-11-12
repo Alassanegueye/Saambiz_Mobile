@@ -791,18 +791,8 @@ class _RangeeCategories extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 7),
-                      Text(
+                      _LibelleCategorie(
                         toutes ? 'Tout voir' : _nomCourt(c!.nom),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          fontFamily: kPolice,
-                          fontSize: 11,
-                          height: 1.2,
-                          fontWeight: FontWeight.w600,
-                          color: AppColor.kGrayscaleDark100,
-                        ),
                       ),
                     ],
                   ),
@@ -954,6 +944,41 @@ class _BlocPromotions extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Nom d'une catégorie sous sa tuile. Plusieurs mots passent sur deux
+/// lignes, entre les mots ; un mot seul (« Chaussures ») reste entier sur
+/// une ligne et rétrécit un peu si besoin, plutôt que d'être coupé en
+/// « Chaussure / s ».
+class _LibelleCategorie extends StatelessWidget {
+  final String texte;
+  const _LibelleCategorie(this.texte);
+
+  static const _style = TextStyle(
+    fontFamily: kPolice,
+    fontSize: 11,
+    height: 1.2,
+    fontWeight: FontWeight.w600,
+    color: AppColor.kGrayscaleDark100,
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    final t = texte.trim();
+    if (!t.contains(' ')) {
+      return FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Text(t, maxLines: 1, style: _style),
+      );
+    }
+    return Text(
+      t,
+      maxLines: 2,
+      overflow: TextOverflow.ellipsis,
+      textAlign: TextAlign.center,
+      style: _style,
     );
   }
 }

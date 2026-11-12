@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/messages.dart';
 import 'package:flutter/material.dart';
 import 'package:saambiz/core/theme/police.dart';
 
@@ -33,10 +34,11 @@ class _AidePageState extends State<AidePage> {
   void initState() {
     super.initState();
     sl<ConfigPubliqueService>().centreAide().then((c) {
-      if (mounted) setState(() {
-        _centre = c;
-        _charge = true;
-      });
+      if (mounted)
+        setState(() {
+          _centre = c;
+          _charge = true;
+        });
     });
   }
 
@@ -207,11 +209,7 @@ class _AidePageState extends State<AidePage> {
   Future<void> _ouvrir(BuildContext context, String url) async {
     final ok = await UrlExterne.lancer(url);
     if (!ok && context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Impossible d\'ouvrir ce lien sur cet appareil.'),
-        ),
-      );
+      afficherErreur(context, 'Impossible d\'ouvrir ce lien sur cet appareil.');
     }
   }
 }

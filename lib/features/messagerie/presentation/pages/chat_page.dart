@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/messages.dart';
 import 'package:saambiz/core/widgets/page_vendeur.dart';
 import 'dart:async';
 
@@ -93,12 +94,7 @@ class _ChatViewState extends State<_ChatView> {
       body: BlocConsumer<MessagerieBloc, MessagerieState>(
         listener: (context, state) {
           if (state is MessagerieError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: Colors.red,
-              ),
-            );
+            afficherErreur(context, state.message);
           }
         },
         builder: (context, state) {

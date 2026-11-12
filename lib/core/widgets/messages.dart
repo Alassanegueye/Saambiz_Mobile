@@ -37,6 +37,8 @@ void afficherInfo(
   _afficher(context, titre, message, ToastificationType.info);
 }
 
+ToastificationItem? _dernier;
+
 const _vert = Color(0xFF12805C);
 const _rouge = Color(0xFFD93A2B);
 const _bleu = Color(0xFF01154B);
@@ -58,11 +60,17 @@ void _afficher(
     _ => _bleu,
   };
 
-  toastification.dismissAll(delayForAnimation: false);
-  toastification.show(
+  // Le bandeau précédent s'efface. Il n'entre dans la liste qu'à l'image
+  // suivante : on le retire donc après ce passage, pas tout de suite.
+  final precedent = _dernier;
+  if (precedent != null) {
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => toastification.dismiss(precedent, showRemoveAnimation: false),
+    );
+  }
+  _dernier = toastification.show(
     overlayState: overlay,
     type: type,
-    style: ToastificationStyle.fillColored,
     alignment: Alignment.topCenter,
     title: Text(
       titre,
@@ -76,7 +84,9 @@ void _afficher(
       message,
       style: const TextStyle(fontFamily: kPolice, fontSize: 13.5, height: 1.3),
     ),
-    primaryColor: couleur,
+    // Fond de couleur, texte et icône en blanc (même rendu que l'ancien
+    // bandeau d'erreur de connexion).
+    primaryColor: Colors.white,
     backgroundColor: couleur,
     foregroundColor: Colors.white,
     autoCloseDuration: Duration(

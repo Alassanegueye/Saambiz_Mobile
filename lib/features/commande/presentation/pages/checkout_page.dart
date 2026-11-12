@@ -69,10 +69,9 @@ class _CheckoutViewState extends State<_CheckoutView> {
   void _soumettre(BuildContext context) {
     // Au moins un produit coché, d'une seule boutique (voir PanierService).
     if (_panier.selectionVide) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Choisissez au moins un produit dans votre panier.'),
-        ),
+      afficherErreur(
+        context,
+        'Choisissez au moins un produit dans votre panier.',
       );
       return;
     }
@@ -99,12 +98,7 @@ class _CheckoutViewState extends State<_CheckoutView> {
       body: BlocConsumer<CommandeBloc, CommandeState>(
         listener: (context, state) async {
           if (state is CommandeError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: Colors.red,
-              ),
-            );
+            afficherErreur(context, state.message);
           } else if (state is CommandeCreee) {
             // Le client paie plus tard, une fois la commande acceptée.
             // Seuls les produits commandés quittent le panier.
@@ -496,11 +490,15 @@ class _Recapitulatif extends StatelessWidget {
                             color: _C.black,
                           ),
                         ),
+                        if (it.options.isNotEmpty)
+                          Text(
+                            it.libelleOptions,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(fontSize: 12, color: _C.sub),
+                          ),
                         Text(
-                          [
-                            if (it.options.isNotEmpty) it.libelleOptions,
-                            '${it.quantite} × ${montantFcfa(it.prix)}',
-                          ].join(' · '),
+                          '${it.quantite} × ${montantFcfa(it.prix)}',
                           style: const TextStyle(fontSize: 12, color: _C.sub),
                         ),
                       ],

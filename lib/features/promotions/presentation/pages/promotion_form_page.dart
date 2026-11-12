@@ -115,9 +115,7 @@ class _PromotionFormViewState extends State<_PromotionFormView> {
   void _soumettre() {
     if (!_formKey.currentState!.validate()) return;
     if (!_isEdit && (_produitId == null || _produitId!.isEmpty)) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Choisissez un produit')));
+      afficherErreur(context, 'Choisissez un produit');
       return;
     }
     final bloc = context.read<PromotionsBloc>();
@@ -159,12 +157,7 @@ class _PromotionFormViewState extends State<_PromotionFormView> {
       body: BlocConsumer<PromotionsBloc, PromotionsState>(
         listener: (context, state) {
           if (state is PromotionsError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: Colors.red,
-              ),
-            );
+            afficherErreur(context, state.message);
           } else if (state is PromotionsLoaded) {
             afficherSucces(
               context,

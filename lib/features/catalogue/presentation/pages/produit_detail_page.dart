@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/messages.dart';
 import 'dart:async';
 
 import 'package:dio/dio.dart';
@@ -89,14 +90,10 @@ class _ProduitDetailPageState extends State<ProduitDetailPage> {
       final manquante = p.options.firstWhere(
         (o) => !_choix.containsKey(o.libelle),
       );
-      ScaffoldMessenger.of(context)
-        ..clearSnackBars()
-        ..showSnackBar(
-          SnackBar(
-            content: Text('Choisissez : ${manquante.libelle.toLowerCase()}'),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+      afficherErreur(
+        context,
+        'Choisissez : ${manquante.libelle.toLowerCase()}',
+      );
       return;
     }
     await ajouterAuPanier(
@@ -110,7 +107,10 @@ class _ProduitDetailPageState extends State<ProduitDetailPage> {
   Future<void> _whatsapp() async {
     final tel = (p.boutique?.telephone ?? '').replaceAll(RegExp(r'\D'), '');
     if (tel.isEmpty) {
-      _message('Cette boutique n\'a pas indiqué de numéro WhatsApp.');
+      afficherInfo(
+        context,
+        'Cette boutique n\'a pas indiqué de numéro WhatsApp.',
+      );
       return;
     }
     final numero = tel.length == 9 ? '221$tel' : tel;
@@ -118,16 +118,12 @@ class _ProduitDetailPageState extends State<ProduitDetailPage> {
       'Bonjour, je suis intéressé(e) par « ${p.nom} » vu sur SaamBiz.',
     );
     final ok = await UrlExterne.lancer('https://wa.me/$numero?text=$texte');
-    if (!ok) _message('WhatsApp n\'est pas disponible sur cet appareil.');
-  }
-
-  void _message(String texte) {
-    if (!mounted) return;
-    ScaffoldMessenger.of(context)
-      ..clearSnackBars()
-      ..showSnackBar(
-        SnackBar(content: Text(texte), behavior: SnackBarBehavior.floating),
+    if (!ok && mounted) {
+      afficherErreur(
+        context,
+        'WhatsApp n\'est pas disponible sur cet appareil.',
       );
+    }
   }
 
   @override

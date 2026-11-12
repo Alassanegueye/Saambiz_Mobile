@@ -1,8 +1,8 @@
+import 'package:saambiz/core/widgets/messages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:saambiz/core/theme/police.dart';
-import 'package:toastification/toastification.dart';
 
 import '../../../../core/routes/app_router.dart';
 import '../../../../core/services/comptes_memorises.dart';
@@ -12,7 +12,6 @@ import '../../../../core/utils/telephone.dart';
 import '../../../../core/widgets/bouton_indicatif.dart';
 import '../../../../injection_container.dart';
 import '../../../../core/theme/app_color.dart';
-import '../../../../core/widgets/toastNotif.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
@@ -137,6 +136,11 @@ class _LoginPageState extends State<LoginPage> {
       _comptes = _comptes.where((c) => c.id != compte.id).toList();
       if (_comptes.isEmpty) _formulaireVisible = true;
     });
+    afficherSucces(
+      context,
+      'Ce compte n\'est plus proposé sur ce téléphone.',
+      titre: 'Compte retiré',
+    );
   }
 
   void _onLoginPressed() {
@@ -177,14 +181,19 @@ class _LoginPageState extends State<LoginPage> {
               _ => null,
             };
             if (route == null) {
-              showToast(
+              afficherErreur(
                 context,
-                'Échec de la connexion',
                 'Ce type de compte ne peut pas se connecter à l\'application.',
-                ToastificationType.error,
+                titre: 'Échec de la connexion',
               );
               return;
             }
+            final prenom = state.user.prenom.trim();
+            afficherSucces(
+              context,
+              prenom.isEmpty ? 'Bienvenue sur SaamBiz.' : 'Bienvenue $prenom !',
+              titre: 'Connexion réussie',
+            );
             Navigator.of(context).pushNamedAndRemoveUntil(
               route,
               (_) => false,
@@ -193,29 +202,22 @@ class _LoginPageState extends State<LoginPage> {
           } else if (state is AuthCompteAReconnecter) {
             _reconnecter(state.compte);
             if (state.message != null) {
-              showToast(
+              afficherInfo(
                 context,
-                'Reconnexion nécessaire',
                 state.message!,
-                ToastificationType.info,
+                titre: 'Reconnexion nécessaire',
               );
             }
             _chargerComptes(); // le compte a perdu sa session
           } else if (state is AuthConnexionIndisponible) {
-            showToast(
-              context,
-              'Bientôt disponible',
-              state.message,
-              ToastificationType.info,
-            );
+            afficherInfo(context, state.message, titre: 'Bientôt disponible');
           } else if (state is AuthFailure) {
-            showToast(
+            afficherErreur(
               context,
-              'Échec de la connexion',
               state.message.trim().isEmpty
                   ? 'Identifiant ou mot de passe incorrect.'
                   : state.message,
-              ToastificationType.error,
+              titre: 'Échec de la connexion',
             );
           }
         },
@@ -239,78 +241,81 @@ class _LoginPageState extends State<LoginPage> {
                           // de la feuille blanche.
                           color: AppColor.kPrimary,
                           child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            _EnteteConnexion(
-                              titre: choix ? 'Bon retour !' : 'Connexion',
-                            ),
-                            Expanded(
-                              child: Container(
-                                decoration: const BoxDecoration(
-                                  color: AppColor.kWhite,
-                                  borderRadius: BorderRadius.vertical(
-                                    top: Radius.circular(32),
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              _EnteteConnexion(
+                                titre: choix ? 'Bon retour !' : 'Connexion',
+                              ),
+                              Expanded(
+                                child: Container(
+                                  decoration: const BoxDecoration(
+                                    color: AppColor.kWhite,
+                                    borderRadius: BorderRadius.vertical(
+                                      top: Radius.circular(32),
+                                    ),
+                                  ),
+                                  padding: EdgeInsets.fromLTRB(
+                                    24,
+                                    20,
+                                    24,
+                                    16 + MediaQuery.paddingOf(context).bottom,
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.stretch,
+                                    children: [
+                                      if (_formulaireVisible != null)
+                                        AnimatedSwitcher(
+                                          duration: const Duration(
+                                            milliseconds: 220,
+                                          ),
+                                          child: choix
+                                              ? ChoixCompte(
+                                                  key: const ValueKey('choix'),
+                                                  comptes: _comptes,
+                                                  avecEntete: false,
+                                                  occupe: isLoading,
+                                                  compteEnCours:
+                                                      state
+                                                          is AuthRepriseEnCours
+                                                      ? state.idCompte
+                                                      : null,
+                                                  onChoisir: _choisirCompte,
+                                                  onRetirer: _retirerCompte,
+                                                  onAutreCompte: () => setState(
+                                                    () {
+                                                      _formulaireVisible = true;
+                                                      _identifiantController
+                                                          .clear();
+                                                      _passwordController
+                                                          .clear();
+                                                    },
+                                                  ),
+                                                )
+                                              : KeyedSubtree(
+                                                  key: const ValueKey(
+                                                    'formulaire',
+                                                  ),
+                                                  child: _formulaire(
+                                                    isLoading,
+                                                    state,
+                                                  ),
+                                                ),
+                                        ),
+                                      const Spacer(),
+                                      const SizedBox(height: 8),
+                                      _CreerCompte(
+                                        onTap: () =>
+                                            Navigator.of(context).pushNamed(
+                                              AppRouter.profileChoiceRoute,
+                                            ),
+                                      ),
+                                    ],
                                   ),
                                 ),
-                                padding: EdgeInsets.fromLTRB(
-                                  24,
-                                  20,
-                                  24,
-                                  16 + MediaQuery.paddingOf(context).bottom,
-                                ),
-                                child: Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.stretch,
-                                  children: [
-                                    if (_formulaireVisible != null)
-                                      AnimatedSwitcher(
-                                        duration: const Duration(
-                                          milliseconds: 220,
-                                        ),
-                                        child: choix
-                                            ? ChoixCompte(
-                                                key: const ValueKey('choix'),
-                                                comptes: _comptes,
-                                                avecEntete: false,
-                                                occupe: isLoading,
-                                                compteEnCours:
-                                                    state is AuthRepriseEnCours
-                                                    ? state.idCompte
-                                                    : null,
-                                                onChoisir: _choisirCompte,
-                                                onRetirer: _retirerCompte,
-                                                onAutreCompte: () => setState(
-                                                  () {
-                                                    _formulaireVisible = true;
-                                                    _identifiantController
-                                                        .clear();
-                                                    _passwordController.clear();
-                                                  },
-                                                ),
-                                              )
-                                            : KeyedSubtree(
-                                                key: const ValueKey(
-                                                  'formulaire',
-                                                ),
-                                                child: _formulaire(
-                                                  isLoading,
-                                                  state,
-                                                ),
-                                              ),
-                                      ),
-                                    const Spacer(),
-                                    const SizedBox(height: 8),
-                                    _CreerCompte(
-                                      onTap: () => Navigator.of(
-                                        context,
-                                      ).pushNamed(AppRouter.profileChoiceRoute),
-                                    ),
-                                  ],
-                                ),
                               ),
-                            ),
-                          ],
-                        ),
+                            ],
+                          ),
                         ),
                       ),
                     ),

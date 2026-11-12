@@ -181,20 +181,34 @@ class _MonAbonnementViewState extends State<_MonAbonnementView> {
       body: BlocConsumer<AbonnementBloc, AbonnementState>(
         listener: (context, state) async {
           if (state is AbonnementError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: Colors.red,
-              ),
-            );
+            afficherErreur(context, state.message);
           } else if (state is PaiementInitieAbonnement) {
             final url = state.paymentUrl;
-            if (url != null && url.isNotEmpty) {
-              final uri = Uri.tryParse(url);
-              if (uri != null) {
-                await launchUrl(uri, mode: LaunchMode.externalApplication);
-              }
+            final uri = (url == null || url.isEmpty) ? null : Uri.tryParse(url);
+            if (uri == null) {
+              afficherSucces(
+                context,
+                'Confirmez le paiement sur votre téléphone pour renouveler '
+                'votre abonnement.',
+                titre: 'Paiement lancé',
+              );
+              return;
             }
+            final ouvert = await launchUrl(
+              uri,
+              mode: LaunchMode.externalApplication,
+            );
+            if (!context.mounted) return;
+            ouvert
+                ? afficherInfo(
+                    context,
+                    'Terminez le paiement dans la page qui vient de s\'ouvrir.',
+                    titre: 'Paiement lancé',
+                  )
+                : afficherErreur(
+                    context,
+                    'La page de paiement n\'a pas pu s\'ouvrir. Réessayez.',
+                  );
           }
         },
         builder: (context, state) {

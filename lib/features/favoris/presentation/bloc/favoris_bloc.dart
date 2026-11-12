@@ -31,10 +31,16 @@ class FavorisBloc extends Bloc<FavorisEvent, FavorisState> {
 
   Future<void> _onCharger(LoadFavoris event, Emitter<FavorisState> emit) async {
     emit(FavorisLoading());
+    await _recharger(emit);
+  }
+
+  /// Recharge la liste ; [succes] accompagne la liste quand elle suit une
+  /// action, pour que l'écran la confirme.
+  Future<void> _recharger(Emitter<FavorisState> emit, {String? succes}) async {
     final resultat = await getBoutiquesSuivies();
     resultat.fold(
       (panne) => emit(FavorisError(panne.errorMessage)),
-      (boutiques) => emit(FavorisLoaded(boutiques)),
+      (boutiques) => emit(FavorisLoaded(boutiques, succes: succes)),
     );
   }
 
@@ -43,9 +49,9 @@ class FavorisBloc extends Bloc<FavorisEvent, FavorisState> {
     Emitter<FavorisState> emit,
   ) async {
     final resultat = await suivreBoutique(event.boutiqueId);
-    resultat.fold(
-      (panne) => emit(FavorisError(panne.errorMessage)),
-      (_) => add(LoadFavoris()),
+    await resultat.fold(
+      (panne) async => emit(FavorisError(panne.errorMessage)),
+      (_) => _recharger(emit, succes: 'Boutique ajoutée à vos favoris.'),
     );
   }
 
@@ -54,9 +60,9 @@ class FavorisBloc extends Bloc<FavorisEvent, FavorisState> {
     Emitter<FavorisState> emit,
   ) async {
     final resultat = await nePlusSuivreBoutique(event.boutiqueId);
-    resultat.fold(
-      (panne) => emit(FavorisError(panne.errorMessage)),
-      (_) => add(LoadFavoris()),
+    await resultat.fold(
+      (panne) async => emit(FavorisError(panne.errorMessage)),
+      (_) => _recharger(emit, succes: 'Vous ne suivez plus cette boutique.'),
     );
   }
 
@@ -97,12 +103,17 @@ class FavorisBloc extends Bloc<FavorisEvent, FavorisState> {
         final courant = state;
         if (courant is FavorisLoaded) {
           emit(
-            FavorisLoaded([
-              for (final b in courant.boutiques)
-                b.id == event.boutiqueId
-                    ? b.copyWith(clocheActive: etatReel)
-                    : b,
-            ]),
+            FavorisLoaded(
+              [
+                for (final b in courant.boutiques)
+                  b.id == event.boutiqueId
+                      ? b.copyWith(clocheActive: etatReel)
+                      : b,
+              ],
+              succes: etatReel
+                  ? 'Alertes activées : vous serez prévenu des promotions et nouveautés.'
+                  : 'Alertes désactivées pour cette boutique.',
+            ),
           );
         }
       },

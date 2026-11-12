@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/messages.dart';
 import 'dart:async';
 
 import 'package:dio/dio.dart';
@@ -152,10 +153,9 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
           // Compte bien vérifié mais connexion impossible : on renvoie vers
           // l'écran de connexion plutôt que de bloquer l'utilisateur ici.
           if (!mounted) return;
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Compte créé. Connectez-vous pour continuer.'),
-            ),
+          afficherSucces(
+            context,
+            'Compte créé. Connectez-vous pour continuer.',
           );
           Navigator.of(
             context,

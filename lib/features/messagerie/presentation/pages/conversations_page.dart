@@ -361,27 +361,34 @@ class _Avatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final aPhoto = (photo ?? '').isNotEmpty;
-    return CircleAvatar(
-      radius: 23,
-      backgroundColor: AppColor.kPrimaryLight,
-      backgroundImage: aPhoto ? fournisseurImageReseau(photo!) : null,
-      child: aPhoto
-          ? null
-          : Text(
-              nom.trim().isEmpty ? '?' : initialesDe(nom),
-              style: const TextStyle(
-                fontFamily: kPolice,
-                fontWeight: FontWeight.w700,
-                color: AppColor.kPrimary,
-              ),
-            ),
+    final initiales = Container(
+      width: 46,
+      height: 46,
+      color: AppColor.kPrimaryLight,
+      alignment: Alignment.center,
+      child: Text(
+        nom.trim().isEmpty ? '?' : initialesDe(nom),
+        style: const TextStyle(
+          fontFamily: kPolice,
+          fontWeight: FontWeight.w700,
+          color: AppColor.kPrimary,
+        ),
+      ),
+    );
+    // Logo de la boutique (ou photo) ; les initiales tant qu'il n'y en a
+    // pas, ou s'il ne se charge pas.
+    return ClipOval(
+      child: SizedBox(
+        width: 46,
+        height: 46,
+        child: (photo ?? '').isEmpty
+            ? initiales
+            : ImageReseau(photo!, fit: BoxFit.cover, repli: initiales),
+      ),
     );
   }
 }
 
-/// Feuille « Nouveau message » du vendeur : ses clients abonnés, avec une
-/// recherche par nom.
 class _ChoixClient extends StatefulWidget {
   const _ChoixClient();
 

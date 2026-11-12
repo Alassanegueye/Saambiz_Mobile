@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/messages.dart';
 import 'package:saambiz/core/widgets/page_vendeur.dart';
 import 'dart:io';
 
@@ -250,6 +251,13 @@ class _AssistantVitrinePageState extends State<AssistantVitrinePage> {
         if (state is VitrineAnalysee) _appliquerAnalyse(state.resultat);
 
         if (state is VitrineCreee) {
+          afficherSucces(
+            context,
+            _modification
+                ? 'Votre site a été mis à jour.'
+                : 'Votre site est prêt.',
+            titre: _modification ? 'Site mis à jour' : 'Site créé',
+          );
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(
               builder: (_) => VitrinePretePage(
@@ -261,9 +269,7 @@ class _AssistantVitrinePageState extends State<AssistantVitrinePage> {
         }
 
         if (state is VitrineErreur) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(state.message)));
+          afficherErreur(context, state.message);
         }
       },
       builder: (context, state) {

@@ -211,7 +211,7 @@ class _NouvelleCampagnePageState extends State<NouvelleCampagnePage> {
       probleme ??= 'Choisissez au moins un client.';
     }
     if (probleme != null) {
-      _snack(probleme);
+      afficherErreur(context, probleme, titre: 'Campagne incomplète');
       return;
     }
     setState(() => _envoi = true);
@@ -250,7 +250,9 @@ class _NouvelleCampagnePageState extends State<NouvelleCampagnePage> {
       Navigator.of(context).pop(true);
     } on DioException catch (e) {
       final data = e.response?.data;
-      _snack(
+      if (!mounted) return;
+      afficherErreur(
+        context,
         data is Map && data['message'] != null
             ? data['message'].toString()
             : 'Envoi impossible. Vérifiez votre connexion.',
@@ -258,14 +260,6 @@ class _NouvelleCampagnePageState extends State<NouvelleCampagnePage> {
     } finally {
       if (mounted) setState(() => _envoi = false);
     }
-  }
-
-  void _snack(String texte) {
-    ScaffoldMessenger.of(context)
-      ..clearSnackBars()
-      ..showSnackBar(
-        SnackBar(content: Text(texte), behavior: SnackBarBehavior.floating),
-      );
   }
 
   // Écran

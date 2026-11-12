@@ -79,12 +79,7 @@ class _SignalerFormViewState extends State<_SignalerFormView> {
       body: BlocConsumer<SignalementsBloc, SignalementsState>(
         listener: (context, state) {
           if (state is SignalementsError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: Colors.red,
-              ),
-            );
+            afficherErreur(context, state.message);
           } else if (state is SignalementEnvoye) {
             afficherSucces(context, 'Signalement envoyé, merci.');
             Navigator.of(context).pop();

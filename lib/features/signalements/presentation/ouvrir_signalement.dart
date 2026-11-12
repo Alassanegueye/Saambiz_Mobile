@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/messages.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/services/token_service.dart';
@@ -30,11 +31,7 @@ Future<void> ouvrirSignalement(
   if (!context.mounted) return;
 
   if (!connecte) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Connectez-vous pour signaler un contenu.'),
-      ),
-    );
+    afficherInfo(context, 'Connectez-vous pour signaler un contenu.');
     return;
   }
 

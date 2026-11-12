@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/messages.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/widgets/degrade_fond.dart';
 import 'package:saambiz/core/widgets/image_reseau.dart';
@@ -157,95 +158,107 @@ class PanierPage extends StatelessWidget {
                                 ),
                                 Expanded(
                                   child: Container(
-                                decoration: BoxDecoration(
-                                  color: _C.white,
-                                  borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(color: _C.border),
-                                ),
-                                padding: const EdgeInsets.all(12),
-                                child: Row(
-                                  children: [
-                                    ClipRRect(
-                                      borderRadius: BorderRadius.circular(12),
-                                      child: item.image.isNotEmpty
-                                          ? ImageReseau(
-                                              item.image,
-                                              width: 64,
-                                              height: 64,
-                                              fit: BoxFit.cover,
-                                              repli: const _ImgFallback(),
-                                            )
-                                          : const _ImgFallback(),
+                                    decoration: BoxDecoration(
+                                      color: _C.white,
+                                      borderRadius: BorderRadius.circular(16),
+                                      border: Border.all(color: _C.border),
                                     ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            item.nom,
-                                            maxLines: 2,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: const TextStyle(
-                                              fontWeight: FontWeight.w700,
-                                              color: _C.black,
-                                            ),
+                                    padding: const EdgeInsets.all(12),
+                                    child: Row(
+                                      children: [
+                                        ClipRRect(
+                                          borderRadius: BorderRadius.circular(
+                                            12,
                                           ),
-                                          if (item.options.isNotEmpty)
-                                            Padding(
-                                              padding: const EdgeInsets.only(top: 3),
-                                              child: Text(
-                                                item.libelleOptions,
+                                          child: item.image.isNotEmpty
+                                              ? ImageReseau(
+                                                  item.image,
+                                                  width: 64,
+                                                  height: 64,
+                                                  fit: BoxFit.cover,
+                                                  repli: const _ImgFallback(),
+                                                )
+                                              : const _ImgFallback(),
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                item.nom,
                                                 maxLines: 2,
                                                 overflow: TextOverflow.ellipsis,
                                                 style: const TextStyle(
-                                                  fontSize: 12,
-                                                  color: _C.sub,
+                                                  fontWeight: FontWeight.w700,
+                                                  color: _C.black,
                                                 ),
                                               ),
-                                            ),
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            montantFcfa(item.prix),
-                                            style: const TextStyle(
-                                              color: _C.green,
-                                              fontWeight: FontWeight.w700,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    // La corbeille au-dessus des quantités : retire
-                                    // l'article d'un geste, sans descendre à zéro.
-                                    Column(
-                                      crossAxisAlignment: CrossAxisAlignment.end,
-                                      children: [
-                                        IconButton(
-                                          tooltip: 'Retirer du panier',
-                                          visualDensity: VisualDensity.compact,
-                                          onPressed: () => panier.retirer(item.cle),
-                                          icon: const Icon(
-                                            Icons.delete_outline_rounded,
-                                            size: 21,
-                                            color: AppColor.kErreur,
+                                              if (item.options.isNotEmpty)
+                                                Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                        top: 3,
+                                                      ),
+                                                  child: Text(
+                                                    item.libelleOptions,
+                                                    maxLines: 2,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    style: const TextStyle(
+                                                      fontSize: 12,
+                                                      color: _C.sub,
+                                                    ),
+                                                  ),
+                                                ),
+                                              const SizedBox(height: 4),
+                                              Text(
+                                                montantFcfa(item.prix),
+                                                style: const TextStyle(
+                                                  color: _C.green,
+                                                  fontWeight: FontWeight.w700,
+                                                ),
+                                              ),
+                                            ],
                                           ),
                                         ),
-                                        _QtyStepper(
-                                          quantite: item.quantite,
-                                          onMoins: () => panier.changerQuantite(
-                                            item.cle,
-                                            item.quantite - 1,
-                                          ),
-                                          onPlus: () => panier.changerQuantite(
-                                            item.cle,
-                                            item.quantite + 1,
-                                          ),
+                                        // La corbeille au-dessus des quantités : retire
+                                        // l'article d'un geste, sans descendre à zéro.
+                                        Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.end,
+                                          children: [
+                                            IconButton(
+                                              tooltip: 'Retirer du panier',
+                                              visualDensity:
+                                                  VisualDensity.compact,
+                                              onPressed: () =>
+                                                  panier.retirer(item.cle),
+                                              icon: const Icon(
+                                                Icons.delete_outline_rounded,
+                                                size: 21,
+                                                color: AppColor.kErreur,
+                                              ),
+                                            ),
+                                            _QtyStepper(
+                                              quantite: item.quantite,
+                                              onMoins: () =>
+                                                  panier.changerQuantite(
+                                                    item.cle,
+                                                    item.quantite - 1,
+                                                  ),
+                                              onPlus: () =>
+                                                  panier.changerQuantite(
+                                                    item.cle,
+                                                    item.quantite + 1,
+                                                  ),
+                                            ),
+                                          ],
                                         ),
                                       ],
                                     ),
-                                  ],
-                                ),
-                              ),
+                                  ),
                                 ),
                               ],
                             ),
@@ -273,16 +286,11 @@ class PanierPage extends StatelessWidget {
 
 /// Explique pourquoi la sélection vient de changer de boutique.
 void _prevenirChangement(BuildContext context) {
-  ScaffoldMessenger.of(context)
-    ..clearSnackBars()
-    ..showSnackBar(
-      const SnackBar(
-        content: Text(
-          'Une commande regroupe une seule boutique : la sélection a été '
-          'remplacée.',
-        ),
-      ),
-    );
+  afficherInfo(
+    context,
+    'Une commande regroupe une seule boutique : la sélection a été '
+    'remplacée.',
+  );
 }
 
 /// Nom d'une boutique au-dessus de ses produits, avec la case qui les coche
@@ -377,6 +385,7 @@ class _QtyStepper extends StatelessWidget {
 class _BarreTotal extends StatelessWidget {
   final double total;
   final int nombre;
+
   /// Nul tant qu'aucun produit n'est coché : le bouton est grisé.
   final VoidCallback? onCommander;
   const _BarreTotal({

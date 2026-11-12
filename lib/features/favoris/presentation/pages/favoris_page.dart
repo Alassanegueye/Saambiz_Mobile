@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/messages.dart';
 import 'package:saambiz/core/widgets/page_vendeur.dart';
 import 'package:saambiz/core/widgets/onglets_conserves.dart';
 import 'package:saambiz/core/widgets/image_reseau.dart';
@@ -55,75 +56,70 @@ class _FavorisView extends StatelessWidget {
     return PageVendeur(
       titre: 'Mes favoris',
       corps: Column(
-          children: [
-            // Produits aimés (cœur des cartes produits), puis boutiques suivies.
-            const _ProduitsAimes(),
-            Expanded(
-              child: BlocConsumer<FavorisBloc, FavorisState>(
-                buildWhen: (avant, apres) =>
-                    !(apres is FavorisLoading && avant is FavorisLoaded),
-                listener: (context, state) {
-                  if (state is FavorisError) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(state.message),
-                        backgroundColor: Colors.red,
-                      ),
+        children: [
+          // Produits aimés (cœur des cartes produits), puis boutiques suivies.
+          const _ProduitsAimes(),
+          Expanded(
+            child: BlocConsumer<FavorisBloc, FavorisState>(
+              buildWhen: (avant, apres) =>
+                  !(apres is FavorisLoading && avant is FavorisLoaded),
+              listener: (context, state) {
+                if (state is FavorisError) {
+                  afficherErreur(context, state.message);
+                } else if (state is FavorisLoaded && state.succes != null) {
+                  afficherSucces(context, state.succes!);
+                }
+              },
+              builder: (context, state) {
+                if (state is FavorisLoading || state is FavorisInitial) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (state is FavorisLoaded) {
+                  // Une boutique suivie deux fois côté serveur n'apparaît
+                  // qu'une fois.
+                  final vues = <String>{};
+                  final boutiques = state.boutiques
+                      .where((b) => vues.add(b.id))
+                      .toList(growable: false);
+                  if (boutiques.isEmpty) {
+                    return EmptyState(
+                      icon: Icons.favorite_border_rounded,
+                      title: 'Aucune boutique suivie',
+                      subtitle:
+                          'Touchez le cœur d’une boutique pour la retrouver ici.',
+                      actionLabel: 'Découvrir les boutiques',
+                      onAction: () {
+                        explorerBoutiquesDemande.value++;
+                        ongletAcheteurDemande.value = 1;
+                      },
                     );
                   }
-                },
-                builder: (context, state) {
-                  if (state is FavorisLoading || state is FavorisInitial) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-                  if (state is FavorisLoaded) {
-                    // Une boutique suivie deux fois côté serveur n'apparaît
-                    // qu'une fois.
-                    final vues = <String>{};
-                    final boutiques = state.boutiques
-                        .where((b) => vues.add(b.id))
-                        .toList(growable: false);
-                    if (boutiques.isEmpty) {
-                      return EmptyState(
-                        icon: Icons.favorite_border_rounded,
-                        title: 'Aucune boutique suivie',
-                        subtitle:
-                            'Touchez le cœur d’une boutique pour la retrouver ici.',
-                        actionLabel: 'Découvrir les boutiques',
-                        onAction: () {
-                          explorerBoutiquesDemande.value++;
-                          ongletAcheteurDemande.value = 1;
-                        },
-                      );
-                    }
-                    return RefreshIndicator(
-                      onRefresh: () async =>
-                          context.read<FavorisBloc>().add(LoadFavoris()),
-                      child: ListView.separated(
-                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
-                        itemCount: boutiques.length + 1,
-                        separatorBuilder: (_, i) =>
-                            SizedBox(height: i == 0 ? 12 : 10),
-                        itemBuilder: (context, i) {
-                          if (i == 0) {
-                            return _EnTeteSection(
-                              titre: 'Boutiques suivies',
-                              nombre: boutiques.length,
-                            );
-                          }
-                          return _CarteBoutiqueSuivie(
-                            boutique: boutiques[i - 1],
+                  return RefreshIndicator(
+                    onRefresh: () async =>
+                        context.read<FavorisBloc>().add(LoadFavoris()),
+                    child: ListView.separated(
+                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
+                      itemCount: boutiques.length + 1,
+                      separatorBuilder: (_, i) =>
+                          SizedBox(height: i == 0 ? 12 : 10),
+                      itemBuilder: (context, i) {
+                        if (i == 0) {
+                          return _EnTeteSection(
+                            titre: 'Boutiques suivies',
+                            nombre: boutiques.length,
                           );
-                        },
-                      ),
-                    );
-                  }
-                  return const SizedBox.shrink();
-                },
-              ),
+                        }
+                        return _CarteBoutiqueSuivie(boutique: boutiques[i - 1]);
+                      },
+                    ),
+                  );
+                }
+                return const SizedBox.shrink();
+              },
             ),
-          ],
-        ),
+          ),
+        ],
+      ),
     );
   }
 }

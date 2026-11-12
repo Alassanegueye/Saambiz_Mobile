@@ -127,11 +127,10 @@ class _ProduitFormPageState extends State<ProduitFormPage> {
   }
 
   Future<void> _ajouterPhotosSupplementaires() async {
-    final reste = _maxPhotos - _imagesExistantes.length - _photosEnAttente.length;
+    final reste =
+        _maxPhotos - _imagesExistantes.length - _photosEnAttente.length;
     if (reste <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('8 photos supplémentaires au maximum.')),
-      );
+      afficherInfo(context, '8 photos supplémentaires au maximum.');
       return;
     }
     final picker = ImagePicker();
@@ -153,19 +152,15 @@ class _ProduitFormPageState extends State<ProduitFormPage> {
         fichiers.map((f) => f.path).toList(),
       );
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Photos ajoutées')));
+      afficherSucces(context, 'Photos ajoutées');
       // Le produit rafraîchi n'est pas re-fetch ici (pas de usecase dédié
       // dans cet écran) : on affiche un message de succès, la liste sera
       // à jour à la prochaine ouverture / rechargement de "Mes produits".
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Erreur upload : $e'),
-          backgroundColor: Colors.red,
-        ),
+      afficherErreur(
+        context,
+        messageErreurReseau(e, repli: 'Les photos n\'ont pas pu être envoyées. Réessayez.'),
       );
     } finally {
       if (mounted) setState(() => _uploadingImages = false);
@@ -183,9 +178,7 @@ class _ProduitFormPageState extends State<ProduitFormPage> {
       });
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(messageErreurReseau(e)), backgroundColor: Colors.red),
-      );
+      afficherErreur(context, messageErreurReseau(e));
     } finally {
       if (mounted) setState(() => _suppressionImageId = null);
     }
@@ -194,19 +187,13 @@ class _ProduitFormPageState extends State<ProduitFormPage> {
   Future<void> _soumettre() async {
     if (!_formKey.currentState!.validate()) return;
     if (_categorieId == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Choisissez une catégorie')));
+      afficherErreur(context, 'Choisissez une catégorie');
       return;
     }
     final erreurs = SpecificationProduit.verifier(_specifications, _attributs);
     setState(() => _erreursSpecs = erreurs);
     if (erreurs.isNotEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Complétez les caractéristiques du produit'),
-        ),
-      );
+      afficherErreur(context, 'Complétez les caractéristiques du produit');
       return;
     }
     setState(() => _loading = true);
@@ -242,13 +229,10 @@ class _ProduitFormPageState extends State<ProduitFormPage> {
             await _ds.ajouterImages(id, List.of(_photosEnAttente));
           } catch (_) {
             if (mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text(
-                    'Produit créé, mais les photos supplémentaires n\'ont '
-                    'pas pu être envoyées. Ajoutez-les en modifiant le produit.',
-                  ),
-                ),
+              afficherInfo(
+                context,
+                'Produit créé, mais les photos supplémentaires n\'ont '
+                'pas pu être envoyées. Ajoutez-les en modifiant le produit.',
               );
             }
           }
@@ -264,9 +248,7 @@ class _ProduitFormPageState extends State<ProduitFormPage> {
       Navigator.of(context).pop(true);
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(messageErreurReseau(e)), backgroundColor: Colors.red),
-      );
+      afficherErreur(context, messageErreurReseau(e));
     } finally {
       if (mounted) setState(() => _loading = false);
     }

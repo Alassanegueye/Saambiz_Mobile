@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/messages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -177,11 +178,7 @@ class VitrinePretePage extends StatelessWidget {
                                 ClipboardData(text: vitrine.url),
                               );
                               if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Adresse copiée.'),
-                                  ),
-                                );
+                                afficherSucces(context, 'Adresse copiée.');
                               }
                             },
                             icon: const Icon(Icons.copy_rounded, size: 16),
@@ -383,11 +380,7 @@ Future<void> _partager(BuildContext context, String url) async {
   if (!ouvert && context.mounted) {
     await Clipboard.setData(ClipboardData(text: url));
     if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Adresse copiée : collez-la où vous voulez.'),
-        ),
-      );
+      afficherSucces(context, 'Adresse copiée : collez-la où vous voulez.');
     }
   }
 }
