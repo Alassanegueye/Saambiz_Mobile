@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "site-vitrine",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": ["-c", "cd ../Saambiz_Site_Vitrine && npx vite --config node_modules/.vite-apercu.config.mjs"],
+      "port": 5179
+    }
+  ]
+}
