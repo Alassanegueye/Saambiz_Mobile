@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/messages.dart';
 import 'package:saambiz/core/widgets/libelle_obligatoire.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -85,9 +86,7 @@ class _SignalerFormViewState extends State<_SignalerFormView> {
               ),
             );
           } else if (state is SignalementEnvoye) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Signalement envoyé, merci.')),
-            );
+            afficherSucces(context, 'Signalement envoyé, merci.');
             Navigator.of(context).pop();
           }
         },

@@ -1,3 +1,5 @@
+import 'package:saambiz/core/widgets/champ_code.dart';
+import 'package:saambiz/core/widgets/messages.dart';
 import 'package:saambiz/core/widgets/libelle_obligatoire.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -38,22 +40,27 @@ class _ResetPasswordView extends StatefulWidget {
 
 class _ResetPasswordViewState extends State<_ResetPasswordView> {
   final _formKey = GlobalKey<FormState>();
-  final _codeCtrl = TextEditingController();
   final _nouveauCtrl = TextEditingController();
+  String _code = '';
+  String? _erreurCode;
 
   @override
   void dispose() {
-    _codeCtrl.dispose();
     _nouveauCtrl.dispose();
     super.dispose();
   }
 
   void _confirmer() {
-    if (!_formKey.currentState!.validate()) return;
+    final codeOk = _code.length == 6;
+    setState(
+      () => _erreurCode = codeOk ? null : 'Saisissez les 6 chiffres du code.',
+    );
+    final formOk = _formKey.currentState!.validate();
+    if (!codeOk || !formOk) return;
     context.read<CompteBloc>().add(
       ResetPasswordRequested(
         email: widget.email,
-        code: _codeCtrl.text.trim(),
+        code: _code,
         nouveauMotDePasse: _nouveauCtrl.text,
       ),
     );
@@ -74,6 +81,10 @@ class _ResetPasswordViewState extends State<_ResetPasswordView> {
               ),
             );
           } else if (state is CompteMessageSucces) {
+            afficherSucces(
+              context,
+              'Mot de passe réinitialisé : connectez-vous avec le nouveau',
+            );
             Navigator.of(
               context,
             ).pushNamedAndRemoveUntil(AppRouter.loginRoute, (_) => false);
@@ -86,14 +97,44 @@ class _ResetPasswordViewState extends State<_ResetPasswordView> {
             child: ListView(
               padding: const EdgeInsets.all(16),
               children: [
-                TextFormField(
-                  controller: _codeCtrl,
-                  keyboardType: TextInputType.number,
-                  validator: (v) =>
-                      (v == null || v.trim().isEmpty) ? 'Code requis' : null,
-                  decoration: _decoration('Code reçu par e-mail'),
+                Text(
+                  'Code envoyé à ${widget.email}',
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: Color(0xFF4B5568),
+                  ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 14),
+                const LibelleObligatoire(
+                  'Code à 6 chiffres',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: _C.green,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                ChampCode(
+                  autofocus: true,
+                  erreur: _erreurCode != null,
+                  onChanged: (code) {
+                    _code = code;
+                    if (_erreurCode != null) {
+                      setState(() => _erreurCode = null);
+                    }
+                  },
+                ),
+                if (_erreurCode != null) ...[
+                  const SizedBox(height: 6),
+                  Text(
+                    _erreurCode!,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Color(0xFFE53935),
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 20),
                 TextFormField(
                   controller: _nouveauCtrl,
                   obscureText: true,

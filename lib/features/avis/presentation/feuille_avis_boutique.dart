@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/messages.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
@@ -122,8 +123,11 @@ class _FeuilleAvisState extends State<_FeuilleAvis> {
         commentaire: _commentaire.text,
       );
       if (!mounted) return;
-      _signaler(
-        _mien == null ? 'Merci, votre avis est publié.' : 'Avis mis à jour.',
+      afficherSucces(
+        context,
+        _mien == null
+            ? 'Merci, votre avis est publié.'
+            : 'Avis mis à jour avec succès',
       );
       await _charger();
     } catch (e) {
@@ -164,7 +168,7 @@ class _FeuilleAvisState extends State<_FeuilleAvis> {
     try {
       await _source.supprimer(widget.boutiqueId);
       if (!mounted) return;
-      _signaler('Votre avis a été retiré.');
+      afficherSucces(context, 'Votre avis a été retiré.');
       setState(() {
         _mien = null;
         _note = 0;
@@ -178,10 +182,6 @@ class _FeuilleAvisState extends State<_FeuilleAvis> {
         _envoi = false;
       });
     }
-  }
-
-  void _signaler(String texte) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(texte)));
   }
 
   @override

@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/messages.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -144,11 +145,9 @@ class _NouvelleCommandeVendeurPageState
         if (_noteCtrl.text.trim().isNotEmpty) 'note': _noteCtrl.text.trim(),
       });
       if (!mounted) return;
-      showToast(
+      afficherSucces(
         context,
-        'Commande enregistrée',
-        'Elle apparaît dans vos commandes en cours.',
-        ToastificationType.success,
+        'Commande enregistrée : elle apparaît dans vos commandes en cours.',
       );
       Navigator.of(context).pop(true);
     } on DioException catch (e) {

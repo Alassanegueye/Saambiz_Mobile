@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/messages.dart';
 import 'package:saambiz/core/widgets/libelle_obligatoire.dart';
 import 'package:flutter/material.dart';
 import 'package:saambiz/core/theme/app_color.dart';
@@ -91,14 +92,11 @@ class _CheckoutViewState extends State<_CheckoutView> {
             // Le client paie plus tard, une fois la commande acceptée.
             await _panier.vider();
             if (!context.mounted) return;
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  state.commande.modePaiement == 'en_ligne'
-                      ? 'Commande envoyée. Vous pourrez la payer dès que le vendeur l\'aura acceptée.'
-                      : 'Commande envoyée au vendeur.',
-                ),
-              ),
+            afficherSucces(
+              context,
+              state.commande.modePaiement == 'en_ligne'
+                  ? 'Commande envoyée. Vous pourrez la payer dès que le vendeur l\'aura acceptée.'
+                  : 'Commande envoyée au vendeur.',
             );
             _allerMesCommandes(context);
           }

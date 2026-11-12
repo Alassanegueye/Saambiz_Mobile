@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/messages.dart';
 import 'package:saambiz/core/widgets/libelle_obligatoire.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -73,9 +74,7 @@ class _ChangePasswordViewState extends State<_ChangePasswordView> {
             );
           } else if (state is CompteActionSucces ||
               state is CompteMessageSucces) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Mot de passe modifié')),
-            );
+            afficherSucces(context, 'Mot de passe modifié avec succès');
             Navigator.of(context).pop();
           }
         },

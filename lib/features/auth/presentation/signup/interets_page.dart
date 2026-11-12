@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/messages.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:saambiz/core/theme/police.dart';
@@ -172,6 +173,7 @@ class _InteretsPageState extends State<InteretsPage> {
     if (!mounted) return;
 
     if (widget.modeEdition) {
+      afficherSucces(context, 'Centres d\'intérêt mis à jour');
       Navigator.of(context).pop(true);
       return;
     }
@@ -197,16 +199,19 @@ class _InteretsPageState extends State<InteretsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final prenom = widget.user?.prenom;
+    final nomComplet = [
+      widget.user?.prenom.trim() ?? '',
+      widget.user?.nom.trim() ?? '',
+    ].where((e) => e.isNotEmpty).join(' ');
     return SbPageAuth(
       // Dernière étape de l'inscription d'un client (pas en modification).
       etape: widget.modeEdition ? null : 5,
       icone: Icons.favorite_border_rounded,
       titre: widget.modeEdition
           ? 'Vos centres d’intérêt'
-          : prenom == null || prenom.isEmpty
-          ? 'Bienvenue !'
-          : 'Bienvenue $prenom',
+          : nomComplet.isEmpty
+          ? 'Bonjour !'
+          : 'Bonjour $nomComplet',
       sousTitre: 'Choisissez au moins 2 catégories.',
       carte: [
         GridView.builder(

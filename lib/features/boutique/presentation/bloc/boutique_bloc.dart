@@ -84,7 +84,10 @@ class BoutiqueBloc extends Bloc<BoutiqueEvent, BoutiqueState> {
     Emitter<BoutiqueState> emit,
   ) async {
     final result = await pauseBoutique();
-    result.fold((f) => _emitFailure(f, emit), (_) => add(LoadMaBoutique()));
+    await result.fold(
+      (f) async => _emitFailure(f, emit),
+      (_) => _recharger(emit, 'Boutique mise en pause'),
+    );
   }
 
   Future<void> _onReactiver(
@@ -92,6 +95,19 @@ class BoutiqueBloc extends Bloc<BoutiqueEvent, BoutiqueState> {
     Emitter<BoutiqueState> emit,
   ) async {
     final result = await reactiverBoutique();
-    result.fold((f) => _emitFailure(f, emit), (_) => add(LoadMaBoutique()));
+    await result.fold(
+      (f) async => _emitFailure(f, emit),
+      (_) => _recharger(emit, 'Votre boutique est de nouveau ouverte'),
+    );
+  }
+
+  /// Relit la boutique sans repasser par l'écran de chargement, et joint
+  /// le message de confirmation.
+  Future<void> _recharger(Emitter<BoutiqueState> emit, String succes) async {
+    final result = await getMaBoutique();
+    result.fold(
+      (f) => _emitFailure(f, emit),
+      (b) => emit(BoutiqueLoaded(b, succes: succes)),
+    );
   }
 }

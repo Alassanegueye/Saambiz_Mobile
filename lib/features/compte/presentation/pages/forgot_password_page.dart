@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/messages.dart';
 import 'package:saambiz/core/widgets/libelle_obligatoire.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -67,6 +68,10 @@ class _ForgotPasswordViewState extends State<_ForgotPasswordView> {
               ),
             );
           } else if (state is CompteMessageSucces) {
+            afficherSucces(
+              context,
+              'Code envoyé : consultez votre boîte e-mail',
+            );
             Navigator.of(context).pushReplacement(
               MaterialPageRoute(
                 builder: (_) =>

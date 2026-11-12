@@ -1,3 +1,4 @@
+import 'package:saambiz/features/messagerie/presentation/pages/chat_page.dart';
 import 'package:dio/dio.dart';
 import 'package:saambiz/core/widgets/image_reseau.dart';
 import 'package:flutter/material.dart';
@@ -243,6 +244,32 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
     if (!await UrlExterne.lancer('https://wa.me/$numero')) {
       _message('WhatsApp n\'est pas disponible sur cet appareil.');
     }
+  }
+
+  /// Compte du vendeur, destinataire des messages.
+  String get _vendeurId {
+    final b = _boutique;
+    final vendeur = b?['vendeur'];
+    return (b?['vendeurId'] ?? (vendeur is Map ? vendeur['id'] : null) ?? '')
+        .toString();
+  }
+
+  Future<void> _ecrire(String nomBoutique) async {
+    if (!await sl<TokenService>().isAuthenticated) {
+      _message(
+        'Créez un compte ou connectez-vous pour écrire à cette boutique.',
+      );
+      return;
+    }
+    if (!mounted) return;
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => ChatPage(
+          interlocuteurId: _vendeurId,
+          interlocuteurNom: nomBoutique,
+        ),
+      ),
+    );
   }
 
   Future<void> _appeler(String telephone) async {
@@ -607,6 +634,29 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
                     ),
                   ),
               ],
+            ),
+          ],
+          if (_vendeurId.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            SizedBox(
+              height: 48,
+              child: FilledButton.icon(
+                onPressed: () => _ecrire(nom),
+                icon: const Icon(Icons.chat_bubble_outline_rounded, size: 19),
+                label: const Text('Envoyer un message'),
+                style: FilledButton.styleFrom(
+                  backgroundColor: _accent,
+                  foregroundColor: AppColor.kWhite,
+                  textStyle: const TextStyle(
+                    fontFamily: kPolice,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+              ),
             ),
           ],
           if (liens.isNotEmpty) ...[

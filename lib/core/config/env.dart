@@ -37,6 +37,15 @@ class Env {
   static bool get estProduction => environnement == 'prod';
   static bool get estDeveloppement => !estProduction;
 
+  /// Paiements Orange Money / Wave simulés dans l'application, le temps que
+  /// les API des opérateurs soient branchées. Aucun argent ne circule et le
+  /// serveur n'est pas appelé. Désactiver avec
+  /// `--dart-define=PAIEMENT_SIMULE=false` quand les API seront prêtes.
+  static const bool paiementSimule = bool.fromEnvironment(
+    'PAIEMENT_SIMULE',
+    defaultValue: true,
+  );
+
   // API
   /// Adresse de l'API.
   ///

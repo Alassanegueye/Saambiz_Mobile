@@ -16,6 +16,8 @@ import '../../../../core/widgets/shimmer_list.dart';
 import '../../../../injection_container.dart';
 import '../../../home/presentation/pages/acheteur/main_client_page.dart'
     show ongletAcheteurDemande;
+import '../../../catalogue/presentation/pages/categories_page.dart'
+    show explorerBoutiquesDemande;
 import '../bloc/commande_bloc.dart';
 import '../bloc/commande_event.dart';
 import '../bloc/commande_state.dart';
@@ -230,8 +232,10 @@ class _ListeState extends State<_Liste> with RetourSurOnglet {
                                         'Vos commandes passées apparaîtront ici.',
                                     actionLabel: 'Découvrir les boutiques',
                                     scrollable: false,
-                                    onAction: () =>
-                                        ongletAcheteurDemande.value = 0,
+                                    onAction: () {
+                                      explorerBoutiquesDemande.value++;
+                                      ongletAcheteurDemande.value = 1;
+                                    },
                                   )
                                 : const Center(
                                     child: Padding(

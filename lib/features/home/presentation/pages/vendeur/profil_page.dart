@@ -222,42 +222,25 @@ class _ProfilPageState extends State<ProfilPage> with RetourSurOnglet {
               SectionProfil(
                 titre: 'Ma boutique',
                 entrees: [
-                  LigneProfil(
-                    icone: Icons.verified_outlined,
-                    libelle: 'Certification',
-                    sousTitre: switch (_certification?.statut) {
-                      'approuve' => 'Votre boutique est certifiée',
-                      'en_attente' => 'Demande en cours d\'examen',
-                      'rejete' => 'Demande refusée : renvoyez vos photos',
-                      _ => 'Faites certifier votre boutique',
-                    },
-                    fin: _certification != null && _certification!.actionRequise
-                        ? Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Container(
-                                width: 9,
-                                height: 9,
-                                decoration: const BoxDecoration(
-                                  color: AppColor.kErreur,
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-                              const SizedBox(width: 6),
-                              const Icon(
-                                Icons.chevron_right_rounded,
-                                color: AppColor.kGrayscale30,
-                              ),
-                            ],
-                          )
-                        : _certification?.certifie == true
-                        ? const Icon(
-                            Icons.verified_rounded,
-                            color: AppColor.kSucces,
-                          )
-                        : null,
-                    onTap: _ouvrirCertification,
-                  ),
+                  // Tant qu'une action est requise, le bandeau du haut fait
+                  // déjà office d'entrée : pas de ligne en double.
+                  if (!(_certification?.actionRequise ?? false))
+                    LigneProfil(
+                      icone: Icons.verified_outlined,
+                      libelle: 'Certification',
+                      sousTitre: switch (_certification?.statut) {
+                        'approuve' => 'Votre boutique est certifiée',
+                        'en_attente' => 'Demande en cours d\'examen',
+                        _ => 'Faites certifier votre boutique',
+                      },
+                      fin: _certification?.certifie == true
+                          ? const Icon(
+                              Icons.verified_rounded,
+                              color: AppColor.kSucces,
+                            )
+                          : null,
+                      onTap: _ouvrirCertification,
+                    ),
                   LigneProfil(
                     icone: Icons.storefront_outlined,
                     libelle: 'Ma boutique',
@@ -280,7 +263,8 @@ class _ProfilPageState extends State<ProfilPage> with RetourSurOnglet {
                     icone: Icons.chat_bubble_outline_rounded,
                     libelle: 'Messages',
                     sousTitre: 'Vos conversations avec vos clients',
-                    onTap: () => _ouvrir(const ConversationsPage()),
+                    onTap: () =>
+                        _ouvrir(const ConversationsPage(pourVendeur: true)),
                   ),
                 ],
               ),

@@ -82,9 +82,9 @@ class PromotionsBloc extends Bloc<PromotionsEvent, PromotionsState> {
     Emitter<PromotionsState> emit,
   ) async {
     final result = await repository.supprimerPromotion(event.id);
-    result.fold(
-      (f) => emit(PromotionsError(f.errorMessage)),
-      (_) => add(LoadMesPromotions()),
-    );
+    result.fold((f) => emit(PromotionsError(f.errorMessage)), (_) {
+      emit(PromotionActionSucces('Promotion supprimée avec succès'));
+      add(LoadMesPromotions());
+    });
   }
 }

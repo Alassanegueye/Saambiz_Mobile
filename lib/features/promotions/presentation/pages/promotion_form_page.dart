@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/messages.dart';
 import 'package:saambiz/core/widgets/libelle_obligatoire.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -165,6 +166,12 @@ class _PromotionFormViewState extends State<_PromotionFormView> {
               ),
             );
           } else if (state is PromotionsLoaded) {
+            afficherSucces(
+              context,
+              _isEdit
+                  ? 'Promotion mise à jour avec succès'
+                  : 'Promotion créée avec succès',
+            );
             Navigator.of(context).pop(true);
           }
         },

@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/messages.dart';
 import 'package:saambiz/core/widgets/libelle_obligatoire.dart';
 import 'package:saambiz/core/widgets/image_reseau.dart';
 import 'package:flutter/material.dart';
@@ -346,13 +347,9 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
             );
           } else if (state is CommandeMiseAJour) {
             setState(() => commande = state.commande);
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Commande mise à jour')),
-            );
+            afficherSucces(context, 'Commande mise à jour avec succès');
           } else if (state is RetourDemande) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Demande de retour envoyée')),
-            );
+            afficherSucces(context, 'Demande de retour envoyée');
           } else if (state is PaiementInitie) {
             final uri = Uri.tryParse(state.paymentUrl ?? '');
             final ouvert =

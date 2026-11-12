@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/messages.dart';
 import 'package:saambiz/core/widgets/libelle_obligatoire.dart';
 import 'package:saambiz/core/widgets/image_reseau.dart';
 import 'dart:io';
@@ -217,6 +218,12 @@ class _ProduitFormPageState extends State<ProduitFormPage> {
         );
       }
       if (!mounted) return;
+      afficherSucces(
+        context,
+        _isEdit
+            ? 'Produit mis à jour avec succès'
+            : 'Produit ajouté à votre boutique',
+      );
       Navigator.of(context).pop(true);
     } catch (e) {
       if (!mounted) return;

@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/messages.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -90,9 +91,19 @@ class _VueBoutiqueState extends State<_VueBoutique> {
       corps: BlocConsumer<VitrineBloc, VitrineState>(
         listener: (context, state) {
           if (state is VitrineErreur) {
-            ScaffoldMessenger.of(
+            afficherErreur(context, state.message);
+          }
+          if (state is VitrineEnregistree) {
+            final avant = _derniere?.active;
+            final apres = state.vitrine.active;
+            afficherSucces(
               context,
-            ).showSnackBar(SnackBar(content: Text(state.message)));
+              avant != null && avant != apres
+                  ? (apres
+                        ? 'Votre boutique est en ligne : vos clients peuvent la visiter.'
+                        : 'Votre boutique est hors ligne.')
+                  : 'Modifications enregistrées avec succès',
+            );
           }
           // Retour de l'assistant ou d'un enregistrement : on recharge
           // pour repartir d'un état sûr, plutôt que de recomposer
@@ -101,13 +112,10 @@ class _VueBoutiqueState extends State<_VueBoutique> {
             context.read<VitrineBloc>().add(ChargerVitrine());
           }
           if (state is VitrineSupprimee) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text(
-                  'Votre site a été retiré. Vous pouvez en créer un autre '
-                  'quand vous voulez.',
-                ),
-              ),
+            afficherSucces(
+              context,
+              'Votre site a été retiré. Vous pouvez en créer un autre '
+              'quand vous voulez.',
             );
             // Recharger : l'écran repart sur l'assistant de création.
             context.read<VitrineBloc>().add(ChargerVitrine());
@@ -613,7 +621,7 @@ class _ConfigurationState extends State<_Configuration> {
           if (ok != true) return;
           await source.supprimerProduit(p.id);
           await _chargerProduits();
-          _dire('Produit supprimé.');
+          if (mounted) afficherSucces(context, 'Produit supprimé avec succès');
       }
     } catch (_) {
       if (mounted)
@@ -751,11 +759,7 @@ class _ConfigurationState extends State<_Configuration> {
     context.read<VitrineBloc>().add(
       ModifierVitrineDemande({'active': enLigne}),
     );
-    _dire(
-      enLigne
-          ? 'Votre boutique est en ligne : vos clients peuvent la visiter.'
-          : 'Votre boutique est hors ligne.',
-    );
+    // Le message part une fois l'enregistrement confirmé (voir le listener).
   }
 
   // ── Affichage ───────────────────────────────────────────────────────

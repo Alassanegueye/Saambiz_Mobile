@@ -37,9 +37,12 @@ class VendeurProduitLoading extends VendeurProduitState {}
 
 class VendeurProduitLoaded extends VendeurProduitState {
   final List<ProduitModel> produits;
-  VendeurProduitLoaded(this.produits);
+
+  /// Message à confirmer à l'utilisateur après une action réussie.
+  final String? succes;
+  VendeurProduitLoaded(this.produits, {this.succes});
   @override
-  List<Object?> get props => [produits];
+  List<Object?> get props => [produits, succes];
 }
 
 class VendeurProduitError extends VendeurProduitState {
@@ -66,11 +69,14 @@ class VendeurProduitBloc
     on<ToggleDispoProduit>(_onToggle);
   }
 
-  Future<void> _reloadOrError(Emitter<VendeurProduitState> emit) async {
+  Future<void> _reloadOrError(
+    Emitter<VendeurProduitState> emit, {
+    String? succes,
+  }) async {
     final result = await getMesProduits();
     result.fold(
       (failure) => emit(VendeurProduitError(failure.errorMessage)),
-      (produits) => emit(VendeurProduitLoaded(produits)),
+      (produits) => emit(VendeurProduitLoaded(produits, succes: succes)),
     );
   }
 
@@ -89,7 +95,7 @@ class VendeurProduitBloc
     final result = await supprimerProduit(event.id);
     await result.fold(
       (failure) async => emit(VendeurProduitError(failure.errorMessage)),
-      (_) => _reloadOrError(emit),
+      (_) => _reloadOrError(emit, succes: 'Produit supprimé avec succès'),
     );
   }
 
@@ -100,7 +106,8 @@ class VendeurProduitBloc
     final result = await toggleDisponibilite(event.id);
     await result.fold(
       (failure) async => emit(VendeurProduitError(failure.errorMessage)),
-      (_) => _reloadOrError(emit),
+      (_) =>
+          _reloadOrError(emit, succes: 'Disponibilité du produit mise à jour'),
     );
   }
 }

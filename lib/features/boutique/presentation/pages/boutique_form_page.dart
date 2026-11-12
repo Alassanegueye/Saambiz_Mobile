@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/messages.dart';
 import 'package:saambiz/core/widgets/page_vendeur.dart';
 import 'package:saambiz/core/widgets/libelle_obligatoire.dart';
 import 'package:saambiz/core/widgets/image_reseau.dart';
@@ -134,6 +135,12 @@ class _BoutiqueFormViewState extends State<_BoutiqueFormView> {
               ),
             );
           } else if (state is BoutiqueLoaded) {
+            afficherSucces(
+              context,
+              _isEdit
+                  ? 'Boutique mise à jour avec succès'
+                  : 'Votre boutique a été créée',
+            );
             Navigator.of(context).pop(state.boutique);
           }
         },

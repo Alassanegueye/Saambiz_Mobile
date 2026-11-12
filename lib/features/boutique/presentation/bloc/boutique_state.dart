@@ -13,9 +13,12 @@ class BoutiqueLoading extends BoutiqueState {}
 
 class BoutiqueLoaded extends BoutiqueState {
   final Boutique boutique;
-  BoutiqueLoaded(this.boutique);
+
+  /// Message à confirmer à l'utilisateur après une action réussie.
+  final String? succes;
+  BoutiqueLoaded(this.boutique, {this.succes});
   @override
-  List<Object?> get props => [boutique];
+  List<Object?> get props => [boutique, succes];
 }
 
 /// Aucune boutique n'existe encore pour ce vendeur (404 côté backend).

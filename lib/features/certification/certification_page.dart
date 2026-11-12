@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/messages.dart';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
@@ -118,7 +119,7 @@ class _CertificationPageState extends State<CertificationPage> {
         versoPath: _verso!,
       );
       if (!mounted) return;
-      _dire(message);
+      afficherSucces(context, message);
       setState(() {
         _recto = null;
         _verso = null;

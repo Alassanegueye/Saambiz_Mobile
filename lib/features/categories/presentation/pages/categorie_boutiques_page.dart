@@ -280,130 +280,231 @@ class _CategorieBoutiquesPageState extends State<CategorieBoutiquesPage> {
   }
 }
 
-/// Une boutique de la liste : logo, nom, ville, badge de confiance, distance.
+/// Une boutique de la liste : logo, nom, badge de confiance, catégorie,
+/// ville, distance, note et nombre d'articles quand le serveur les donne.
 class LigneBoutique extends StatelessWidget {
   final Map<String, dynamic> donnees;
   const LigneBoutique({super.key, required this.donnees});
 
+  void _ouvrir(BuildContext context) {
+    if (donnees['id'] == null) return;
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => BoutiquePubliquePage(
+          boutiqueId: donnees['id'].toString(),
+          apercu: BoutiqueResume.fromJson(donnees),
+        ),
+      ),
+    );
+  }
+
+  static String? _texte(dynamic v) {
+    final t = v?.toString().trim();
+    return (t == null || t.isEmpty) ? null : t;
+  }
+
+  static String? _distance(dynamic v) {
+    final d = v is num ? v.toDouble() : double.tryParse('${v ?? ''}');
+    if (d == null) return null;
+    if (d < 1) return '${(d * 1000).round()} m';
+    return '${d < 10 ? d.toStringAsFixed(1) : d.round()} km';
+  }
+
   @override
   Widget build(BuildContext context) {
-    final logo = donnees['logo']?.toString();
+    final logo = _texte(donnees['logo']);
+    final nom = _texte(donnees['nom']) ?? 'Boutique';
     final verifiee = donnees['verifiee'] == true;
-    final distance = donnees['distanceKm'];
-    final slogan = donnees['slogan']?.toString();
+    final slogan = _texte(donnees['slogan']);
+    final categorie = _texte(donnees['categorie']);
+    final ville = _texte(donnees['localisation']);
+    final distance = _distance(donnees['distanceKm']);
+    final noteBrute = donnees['note'];
+    final note = noteBrute is num
+        ? noteBrute.toDouble()
+        : double.tryParse('${noteBrute ?? ''}');
+    final nbBrut = donnees['nombreProduits'];
+    final nbArticles = nbBrut is num
+        ? nbBrut.toInt()
+        : int.tryParse('${nbBrut ?? ''}');
 
-    return InkWell(
-      borderRadius: BorderRadius.circular(16),
-      onTap: () {
-        if (donnees['id'] == null) return;
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (_) => BoutiquePubliquePage(
-              boutiqueId: donnees['id'].toString(),
-              apercu: BoutiqueResume.fromJson(donnees),
-            ),
-          ),
-        );
-      },
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: _C.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: _C.border),
-        ),
-        child: Row(
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: SizedBox(
-                width: 60,
-                height: 60,
-                child: logo != null && logo.isNotEmpty
-                    ? ImageReseau(
-                        logo,
-                        fit: BoxFit.cover,
-                        repli: const _LogoParDefaut(),
-                      )
-                    : const _LogoParDefaut(),
+    return Material(
+      color: _C.white,
+      borderRadius: BorderRadius.circular(18),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(18),
+        onTap: () => _ouvrir(context),
+        child: Ink(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: _C.border),
+            boxShadow: [
+              BoxShadow(
+                color: _C.navy.withValues(alpha: 0.05),
+                blurRadius: 16,
+                offset: const Offset(0, 5),
               ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Flexible(
-                        child: Text(
-                          donnees['nom']?.toString() ?? 'Boutique',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontFamily: kPolice,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: _C.navy,
+            ],
+          ),
+          child: Row(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(14),
+                child: SizedBox(
+                  width: 64,
+                  height: 64,
+                  child: logo != null
+                      ? ImageReseau(
+                          logo,
+                          fit: BoxFit.cover,
+                          repli: const _LogoParDefaut(),
+                        )
+                      : const _LogoParDefaut(),
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            nom,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontFamily: kPolice,
+                              fontSize: 15.5,
+                              fontWeight: FontWeight.w800,
+                              color: _C.navy,
+                            ),
                           ),
                         ),
-                      ),
-                      if (verifiee) ...[
-                        const SizedBox(width: 5),
-                        const Icon(
-                          Icons.verified_rounded,
-                          size: 15,
-                          color: _C.green,
-                        ),
+                        if (verifiee) ...[
+                          const SizedBox(width: 5),
+                          const Icon(
+                            Icons.verified_rounded,
+                            size: 16,
+                            color: _C.green,
+                          ),
+                        ],
                       ],
-                    ],
-                  ),
-                  if (slogan != null && slogan.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 2),
-                      child: Text(
-                        slogan,
+                    ),
+                    if (slogan != null || categorie != null) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        slogan ?? categorie!,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
                           fontFamily: kPolice,
-                          fontSize: 12,
+                          fontSize: 12.5,
                           color: _C.textMid,
                         ),
                       ),
-                    ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.place_outlined,
-                        size: 13,
-                        color: _C.textLight,
-                      ),
-                      const SizedBox(width: 3),
-                      Flexible(
-                        child: Text(
-                          [
-                            donnees['localisation']?.toString(),
-                            if (distance != null) '$distance km',
-                          ].where((e) => e != null && e.isNotEmpty).join(', '),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontFamily: kPolice,
-                            fontSize: 11.5,
-                            color: _C.textLight,
-                          ),
-                        ),
-                      ),
                     ],
-                  ),
-                ],
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 6,
+                      runSpacing: 6,
+                      children: [
+                        if (note != null && note > 0)
+                          _Pastille(
+                            icone: Icons.star_rounded,
+                            texte: note.toStringAsFixed(1),
+                            fond: const Color(0xFFFFF4D1),
+                            couleur: const Color(0xFF9A6B00),
+                            couleurIcone: _C.gold,
+                          ),
+                        if (ville != null || distance != null)
+                          _Pastille(
+                            icone: Icons.place_outlined,
+                            texte: [
+                              ville,
+                              distance,
+                            ].whereType<String>().join(' · '),
+                          ),
+                        if (nbArticles != null && nbArticles > 0)
+                          _Pastille(
+                            icone: Icons.inventory_2_outlined,
+                            texte: nbArticles == 1
+                                ? '1 article'
+                                : '$nbArticles articles',
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              Container(
+                width: 32,
+                height: 32,
+                decoration: const BoxDecoration(
+                  color: _C.navySoft,
+                  shape: BoxShape.circle,
+                ),
+                alignment: Alignment.center,
+                child: const Icon(
+                  Icons.chevron_right_rounded,
+                  color: _C.navy,
+                  size: 20,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _Pastille extends StatelessWidget {
+  final IconData icone;
+  final String texte;
+  final Color fond;
+  final Color couleur;
+  final Color? couleurIcone;
+  const _Pastille({
+    required this.icone,
+    required this.texte,
+    this.fond = _C.navySoft,
+    this.couleur = _C.textMid,
+    this.couleurIcone,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: fond,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icone, size: 13, color: couleurIcone ?? couleur),
+          const SizedBox(width: 4),
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 150),
+            child: Text(
+              texte,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontFamily: kPolice,
+                fontSize: 11.5,
+                fontWeight: FontWeight.w600,
+                color: couleur,
               ),
             ),
-            const Icon(Icons.chevron_right_rounded, color: _C.gold),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

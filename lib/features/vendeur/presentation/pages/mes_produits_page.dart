@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/messages.dart';
 import 'package:saambiz/core/widgets/onglets_conserves.dart';
 import 'package:saambiz/core/widgets/image_reseau.dart';
 import 'package:flutter/material.dart';
@@ -95,12 +96,9 @@ class _MesProduitsViewState extends State<_MesProduitsView> {
             !(apres is VendeurProduitLoading && avant is VendeurProduitLoaded),
         listener: (context, state) {
           if (state is VendeurProduitError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: _C.danger,
-              ),
-            );
+            afficherErreur(context, state.message);
+          } else if (state is VendeurProduitLoaded && state.succes != null) {
+            afficherSucces(context, state.succes!);
           }
         },
         builder: (context, state) {

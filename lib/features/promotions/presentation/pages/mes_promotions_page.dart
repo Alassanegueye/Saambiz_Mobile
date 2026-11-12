@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/messages.dart';
 import 'package:saambiz/core/widgets/onglets_conserves.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/widgets/page_vendeur.dart';
@@ -87,15 +88,13 @@ class _MesPromotionsView extends StatelessWidget {
       ),
       corps: BlocConsumer<PromotionsBloc, PromotionsState>(
         buildWhen: (avant, apres) =>
+            apres is! PromotionActionSucces &&
             !(apres is PromotionsLoading && avant is PromotionsLoaded),
         listener: (context, state) {
           if (state is PromotionsError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: Colors.red,
-              ),
-            );
+            afficherErreur(context, state.message);
+          } else if (state is PromotionActionSucces) {
+            afficherSucces(context, state.message);
           }
         },
         builder: (context, state) {

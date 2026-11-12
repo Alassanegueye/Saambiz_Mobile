@@ -1,3 +1,7 @@
+import 'package:saambiz/core/config/env.dart';
+import 'package:saambiz/core/paiement/feuille_paiement_mobile.dart';
+import 'package:saambiz/core/paiement/paiement_simule.dart';
+import 'package:saambiz/core/widgets/messages.dart';
 import 'package:saambiz/core/theme/app_color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -44,88 +48,117 @@ class _MonAbonnementViewState extends State<_MonAbonnementView> {
   final _dateFmt = DateFormat('dd/MM/yyyy');
 
   Future<void> _renouveler(BuildContext context) async {
-    final numeroCtrl = TextEditingController();
-    String methode = 'orange_money';
-    final res = await showDialog<bool>(
+    final bloc = context.read<AbonnementBloc>();
+    final state = bloc.state;
+    num? montant = state is AbonnementLoaded ? state.abonnement.montant : null;
+
+    // Le backend refuse tout montant non positif : tant que la fiche n'est
+    // pas chargée (ou pendant l'essai gratuit, à 0), le prix est demandé au
+    // serveur, qui en est la source.
+    if (montant == null || montant <= 0) {
+      montant = await sl<ConfigPubliqueService>().prixAbonnement();
+    }
+    if (!context.mounted) return;
+
+    final choix = await choisirPaiementMobile(
+      context,
+      titre: 'Renouveler mon abonnement',
+      montant: montant,
+    );
+    if (choix == null || !context.mounted) return;
+
+    if (Env.paiementSimule) {
+      await _payerEnSimulation(context, choix, montant ?? 0);
+      return;
+    }
+
+    if (montant == null || montant <= 0) {
+      afficherErreur(
+        context,
+        "Le montant de l'abonnement n'a pas pu être récupéré. "
+        'Vérifiez votre connexion puis réessayez.',
+      );
+      return;
+    }
+
+    bloc.add(
+      PayerAbonnement(
+        montant: montant,
+        numeroTelephone: choix.numero,
+        methode: choix.methode,
+      ),
+    );
+  }
+
+  /// Paiement simulé, le temps que les API Orange Money / Wave soient
+  /// branchées : une attente « confirmez sur votre téléphone », puis l'issue
+  /// prévue pour le numéro de test choisi.
+  Future<void> _payerEnSimulation(
+    BuildContext context,
+    ChoixPaiementMobile choix,
+    num montant,
+  ) async {
+    final operateur = choix.methode == 'wave'
+        ? Operateur.wave
+        : Operateur.orangeMoney;
+    final navigator = Navigator.of(context, rootNavigator: true);
+    showDialog<void>(
       context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setStateDialog) => AlertDialog(
-          title: const Text('Renouveler mon abonnement'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: numeroCtrl,
-                keyboardType: TextInputType.phone,
-                decoration: const InputDecoration(
-                  labelText: 'Numéro de téléphone',
-                ),
-              ),
-              const SizedBox(height: 12),
-              DropdownButton<String>(
-                value: methode,
-                isExpanded: true,
-                items: const [
-                  DropdownMenuItem(
-                    value: 'orange_money',
-                    child: Text('Orange Money'),
-                  ),
-                  DropdownMenuItem(value: 'wave', child: Text('Wave')),
-                ],
-                onChanged: (v) =>
-                    setStateDialog(() => methode = v ?? 'orange_money'),
-              ),
-            ],
+      barrierDismissible: false,
+      builder: (_) => PopScope(
+        canPop: false,
+        child: Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Annuler'),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                LogoOperateur(operateur, taille: 56),
+                const SizedBox(height: 18),
+                const Text(
+                  'Confirmez le paiement',
+                  style: TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w800,
+                    color: AppColor.kGrayscaleDark100,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'Validez la demande ${operateur.nom} reçue sur le '
+                  '${choix.numero}.',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 13.5, color: _C.sub),
+                ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: 26,
+                  height: 26,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.6,
+                    color: operateur.couleur,
+                  ),
+                ),
+              ],
             ),
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('Payer'),
-            ),
-          ],
+          ),
         ),
       ),
     );
-    if (res == true && numeroCtrl.text.trim().isNotEmpty && context.mounted) {
-      final bloc = context.read<AbonnementBloc>();
-      final state = bloc.state;
-      num? montant = state is AbonnementLoaded
-          ? state.abonnement.montant
-          : null;
-
-      // Le repli valait `0`, et le backend refuse tout montant non positif :
-      // tant que la fiche d'abonnement n'était pas chargée, le paiement
-      // échouait à coup sûr sur « Le montant doit être positif ». Le prix est
-      // désormais demandé au serveur, qui en est la source.
-      if (montant == null || montant <= 0) {
-        montant = await sl<ConfigPubliqueService>().prixAbonnement();
-      }
-
-      if (!context.mounted) return;
-
-      if (montant == null || montant <= 0) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              "Le montant de l'abonnement n'a pas pu être récupéré. "
-              'Vérifiez votre connexion puis réessayez.',
-            ),
-          ),
-        );
-        return;
-      }
-
-      bloc.add(
-        PayerAbonnement(
-          montant: montant,
-          numeroTelephone: numeroCtrl.text.trim(),
-          methode: methode,
-        ),
-      );
+    final r = await simulerPaiement(
+      numero: choix.numero,
+      methode: choix.methode,
+      montant: montant,
+    );
+    navigator.pop();
+    if (!context.mounted) return;
+    if (r.reussi) {
+      afficherSucces(context, '${r.message}\nRéférence : ${r.reference}');
+    } else {
+      afficherErreur(context, r.message);
     }
   }
 

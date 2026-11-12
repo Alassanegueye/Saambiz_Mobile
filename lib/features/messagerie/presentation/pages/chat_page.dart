@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/page_vendeur.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -86,7 +87,7 @@ class _ChatViewState extends State<_ChatView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return ScaffoldMarine(
       backgroundColor: _C.bg,
       appBar: AppBar(title: Text(widget.interlocuteurNom)),
       body: BlocConsumer<MessagerieBloc, MessagerieState>(

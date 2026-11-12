@@ -533,15 +533,31 @@ class _EnteteAccueil extends StatelessWidget {
               ),
               if (!isGuest && user != null && _nomAffiche.isNotEmpty) ...[
                 const SizedBox(height: 12),
-                const Text(
-                  'Bonjour, ',
-                  style: TextStyle(
+                Text(
+                  _nomAffiche,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
                     fontFamily: kPolice,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
+                    fontSize: 17,
+                    fontWeight: FontWeight.w700,
                     color: Colors.white,
                   ),
                 ),
+                if (user!.email.trim().isNotEmpty) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    user!.email.trim(),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontFamily: kPolice,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.white.withValues(alpha: 0.75),
+                    ),
+                  ),
+                ],
               ],
               const SizedBox(height: 14),
               // Barre de recherche grande pilule arrondie
@@ -679,7 +695,7 @@ class _RangeeCategories extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(top: 18),
       child: SizedBox(
-        height: largeur + 38,
+        height: largeur + 46,
         child: ListView.separated(
           scrollDirection: Axis.horizontal,
           padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -733,12 +749,13 @@ class _RangeeCategories extends StatelessWidget {
                       const SizedBox(height: 7),
                       Text(
                         toutes ? 'Tout voir' : _nomCourt(c!.nom),
-                        maxLines: 1,
+                        maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         textAlign: TextAlign.center,
                         style: const TextStyle(
                           fontFamily: kPolice,
-                          fontSize: 11.5,
+                          fontSize: 11,
+                          height: 1.2,
                           fontWeight: FontWeight.w600,
                           color: AppColor.kGrayscaleDark100,
                         ),

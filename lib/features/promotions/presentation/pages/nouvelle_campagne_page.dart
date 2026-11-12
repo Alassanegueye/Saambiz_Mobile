@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/messages.dart';
 import 'package:saambiz/core/widgets/page_vendeur.dart';
 import 'package:saambiz/core/widgets/libelle_obligatoire.dart';
 import 'package:saambiz/core/widgets/image_reseau.dart';
@@ -247,7 +248,7 @@ class _NouvelleCampagnePageState extends State<NouvelleCampagnePage> {
       final message = res.data is Map
           ? (res.data['message'] ?? 'Envoyé.').toString()
           : 'Envoyé.';
-      _snack(message);
+      afficherSucces(context, message);
       Navigator.of(context).pop(true);
     } on DioException catch (e) {
       final data = e.response?.data;
@@ -322,54 +323,57 @@ class _NouvelleCampagnePageState extends State<NouvelleCampagnePage> {
                   _sectionInformation(),
                 if (_type == TypeCampagne.promotion) _carteNotifier(),
                 if (_avecMessage)
-                _carte(
-                  titre: 'Votre message',
-                  enfant: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Text(
-                        'Personnalisez le message : c\'est exactement ce que '
-                        'vos clients liront dans la notification.',
-                        style: _discret(),
-                      ),
-                      const SizedBox(height: 12),
-                      TextField(
-                        controller: _titre,
-                        maxLength: 80,
-                        decoration: _deco(
-                          'Titre',
-                          'Ex. : Soldes de fin de mois',
+                  _carte(
+                    titre: 'Votre message',
+                    enfant: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text(
+                          'Personnalisez le message : c\'est exactement ce que '
+                          'vos clients liront dans la notification.',
+                          style: _discret(),
                         ),
-                      ),
-                      const SizedBox(height: 10),
-                      TextField(
-                        controller: _message,
-                        onChanged: (_) => setState(() {}),
-                        maxLength: 500,
-                        minLines: 3,
-                        maxLines: 6,
-                        decoration: _deco(
-                          'Message',
-                          'Ex. : -20 % sur toute la collection jusqu\'à dimanche !',
-                        ),
-                      ),
-                      if (_type == TypeCampagne.promotion &&
-                          _message.text.trim().isEmpty)
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: TextButton.icon(
-                            onPressed: () => setState(
-                              () => _message.text = _suggestionPromo,
-                            ),
-                            icon: const Icon(Icons.auto_awesome_outlined, size: 18),
-                            label: const Text('Utiliser une suggestion'),
+                        const SizedBox(height: 12),
+                        TextField(
+                          controller: _titre,
+                          maxLength: 80,
+                          decoration: _deco(
+                            'Titre',
+                            'Ex. : Soldes de fin de mois',
                           ),
                         ),
-                      const SizedBox(height: 6),
-                      _choixImage(),
-                    ],
+                        const SizedBox(height: 10),
+                        TextField(
+                          controller: _message,
+                          onChanged: (_) => setState(() {}),
+                          maxLength: 500,
+                          minLines: 3,
+                          maxLines: 6,
+                          decoration: _deco(
+                            'Message',
+                            'Ex. : -20 % sur toute la collection jusqu\'à dimanche !',
+                          ),
+                        ),
+                        if (_type == TypeCampagne.promotion &&
+                            _message.text.trim().isEmpty)
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: TextButton.icon(
+                              onPressed: () => setState(
+                                () => _message.text = _suggestionPromo,
+                              ),
+                              icon: const Icon(
+                                Icons.auto_awesome_outlined,
+                                size: 18,
+                              ),
+                              label: const Text('Utiliser une suggestion'),
+                            ),
+                          ),
+                        const SizedBox(height: 6),
+                        _choixImage(),
+                      ],
+                    ),
                   ),
-                ),
                 if (_avecMessage) _sectionDestinataires(),
               ],
             ),
@@ -754,30 +758,30 @@ class _NouvelleCampagnePageState extends State<NouvelleCampagnePage> {
   Widget _carte({required String titre, required Widget enfant}) => Padding(
     padding: const EdgeInsets.only(bottom: 14),
     child: Material(
-    color: AppColor.kWhite,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(16),
-      side: const BorderSide(color: AppColor.kLine),
-    ),
-    child: Padding(
-    padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          titre,
-          style: const TextStyle(
-            fontFamily: kPolice,
-            fontSize: 15,
-            fontWeight: FontWeight.w700,
-            color: AppColor.kGrayscaleDark100,
-          ),
+      color: AppColor.kWhite,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: const BorderSide(color: AppColor.kLine),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              titre,
+              style: const TextStyle(
+                fontFamily: kPolice,
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+                color: AppColor.kGrayscaleDark100,
+              ),
+            ),
+            const SizedBox(height: 8),
+            enfant,
+          ],
         ),
-        const SizedBox(height: 8),
-        enfant,
-      ],
-    ),
-    ),
+      ),
     ),
   );
 }

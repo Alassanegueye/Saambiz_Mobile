@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/messages.dart';
 import 'dart:io';
 import 'package:saambiz/core/widgets/image_reseau.dart';
 
@@ -145,6 +146,7 @@ class _EditProfileViewState extends State<_EditProfileView> {
               ),
             );
           } else if (state is CompteActionSucces) {
+            afficherSucces(context, 'Profil mis à jour avec succès');
             Navigator.of(context).pop(state.user);
           }
         },

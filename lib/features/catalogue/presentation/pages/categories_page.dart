@@ -23,6 +23,12 @@ import 'produits_page.dart';
 
 enum _Onglet { boutiques, categories }
 
+/// Demande d'afficher la section « Boutiques » de l'onglet Explorer depuis
+/// une autre page (ex. « Découvrir les boutiques » de « Mes commandes »).
+/// L'onglet reste en vie entre deux visites : sans ça, il rouvrirait sur la
+/// dernière section consultée.
+final ValueNotifier<int> explorerBoutiquesDemande = ValueNotifier<int>(0);
+
 /// Onglet « Explorer » du client : les BOUTIQUES d'abord — SaamBiz présente
 /// des boutiques avant des produits — puis les catégories.
 ///
@@ -67,6 +73,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
   void initState() {
     super.initState();
     _defilement.addListener(_surDefilement);
+    explorerBoutiquesDemande.addListener(_surBoutiquesDemande);
     _charger();
     _chargerBoutiques();
   }
@@ -74,6 +81,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
   @override
   void dispose() {
     _attenteFrappe?.cancel();
+    explorerBoutiquesDemande.removeListener(_surBoutiquesDemande);
     _defilement.dispose();
     _ctrl.dispose();
     super.dispose();
@@ -151,6 +159,12 @@ class _CategoriesPageState extends State<CategoriesPage> {
       const Duration(milliseconds: 350),
       _chargerBoutiques,
     );
+  }
+
+  void _surBoutiquesDemande() {
+    if (!mounted) return;
+    _changerOnglet(_Onglet.boutiques);
+    if (_defilement.hasClients) _defilement.jumpTo(0);
   }
 
   void _changerOnglet(_Onglet onglet) {
