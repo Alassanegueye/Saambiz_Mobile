@@ -109,9 +109,9 @@ class _AccueilBoutiquesPageState extends State<AccueilBoutiquesPage>
     // Un invité n'a pas de notifications : la page s'ouvre quand même, et
     // dit simplement qu'il n'y en a aucune (pas de détour par la connexion).
     if (widget.isGuest) {
-      Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => const _NotificationsInvite()),
-      );
+      Navigator.of(
+        context,
+      ).push(MaterialPageRoute(builder: (_) => const _NotificationsInvite()));
       return;
     }
     await Navigator.of(
@@ -252,9 +252,7 @@ class _AccueilBoutiquesPageState extends State<AccueilBoutiquesPage>
                     parent: BouncingScrollPhysics(),
                   ),
                   slivers: [
-                    SliverToBoxAdapter(
-                      child: SizedBox(height: _hauteurEntete),
-                    ),
+                    SliverToBoxAdapter(child: SizedBox(height: _hauteurEntete)),
                     ..._corps(),
                     const SliverToBoxAdapter(
                       child: SizedBox(height: kEspaceBarreBas),
@@ -333,8 +331,10 @@ class _AccueilBoutiquesPageState extends State<AccueilBoutiquesPage>
     // (dapresRecherches, pourVous, produitsPourVous)
     final sectionsPourVous = <AccueilSection>[];
     for (final cle in ['dapresRecherches', 'pourVous', 'produitsPourVous']) {
-      final s = parCle.remove(cle);
-      if (s != null) sectionsPourVous.add(s);
+      // Seules les sections de produits rejoignent la grille : une section
+      // de boutiques y apparaissait en fausses cartes produit à « 0 FCFA ».
+      if (parCle[cle]?.type != 'produits') continue;
+      sectionsPourVous.add(parCle.remove(cle)!);
     }
 
     // Ordre fixe des sections restantes en carrousels
@@ -833,9 +833,12 @@ class _BlocPromotions extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 22, 16, 0),
       child: Container(
         clipBehavior: Clip.antiAlias,
+        // Fond doré très clair : le bloc se remarque sans écraser l'écran,
+        // même avec une seule promotion.
         decoration: BoxDecoration(
-          color: AppColor.kPrimary,
+          color: const Color(0xFFFFF6DB),
           borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: const Color(0xFFFBE3A0)),
         ),
         child: Stack(
           children: [
@@ -851,12 +854,12 @@ class _BlocPromotions extends StatelessWidget {
                         width: 38,
                         height: 38,
                         decoration: BoxDecoration(
-                          color: AppColor.kSecondary,
+                          color: AppColor.kPrimary,
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: const Icon(
                           Icons.local_offer_rounded,
-                          color: AppColor.kPrimary,
+                          color: AppColor.kSecondary,
                           size: 20,
                         ),
                       ),
@@ -876,7 +879,7 @@ class _BlocPromotions extends StatelessWidget {
                                 fontSize: 17,
                                 fontWeight: FontWeight.w800,
                                 letterSpacing: -0.2,
-                                color: AppColor.kWhite,
+                                color: AppColor.kPrimary,
                               ),
                             ),
                             const SizedBox(height: 2),
@@ -887,7 +890,7 @@ class _BlocPromotions extends StatelessWidget {
                               style: TextStyle(
                                 fontFamily: kPolice,
                                 fontSize: 12.5,
-                                color: AppColor.kWhite.withValues(alpha: 0.72),
+                                color: AppColor.kSecondaryDark,
                               ),
                             ),
                           ],
@@ -907,13 +910,13 @@ class _BlocPromotions extends StatelessWidget {
                                   fontFamily: kPolice,
                                   fontSize: 13,
                                   fontWeight: FontWeight.w700,
-                                  color: AppColor.kSecondary,
+                                  color: AppColor.kPrimary,
                                 ),
                               ),
                               Icon(
                                 Icons.chevron_right_rounded,
                                 size: 18,
-                                color: AppColor.kSecondary,
+                                color: AppColor.kPrimary,
                               ),
                             ],
                           ),
@@ -1672,11 +1675,6 @@ class _CarteProduitPourVous extends StatelessWidget {
                         ),
                       ),
                     ),
-                  Positioned(
-                    right: 6,
-                    bottom: 6,
-                    child: BoutonAjoutPanier(produit: produit),
-                  ),
                   // Bouton favoris en haut a droite
                   Positioned(
                     top: 6,
@@ -1749,11 +1747,9 @@ class _CarteProduitPourVous extends StatelessWidget {
                     const SizedBox(height: 6),
                     // Prix & Remise
                     Row(
-                      crossAxisAlignment: CrossAxisAlignment.baseline,
-                      textBaseline: TextBaseline.alphabetic,
                       children: [
                         Text(
-                          '${formaterPrix(produit.prix)} FCFA',
+                          formaterPrix(produit.prixPaye),
                           style: TextStyle(
                             fontFamily: kPolice,
                             fontSize: 14,
@@ -1763,11 +1759,11 @@ class _CarteProduitPourVous extends StatelessWidget {
                                 : AppColor.kPrimary,
                           ),
                         ),
-                        if (aRemise && produit.prixPromo != null) ...[
+                        if (produit.prixBarre != null) ...[
                           const SizedBox(width: 5),
                           Flexible(
                             child: Text(
-                              formaterPrix(produit.prixPromo!),
+                              formaterPrix(produit.prixBarre!),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
@@ -1779,36 +1775,9 @@ class _CarteProduitPourVous extends StatelessWidget {
                             ),
                           ),
                         ],
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    // Avis ou note
-                    const Row(
-                      children: [
-                        Icon(
-                          Icons.star_rounded,
-                          size: 13,
-                          color: AppColor.kSecondary,
-                        ),
-                        SizedBox(width: 2),
-                        Text(
-                          '4.8',
-                          style: TextStyle(
-                            fontFamily: kPolice,
-                            fontSize: 10.5,
-                            fontWeight: FontWeight.w700,
-                            color: AppColor.kGrayscaleDark100,
-                          ),
-                        ),
-                        SizedBox(width: 4),
-                        Text(
-                          '(recommandé)',
-                          style: TextStyle(
-                            fontFamily: kPolice,
-                            fontSize: 10,
-                            color: AppColor.kGrayscale40,
-                          ),
-                        ),
+                        const Spacer(),
+                        // Hors de la photo, comme sur les autres cartes.
+                        BoutonAjoutPanier(produit: produit, taille: 30),
                       ],
                     ),
                   ],
@@ -1821,7 +1790,6 @@ class _CarteProduitPourVous extends StatelessWidget {
     );
   }
 }
-
 
 /// Notifications d'un invité : il n'en reçoit pas, la page le dit.
 class _NotificationsInvite extends StatelessWidget {

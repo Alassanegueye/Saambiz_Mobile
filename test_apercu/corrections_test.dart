@@ -12,14 +12,21 @@ import 'package:saambiz/core/widgets/messages.dart';
 import 'package:saambiz/features/auth/domain/entities/user.dart';
 import 'package:saambiz/features/auth/presentation/pages/login_page.dart';
 import 'package:saambiz/features/auth/presentation/signup/interets_page.dart';
+import 'package:saambiz/features/catalogue/data/produit_catalogue.dart';
+import 'package:saambiz/features/catalogue/presentation/pages/boutique_publique_page.dart';
 import 'package:saambiz/features/commande/data/services/panier_service.dart';
 import 'package:saambiz/features/commande/presentation/pages/checkout_page.dart';
+import 'package:saambiz/features/commande/presentation/pages/panier_page.dart';
+import 'package:saambiz/features/compte/presentation/pages/edit_profil_page.dart';
 import 'package:saambiz/features/compte/presentation/pages/reset_password_page.dart';
 import 'package:saambiz/features/home/presentation/pages/acheteur/main_client_page.dart';
+import 'package:saambiz/features/home/presentation/pages/vendeur/profil_page.dart'
+    as vendeur;
 import 'package:saambiz/features/messagerie/presentation/pages/conversations_page.dart';
 import 'package:saambiz/injection_container.dart' as di;
 
-import 'apercu_test.dart' show onglet;
+import 'apercu_test.dart' show onglet, vendeuse;
+import 'donnees.dart';
 import 'outils.dart';
 
 const balla = User(
@@ -161,6 +168,82 @@ void main() {
         ),
         avant: onglet('Favoris'),
       ),
+    );
+  });
+
+  testWidgets('page boutique', (t) async {
+    await capturer(
+      t,
+      'corrections_12_boutique',
+      BoutiquePubliquePage(
+        boutiqueId: 'b1',
+        apercu: BoutiqueResume.fromJson(Donnees.boutiques.first),
+      ),
+      hauteur: 1400,
+    );
+  });
+
+  testWidgets('page boutique (Aloushop, sans avis ni bannière)', (t) async {
+    await capturer(
+      t,
+      'corrections_13_boutique_simple',
+      BoutiquePubliquePage(
+        boutiqueId: 'b2',
+        apercu: BoutiqueResume.fromJson(Donnees.boutiques[1]),
+      ),
+    );
+  });
+
+  testWidgets('panier', (t) async {
+    final panier = di.sl<PanierService>();
+    if (panier.selectionVide) panier.basculerBoutique('v-b1');
+    await capturer(t, 'corrections_14_panier', const PanierPage());
+  });
+
+  testWidgets('compte', (t) async {
+    await capturer(
+      t,
+      'corrections_15_compte',
+      const MainAcheteurPage(user: balla),
+      action: onglet('Compte'),
+      hauteur: 1500,
+    );
+  });
+
+  testWidgets('compte vendeur', (t) async {
+    await capturer(
+      t,
+      'corrections_16_compte_vendeur',
+      const vendeur.ProfilPage(user: vendeuse),
+      profil: 'vendeur',
+    );
+  });
+
+  testWidgets('modifier le profil', (t) async {
+    await capturer(
+      t,
+      'corrections_17_modifier_profil',
+      const EditProfilePage(user: balla),
+    );
+  });
+
+  testWidgets('accueil sans doublons', (t) async {
+    await capturer(
+      t,
+      'corrections_18_accueil_entier',
+      const MainAcheteurPage(user: balla),
+      hauteur: 4200,
+      action: (tester) async {
+        final noms = find
+            .byWidgetPredicate(
+              (w) => w is Text && (w.data ?? '').isNotEmpty,
+              skipOffstage: false,
+            )
+            .evaluate()
+            .map((e) => (e.widget as Text).data!)
+            .toList();
+        debugPrint('TEXTES ${noms.join(' | ')}');
+      },
     );
   });
 }

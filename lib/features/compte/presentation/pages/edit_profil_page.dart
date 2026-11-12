@@ -10,6 +10,9 @@ import 'package:saambiz/core/widgets/bouton_indicatif.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../../core/theme/app_color.dart';
+import '../../../../core/theme/police.dart';
+import '../../../../core/widgets/page_vendeur.dart';
 import '../../../../injection_container.dart';
 import '../../../auth/domain/entities/user.dart';
 import '../bloc/compte_bloc.dart';
@@ -80,8 +83,15 @@ class _EditProfileViewState extends State<_EditProfileView> {
     if (x != null) setState(() => _photoPath = x.path);
   }
 
-  /// La photo tout juste choisie, sinon la photo actuelle, sinon une icône.
-  /// Le petit appareil photo reste visible : il dit qu'on peut en changer.
+  String get _initiales {
+    final p = _prenomCtrl.text.trim();
+    final n = _nomCtrl.text.trim();
+    final i = '${p.isNotEmpty ? p[0] : ''}${n.isNotEmpty ? n[0] : ''}';
+    return i.isEmpty ? '?' : i.toUpperCase();
+  }
+
+  /// La photo tout juste choisie, sinon la photo actuelle, sinon les
+  /// initiales. Le petit appareil photo dit qu'on peut en changer.
   Widget _avatar() {
     final actuelle = widget.user?.photoProfil;
     final ImageProvider? image = _photoPath != null
@@ -89,36 +99,57 @@ class _EditProfileViewState extends State<_EditProfileView> {
         : (actuelle != null && actuelle.isNotEmpty)
         ? fournisseurImageReseau(actuelle)
         : null;
-    return GestureDetector(
-      onTap: _choisirPhoto,
-      child: Stack(
-        children: [
-          CircleAvatar(
-            radius: 44,
-            backgroundColor: _C.green.withValues(alpha: 0.15),
-            backgroundImage: image,
-            child: image == null
-                ? const Icon(Icons.person_outline_rounded, color: _C.green)
-                : null,
-          ),
-          Positioned(
-            right: 0,
-            bottom: 0,
-            child: Container(
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                color: _C.green,
+    return Semantics(
+      button: true,
+      label: 'Changer la photo de profil',
+      child: GestureDetector(
+        onTap: _choisirPhoto,
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(4),
+              decoration: const BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(color: _C.white, width: 2),
+                color: AppColor.kSecondary,
               ),
-              child: const Icon(
-                Icons.camera_alt_outlined,
-                size: 14,
-                color: _C.white,
+              child: CircleAvatar(
+                radius: 48,
+                backgroundColor: _C.white,
+                backgroundImage: image,
+                child: image == null
+                    ? Text(
+                        _initiales,
+                        style: const TextStyle(
+                          fontFamily: kPolice,
+                          fontSize: 30,
+                          fontWeight: FontWeight.w800,
+                          color: _C.green,
+                        ),
+                      )
+                    : null,
               ),
             ),
-          ),
-        ],
+            Positioned(
+              right: 0,
+              bottom: 2,
+              child: Container(
+                width: 34,
+                height: 34,
+                decoration: BoxDecoration(
+                  color: _C.green,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: _C.white, width: 3),
+                ),
+                child: const Icon(
+                  Icons.photo_camera_rounded,
+                  size: 16,
+                  color: _C.white,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -138,7 +169,8 @@ class _EditProfileViewState extends State<_EditProfileView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    final email = (widget.user?.email ?? '').trim();
+    return ScaffoldMarine(
       backgroundColor: _C.bg,
       appBar: AppBar(title: const Text('Modifier le profil')),
       body: BlocConsumer<CompteBloc, CompteState>(
@@ -146,7 +178,11 @@ class _EditProfileViewState extends State<_EditProfileView> {
           if (state is CompteError) {
             afficherErreur(context, state.message);
           } else if (state is CompteActionSucces) {
-            afficherSucces(context, 'Profil mis à jour avec succès');
+            afficherSucces(
+              context,
+              'Vos informations ont été enregistrées.',
+              titre: 'Profil mis à jour',
+            );
             Navigator.of(context).pop(state.user);
           }
         },
@@ -154,52 +190,151 @@ class _EditProfileViewState extends State<_EditProfileView> {
           final loading = state is CompteActionEnCours;
           return Form(
             key: _formKey,
-            child: ListView(
-              padding: const EdgeInsets.all(16),
+            child: Column(
               children: [
-                Center(child: _avatar()),
-                const SizedBox(height: 20),
-                _input(_prenomCtrl, 'Prénom'),
-                const SizedBox(height: 12),
-                _input(_nomCtrl, 'Nom'),
-                const SizedBox(height: 12),
-                _input(
-                  _telephoneCtrl,
-                  'Téléphone',
-                  keyboard: TextInputType.phone,
-                  verifier: (v) => verifierTelephone(v, _paysTel.value),
-                  formats: [FormatTelephone(_paysTel)],
-                  prefixe: BoutonIndicatif(
-                    pays: _paysTel,
-                    onChange: () => setState(_telephoneCtrl.clear),
+                Expanded(
+                  child: ListView(
+                    padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
+                    children: [
+                      Center(child: _avatar()),
+                      const SizedBox(height: 6),
+                      Center(
+                        child: TextButton(
+                          onPressed: _choisirPhoto,
+                          child: const Text(
+                            'Changer la photo',
+                            style: TextStyle(
+                              fontFamily: kPolice,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                              color: _C.green,
+                            ),
+                          ),
+                        ),
+                      ),
+                      if (email.isNotEmpty)
+                        Center(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColor.kPrimaryLight,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  Icons.mail_outline_rounded,
+                                  size: 15,
+                                  color: _C.green,
+                                ),
+                                const SizedBox(width: 6),
+                                Flexible(
+                                  child: Text(
+                                    email,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontFamily: kPolice,
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                      color: _C.green,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      const SizedBox(height: 24),
+                      _Groupe(
+                        titre: 'Informations personnelles',
+                        champs: [
+                          _champ(
+                            _prenomCtrl,
+                            'Prénom',
+                            Icons.person_outline_rounded,
+                            majuscules: true,
+                          ),
+                          _champ(
+                            _nomCtrl,
+                            'Nom',
+                            Icons.badge_outlined,
+                            majuscules: true,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 18),
+                      _Groupe(
+                        titre: 'Coordonnées',
+                        champs: [
+                          _champ(
+                            _telephoneCtrl,
+                            'Téléphone',
+                            null,
+                            keyboard: TextInputType.phone,
+                            verifier: (v) =>
+                                verifierTelephone(v, _paysTel.value),
+                            formats: [FormatTelephone(_paysTel)],
+                            prefixe: BoutonIndicatif(
+                              pays: _paysTel,
+                              onChange: () => setState(_telephoneCtrl.clear),
+                            ),
+                          ),
+                          _champ(
+                            _adresseCtrl,
+                            'Adresse',
+                            Icons.location_on_outlined,
+                            aide: 'Quartier et ville, pour vos livraisons',
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 12),
-                _input(_adresseCtrl, 'Adresse'),
-                const SizedBox(height: 24),
-                ElevatedButton(
-                  onPressed: loading ? null : _soumettre,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: _C.green,
-                    foregroundColor: _C.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
+                Container(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+                  decoration: const BoxDecoration(
+                    color: _C.white,
+                    boxShadow: [
+                      BoxShadow(color: Color(0x12000000), blurRadius: 16),
+                    ],
+                  ),
+                  child: SafeArea(
+                    top: false,
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: 52,
+                      child: FilledButton(
+                        onPressed: loading ? null : _soumettre,
+                        style: FilledButton.styleFrom(
+                          backgroundColor: _C.green,
+                          foregroundColor: _C.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          textStyle: const TextStyle(
+                            fontFamily: kPolice,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        child: loading
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : const Text('Enregistrer'),
+                      ),
                     ),
                   ),
-                  child: loading
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : const Text(
-                          'Enregistrer',
-                          style: TextStyle(fontWeight: FontWeight.w700),
-                        ),
                 ),
               ],
             ),
@@ -209,43 +344,127 @@ class _EditProfileViewState extends State<_EditProfileView> {
     );
   }
 
-  Widget _input(
+  /// Un champ : libellé au-dessus, icône à gauche, fond gris clair.
+  Widget _champ(
     TextEditingController c,
-    String label, {
+    String label,
+    IconData? icone, {
     TextInputType? keyboard,
     String? Function(String)? verifier,
     List<TextInputFormatter>? formats,
     Widget? prefixe,
+    String? aide,
+    bool majuscules = false,
   }) {
-    return TextFormField(
-      controller: c,
-      keyboardType: keyboard,
-      inputFormatters: formats,
-      validator: (v) => (v == null || v.trim().isEmpty)
-          ? '$label requis'
-          : verifier?.call(v.trim()),
-      decoration: InputDecoration(
-        label: LibelleObligatoire(label),
-        prefixIcon: prefixe,
-        filled: true,
-        fillColor: _C.white,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 14,
-          vertical: 14,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        LibelleObligatoire(
+          label,
+          style: const TextStyle(
+            fontFamily: kPolice,
+            fontSize: 13.5,
+            fontWeight: FontWeight.w700,
+            color: _C.green,
+          ),
         ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: _C.border),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: c,
+          keyboardType: keyboard,
+          inputFormatters: formats,
+          textCapitalization: majuscules
+              ? TextCapitalization.words
+              : TextCapitalization.sentences,
+          // Les initiales de l'avatar suivent le prénom et le nom.
+          onChanged: majuscules ? (_) => setState(() {}) : null,
+          validator: (v) => (v == null || v.trim().isEmpty)
+              ? '$label requis'
+              : verifier?.call(v.trim()),
+          style: const TextStyle(
+            fontFamily: kPolice,
+            fontSize: 15.5,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF1B1F27),
+          ),
+          decoration: InputDecoration(
+            prefixIcon:
+                prefixe ??
+                (icone == null
+                    ? null
+                    : Icon(icone, size: 20, color: const Color(0xFF8A93A6))),
+            helperText: aide,
+            helperStyle: const TextStyle(fontFamily: kPolice, fontSize: 12),
+            filled: true,
+            fillColor: _C.bg,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 14,
+              vertical: 15,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: BorderSide.none,
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: const BorderSide(color: _C.green, width: 1.5),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: const BorderSide(color: AppColor.kErreur),
+            ),
+            focusedErrorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: const BorderSide(color: AppColor.kErreur, width: 1.5),
+            ),
+          ),
         ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: _C.green),
+      ],
+    );
+  }
+}
+
+/// Une carte blanche titrée qui regroupe des champs.
+class _Groupe extends StatelessWidget {
+  final String titre;
+  final List<Widget> champs;
+  const _Groupe({required this.titre, required this.champs});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 4, bottom: 10),
+          child: Text(
+            titre.toUpperCase(),
+            style: const TextStyle(
+              fontFamily: kPolice,
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0.8,
+              color: AppColor.kGrayscale40,
+            ),
+          ),
         ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: _C.border),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: _C.white,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: _C.border),
+          ),
+          child: Column(
+            children: [
+              for (var i = 0; i < champs.length; i++) ...[
+                if (i > 0) const SizedBox(height: 16),
+                champs[i],
+              ],
+            ],
+          ),
         ),
-      ),
+      ],
     );
   }
 }

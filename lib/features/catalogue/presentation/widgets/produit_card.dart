@@ -164,7 +164,8 @@ class ProduitCard extends StatelessWidget {
   final ProduitCatalogue produit;
   final bool surFond;
 
-  /// Bouton « + » sur la photo, pour ajouter au panier sans ouvrir la fiche.
+  /// Bouton « + » à droite du prix, pour ajouter au panier sans ouvrir la
+  /// fiche.
   final bool avecAjout;
   const ProduitCard({
     super.key,
@@ -199,22 +200,49 @@ class ProduitCard extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 3),
-        PrixTexte(p.prixPaye),
-        SizedBox(
-          height: 16,
-          child: p.prixBarre == null
-              ? null
-              : Text(
-                  formaterPrix(p.prixBarre!),
-                  maxLines: 1,
-                  style: const TextStyle(
-                    fontFamily: kPolice,
-                    fontSize: 11.5,
-                    color: AppColor.kGrayscale30,
-                    decoration: TextDecoration.lineThrough,
-                    decorationColor: AppColor.kGrayscale30,
+        // Prix à gauche ; l'ajout au panier à droite, hors de la photo :
+        // posé dessus, il cachait le compte à rebours.
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: PrixTexte(p.prixPaye),
                   ),
-                ),
+                  SizedBox(
+                    height: 16,
+                    child: p.prixBarre == null
+                        ? null
+                        : Text(
+                            formaterPrix(p.prixBarre!),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontFamily: kPolice,
+                              fontSize: 11.5,
+                              color: AppColor.kGrayscale30,
+                              decoration: TextDecoration.lineThrough,
+                              decorationColor: AppColor.kGrayscale30,
+                            ),
+                          ),
+                  ),
+                ],
+              ),
+            ),
+            if (avecAjout) ...[
+              const SizedBox(width: 6),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 2),
+                child: BoutonAjoutPanier(produit: p, taille: 30),
+              ),
+            ],
+          ],
         ),
       ],
     );
@@ -319,12 +347,6 @@ class ProduitCard extends StatelessWidget {
             top: 6,
             child: BoutonFavoriProduit(produit: p, taille: 32),
           ),
-          if (avecAjout)
-            Positioned(
-              right: 6,
-              bottom: 6,
-              child: BoutonAjoutPanier(produit: p),
-            ),
         ],
       ),
     );
@@ -435,16 +457,16 @@ class _Quantite extends StatelessWidget {
         child: SizedBox(
           width: taille,
           height: taille,
-          child: Icon(icone, size: taille * 0.55, color: AppColor.kWhite),
+          child: Icon(icone, size: taille * 0.55, color: AppColor.kPrimary),
         ),
       ),
     );
 
     return Material(
-      color: AppColor.kPrimary,
-      shape: const StadiumBorder(),
-      elevation: 2,
-      shadowColor: Colors.black26,
+      color: AppColor.kPrimaryLight,
+      shape: const StadiumBorder(
+        side: BorderSide(color: AppColor.kPrimaryBorder),
+      ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -464,7 +486,7 @@ class _Quantite extends StatelessWidget {
                 fontFamily: kPolice,
                 fontWeight: FontWeight.w700,
                 fontSize: taille * 0.44,
-                color: AppColor.kWhite,
+                color: AppColor.kPrimary,
                 fontFeatures: const [FontFeature.tabularFigures()],
               ),
             ),
