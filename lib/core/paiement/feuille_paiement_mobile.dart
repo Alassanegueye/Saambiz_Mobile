@@ -272,15 +272,15 @@ enum Operateur {
   orangeMoney(
     nom: 'Orange Money',
     couleur: Color(0xFFFF7900),
-    logo: 'assets/images/orange_money.png',
+    logo: 'assets/images/OM.png',
   ),
-  wave(nom: 'Wave', couleur: Color(0xFF1DC4FF), logo: 'assets/images/wave.png');
+  wave(nom: 'Wave', couleur: Color(0xFF1DC4FF), logo: 'assets/images/wave.jpg');
 
   final String nom;
   final Color couleur;
 
-  /// Logo officiel : il suffit de déposer le fichier à cet emplacement.
-  /// Sans lui, une pastille aux couleurs de l'opérateur le remplace.
+  /// Logo officiel (assets/images). S'il manquait, une pastille aux couleurs
+  /// de l'opérateur le remplacerait.
   final String logo;
   const Operateur({
     required this.nom,
@@ -302,10 +302,16 @@ class LogoOperateur extends StatelessWidget {
       child: SizedBox(
         width: taille,
         height: taille,
-        child: Image.asset(
-          operateur.logo,
-          fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => _repli(),
+        // Le logo Orange Money est détouré : un fond blanc le fait ressortir.
+        child: ColoredBox(
+          color: AppColor.kWhite,
+          child: Image.asset(
+            operateur.logo,
+            fit: operateur == Operateur.orangeMoney
+                ? BoxFit.contain
+                : BoxFit.cover,
+            errorBuilder: (_, __, ___) => _repli(),
+          ),
         ),
       ),
     );

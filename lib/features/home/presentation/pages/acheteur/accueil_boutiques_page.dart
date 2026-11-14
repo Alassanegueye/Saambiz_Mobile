@@ -493,16 +493,6 @@ class _EnteteAccueil extends StatelessWidget {
     return user!.nomAffiche;
   }
 
-  String get _initiales {
-    if (isGuest || user == null) return 'SA';
-    final p = user!.prenom.trim();
-    final n = user!.nom.trim();
-    final p0 = p.isNotEmpty ? p[0] : '';
-    final n0 = n.isNotEmpty ? n[0] : '';
-    final init = '$p0$n0'.toUpperCase();
-    return init.isNotEmpty ? init : 'SB';
-  }
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -529,7 +519,7 @@ class _EnteteAccueil extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Ligne 1 : Pictogramme seul a gauche (sans texte), Cloche, Panier et Avatar a droite
+              // Ligne 1 : Pictogramme seul a gauche (sans texte), Cloche et Panier a droite
               Row(
                 children: [
                   Image.asset(
@@ -548,31 +538,6 @@ class _EnteteAccueil extends StatelessWidget {
                   const SizedBox(width: 8),
                   // Bouton Panier en verre
                   const _BoutonPanierVerreRond(),
-                  if (!isGuest && user != null && _initiales.isNotEmpty) ...[
-                    const SizedBox(width: 8),
-                    Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: AppColor.kSecondary,
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.35),
-                          width: 1.5,
-                        ),
-                      ),
-                      alignment: Alignment.center,
-                      child: Text(
-                        _initiales,
-                        style: const TextStyle(
-                          fontFamily: kPolice,
-                          fontWeight: FontWeight.w800,
-                          color: AppColor.kPrimary,
-                          fontSize: 14.5,
-                        ),
-                      ),
-                    ),
-                  ],
                 ],
               ),
               if (!isGuest && user != null && _nomAffiche.isNotEmpty) ...[

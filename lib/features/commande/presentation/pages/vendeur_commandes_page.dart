@@ -186,10 +186,15 @@ class _ListeCommandesState extends State<_ListeCommandes> {
                       return CommandeCard(
                         commande: c,
                         isVendeur: true,
-                        onTap: () => Navigator.of(context).pushNamed(
-                          AppRouter.commandeDetailRoute,
-                          arguments: CommandeDetailArgs(c, isVendeur: true),
-                        ),
+                        onTap: () async {
+                          final bloc = context.read<CommandeBloc>();
+                          await Navigator.of(context).pushNamed(
+                            AppRouter.commandeDetailRoute,
+                            arguments: CommandeDetailArgs(c, isVendeur: true),
+                          );
+                          // Le statut a pu changer dans le détail.
+                          bloc.add(LoadCommandesVendeur());
+                        },
                       );
                     },
                   ),

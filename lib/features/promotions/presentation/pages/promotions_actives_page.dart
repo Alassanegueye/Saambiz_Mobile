@@ -8,6 +8,7 @@ import '../bloc/promotions_bloc.dart';
 import '../bloc/promotions_event.dart';
 import '../bloc/promotions_state.dart';
 import '../../../../core/utils/dates.dart';
+import '../../../../core/widgets/page_vendeur.dart';
 
 class _C {
   static const green = Color(0xFF01154B);
@@ -37,10 +38,12 @@ class _PromotionsActivesView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: _C.bg,
-      appBar: AppBar(title: const Text('Promotions')),
-      body: BlocConsumer<PromotionsBloc, PromotionsState>(
+    // Même gabarit que Boutiques, Commandes ou Favoris : en-tête bleu, contenu
+    // sur une carte aux coins arrondis.
+    return PageVendeur(
+      titre: 'Promotions',
+      sousTitre: 'Les bons plans du moment',
+      corps: BlocConsumer<PromotionsBloc, PromotionsState>(
         listener: (context, state) {
           if (state is PromotionsError) {
             afficherErreur(context, state.message);

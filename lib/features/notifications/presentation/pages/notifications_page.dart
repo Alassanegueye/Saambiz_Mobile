@@ -9,6 +9,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../injection_container.dart';
+import '../../../home/domain/entities/notification_model.dart';
+import '../../../messagerie/presentation/pages/chat_page.dart';
+import '../../../messagerie/presentation/pages/conversations_page.dart';
 import '../../../../core/services/socket_service.dart';
 import '../bloc/notifications_bloc.dart';
 import '../bloc/notifications_event.dart';
@@ -21,19 +24,22 @@ class _C {
 /// Notifications (GET /notifications), mises à jour en temps réel via
 /// l'événement socket `notification:new`.
 class NotificationsPage extends StatelessWidget {
-  const NotificationsPage({super.key});
+  /// Espace vendeur : la messagerie s'ouvre côté vendeur.
+  final bool pourVendeur;
+  const NotificationsPage({super.key, this.pourVendeur = false});
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => sl<NotificationsBloc>()..add(LoadNotifications()),
-      child: const _NotificationsView(),
+      child: _NotificationsView(pourVendeur: pourVendeur),
     );
   }
 }
 
 class _NotificationsView extends StatefulWidget {
-  const _NotificationsView();
+  final bool pourVendeur;
+  const _NotificationsView({required this.pourVendeur});
   @override
   State<_NotificationsView> createState() => _NotificationsViewState();
 }
@@ -55,6 +61,28 @@ class _NotificationsViewState extends State<_NotificationsView> {
   void dispose() {
     _sub?.cancel();
     super.dispose();
+  }
+
+  /// Toucher une notification la marque comme lue et ouvre la conversation
+  /// concernée : celle avec la boutique (ou le client) qui l'a envoyée. Les
+  /// anciennes notifications, sans interlocuteur connu, ouvrent la messagerie.
+  void _ouvrir(NotificationModel n) {
+    if (!n.lue) {
+      context.read<NotificationsBloc>().add(MarquerNotificationLue(n.id));
+    }
+    final id = n.interlocuteurId;
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => id != null
+            ? ChatPage(
+                interlocuteurId: id,
+                interlocuteurNom: n.interlocuteurNom.isNotEmpty
+                    ? n.interlocuteurNom
+                    : n.titre,
+              )
+            : ConversationsPage(pourVendeur: widget.pourVendeur),
+      ),
+    );
   }
 
   @override
@@ -111,9 +139,7 @@ class _NotificationsViewState extends State<_NotificationsView> {
                     ),
                     clipBehavior: Clip.antiAlias,
                     child: InkWell(
-                      onTap: () => context.read<NotificationsBloc>().add(
-                        MarquerNotificationLue(n.id),
-                      ),
+                      onTap: () => _ouvrir(n),
                       child: Padding(
                         padding: const EdgeInsets.all(14),
                         child: Row(

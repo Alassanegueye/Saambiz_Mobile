@@ -55,31 +55,13 @@ class CarteEnteteProfil extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       child: Stack(
         children: [
-          // Motif discret dans le coin : la carte ne fait pas « vide ».
-          Positioned(
-            right: -30,
-            top: -40,
-            child: Container(
-              width: 150,
-              height: 150,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white.withValues(alpha: 0.05),
-              ),
-            ),
-          ),
           Padding(
             padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
             child: Column(
               children: [
                 Row(
                   children: [
-                    Container(
-                      padding: const EdgeInsets.all(3),
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: AppColor.kSecondary,
-                      ),
+                    SizedBox(
                       child: CircleAvatar(
                         radius: 30,
                         backgroundColor: AppColor.kWhite,

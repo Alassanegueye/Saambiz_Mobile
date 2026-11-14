@@ -799,6 +799,31 @@ class _ConfigurationState extends State<_Configuration> {
             adresse: vitrine.url,
             pied: teintes.pied,
             nomBoutique: _boutique?.nom ?? 'Ma boutique',
+            barre: _BarreSite(
+              nom: _boutique?.nom ?? 'Ma boutique',
+              logo: _boutique?.logo,
+              logoForme: vitrine.logoForme,
+              teintes: teintes,
+              avecPanier: vitrine.commande,
+            ),
+            piedDePage: _PiedSite(
+              nom: _boutique?.nom ?? 'Ma boutique',
+              logo: _boutique?.logo,
+              logoForme: vitrine.logoForme,
+              // Le pied du site affiche la description de la boutique, et
+              // à défaut son activité — comme saambiz.com, qui retombe sur
+              // le slogan.
+              description: (_boutique?.description ?? '').trim().isNotEmpty
+                  ? _boutique!.description.trim()
+                  : (vitrine.activite ?? '').trim(),
+              telephone: (_boutique?.telephone ?? '').trim(),
+              whatsapp: (vitrine.reseaux['whatsapp'] ?? _boutique?.telephone ?? '')
+                  .trim(),
+              adresse: _boutique?.localisation ?? '',
+              horaires: horaires,
+              reseaux: vitrine.reseaux,
+              fond: teintes.pied,
+            ),
             enfants: [
               _BlocModifiable(
                 infobulle: 'Modifier le nom, le logo et l\'adresse',
@@ -1329,12 +1354,14 @@ class _CadreSite extends StatelessWidget {
   final Color pied;
   final String nomBoutique;
   final Widget? barre;
+  final Widget? piedDePage;
   final List<Widget> enfants;
   const _CadreSite({
     required this.adresse,
     required this.pied,
     required this.nomBoutique,
     this.barre,
+    this.piedDePage,
     required this.enfants,
   });
 
@@ -1387,22 +1414,312 @@ class _CadreSite extends StatelessWidget {
           ),
           if (barreSite != null) barreSite,
           ...enfants,
-          Container(
-            color: pied,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
-            child: Text(
-              nomBoutique,
-              textAlign: TextAlign.center,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontFamily: kPolice,
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-                color: _C.white.withValues(alpha: 0.85),
+          piedDePage ??
+              // Repli : la bande au nom de la boutique, si l'appelant ne
+              // fournit pas le pied complet.
+              Container(
+                color: pied,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 18,
+                ),
+                child: Text(
+                  nomBoutique,
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontFamily: kPolice,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: _C.white.withValues(alpha: 0.85),
+                  ),
+                ),
+              ),
+        ],
+      ),
+    );
+  }
+}
+
+/// La barre du haut du site, telle qu'elle s'affiche sur un téléphone.
+///
+/// Sur saambiz.com cette barre porte le logo, le nom, la navigation, le
+/// panier et un bouton menu. À largeur de téléphone — la seule que montre cet
+/// aperçu — la navigation se replie dans le bouton menu : on reproduit donc
+/// la marque, le panier et le menu, et rien de plus.
+///
+/// Le panier n'apparaît que si la boutique prend les commandes, comme sur le
+/// site : l'aperçu ne doit pas promettre un bouton que les clients n'auront
+/// pas.
+class _BarreSite extends StatelessWidget {
+  final String nom;
+  final String? logo;
+  final String logoForme;
+  final _Teintes teintes;
+  final bool avecPanier;
+  const _BarreSite({
+    required this.nom,
+    required this.logo,
+    required this.logoForme,
+    required this.teintes,
+    required this.avecPanier,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    const cote = 30.0;
+    final rayon = BorderRadius.circular(logoForme == 'rond' ? cote / 2 : 8);
+    final initiale = Container(
+      width: cote,
+      height: cote,
+      color: teintes.bouton,
+      alignment: Alignment.center,
+      child: Text(
+        nom.trim().isEmpty ? '?' : nom.trim()[0].toUpperCase(),
+        style: TextStyle(
+          fontFamily: kPolice,
+          fontSize: 14,
+          fontWeight: FontWeight.w700,
+          color: teintes.surBouton,
+        ),
+      ),
+    );
+
+    return DecoratedBox(
+      decoration: const BoxDecoration(
+        color: _C.white,
+        border: Border(bottom: BorderSide(color: _S.ligne)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(14, 10, 10, 10),
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: rayon,
+              child: (logo ?? '').isEmpty
+                  ? initiale
+                  : ImageReseau(
+                      logo!,
+                      largeurServeur: 96,
+                      width: cote,
+                      height: cote,
+                      fit: BoxFit.cover,
+                      repli: initiale,
+                    ),
+            ),
+            const SizedBox(width: 9),
+            Expanded(
+              child: Text(
+                nom,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontFamily: kPolice,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: -0.2,
+                  color: _S.encre,
+                ),
               ),
             ),
+            if (avecPanier) ...[
+              Icon(Icons.shopping_bag_outlined, size: 20, color: teintes.texte),
+              const SizedBox(width: 14),
+            ],
+            const Icon(Icons.menu_rounded, size: 21, color: _S.encre),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Le pied du site, tel qu'il s'affiche sur un téléphone.
+///
+/// L'aperçu n'en montrait qu'une bande au nom de la boutique, alors que le
+/// pied est la dernière chose que voit un client et qu'il porte de quoi
+/// joindre le vendeur. Celui-ci ne pouvait donc pas vérifier, depuis son
+/// téléphone, que son numéro et son adresse y figurent bien.
+///
+/// Reprend les blocs de saambiz.com : la marque (logo, nom, description), les
+/// réseaux, puis « Nous joindre ». Les pages de la boutique sont volontairement
+/// omises : ce sont des liens, et rien n'est cliquable dans un aperçu.
+class _PiedSite extends StatelessWidget {
+  final String nom;
+  final String? logo;
+  final String logoForme;
+  final String description;
+  final String telephone;
+  final String whatsapp;
+  final String adresse;
+  final String horaires;
+  final Map<String, String> reseaux;
+  final Color fond;
+  const _PiedSite({
+    required this.nom,
+    required this.logo,
+    required this.logoForme,
+    required this.description,
+    required this.telephone,
+    required this.whatsapp,
+    required this.adresse,
+    required this.horaires,
+    required this.reseaux,
+    required this.fond,
+  });
+
+  /// Les réseaux affichés, dans l'ordre du site.
+  static const _icones = <String, IconData>{
+    'instagram': Icons.camera_alt_outlined,
+    'facebook': Icons.facebook_outlined,
+    'tiktok': Icons.music_note_outlined,
+    'snapchat': Icons.chat_bubble_outline_rounded,
+    'site': Icons.language_rounded,
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    // Le pied est sombre quelle que soit la couleur du vendeur
+    // (voir _Teintes.pied) : on écrit dessus en blanc atténué.
+    const clair = Color(0xFFFFFFFF);
+    final doux = clair.withValues(alpha: 0.76);
+    final pale = clair.withValues(alpha: 0.55);
+
+    const cote = 34.0;
+    final rayon = BorderRadius.circular(logoForme == 'rond' ? cote / 2 : 9);
+    final initiale = Container(
+      width: cote,
+      height: cote,
+      color: clair,
+      alignment: Alignment.center,
+      child: Text(
+        nom.trim().isEmpty ? '?' : nom.trim()[0].toUpperCase(),
+        style: TextStyle(
+          fontFamily: kPolice,
+          fontSize: 15,
+          fontWeight: FontWeight.w700,
+          color: fond,
+        ),
+      ),
+    );
+
+    final joindre = <({IconData icone, String texte})>[
+      if (telephone.isNotEmpty) (icone: Icons.call_outlined, texte: telephone),
+      if (whatsapp.isNotEmpty)
+        (icone: Icons.chat_outlined, texte: 'Écrire sur WhatsApp'),
+      if (adresse.isNotEmpty) (icone: Icons.place_outlined, texte: adresse),
+      if (horaires.isNotEmpty)
+        (icone: Icons.schedule_rounded, texte: horaires),
+    ];
+
+    final liens = _icones.entries
+        .where((e) => (reseaux[e.key] ?? '').trim().isNotEmpty)
+        .toList();
+
+    return Container(
+      color: fond,
+      padding: const EdgeInsets.fromLTRB(16, 20, 16, 18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              ClipRRect(
+                borderRadius: rayon,
+                child: (logo ?? '').isEmpty
+                    ? initiale
+                    : ImageReseau(
+                        logo!,
+                        largeurServeur: 96,
+                        width: cote,
+                        height: cote,
+                        fit: BoxFit.cover,
+                        repli: initiale,
+                      ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  nom,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontFamily: kPolice,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: -0.2,
+                    color: clair,
+                  ),
+                ),
+              ),
+            ],
           ),
+          if (description.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Text(
+              description,
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(fontSize: 13, height: 1.55, color: doux),
+            ),
+          ],
+          if (liens.isNotEmpty) ...[
+            const SizedBox(height: 14),
+            Row(
+              children: [
+                for (final e in liens) ...[
+                  Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: clair.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Icon(e.value, size: 16, color: clair),
+                  ),
+                  const SizedBox(width: 8),
+                ],
+              ],
+            ),
+          ],
+          if (joindre.isNotEmpty) ...[
+            const SizedBox(height: 18),
+            Text(
+              'Nous joindre',
+              style: TextStyle(
+                fontFamily: kPolice,
+                fontSize: 11.5,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.5,
+                color: pale,
+              ),
+            ),
+            const SizedBox(height: 9),
+            for (final l in joindre)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 7),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(l.icone, size: 15, color: pale),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        l.texte,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 13,
+                          height: 1.4,
+                          color: doux,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+          ],
         ],
       ),
     );

@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:saambiz/core/theme/police.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../../../core/paiement/feuille_paiement_mobile.dart'
+    show LogoOperateur, Operateur;
 import '../../../../core/theme/app_color.dart';
 import '../../../../core/utils/texte.dart';
 import '../../../../core/utils/url_externe.dart';
@@ -84,6 +86,10 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    // La commande passée en argument vient de la liste, qui peut dater : le
+    // serveur a le dernier mot. Sans cette relecture, une commande acceptée
+    // ou mise en préparation réapparaissait « en attente » en revenant.
+    WidgetsBinding.instance.addPostFrameCallback((_) => _actualiser());
   }
 
   @override
@@ -163,12 +169,12 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const Icon(Icons.phone_iphone_rounded),
+              leading: const LogoOperateur(Operateur.wave, taille: 36),
               title: const Text('Wave'),
               onTap: () => Navigator.pop(feuille, 'wave'),
             ),
             ListTile(
-              leading: const Icon(Icons.phone_android_rounded),
+              leading: const LogoOperateur(Operateur.orangeMoney, taille: 36),
               title: const Text('Orange Money'),
               onTap: () => Navigator.pop(feuille, 'orange_money'),
             ),
@@ -340,9 +346,15 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
         listener: (context, state) async {
           if (state is CommandeError) {
             afficherErreur(context, state.message);
+            // Souvent, la commande a changé ailleurs (déjà acceptée…) : on
+            // relit l'état réel pour proposer les bons boutons.
+            _actualiser();
           } else if (state is CommandeMiseAJour) {
             setState(() => commande = state.commande);
             afficherSucces(context, 'Commande mise à jour avec succès');
+            // La réponse du changement de statut ne contient ni les articles
+            // ni le client : on relit la commande complète.
+            _actualiser();
           } else if (state is RetourDemande) {
             afficherSucces(context, 'Demande de retour envoyée');
           } else if (state is PaiementInitie) {

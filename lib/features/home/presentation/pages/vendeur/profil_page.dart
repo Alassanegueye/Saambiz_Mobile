@@ -278,7 +278,7 @@ class _ProfilPageState extends State<ProfilPage> with RetourSurOnglet {
                     icone: Icons.notifications_none_rounded,
                     libelle: 'Notifications',
                     sousTitre: 'Nouvelles commandes et alertes',
-                    onTap: () => _ouvrir(const NotificationsPage()),
+                    onTap: () => _ouvrir(const NotificationsPage(pourVendeur: true)),
                   ),
                   LigneProfil(
                     icone: Icons.chat_bubble_outline_rounded,

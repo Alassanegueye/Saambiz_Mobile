@@ -268,7 +268,7 @@ class _HomePageState extends State<HomePage>
   void _openNotifications() async {
     await Navigator.of(
       context,
-    ).push(MaterialPageRoute(builder: (_) => const NotificationsPage()));
+    ).push(MaterialPageRoute(builder: (_) => const NotificationsPage(pourVendeur: true)));
     _loadStats(); // rafraîchir le badge (notificationsNonLues) au retour
   }
 
@@ -852,10 +852,14 @@ class _HomePageState extends State<HomePage>
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: () => Navigator.of(context).pushNamed(
-          AppRouter.commandeDetailRoute,
-          arguments: CommandeDetailArgs(o, isVendeur: true),
-        ),
+        onTap: () async {
+          await Navigator.of(context).pushNamed(
+            AppRouter.commandeDetailRoute,
+            arguments: CommandeDetailArgs(o, isVendeur: true),
+          );
+          // Le statut a pu changer dans le détail.
+          if (mounted) _loadStats();
+        },
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           child: Row(
