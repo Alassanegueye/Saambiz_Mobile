@@ -28,6 +28,7 @@ import '../../../../categories/presentation/icones_categories.dart';
 import '../../../../notifications/data/datasources/notifications_remote_datasource.dart';
 import '../../../../notifications/presentation/pages/notifications_page.dart';
 import '../../../data/datasources/accueil_remote_datasource.dart';
+import '../../widgets/carte_boutique_grille.dart';
 import '../../../../../core/widgets/avatar_utilisateur.dart';
 import 'main_client_page.dart' show ongletAcheteurDemande, ongletAcheteurCompte;
 import '../../../../../core/widgets/page_vendeur.dart';
@@ -1049,9 +1050,11 @@ class _SectionBoutiques extends StatelessWidget {
 /// differente d'une carte produit, avec avatar, categorie, note, et bouton Visiter.
 class _CarteBoutique extends StatelessWidget {
   final Map<String, dynamic> donnees;
-  final double largeur;
-  const _CarteBoutique({required this.donnees, this.largeur = 275});
+  const _CarteBoutique({required this.donnees});
 
+  /// Taille dans le carrousel de l'accueil. Les pages « Voir tout » ont leur
+  /// propre carte, faite pour la grille : [CarteBoutiqueGrille].
+  static const double largeur = 275;
   static const double hauteur = 126;
 
   void _ouvrir(BuildContext context) {
@@ -1170,37 +1173,41 @@ class _CarteBoutique extends StatelessWidget {
                     const SizedBox(height: 8),
                     Row(
                       children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 2.5,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppColor.kSecondaryLight,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(
-                                Icons.star_rounded,
-                                size: 13,
-                                color: AppColor.kSecondaryDark,
-                              ),
-                              const SizedBox(width: 3),
-                              Text(
-                                note != null ? '$note' : '4.8',
-                                style: const TextStyle(
-                                  fontFamily: kPolice,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w700,
+                        // Seulement une vraie note : une boutique sans avis
+                        // n'affiche pas de chiffre de remplissage.
+                        if (note is num) ...[
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2.5,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColor.kSecondaryLight,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  Icons.star_rounded,
+                                  size: 13,
                                   color: AppColor.kSecondaryDark,
                                 ),
-                              ),
-                            ],
+                                const SizedBox(width: 3),
+                                Text(
+                                  note.toStringAsFixed(1).replaceAll('.', ','),
+                                  style: const TextStyle(
+                                    fontFamily: kPolice,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColor.kSecondaryDark,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                        const SizedBox(width: 8),
+                          const SizedBox(width: 8),
+                        ],
                         Flexible(
                           child: Text(
                             distance != null
@@ -1325,6 +1332,20 @@ class _SectionAccueilPageState extends State<SectionAccueilPage> {
   bool _chargement = true;
   bool _erreur = false;
 
+  /// Texte tapé dans la recherche d'une liste de boutiques.
+  String _filtre = '';
+
+  /// Sections faites de boutiques : leur squelette a la forme des cartes de
+  /// boutique, avant même que la réponse dise le type.
+  static const _sectionsBoutiques = {
+    'suivies',
+    'pourVous',
+    'proches',
+    'meilleures',
+    'nouvelles',
+    'aDecouvrir',
+  };
+
   @override
   void initState() {
     super.initState();
@@ -1368,7 +1389,9 @@ class _SectionAccueilPageState extends State<SectionAccueilPage> {
 
   Widget _corps() {
     if (_chargement) {
-      return const _SqueletteGrille();
+      return _sectionsBoutiques.contains(widget.cle)
+          ? const SqueletteCartesBoutiques()
+          : const _SqueletteGrille();
     }
     if (_erreur) {
       return EmptyState(
@@ -1389,33 +1412,116 @@ class _SectionAccueilPageState extends State<SectionAccueilPage> {
         subtitle: 'Cette section se remplira dès que les boutiques publieront.',
       );
     }
-    final produits = _section!.type == 'produits';
-    final largeur = MediaQuery.sizeOf(context).width;
-    final colonnes = largeur >= 600 ? 3 : 2;
+    if (_section!.type != 'produits') return _boutiques(elements);
     return RefreshIndicator(
       color: AppColor.kPrimary,
       onRefresh: _charger,
       child: GridView.builder(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
         physics: const AlwaysScrollableScrollPhysics(),
-        gridDelegate: produits
-            ? grilleProduits(context)
-            : SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: colonnes,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 14,
-                mainAxisExtent: _CarteBoutique.hauteur,
-              ),
+        gridDelegate: grilleProduits(context),
         itemCount: elements.length,
-        itemBuilder: (_, i) => produits
-            ? ProduitCard(
-                produit: ProduitCatalogue.fromJson(elements[i]),
-                avecAjout: true,
+        itemBuilder: (_, i) => ProduitCard(
+          produit: ProduitCatalogue.fromJson(elements[i]),
+          avecAjout: true,
+        ),
+      ),
+    );
+  }
+
+  /// Liste de boutiques : leur nombre, une recherche dans la liste, puis
+  /// les cartes deux par ligne.
+  Widget _boutiques(List<Map<String, dynamic>> elements) {
+    final filtre = _filtre.trim().toLowerCase();
+    final visibles = filtre.isEmpty
+        ? elements
+        : elements
+              .where(
+                (b) =>
+                    [
+                      b['nom'],
+                      b['categorie'],
+                      b['localisation'],
+                      b['slogan'],
+                    ].any(
+                      (v) =>
+                          (v ?? '').toString().toLowerCase().contains(filtre),
+                    ),
               )
-            : LayoutBuilder(
-                builder: (_, c) =>
-                    _CarteBoutique(donnees: elements[i], largeur: c.maxWidth),
+              .toList();
+    final sousTitre = (_section?.sousTitre ?? '').trim();
+    final nombre = elements.length;
+    return RefreshIndicator(
+      color: AppColor.kPrimary,
+      onRefresh: _charger,
+      child: CustomScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+        slivers: [
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
+            sliver: SliverToBoxAdapter(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    filtre.isNotEmpty
+                        ? '${visibles.length} sur $nombre'
+                        : nombre > 1
+                        ? '$nombre boutiques'
+                        : '$nombre boutique',
+                    style: titreSection(17),
+                  ),
+                  if (sousTitre.isNotEmpty) ...[
+                    const SizedBox(height: 2),
+                    Text(sousTitre, style: texteDiscret(13)),
+                  ],
+                  // La recherche n'a d'intérêt qu'au-delà d'un écran de
+                  // cartes.
+                  if (nombre > 4) ...[
+                    const SizedBox(height: 14),
+                    ChampRecherche(
+                      indication: 'Rechercher une boutique, une ville',
+                      surFondClair: true,
+                      onChanged: (v) => setState(() => _filtre = v),
+                    ),
+                  ],
+                ],
               ),
+            ),
+          ),
+          if (visibles.isEmpty)
+            const SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.only(top: 28),
+                child: EtatVide(
+                  icone: Icons.search_off_rounded,
+                  titre: 'Aucune boutique trouvée',
+                  message: 'Essayez un autre nom, une catégorie ou une ville.',
+                  compact: true,
+                ),
+              ),
+            )
+          else
+            SliverPadding(
+              padding: EdgeInsets.fromLTRB(
+                16,
+                16,
+                16,
+                32 + MediaQuery.paddingOf(context).bottom,
+              ),
+              sliver: SliverGrid(
+                gridDelegate: CarteBoutiqueGrille.grille(context),
+                delegate: SliverChildBuilderDelegate(
+                  (_, i) => Apparition(
+                    rang: i,
+                    child: CarteBoutiqueGrille(donnees: visibles[i]),
+                  ),
+                  childCount: visibles.length,
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }

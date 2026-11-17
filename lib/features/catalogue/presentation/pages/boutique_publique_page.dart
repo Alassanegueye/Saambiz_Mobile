@@ -755,7 +755,7 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
           if (depuis != null) ...[
             separateur(),
             Expanded(
-              child: _Chiffre(valeur: '$depuis', libelle: 'Sur Saambiz'),
+              child: _Chiffre(valeur: '$depuis', libelle: 'Sur SaamBiz'),
             ),
           ],
         ],
@@ -1038,7 +1038,7 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
       if (depuis != null)
         _LigneInfo(
           icone: Icons.storefront_outlined,
-          titre: 'Sur Saambiz depuis',
+          titre: 'Sur SaamBiz depuis',
           valeur: '$depuis',
         ),
     ];
