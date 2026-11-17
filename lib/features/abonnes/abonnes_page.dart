@@ -68,6 +68,27 @@ class AbonnesService {
   }
 }
 
+/// Qui reçoit les notifications, accordé au nombre : « 0 sur 2 ont activé la
+/// cloche : ce sont eux qui… » ne désignait personne.
+String libelleCloche(int avecCloche, int total) {
+  if (avecCloche <= 0) {
+    return 'Aucun abonné n’a encore activé la cloche : seuls ceux qui '
+        'l’activent reçoivent vos promotions et messages.';
+  }
+  if (avecCloche >= total) {
+    return total == 1
+        ? 'Votre abonné a activé la cloche : vos promotions et messages '
+              'lui parviennent.'
+        : 'Vos $total abonnés ont activé la cloche : vos promotions et '
+              'messages leur parviennent.';
+  }
+  return avecCloche == 1
+      ? '1 abonné sur $total a activé la cloche : lui seul reçoit vos '
+            'promotions et messages.'
+      : '$avecCloche abonnés sur $total ont activé la cloche : eux seuls '
+            'reçoivent vos promotions et messages.';
+}
+
 /// Liste des clients abonnés à la boutique. Seuls ceux qui ont activé la
 /// cloche reçoivent les notifications (promotions, messages, nouveautés).
 class AbonnesPage extends StatefulWidget {
@@ -203,7 +224,7 @@ class _AbonnesPageState extends State<AbonnesPage> {
                           const SizedBox(width: 10),
                           Expanded(
                             child: Text(
-                              '$avecCloche sur ${liste.length} ont activé la cloche : ce sont eux qui reçoivent vos promotions et messages.',
+                              libelleCloche(avecCloche, liste.length),
                               style: const TextStyle(
                                 fontFamily: kPolice,
                                 fontSize: 12.5,
@@ -224,6 +245,9 @@ class _AbonnesPageState extends State<AbonnesPage> {
   }
 }
 
+/// Un abonné sur une ligne : photo ou initiales, nom, date d'abonnement,
+/// cloche. Le toucher ouvre sa fiche (coordonnées, activité, contact) :
+/// chaque carte portait son propre bouton « Voir plus » pleine largeur.
 class _LigneAbonne extends StatelessWidget {
   final Abonne abonne;
   const _LigneAbonne({required this.abonne});
@@ -231,31 +255,53 @@ class _LigneAbonne extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final a = abonne;
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: AppColor.kWhite,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColor.kLine),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+    return Material(
+      color: AppColor.kWhite,
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: () => Navigator.of(
+          context,
+        ).push(MaterialPageRoute(builder: (_) => AbonneDetailPage(abonne: a))),
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(12, 12, 8, 12),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColor.kLine),
+          ),
+          child: Row(
             children: [
-              AvatarAbonne(abonne: a, rayon: 24),
+              AvatarAbonne(abonne: a, rayon: 22),
               const SizedBox(width: 12),
               Expanded(
-                child: Text(
-                  a.nomComplet,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontFamily: kPolice,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
-                    color: AppColor.kGrayscaleDark100,
-                  ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      a.nomComplet,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontFamily: kPolice,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: AppColor.kGrayscaleDark100,
+                      ),
+                    ),
+                    if (a.depuis != null) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        'Abonné depuis le ${dateLongue(a.depuis!)}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontFamily: kPolice,
+                          fontSize: 12.5,
+                          color: AppColor.kGrayscale40,
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ),
               Tooltip(
@@ -272,74 +318,20 @@ class _LigneAbonne extends StatelessWidget {
                   size: 20,
                 ),
               ),
+              const SizedBox(width: 4),
+              const Icon(
+                Icons.chevron_right_rounded,
+                color: AppColor.kGrayscale30,
+              ),
             ],
           ),
-          const SizedBox(height: 12),
-          if (a.email != null) _Info(libelle: 'E-mail', valeur: a.email!),
-          if (a.telephone != null)
-            _Info(libelle: 'Téléphone', valeur: a.telephone!),
-          if (a.depuis != null)
-            Text(
-              'Abonné depuis le ${dateLongue(a.depuis!)}',
-              style: const TextStyle(
-                fontFamily: kPolice,
-                fontSize: 13,
-                color: AppColor.kGrayscale40,
-              ),
-            ),
-          const SizedBox(height: 12),
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton.icon(
-              onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => AbonneDetailPage(abonne: a)),
-              ),
-              iconAlignment: IconAlignment.end,
-              icon: const Icon(Icons.chevron_right_rounded),
-              label: const Text('Voir plus'),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _Info extends StatelessWidget {
-  final String libelle;
-  final String valeur;
-  const _Info({required this.libelle, required this.valeur});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 4),
-      child: Text.rich(
-        TextSpan(
-          text: '$libelle : ',
-          style: const TextStyle(
-            fontFamily: kPolice,
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-            color: AppColor.kGrayscaleDark100,
-          ),
-          children: [
-            TextSpan(
-              text: valeur,
-              style: const TextStyle(
-                fontFamily: kPolice,
-                fontWeight: FontWeight.w400,
-                color: AppColor.kGrayscale40,
-              ),
-            ),
-          ],
         ),
       ),
     );
   }
 }
 
-/// Photo de l'abonné, ou son initiale.
+/// Photo de l'abonné, ou ses initiales.
 class AvatarAbonne extends StatelessWidget {
   final Abonne abonne;
   final double rayon;
@@ -348,9 +340,8 @@ class AvatarAbonne extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final photo = abonne.photo;
-    final initiale = abonne.prenom.isNotEmpty
-        ? abonne.prenom[0].toUpperCase()
-        : '?';
+    final lettres = initialesDe('${abonne.prenom} ${abonne.nom}');
+    final initiales = lettres.isEmpty ? '?' : lettres;
     return CircleAvatar(
       radius: rayon,
       backgroundColor: AppColor.kPrimaryLight,
@@ -359,10 +350,10 @@ class AvatarAbonne extends StatelessWidget {
           : null,
       child: photo == null
           ? Text(
-              initiale,
+              initiales,
               style: TextStyle(
                 fontFamily: kPolice,
-                fontSize: rayon * 0.8,
+                fontSize: rayon * (initiales.length > 1 ? 0.7 : 0.8),
                 fontWeight: FontWeight.w800,
                 color: AppColor.kPrimary,
               ),
