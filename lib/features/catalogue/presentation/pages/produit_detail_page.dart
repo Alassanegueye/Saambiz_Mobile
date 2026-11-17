@@ -4,10 +4,12 @@ import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:saambiz/core/widgets/image_reseau.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:saambiz/core/widgets/logo_boutique.dart';
 import 'package:saambiz/core/theme/police.dart';
 
 import '../../../../core/theme/app_color.dart';
+import '../../../../core/theme/app_dimensions.dart';
 import '../../../../core/utils/url_externe.dart';
 import '../../../../core/widgets/ui_kit.dart';
 import '../../../../core/widgets/degrade_fond.dart';
@@ -35,6 +37,11 @@ class _ProduitDetailPageState extends State<ProduitDetailPage> {
   final _galerie = PageController();
   int _page = 0;
 
+  /// La photo a défilé : la barre devient blanche et prend le nom du
+  /// produit.
+  final _defilement = ScrollController();
+  bool _replie = false;
+
   late ProduitCatalogue p = widget.produit;
   List<ProduitCatalogue> _similaires = [];
   bool _similairesEnCours = true;
@@ -49,12 +56,17 @@ class _ProduitDetailPageState extends State<ProduitDetailPage> {
   @override
   void initState() {
     super.initState();
+    _defilement.addListener(() {
+      final replie = _defilement.offset > 260;
+      if (replie != _replie) setState(() => _replie = replie);
+    });
     _charger();
   }
 
   @override
   void dispose() {
     _galerie.dispose();
+    _defilement.dispose();
     super.dispose();
   }
 
@@ -125,51 +137,107 @@ class _ProduitDetailPageState extends State<ProduitDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColor.kBackground,
-      appBar: AppBar(
-        titleSpacing: 0,
-        title: Text(
-          p.nom,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(
-            fontFamily: kPolice,
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        actions: [
-          const BoutonPanier(),
-          MenuSignaler(type: 'produit', cibleId: widget.produit.id),
-        ],
+    final haut = MediaQuery.paddingOf(context).top;
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.dark.copyWith(
+        statusBarColor: Colors.transparent,
       ),
-      body: FondDegradeSubtil(
-        child: RefreshIndicator(
-          color: AppColor.kPrimary,
-          onRefresh: _charger,
-          child: ListView(
-            padding: const EdgeInsets.only(bottom: 20),
-            children: [
-              _blocGalerie(),
-              _blocPrincipal(),
-              if (p.caracteristiques.isNotEmpty) _blocCaracteristiques(),
-              if (p.description.trim().isNotEmpty) _blocDescription(),
-              if (p.boutique != null) _blocBoutique(),
-              _blocSimilaires(),
-            ],
-          ),
+      child: Scaffold(
+        backgroundColor: AppColor.kBackground,
+        body: Stack(
+          children: [
+            FondDegradeSubtil(
+              child: RefreshIndicator(
+                color: AppColor.kPrimary,
+                edgeOffset: haut + 56,
+                onRefresh: _charger,
+                child: ListView(
+                  controller: _defilement,
+                  padding: const EdgeInsets.only(bottom: 20),
+                  children: [
+                    _blocGalerie(haut),
+                    _blocPrincipal(),
+                    if (p.caracteristiques.isNotEmpty) _blocCaracteristiques(),
+                    if (p.description.trim().isNotEmpty) _blocDescription(),
+                    if (p.boutique != null) _blocBoutique(),
+                    _blocSimilaires(),
+                  ],
+                ),
+              ),
+            ),
+            // Barre flottante : retour, panier, signaler, posés sur la
+            // photo ; blanche et titrée du nom du produit une fois la photo
+            // passée.
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 180),
+                decoration: BoxDecoration(
+                  color: _replie ? AppColor.kWhite : Colors.transparent,
+                  boxShadow: _replie ? AppDim.ombreCarte : null,
+                ),
+                padding: EdgeInsets.fromLTRB(12, haut + 6, 12, 8),
+                child: Row(
+                  children: [
+                    if (Navigator.of(context).canPop())
+                      _Pastille(
+                        child: IconButton(
+                          tooltip: 'Retour',
+                          onPressed: () => Navigator.of(context).maybePop(),
+                          icon: const Icon(
+                            Icons.arrow_back_ios_new_rounded,
+                            size: 18,
+                            color: AppColor.kPrimary,
+                          ),
+                        ),
+                      ),
+                    Expanded(
+                      child: AnimatedOpacity(
+                        opacity: _replie ? 1 : 0,
+                        duration: const Duration(milliseconds: 180),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          child: Text(
+                            p.nom,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontFamily: kPolice,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              color: AppColor.kGrayscaleDark100,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const _Pastille(child: BoutonPanier()),
+                    const SizedBox(width: 8),
+                    _Pastille(
+                      child: MenuSignaler(
+                        type: 'produit',
+                        cibleId: widget.produit.id,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
+        bottomNavigationBar: _barreAchat(),
       ),
-      bottomNavigationBar: _barreAchat(),
     );
   }
 
-  // Galerie
-  Widget _blocGalerie() {
+  // Galerie : pleine largeur, jusque sous la barre d'état ; la photo
+  // commence sous les boutons flottants.
+  Widget _blocGalerie(double haut) {
     final images = p.visuels;
     return Container(
-      height: 320,
+      height: 340 + haut,
       clipBehavior: Clip.antiAlias,
       decoration: const BoxDecoration(
         color: AppColor.kWhite,
@@ -178,11 +246,14 @@ class _ProduitDetailPageState extends State<ProduitDetailPage> {
       child: Stack(
         children: [
           if (images.isEmpty)
-            const Center(
-              child: Icon(
-                Icons.image_outlined,
-                size: 56,
-                color: AppColor.kGrayscale30,
+            Padding(
+              padding: EdgeInsets.only(top: haut + 40),
+              child: const Center(
+                child: Icon(
+                  Icons.image_outlined,
+                  size: 56,
+                  color: AppColor.kGrayscale30,
+                ),
               ),
             )
           else
@@ -191,7 +262,7 @@ class _ProduitDetailPageState extends State<ProduitDetailPage> {
               itemCount: images.length,
               onPageChanged: (i) => setState(() => _page = i),
               itemBuilder: (_, i) => Padding(
-                padding: const EdgeInsets.all(12),
+                padding: EdgeInsets.fromLTRB(20, haut + 60, 20, 28),
                 child: ImageReseau(
                   images[i],
                   fit: BoxFit.contain,
@@ -529,80 +600,137 @@ class _ProduitDetailPageState extends State<ProduitDetailPage> {
     );
   }
 
+  /// La boutique qui vend : logo, nom et badge, ville, et « Visiter ».
   Widget _blocBoutique() {
     final b = p.boutique!;
-    return InkWell(
-      onTap: () => Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (_) => BoutiquePubliquePage(boutiqueId: b.id, apercu: b),
-        ),
+    void ouvrir() => Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => BoutiquePubliquePage(boutiqueId: b.id, apercu: b),
       ),
-      child: Container(
-        margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-        padding: const EdgeInsets.all(14),
-        decoration: decorationCarte(),
-        child: Row(
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: SizedBox(
-                width: 48,
-                height: 48,
-                child: (b.logo ?? '').isNotEmpty
-                    ? ImageReseau(
-                        b.logo!,
-                        largeurServeur: 200,
-                        fit: BoxFit.cover,
-                        repli: const LogoBoutiqueParDefaut(),
-                      )
-                    : const LogoBoutiqueParDefaut(),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
+    );
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+      decoration: decorationCarte(),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(AppDim.rayonCarte),
+          onTap: ouvrir,
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Row(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(14),
+                  child: SizedBox(
+                    width: 52,
+                    height: 52,
+                    child: (b.logo ?? '').isNotEmpty
+                        ? ImageReseau(
+                            b.logo!,
+                            largeurServeur: 200,
+                            fit: BoxFit.cover,
+                            repli: const LogoBoutiqueParDefaut(),
+                          )
+                        : const LogoBoutiqueParDefaut(),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Flexible(
-                        child: Text(
-                          b.nom,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontFamily: kPolice,
-                            fontSize: 14.5,
-                            fontWeight: FontWeight.w700,
-                          ),
+                      const Text(
+                        'Vendu par',
+                        style: TextStyle(
+                          fontFamily: kPolice,
+                          fontSize: 11.5,
+                          color: AppColor.kGrayscale40,
                         ),
                       ),
-                      if (b.verifiee) ...[
-                        const SizedBox(width: 5),
-                        const Icon(
-                          Icons.verified_rounded,
-                          size: 16,
-                          color: AppColor.kSucces,
+                      // Le nom entier, sur deux lignes au besoin, le badge
+                      // à sa suite.
+                      Text.rich(
+                        TextSpan(
+                          children: [
+                            TextSpan(text: b.nom),
+                            if (b.verifiee)
+                              const WidgetSpan(
+                                alignment: PlaceholderAlignment.middle,
+                                child: Padding(
+                                  padding: EdgeInsets.only(left: 4),
+                                  child: Icon(
+                                    Icons.verified_rounded,
+                                    size: 16,
+                                    color: AppColor.kSecondary,
+                                    semanticLabel: 'Boutique vérifiée',
+                                  ),
+                                ),
+                              ),
+                          ],
                         ),
-                      ],
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontFamily: kPolice,
+                          fontSize: 15,
+                          height: 1.25,
+                          fontWeight: FontWeight.w800,
+                          color: AppColor.kGrayscaleDark100,
+                        ),
+                      ),
+                      if (b.localisation.isNotEmpty)
+                        Row(
+                          children: [
+                            const Icon(
+                              Icons.location_on_outlined,
+                              size: 13,
+                              color: AppColor.kGrayscale40,
+                            ),
+                            const SizedBox(width: 2),
+                            Flexible(
+                              child: Text(
+                                b.localisation,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: texteDiscret(12),
+                              ),
+                            ),
+                          ],
+                        ),
                     ],
                   ),
-                  if (b.localisation.isNotEmpty)
-                    Text(b.localisation, style: texteDiscret(12)),
-                ],
-              ),
+                ),
+                const SizedBox(width: 10),
+                Container(
+                  padding: const EdgeInsets.fromLTRB(12, 8, 8, 8),
+                  decoration: BoxDecoration(
+                    color: AppColor.kPrimaryLight,
+                    borderRadius: BorderRadius.circular(AppDim.rayonPastille),
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'Visiter',
+                        style: TextStyle(
+                          fontFamily: kPolice,
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w700,
+                          color: AppColor.kPrimary,
+                        ),
+                      ),
+                      Icon(
+                        Icons.chevron_right_rounded,
+                        size: 18,
+                        color: AppColor.kPrimary,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-            const Text(
-              'Voir la boutique',
-              style: TextStyle(
-                fontFamily: kPolice,
-                fontSize: 12.5,
-                fontWeight: FontWeight.w700,
-                color: AppColor.kPrimary,
-              ),
-            ),
-            const Icon(Icons.chevron_right_rounded, color: AppColor.kPrimary),
-          ],
+          ),
         ),
       ),
     );
@@ -728,6 +856,33 @@ class _ProduitDetailPageState extends State<ProduitDetailPage> {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Pastille blanche autour d'un bouton posé sur la photo.
+class _Pastille extends StatelessWidget {
+  final Widget child;
+  const _Pastille({required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 44,
+      height: 44,
+      decoration: BoxDecoration(
+        color: AppColor.kWhite.withValues(alpha: 0.94),
+        shape: BoxShape.circle,
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x22000000),
+            blurRadius: 10,
+            offset: Offset(0, 3),
+          ),
+        ],
+      ),
+      alignment: Alignment.center,
+      child: child,
     );
   }
 }
