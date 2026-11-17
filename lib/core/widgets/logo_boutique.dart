@@ -19,11 +19,8 @@ class LogoBoutiqueParDefaut extends StatelessWidget {
           alignment: Alignment.center,
           decoration: BoxDecoration(
             borderRadius: rayon == null ? null : BorderRadius.circular(rayon!),
-            gradient: const LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [Color(0xFF2A4C96), Color(0xFF01154B)],
-            ),
+            // Marine plein, au lieu du dégradé diagonal #2A4C96 → #01154B.
+            color: const Color(0xFF01154B),
           ),
           child: Icon(
             Icons.shopping_bag_rounded,

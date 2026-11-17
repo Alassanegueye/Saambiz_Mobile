@@ -519,31 +519,16 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
     );
   }
 
-  /// Bannière de la boutique, sinon un dégradé à sa couleur avec un motif
-  /// discret de sacs, pour que la couverture ne soit jamais vide.
+  /// Bannière de la boutique, sinon sa couleur en aplat, pour que la
+  /// couverture ne soit jamais vide.
+  ///
+  /// Deux ornements ont été retirés : un dégradé diagonal à trois teintes
+  /// autour de la couleur de la boutique, qui éclaircissait l'angle inférieur
+  /// droit, et un sac de 150 px à 7 % d'opacité posé en filigrane. Ni l'un ni
+  /// l'autre ne disait quoi que ce soit ; ils se voyaient comme des taches.
   Widget _couverture() {
     final banniere = (_boutique?['banniere'] ?? '').toString();
-    final fond = DecoratedBox(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Color.lerp(_accent, Colors.black, 0.25)!,
-            _accent,
-            Color.lerp(_accent, Colors.white, 0.18)!,
-          ],
-        ),
-      ),
-      child: Align(
-        alignment: const Alignment(0.95, 0.4),
-        child: Icon(
-          Icons.shopping_bag_rounded,
-          size: 150,
-          color: Colors.white.withValues(alpha: 0.07),
-        ),
-      ),
-    );
+    final fond = DecoratedBox(decoration: BoxDecoration(color: _accent));
     return Stack(
       fit: StackFit.expand,
       children: [

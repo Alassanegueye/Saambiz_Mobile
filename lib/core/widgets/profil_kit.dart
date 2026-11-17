@@ -39,11 +39,10 @@ class CarteEnteteProfil extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24),
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF01154B), Color(0xFF1C3A8A)],
-        ),
+        // Marine plein. C'était un dégradé diagonal #01154B → #1C3A8A :
+        // l'angle supérieur droit virait au bleu clair et se lisait comme une
+        // tache sur la carte, pas comme un parti pris.
+        color: const Color(0xFF01154B),
         boxShadow: [
           BoxShadow(
             color: AppColor.kPrimary.withValues(alpha: 0.14),

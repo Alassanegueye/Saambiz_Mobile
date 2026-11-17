@@ -558,27 +558,16 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         margin: const EdgeInsets.fromLTRB(20, 20, 20, 0),
         padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [_C.green, _C.navyDk],
-          ),
+          // Marine plein, au lieu du dégradé diagonal #01154B → #060F26.
+          color: _C.green,
           borderRadius: BorderRadius.circular(22),
         ),
         child: Stack(
           children: [
-            Positioned(
-              right: -20,
-              top: -25,
-              child: Container(
-                width: 110,
-                height: 110,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: _C.gold.withValues(alpha: 0.15),
-                ),
-              ),
-            ),
+            // Retiré ici : un cercle doré de 110 px à 15 % d'opacité, calé en
+            // dehors du cadre (right: -20, top: -25) et rogné par le coin de
+            // la bannière. Il ne portait aucune information et se lisait
+            // comme une tache claire dans l'angle.
             Row(
               children: [
                 Expanded(

@@ -498,11 +498,8 @@ class _EnteteAccueil extends StatelessWidget {
     return Container(
       width: double.infinity,
       decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF01154B), Color(0xFF08226D)],
-        ),
+        // Marine plein, au lieu du dégradé diagonal #01154B → #08226D.
+        color: Color(0xFF01154B),
         borderRadius: BorderRadius.vertical(bottom: Radius.circular(32)),
         boxShadow: [
           BoxShadow(
