@@ -157,9 +157,15 @@ class SignupRemoteDataSource {
         if (first is Map && first['message'] is String) return first['message'];
       }
     }
-    if (e.type == DioExceptionType.connectionTimeout ||
-        e.type == DioExceptionType.receiveTimeout ||
-        e.type == DioExceptionType.connectionError) {
+    // AUCUNE réponse du serveur : la requête n'est jamais arrivée, ou sa
+    // réponse n'est jamais revenue. L'ancienne version n'énumérait que trois
+    // types sur les huit de Dio, et laissait passer `sendTimeout`,
+    // `badCertificate` et surtout `unknown` — celui qui enveloppe la plupart
+    // des SocketException. Le message affiché devenait alors « Impossible
+    // d'envoyer le code. » : l'utilisateur comprenait que son adresse posait
+    // problème, alors que le téléphone n'avait tout simplement pas joint le
+    // serveur. Sans réponse, la cause est le réseau, quel que soit le type.
+    if (e.response == null) {
       return 'Connexion impossible. Vérifiez votre réseau.';
     }
     // Serveur arrêté ou en redémarrage : le proxy répond 502/503 par une page

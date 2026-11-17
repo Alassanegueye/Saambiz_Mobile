@@ -57,6 +57,28 @@ const Map<String, String> _statutSuivant = {
   'en_livraison': 'livree',
 };
 
+/// Le statut vers lequel le vendeur peut faire avancer cette commande, ou
+/// `null` si elle n'avance pas d'ici.
+///
+/// Le cas `acceptee` ne tient pas dans la table ci-dessus : une commande
+/// réglée à la réception peut être préparée tout de suite, alors qu'un
+/// règlement en ligne attend le paiement du client (le serveur refuse la
+/// transition dans ce second cas, voir commande.service.js).
+///
+/// CE CALCUL DOIT RESTER UNIQUE. Il vivait en double : le bouton le faisait
+/// avec le cas `acceptee`, et le gestionnaire du clic lisait la table nue.
+/// Pour une commande acceptée à régler à la réception — le cas le plus
+/// courant en boutique — le bouton « Passer à : En préparation » s'affichait
+/// donc, et ne faisait STRICTEMENT RIEN au clic : la table ne connaît pas
+/// `acceptee`, le statut suivant valait `null`, et l'appel au serveur était
+/// passé sous silence. Aucune erreur, aucun message : un bouton mort.
+String? statutSuivantPourVendeur(
+  String statut, {
+  required String modePaiement,
+}) => statut == 'acceptee' && modePaiement != 'en_ligne'
+    ? 'en_preparation'
+    : _statutSuivant[statut];
+
 class CommandeDetailPage extends StatelessWidget {
   const CommandeDetailPage({super.key});
 
@@ -247,7 +269,10 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
   }
 
   void _avancerStatut() {
-    final suivant = _statutSuivant[commande.statut];
+    final suivant = statutSuivantPourVendeur(
+      commande.statut,
+      modePaiement: commande.modePaiement,
+    );
     if (suivant != null) {
       context.read<CommandeBloc>().add(
         ChangerStatutCommande(commande.id, suivant),
@@ -309,12 +334,11 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
         isVendeur &&
         commande.statut == 'acceptee' &&
         commande.statutPaiement == 'non_paye';
-    // Acceptée et réglée à la réception : le vendeur peut la préparer. Réglée en
-    // ligne, elle attend le paiement du client.
-    final statutSuivant =
-        commande.statut == 'acceptee' && commande.modePaiement != 'en_ligne'
-        ? 'en_preparation'
-        : _statutSuivant[commande.statut];
+    // Même calcul que celui du clic : voir statutSuivantPourVendeur.
+    final statutSuivant = statutSuivantPourVendeur(
+      commande.statut,
+      modePaiement: commande.modePaiement,
+    );
     final retournable = !isVendeur && commande.statut == 'livree';
 
     return ScaffoldMarine(
