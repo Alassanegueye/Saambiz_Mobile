@@ -43,14 +43,20 @@ class AppAppBar extends StatelessWidget implements PreferredSizeWidget {
         leading != null ||
         (implyLeading &&
             (ModalRoute.of(context)?.impliesAppBarDismissal ?? false));
+    // Sous un [ScaffoldMarine], l'en-tête est marine : titre et icônes en
+    // blanc, barre d'état claire.
+    final marine =
+        couleurFond == null &&
+        Theme.of(context).appBarTheme.backgroundColor == AppColor.kPrimary;
     return AppBar(
       centerTitle: centerTitle,
       elevation: 0,
       scrolledUnderElevation: 0,
       backgroundColor: couleurFond ?? Colors.transparent,
-      systemOverlayStyle: SystemUiOverlayStyle.dark.copyWith(
-        statusBarColor: Colors.transparent,
-      ),
+      foregroundColor: marine ? AppColor.kWhite : null,
+      systemOverlayStyle:
+          (marine ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark)
+              .copyWith(statusBarColor: Colors.transparent),
       leading: leading,
       automaticallyImplyLeading: implyLeading,
       titleSpacing: avecRetour ? 0 : 16,
@@ -62,12 +68,14 @@ class AppAppBar extends StatelessWidget implements PreferredSizeWidget {
                   title!,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: kPolice,
                     fontSize: 18,
-                    fontWeight: FontWeight.w700,
+                    fontWeight: marine ? FontWeight.w800 : FontWeight.w700,
                     letterSpacing: -0.2,
-                    color: AppColor.kGrayscaleDark100,
+                    color: marine
+                        ? AppColor.kWhite
+                        : AppColor.kGrayscaleDark100,
                   ),
                 )),
       actions: [...?actions, if (actions != null) const SizedBox(width: 4)],

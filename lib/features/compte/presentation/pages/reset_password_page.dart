@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/page_vendeur.dart';
 import 'package:saambiz/core/widgets/champ_code.dart';
 import 'package:saambiz/core/widgets/messages.dart';
 import 'package:saambiz/core/widgets/libelle_obligatoire.dart';
@@ -68,7 +69,7 @@ class _ResetPasswordViewState extends State<_ResetPasswordView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return ScaffoldMarine(
       backgroundColor: _C.bg,
       appBar: AppBar(title: const Text('Réinitialiser le mot de passe')),
       body: BlocConsumer<CompteBloc, CompteState>(

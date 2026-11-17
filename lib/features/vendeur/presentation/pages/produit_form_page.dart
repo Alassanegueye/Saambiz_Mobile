@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/page_vendeur.dart';
 import 'package:saambiz/core/errors/message_erreur.dart';
 import 'package:saambiz/core/widgets/messages.dart';
 import 'package:saambiz/core/widgets/libelle_obligatoire.dart';
@@ -160,7 +161,10 @@ class _ProduitFormPageState extends State<ProduitFormPage> {
       if (!mounted) return;
       afficherErreur(
         context,
-        messageErreurReseau(e, repli: 'Les photos n\'ont pas pu être envoyées. Réessayez.'),
+        messageErreurReseau(
+          e,
+          repli: 'Les photos n\'ont pas pu être envoyées. Réessayez.',
+        ),
       );
     } finally {
       if (mounted) setState(() => _uploadingImages = false);
@@ -256,7 +260,7 @@ class _ProduitFormPageState extends State<ProduitFormPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return ScaffoldMarine(
       backgroundColor: _C.bg,
       appBar: AppBar(
         title: Text(_isEdit ? 'Modifier le produit' : 'Nouveau produit'),

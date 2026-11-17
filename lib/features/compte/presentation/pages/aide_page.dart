@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/page_vendeur.dart';
 import 'package:saambiz/core/widgets/messages.dart';
 import 'package:flutter/material.dart';
 import 'package:saambiz/core/theme/police.dart';
@@ -86,7 +87,7 @@ class _AidePageState extends State<AidePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return ScaffoldMarine(
       backgroundColor: AppColor.kBackground,
       appBar: AppAppBar(
         title: contactSeulement ? 'Nous contacter' : 'Centre d\'aide',

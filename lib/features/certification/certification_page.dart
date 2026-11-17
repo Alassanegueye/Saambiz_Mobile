@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/page_vendeur.dart';
 import 'package:saambiz/core/widgets/messages.dart';
 import 'dart:io';
 
@@ -147,7 +148,7 @@ class _CertificationPageState extends State<CertificationPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return ScaffoldMarine(
       backgroundColor: AppColor.kBackground,
       appBar: const AppAppBar(title: 'Certification'),
       body: _chargement

@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/page_vendeur.dart';
 import 'package:saambiz/core/config/env.dart';
 import 'package:saambiz/core/paiement/feuille_paiement_mobile.dart';
 import 'package:saambiz/core/paiement/paiement_simule.dart';
@@ -165,7 +166,7 @@ class _MonAbonnementViewState extends State<_MonAbonnementView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return ScaffoldMarine(
       backgroundColor: _C.bg,
       appBar: AppBar(
         title: const Text('Mon abonnement'),

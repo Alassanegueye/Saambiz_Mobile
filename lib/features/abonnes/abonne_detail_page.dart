@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/page_vendeur.dart';
 import 'package:saambiz/core/widgets/messages.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -133,7 +134,7 @@ class _AbonneDetailPageState extends State<AbonneDetailPage> {
   @override
   Widget build(BuildContext context) {
     final a = widget.abonne;
-    return Scaffold(
+    return ScaffoldMarine(
       backgroundColor: AppColor.kBackground,
       appBar: AppBar(
         title: const Text(

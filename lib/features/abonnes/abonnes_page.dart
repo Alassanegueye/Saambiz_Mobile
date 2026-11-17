@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/page_vendeur.dart';
 import 'package:dio/dio.dart';
 import 'package:saambiz/core/widgets/image_reseau.dart';
 import 'package:flutter/material.dart';
@@ -105,7 +106,7 @@ class _AbonnesPageState extends State<AbonnesPage> {
   Widget build(BuildContext context) {
     final liste = _abonnes;
     final avecCloche = liste?.where((a) => a.clocheActive).length ?? 0;
-    return Scaffold(
+    return ScaffoldMarine(
       backgroundColor: AppColor.kBackground,
       appBar: AppBar(
         title: Text(

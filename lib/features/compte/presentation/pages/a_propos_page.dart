@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/page_vendeur.dart';
 import 'package:flutter/material.dart';
 import 'package:saambiz/core/theme/police.dart';
 
@@ -15,7 +16,7 @@ class AProposPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return ScaffoldMarine(
       backgroundColor: AppColor.kBackground,
       appBar: const AppAppBar(title: 'À propos'),
       body: ListView(

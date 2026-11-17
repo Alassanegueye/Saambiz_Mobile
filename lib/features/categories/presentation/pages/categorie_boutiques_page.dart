@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/page_vendeur.dart';
 import 'package:dio/dio.dart';
 import 'package:saambiz/core/widgets/image_reseau.dart';
 import 'package:flutter/material.dart';
@@ -119,7 +120,7 @@ class _CategorieBoutiquesPageState extends State<CategorieBoutiquesPage> {
   @override
   Widget build(BuildContext context) {
     final c = widget.categorie;
-    return Scaffold(
+    return ScaffoldMarine(
       backgroundColor: _C.bg,
       appBar: AppBar(
         titleSpacing: 0,

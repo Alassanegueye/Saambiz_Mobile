@@ -12,6 +12,7 @@ import '../../../../core/theme/app_color.dart';
 import '../../../../core/theme/app_dimensions.dart';
 import '../../../../core/theme/app_typo.dart';
 import '../../../../core/utils/url_externe.dart';
+import '../../../../core/widgets/page_vendeur.dart';
 import '../../../../core/widgets/ui_kit.dart';
 import '../../../../injection_container.dart';
 import '../../../favoris/data/datasources/favoris_remote_datasource.dart';
@@ -1695,11 +1696,8 @@ class _SectionPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColor.kWhite,
+    return ScaffoldMarine(
       appBar: AppBar(
-        backgroundColor: AppColor.kWhite,
-        scrolledUnderElevation: 0,
         title: Text(
           titre,
           style: const TextStyle(

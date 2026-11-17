@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/page_vendeur.dart';
 import 'package:flutter/material.dart';
 import 'package:saambiz/core/theme/police.dart';
 
@@ -6,7 +7,7 @@ class ConditionUtilisation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return ScaffoldMarine(
       backgroundColor: const Color(0xFFF8F9FB),
       appBar: AppBar(
         title: const Text(
