@@ -9,6 +9,8 @@ import 'package:saambiz/core/theme/police.dart';
 
 import '../../../../core/services/token_service.dart';
 import '../../../../core/theme/app_color.dart';
+import '../../../../core/theme/app_dimensions.dart';
+import '../../../../core/theme/app_typo.dart';
 import '../../../../core/utils/url_externe.dart';
 import '../../../../core/widgets/ui_kit.dart';
 import '../../../../injection_container.dart';
@@ -24,7 +26,6 @@ import '../../../signalements/presentation/ouvrir_signalement.dart';
 
 const _bleuVerifie = Color(0xFF1D9BF0);
 const _encre = Color(0xFF1B1F27);
-const _fondDoux = Color(0xFFF4F5F8);
 
 /// Une section de la boutique (« Nos promos du moment »…) et ses produits.
 class _Section {
@@ -33,12 +34,13 @@ class _Section {
   const _Section(this.titre, this.produits);
 }
 
-/// Page d'une boutique dans l'application, la même que son site web :
-/// identité (logo, nom, note, ancienneté, adresse), « Suivre », appeler /
-/// WhatsApp, réseaux, puis les sections choisies par le vendeur, chacune sur
-/// une ligne qui défile avec « Voir tout », ses avantages et sa présentation.
-/// Une boutique qui n'a pas encore composé de section montre tous ses
-/// produits. Ouverte aux invités ; seul « Suivre » demande un compte.
+/// Page d'une boutique vue par un acheteur : couverture, logo centré, nom,
+/// slogan, propriétaire, chiffres clés (note, produits, ancienneté),
+/// « Suivre » et les façons de la joindre. Deux onglets ensuite :
+/// « Produits » (les sections choisies par le vendeur, puis tous ses
+/// produits en grille) et « À propos » (présentation, propriétaire,
+/// informations pratiques, engagements, réseaux). Ouverte aux invités ;
+/// seuls « Suivre » et « Message » demandent un compte.
 class BoutiquePubliquePage extends StatefulWidget {
   final String boutiqueId;
 
@@ -70,6 +72,9 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
   bool _suivi = false;
   bool _cloche = false;
 
+  /// Onglet affiché : 0 = Produits, 1 = À propos.
+  int _onglet = 0;
+
   /// La couverture a défilé : le nom de la boutique passe dans la barre.
   bool _replie = false;
 
@@ -79,7 +84,7 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
     _scroll.addListener(() {
       final replie = _scroll.offset > _hauteurCouverture - 40;
       if (replie != _replie) setState(() => _replie = replie);
-      if (_sections.isEmpty &&
+      if (_onglet == 0 &&
           _scroll.position.pixels > _scroll.position.maxScrollExtent - 400) {
         _chargerSuite();
       }
@@ -315,7 +320,7 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
     }
   }
 
-  static const double _hauteurCouverture = 168;
+  static const double _hauteurCouverture = 190;
 
   String get _nom =>
       (_boutique?['nom'] ?? widget.apercu?.nom ?? 'Boutique').toString();
@@ -328,15 +333,50 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
         : AppColor.kPrimary;
   }
 
+  /// Prénom et nom du vendeur, vide si le serveur ne les donne pas.
+  String get _proprietaire {
+    final v = _boutique?['vendeur'];
+    if (v is! Map) return '';
+    return [v['prenom'], v['nom']]
+        .where((x) => x != null && x.toString().trim().isNotEmpty)
+        .map((x) => x.toString().trim())
+        .join(' ');
+  }
+
+  bool get _verifiee =>
+      _boutique?['verifiee'] == true || (widget.apercu?.verifiee ?? false);
+
+  String get _adresse =>
+      (_boutique?['localisation'] ?? widget.apercu?.localisation ?? '')
+          .toString();
+
+  String get _telephone =>
+      (_boutique?['telephone'] ??
+              _boutique?['whatsapp'] ??
+              widget.apercu?.telephone ??
+              '')
+          .toString();
+
+  String get _whatsappNumero =>
+      (_boutique?['whatsapp'] ??
+              _boutique?['telephone'] ??
+              widget.apercu?.telephone ??
+              '')
+          .toString();
+
+  int get _nombreProduits {
+    final n = _boutique?['nombreProduits'];
+    return n is num ? n.toInt() : _produits.length;
+  }
+
   // Écran
   @override
   Widget build(BuildContext context) {
-    final sections = _sections;
     final haut = MediaQuery.paddingOf(context).top;
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light,
       child: Scaffold(
-        backgroundColor: AppColor.kWhite,
+        backgroundColor: AppColor.kBackground,
         body: Stack(
           children: [
             RefreshIndicator(
@@ -348,23 +388,17 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
                 controller: _scroll,
                 physics: const AlwaysScrollableScrollPhysics(),
                 slivers: [
-                  // Couverture (bannière ou dégradé à la couleur de la boutique) :
-                  // elle fait partie de la page, pour que le logo puisse déborder
-                  // dessus. La barre flotte par-dessus (voir plus bas).
+                  // Couverture, puis la carte blanche de l'identité dont le
+                  // logo chevauche le bord. La barre flotte par-dessus.
                   SliverToBoxAdapter(child: _haut(haut)),
                   SliverToBoxAdapter(child: _entete()),
-                  if (sections.isNotEmpty)
-                    ...sections.map(
-                      (s) => SliverToBoxAdapter(child: _ligneSection(s)),
-                    )
-                  else if (_boutiqueChargee) ...[
-                    SliverToBoxAdapter(child: _titreSection('Nos produits')),
-                    ..._grille(),
-                  ],
-                  SliverToBoxAdapter(child: _avantages()),
-                  SliverToBoxAdapter(child: _apropos()),
+                  SliverToBoxAdapter(child: _onglets()),
+                  if (_onglet == 0)
+                    ..._contenuProduits()
+                  else
+                    SliverToBoxAdapter(child: _contenuApropos()),
                   SliverToBoxAdapter(
-                    child: _suite
+                    child: _suite && _onglet == 0
                         ? const Padding(
                             padding: EdgeInsets.all(20),
                             child: Center(
@@ -374,7 +408,9 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
                               ),
                             ),
                           )
-                        : const SizedBox(height: 32),
+                        : SizedBox(
+                            height: 32 + MediaQuery.paddingOf(context).bottom,
+                          ),
                   ),
                 ],
               ),
@@ -444,15 +480,17 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
     );
   }
 
-  /// Couverture, puis le logo qui la chevauche, avec « Suivre » et la
-  /// cloche à droite. Le tout dans un seul bloc : un débordement vers le bloc
-  /// voisin serait rogné.
+  /// Couverture, carte blanche aux coins arrondis qui la recouvre en bas, et
+  /// le logo centré à cheval sur le bord de la carte.
   Widget _haut(double haut) {
     final logo = (_boutique?['logo'] ?? widget.apercu?.logo ?? '').toString();
-    const debord = 48.0;
+    const tailleLogo = 104.0;
+    const recouvrement = 26.0;
+    final bordCarte = _hauteurCouverture + haut - recouvrement;
     return SizedBox(
-      height: _hauteurCouverture + haut + debord + 12,
+      height: bordCarte + tailleLogo / 2,
       child: Stack(
+        clipBehavior: Clip.none,
         children: [
           Positioned(
             top: 0,
@@ -462,56 +500,43 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
             child: _couverture(),
           ),
           Positioned(
-            left: 20,
+            top: bordCarte,
+            left: 0,
+            right: 0,
             bottom: 0,
-            child: Container(
-              width: 96,
-              height: 96,
+            child: const DecoratedBox(
               decoration: BoxDecoration(
                 color: AppColor.kWhite,
-                borderRadius: BorderRadius.circular(26),
-                border: Border.all(color: AppColor.kWhite, width: 4),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColor.kPrimary.withValues(alpha: 0.10),
-                    blurRadius: 14,
-                    offset: const Offset(0, 3),
-                  ),
-                ],
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(22),
-                child: logo.isNotEmpty
-                    ? ImageReseau(
-                        logo,
-                        largeurServeur: 256,
-                        fit: BoxFit.cover,
-                        repli: const LogoBoutiqueParDefaut(),
-                      )
-                    : const LogoBoutiqueParDefaut(),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
               ),
             ),
           ),
           Positioned(
-            right: 20,
-            bottom: 6,
-            child: Row(
-              children: [
-                _BoutonSuivre(
-                  suivi: _suivi,
-                  couleur: _accent,
-                  onTap: _basculerSuivi,
+            top: bordCarte - tailleLogo / 2,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: Container(
+                width: tailleLogo,
+                height: tailleLogo,
+                decoration: BoxDecoration(
+                  color: AppColor.kWhite,
+                  borderRadius: BorderRadius.circular(30),
+                  border: Border.all(color: AppColor.kWhite, width: 4),
+                  boxShadow: AppDim.ombreFlottante,
                 ),
-                // La cloche n'apparaît qu'une fois la boutique suivie.
-                if (_suivi) ...[
-                  const SizedBox(width: 8),
-                  _BoutonCloche(
-                    active: _cloche,
-                    couleur: _accent,
-                    onTap: _basculerCloche,
-                  ),
-                ],
-              ],
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(26),
+                  child: logo.isNotEmpty
+                      ? ImageReseau(
+                          logo,
+                          largeurServeur: 256,
+                          fit: BoxFit.cover,
+                          repli: const LogoBoutiqueParDefaut(),
+                        )
+                      : const LogoBoutiqueParDefaut(),
+                ),
+              ),
             ),
           ),
         ],
@@ -520,12 +545,9 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
   }
 
   /// Bannière de la boutique, sinon sa couleur en aplat, pour que la
-  /// couverture ne soit jamais vide.
-  ///
-  /// Deux ornements ont été retirés : un dégradé diagonal à trois teintes
-  /// autour de la couleur de la boutique, qui éclaircissait l'angle inférieur
-  /// droit, et un sac de 150 px à 7 % d'opacité posé en filigrane. Ni l'un ni
-  /// l'autre ne disait quoi que ce soit ; ils se voyaient comme des taches.
+  /// couverture ne soit jamais vide. Volontairement sans ornement : les
+  /// dégradés à plusieurs teintes et les filigranes se lisaient comme des
+  /// taches.
   Widget _couverture() {
     final banniere = (_boutique?['banniere'] ?? '').toString();
     final fond = DecoratedBox(decoration: BoxDecoration(color: _accent));
@@ -550,256 +572,325 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
     );
   }
 
-  // Identité de la boutique.
+  // Identité de la boutique : nom, slogan, propriétaire, chiffres clés,
+  // « Suivre » et les façons de la joindre.
   Widget _entete() {
-    final a = widget.apercu;
     final b = _boutique;
     final nom = _nom;
-    final adresse = (b?['localisation'] ?? a?.localisation ?? '').toString();
-    final verifiee = b?['verifiee'] == true || (a?.verifiee ?? false);
-    final sousTitre = (b?['slogan'] ?? b?['categorie'] ?? '').toString();
-    final telephone = (b?['telephone'] ?? b?['whatsapp'] ?? a?.telephone ?? '')
-        .toString();
-    final whatsapp = (b?['whatsapp'] ?? b?['telephone'] ?? a?.telephone ?? '')
-        .toString();
-    final note = b?['note'];
-    final nombreAvis = b?['nombreAvis'] is num
-        ? (b!['nombreAvis'] as num).toInt()
-        : 0;
-    final depuis = b?['depuis'];
-    final reseaux = b?['reseaux'] is Map
-        ? Map<String, dynamic>.from(b!['reseaux'] as Map)
-        : const <String, dynamic>{};
-
-    final liens = <(IconData, String, String)>[
-      if ((reseaux['instagram'] ?? '').toString().isNotEmpty)
-        (
-          Icons.camera_alt_outlined,
-          'Instagram',
-          reseaux['instagram'].toString(),
-        ),
-      if ((reseaux['snapchat'] ?? '').toString().isNotEmpty)
-        (
-          Icons.chat_bubble_outline_rounded,
-          'Snapchat',
-          reseaux['snapchat'].toString(),
-        ),
-      if ((reseaux['facebook'] ?? '').toString().isNotEmpty)
-        (Icons.facebook_rounded, 'Facebook', reseaux['facebook'].toString()),
-      if ((reseaux['tiktok'] ?? '').toString().isNotEmpty)
-        (Icons.music_note_rounded, 'TikTok', reseaux['tiktok'].toString()),
-    ];
+    final adresse = _adresse;
+    final sousTitre = (b?['slogan'] ?? '').toString().trim();
+    final categorie = (b?['categorie'] ?? '').toString().trim();
+    final telephone = _telephone;
+    final whatsapp = _whatsappNumero;
+    final proprietaire = _proprietaire;
 
     final contacts = <Widget>[
       if (telephone.isNotEmpty)
         _ActionContact(
           icone: Icons.phone_rounded,
           libelle: 'Appeler',
-          couleur: _accent,
           onTap: () => _appeler(telephone),
         ),
       if (whatsapp.isNotEmpty)
         _ActionContact(
           icone: Icons.chat_rounded,
           libelle: 'WhatsApp',
-          couleur: const Color(0xFF1FA855),
+          couleur: AppColor.kWhatsapp,
           onTap: () => _whatsapp(whatsapp),
         ),
       if (_vendeurId.isNotEmpty)
         _ActionContact(
           icone: Icons.mail_outline_rounded,
           libelle: 'Message',
-          couleur: _accent,
           onTap: () => _ecrire(nom),
         ),
       if (adresse.isNotEmpty)
         _ActionContact(
-          icone: Icons.map_outlined,
+          icone: Icons.near_me_outlined,
           libelle: 'Itinéraire',
-          couleur: _accent,
           onTap: () => _carte(adresse),
         ),
     ];
 
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColor.kWhite,
+        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(28)),
+        boxShadow: AppDim.ombreCarte,
+      ),
+      padding: const EdgeInsets.fromLTRB(20, 14, 20, 22),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 4),
-          Row(
-            children: [
-              Flexible(
-                child: Text(
-                  nom,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontFamily: kPolice,
-                    fontSize: 24,
-                    fontWeight: FontWeight.w800,
-                    color: _encre,
-                    height: 1.15,
-                  ),
-                ),
-              ),
-              if (verifiee) ...[
-                const SizedBox(width: 6),
-                const Icon(
-                  Icons.verified_rounded,
-                  size: 22,
-                  color: _bleuVerifie,
-                ),
-              ],
-            ],
-          ),
-          if (sousTitre.isNotEmpty) ...[
-            const SizedBox(height: 4),
-            Text(
-              sousTitre,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontFamily: kPolice,
-                fontSize: 14.5,
-                height: 1.35,
-                color: AppColor.kGrayscale40,
-              ),
-            ),
-          ],
-          const SizedBox(height: 14),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              // Toujours affichée, même sans avis : c'est le seul chemin vers
-              // la feuille des avis.
-              _Info(
-                icone: Icons.star_rounded,
-                couleurIcone: const Color(0xFFF5B301),
-                fond: const Color(0xFFFFF4D1),
-                texte: note is num && nombreAvis > 0
-                    ? '$note · $nombreAvis avis'
-                    : 'Donner votre avis',
-                fleche: true,
-                onTap: () => ouvrirAvisBoutique(
-                  context,
-                  boutiqueId: widget.boutiqueId,
-                  nomBoutique: nom,
-                ),
-              ),
-              if (depuis != null)
-                _Info(
-                  icone: Icons.storefront_outlined,
-                  texte: 'Depuis $depuis',
-                ),
-              if (adresse.isNotEmpty)
-                _Info(
-                  icone: Icons.location_on_outlined,
-                  texte: adresse,
-                  onTap: () => _carte(adresse),
-                ),
-            ],
-          ),
-          if (contacts.isNotEmpty) ...[
-            const SizedBox(height: 18),
-            Row(
+          // Nom et badge vérifié, centrés sous le logo.
+          Text.rich(
+            TextSpan(
               children: [
-                for (var i = 0; i < contacts.length; i++) ...[
-                  if (i > 0) const SizedBox(width: 10),
-                  Expanded(child: contacts[i]),
-                ],
-              ],
-            ),
-          ],
-          if (liens.isNotEmpty) ...[
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                const Text(
-                  'Suivez-nous',
-                  style: TextStyle(
-                    fontFamily: kPolice,
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.w600,
-                    color: AppColor.kGrayscale40,
-                  ),
-                ),
-                const SizedBox(width: 10),
-                for (final l in liens)
-                  Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: Material(
-                      color: _accent.withValues(alpha: 0.08),
-                      shape: const CircleBorder(),
-                      child: InkWell(
-                        customBorder: const CircleBorder(),
-                        onTap: () => UrlExterne.lancer(l.$3),
-                        child: SizedBox(
-                          width: 38,
-                          height: 38,
-                          child: Icon(
-                            l.$1,
-                            size: 18,
-                            color: _accent,
-                            semanticLabel: l.$2,
-                          ),
-                        ),
+                TextSpan(text: nom),
+                if (_verifiee)
+                  const WidgetSpan(
+                    alignment: PlaceholderAlignment.middle,
+                    child: Padding(
+                      padding: EdgeInsets.only(left: 6),
+                      child: Icon(
+                        Icons.verified_rounded,
+                        size: 22,
+                        color: _bleuVerifie,
+                        semanticLabel: 'Boutique vérifiée',
                       ),
                     ),
                   ),
               ],
             ),
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: AppTypo.titreL.copyWith(color: _encre),
+          ),
+          if (sousTitre.isNotEmpty) ...[
+            const SizedBox(height: 4),
+            Text(
+              sousTitre,
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: AppTypo.corps.copyWith(color: AppColor.kGrayscale40),
+            ),
           ],
-          const SizedBox(height: 8),
-          const Divider(height: 32, color: AppColor.kLine),
+          if (proprietaire.isNotEmpty || categorie.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Wrap(
+              alignment: WrapAlignment.center,
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                if (proprietaire.isNotEmpty)
+                  _Puce(
+                    icone: Icons.person_outline_rounded,
+                    texte: 'Par $proprietaire',
+                  ),
+                if (categorie.isNotEmpty)
+                  _Puce(
+                    icone: Icons.sell_outlined,
+                    texte: categorie,
+                    fond: AppColor.kSecondaryLight,
+                    couleur: AppColor.kSecondaryDark,
+                  ),
+              ],
+            ),
+          ],
+          const SizedBox(height: 18),
+          _chiffres(),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: _BoutonSuivre(suivi: _suivi, onTap: _basculerSuivi),
+              ),
+              // La cloche n'apparaît qu'une fois la boutique suivie.
+              if (_suivi) ...[
+                const SizedBox(width: 10),
+                _BoutonCloche(active: _cloche, onTap: _basculerCloche),
+              ],
+            ],
+          ),
+          if (contacts.isNotEmpty) ...[
+            const SizedBox(height: 18),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [for (final c in contacts) Expanded(child: c)],
+            ),
+          ],
         ],
       ),
     );
   }
 
-  // Titre de section : gros titre à gauche, « Voir tout → » à droite.
-  Widget _titreSection(String titre, {VoidCallback? voirTout}) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 8, 12, 12),
+  /// Note, nombre de produits, ancienneté : trois chiffres côte à côte.
+  Widget _chiffres() {
+    final b = _boutique;
+    final note = b?['note'];
+    final nombreAvis = b?['nombreAvis'] is num
+        ? (b!['nombreAvis'] as num).toInt()
+        : 0;
+    final depuis = b?['depuis'];
+    final aDesAvis = note is num && nombreAvis > 0;
+    final produits = _nombreProduits;
+
+    Widget separateur() =>
+        Container(width: 1, height: 34, color: AppColor.kGrayscale20);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      decoration: BoxDecoration(
+        color: AppColor.kSurface,
+        borderRadius: AppDim.brGrand,
+      ),
       child: Row(
         children: [
+          // Toujours présent, même sans avis : c'est le chemin vers la
+          // feuille des avis.
           Expanded(
+            child: _Chiffre(
+              valeur: aDesAvis
+                  ? note.toStringAsFixed(1).replaceAll('.', ',')
+                  : 'Noter',
+              icone: Icons.star_rounded,
+              libelle: aDesAvis ? '$nombreAvis avis' : 'Donner votre avis',
+              onTap: () => ouvrirAvisBoutique(
+                context,
+                boutiqueId: widget.boutiqueId,
+                nomBoutique: _nom,
+              ),
+            ),
+          ),
+          separateur(),
+          Expanded(
+            child: _Chiffre(
+              valeur: '$produits',
+              libelle: produits > 1 ? 'Produits' : 'Produit',
+              onTap: () => setState(() => _onglet = 0),
+            ),
+          ),
+          if (depuis != null) ...[
+            separateur(),
+            Expanded(
+              child: _Chiffre(valeur: '$depuis', libelle: 'Sur Saambiz'),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  /// Bascule « Produits » / « À propos ».
+  Widget _onglets() {
+    Widget onglet(int i, String libelle) {
+      final actif = _onglet == i;
+      return Expanded(
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () => setState(() => _onglet = i),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 180),
+            height: 42,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: actif ? AppColor.kPrimary : Colors.transparent,
+              borderRadius: BorderRadius.circular(AppDim.rayonPastille),
+            ),
+            child: Text(
+              libelle,
+              style: TextStyle(
+                fontFamily: kPolice,
+                fontSize: 14.5,
+                fontWeight: FontWeight.w700,
+                color: actif ? AppColor.kWhite : AppColor.kGrayscale40,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 6),
+      child: Container(
+        padding: const EdgeInsets.all(4),
+        decoration: BoxDecoration(
+          color: AppColor.kWhite,
+          borderRadius: BorderRadius.circular(AppDim.rayonPastille),
+          boxShadow: AppDim.ombreCarte,
+        ),
+        child: Row(children: [onglet(0, 'Produits'), onglet(1, 'À propos')]),
+      ),
+    );
+  }
+
+  // Titre de section : gros titre à gauche, « Voir tout → » à droite.
+  Widget _titreSection(String titre, {int? total, VoidCallback? voirTout}) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 18, 12, 12),
+      child: Row(
+        children: [
+          Container(
+            width: 4,
+            height: 20,
+            decoration: BoxDecoration(
+              color: AppColor.kSecondary,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Flexible(
             child: Text(
               titre,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontFamily: kPolice,
-                fontSize: 20,
-                fontWeight: FontWeight.w800,
-                color: _encre,
-              ),
+              style: AppTypo.titreM.copyWith(color: _encre),
             ),
           ),
+          if (total != null && total > 0) ...[
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              decoration: BoxDecoration(
+                color: AppColor.kPrimaryLight,
+                borderRadius: BorderRadius.circular(AppDim.rayonPastille),
+              ),
+              child: Text(
+                '$total',
+                style: const TextStyle(
+                  fontFamily: kPolice,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: AppColor.kPrimary,
+                ),
+              ),
+            ),
+          ],
+          const Spacer(),
           if (voirTout != null)
             TextButton(
               onPressed: voirTout,
-              child: Row(
+              child: const Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
                     'Voir tout',
                     style: TextStyle(
                       fontFamily: kPolice,
-                      fontSize: 15,
+                      fontSize: 14.5,
                       fontWeight: FontWeight.w700,
-                      color: _accent,
+                      color: AppColor.kPrimaryMedium,
                     ),
                   ),
-                  const SizedBox(width: 4),
-                  Icon(Icons.arrow_forward_rounded, size: 18, color: _accent),
+                  SizedBox(width: 4),
+                  Icon(
+                    Icons.arrow_forward_rounded,
+                    size: 18,
+                    color: AppColor.kPrimaryMedium,
+                  ),
                 ],
               ),
             ),
         ],
       ),
     );
+  }
+
+  // Onglet Produits : les sections du vendeur, puis tous les produits.
+  List<Widget> _contenuProduits() {
+    final sections = _sections;
+    return [
+      for (final s in sections) SliverToBoxAdapter(child: _ligneSection(s)),
+      SliverToBoxAdapter(
+        child: _titreSection(
+          sections.isEmpty ? 'Nos produits' : 'Tous les produits',
+          total: _chargement ? null : _nombreProduits,
+        ),
+      ),
+      ..._grille(),
+    ];
   }
 
   // Une section : ses produits sur une ligne qui défile.
@@ -834,18 +925,18 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
     );
   }
 
-  // Boutique sans section : tous ses produits.
+  // Tous les produits de la boutique, en grille.
   List<Widget> _grille() {
     if (_chargement) {
-      return const [
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: EdgeInsets.symmetric(vertical: 60),
-            child: Center(
-              child: CircularProgressIndicator(
-                color: AppColor.kPrimary,
-                strokeWidth: 2.5,
-              ),
+      // Squelette : la grille garde sa forme pendant le chargement.
+      return [
+        SliverPadding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          sliver: SliverGrid(
+            gridDelegate: grilleProduits(context),
+            delegate: SliverChildBuilderDelegate(
+              (_, __) => const _CarteFantome(),
+              childCount: 4,
             ),
           ),
         ),
@@ -854,12 +945,15 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
     if (_erreur != null) {
       return [
         SliverToBoxAdapter(
-          child: EtatVide(
-            icone: Icons.wifi_off_rounded,
-            titre: 'Oups',
-            message: _erreur,
-            action: 'Réessayer',
-            onAction: _charger,
+          child: _Carte(
+            child: EtatVide(
+              icone: Icons.wifi_off_rounded,
+              titre: 'Oups',
+              message: _erreur,
+              action: 'Réessayer',
+              onAction: _charger,
+              compact: true,
+            ),
           ),
         ),
       ];
@@ -867,10 +961,15 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
     if (_produits.isEmpty) {
       return const [
         SliverToBoxAdapter(
-          child: EtatVide(
-            icone: Icons.inventory_2_outlined,
-            titre: 'Aucun produit pour le moment',
-            message: 'Cette boutique ajoute bientôt ses produits.',
+          child: _Carte(
+            child: EtatVide(
+              icone: Icons.inventory_2_outlined,
+              titre: 'Aucun produit pour le moment',
+              message:
+                  'Cette boutique ajoute bientôt ses produits. '
+                  'Suivez-la pour être prévenu de ses nouveautés.',
+              compact: true,
+            ),
           ),
         ),
       ];
@@ -889,93 +988,249 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
     ];
   }
 
-  // Les avantages de la boutique (« Livraison rapide »…).
-  Widget _avantages() {
-    final liste = (_boutique?['avantages'] as List? ?? const [])
+  // Onglet À propos : présentation, propriétaire, informations pratiques,
+  // avantages et réseaux.
+  Widget _contenuApropos() {
+    final b = _boutique;
+    final texte = (b?['apropos'] ?? b?['description'] ?? '').toString().trim();
+    final categorie = (b?['categorie'] ?? '').toString().trim();
+    final horaires = (b?['horaires'] ?? '').toString().trim();
+    final depuis = b?['depuis'];
+    final adresse = _adresse;
+    final telephone = _telephone;
+    final whatsapp = (b?['whatsapp'] ?? '').toString().trim();
+
+    final infos = <Widget>[
+      if (categorie.isNotEmpty)
+        _LigneInfo(
+          icone: Icons.sell_outlined,
+          titre: 'Catégorie',
+          valeur: categorie,
+        ),
+      if (adresse.isNotEmpty)
+        _LigneInfo(
+          icone: Icons.location_on_outlined,
+          titre: 'Adresse',
+          valeur: adresse,
+          onTap: () => _carte(adresse),
+        ),
+      if (horaires.isNotEmpty)
+        _LigneInfo(
+          icone: Icons.schedule_rounded,
+          titre: 'Horaires',
+          valeur: horaires,
+        ),
+      if (telephone.isNotEmpty)
+        _LigneInfo(
+          icone: Icons.phone_outlined,
+          titre: 'Téléphone',
+          valeur: telephone,
+          onTap: () => _appeler(telephone),
+        ),
+      if (whatsapp.isNotEmpty && whatsapp != telephone)
+        _LigneInfo(
+          icone: Icons.chat_outlined,
+          titre: 'WhatsApp',
+          valeur: whatsapp,
+          onTap: () => _whatsapp(whatsapp),
+        ),
+      if (depuis != null)
+        _LigneInfo(
+          icone: Icons.storefront_outlined,
+          titre: 'Sur Saambiz depuis',
+          valeur: '$depuis',
+        ),
+    ];
+
+    final avantages = (b?['avantages'] as List? ?? const [])
         .whereType<Map>()
         .toList();
-    if (liste.isEmpty) return const SizedBox.shrink();
-    return Container(
-      margin: const EdgeInsets.fromLTRB(20, 28, 20, 0),
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
-      decoration: BoxDecoration(
-        color: _fondDoux,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Wrap(
-        alignment: WrapAlignment.spaceEvenly,
-        runSpacing: 14,
-        children: [
-          for (final a in liste)
-            SizedBox(
-              width: 150,
-              child: Column(
-                children: [
-                  Icon(
-                    iconesAvantages[a['icone']]?.$1 ??
-                        Icons.star_border_rounded,
-                    size: 26,
-                    color: _accent,
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    (a['titre'] ?? '').toString(),
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontFamily: kPolice,
-                      fontSize: 13.5,
-                      fontWeight: FontWeight.w600,
-                      color: _encre,
-                    ),
-                  ),
-                  if ((a['texte'] ?? '').toString().isNotEmpty)
-                    Text(
-                      a['texte'].toString(),
-                      textAlign: TextAlign.center,
-                      style: texteDiscret(12),
-                    ),
-                ],
-              ),
+    final reseaux = b?['reseaux'] is Map
+        ? Map<String, dynamic>.from(b!['reseaux'] as Map)
+        : const <String, dynamic>{};
+    final liens = <(IconData, String, String)>[
+      for (final r in const [
+        (Icons.camera_alt_outlined, 'Instagram', 'instagram'),
+        (Icons.facebook_rounded, 'Facebook', 'facebook'),
+        (Icons.music_note_rounded, 'TikTok', 'tiktok'),
+        (Icons.chat_bubble_outline_rounded, 'Snapchat', 'snapchat'),
+        (Icons.language_rounded, 'Site web', 'site'),
+      ])
+        if ((reseaux[r.$3] ?? '').toString().trim().isNotEmpty)
+          (r.$1, r.$2, reseaux[r.$3].toString().trim()),
+    ];
+
+    if (!_boutiqueChargee && b == null) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 60),
+        child: Center(
+          child: CircularProgressIndicator(
+            color: AppColor.kPrimary,
+            strokeWidth: 2.5,
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (texte.isNotEmpty)
+          _Carte(
+            titre: 'Présentation',
+            child: Text(
+              texte,
+              style: AppTypo.corps.copyWith(color: AppColor.kGrayscale60),
             ),
-        ],
-      ),
+          ),
+        _Carte(titre: 'Le propriétaire', child: _proprietaireCarte()),
+        if (infos.isNotEmpty)
+          _Carte(
+            titre: 'Informations',
+            child: Column(
+              children: [
+                for (var i = 0; i < infos.length; i++) ...[
+                  if (i > 0) const Divider(height: 1, color: AppColor.kLine),
+                  infos[i],
+                ],
+              ],
+            ),
+          ),
+        if (avantages.isNotEmpty)
+          _Carte(
+            titre: 'Nos engagements',
+            child: Wrap(
+              spacing: 10,
+              runSpacing: 10,
+              children: [
+                for (final a in avantages)
+                  _Avantage(
+                    icone:
+                        iconesAvantages[a['icone']]?.$1 ??
+                        Icons.star_border_rounded,
+                    titre: (a['titre'] ?? '').toString(),
+                    texte: (a['texte'] ?? '').toString(),
+                  ),
+              ],
+            ),
+          ),
+        if (liens.isNotEmpty)
+          _Carte(
+            titre: 'Retrouvez-nous',
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final l in liens)
+                  _Puce(
+                    icone: l.$1,
+                    texte: l.$2,
+                    onTap: () => UrlExterne.lancer(l.$3),
+                  ),
+              ],
+            ),
+          ),
+      ],
     );
   }
 
-  Widget _apropos() {
-    final texte = (_boutique?['apropos'] ?? '').toString().trim();
-    if (texte.isEmpty) return const SizedBox.shrink();
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 28, 20, 0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'À propos',
-            style: TextStyle(
-              fontFamily: kPolice,
-              fontSize: 20,
-              fontWeight: FontWeight.w800,
-              color: _encre,
-            ),
+  /// Avatar aux initiales, nom, statut du vendeur et « Écrire ».
+  Widget _proprietaireCarte() {
+    final nom = _proprietaire;
+    final affiche = nom.isNotEmpty ? nom : 'Vendeur $_nom';
+    final initiales = (nom.isNotEmpty ? nom : _nom)
+        .split(RegExp(r'\s+'))
+        .where((m) => m.isNotEmpty)
+        .take(2)
+        .map((m) => m.characters.first.toUpperCase())
+        .join();
+    final depuis = _boutique?['depuis'];
+    return Row(
+      children: [
+        Container(
+          width: 54,
+          height: 54,
+          alignment: Alignment.center,
+          decoration: const BoxDecoration(
+            color: AppColor.kPrimary,
+            shape: BoxShape.circle,
           ),
-          const SizedBox(height: 8),
-          Text(
-            texte,
+          child: Text(
+            initiales,
             style: const TextStyle(
               fontFamily: kPolice,
-              fontSize: 14,
-              height: 1.55,
-              color: AppColor.kGrayscale40,
+              fontSize: 19,
+              fontWeight: FontWeight.w800,
+              color: AppColor.kSecondary,
+            ),
+          ),
+        ),
+        const SizedBox(width: 14),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                affiche,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: AppTypo.titreS.copyWith(color: _encre),
+              ),
+              const SizedBox(height: 3),
+              Row(
+                children: [
+                  Icon(
+                    _verifiee
+                        ? Icons.verified_rounded
+                        : Icons.storefront_outlined,
+                    size: 15,
+                    color: _verifiee ? _bleuVerifie : AppColor.kGrayscale40,
+                  ),
+                  const SizedBox(width: 4),
+                  Flexible(
+                    child: Text(
+                      [
+                        _verifiee ? 'Vendeur vérifié' : 'Vendeur',
+                        if (depuis != null) 'depuis $depuis',
+                      ].join(' · '),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTypo.petit,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        if (_vendeurId.isNotEmpty) ...[
+          const SizedBox(width: 10),
+          OutlinedButton.icon(
+            onPressed: () => _ecrire(_nom),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: AppColor.kPrimary,
+              side: const BorderSide(color: AppColor.kPrimaryBorder),
+              shape: RoundedRectangleBorder(borderRadius: AppDim.brMoyen),
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              minimumSize: const Size(0, 40),
+            ),
+            icon: const Icon(Icons.mail_outline_rounded, size: 17),
+            label: const Text(
+              'Écrire',
+              style: TextStyle(
+                fontFamily: kPolice,
+                fontSize: 13.5,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
         ],
-      ),
+      ],
     );
   }
 }
 
-/// Pastille ronde gris clair autour d'un bouton de la barre de la boutique.
+/// Pastille ronde blanche autour d'un bouton de la barre de la boutique.
 class _PastilleBarre extends StatelessWidget {
   final Widget child;
   const _PastilleBarre({required this.child});
@@ -1002,55 +1257,49 @@ class _PastilleBarre extends StatelessWidget {
   }
 }
 
-/// « Suivre » (plein) ou « Suivie » (contour, coche) : l'état se lit d'un coup
-/// d'œil, sans dépendre d'un cœur rouge.
+/// « Suivre la boutique » (plein, marine) ou « Boutique suivie » (clair,
+/// coche) : l'état se lit d'un coup d'œil.
 class _BoutonSuivre extends StatelessWidget {
   final bool suivi;
-  final Color couleur;
   final VoidCallback onTap;
-  const _BoutonSuivre({
-    required this.suivi,
-    required this.couleur,
-    required this.onTap,
-  });
+  const _BoutonSuivre({required this.suivi, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 180),
-      height: 42,
+      height: 50,
       decoration: BoxDecoration(
-        color: suivi ? AppColor.kWhite : couleur,
-        borderRadius: BorderRadius.circular(21),
-        border: Border.all(color: couleur, width: 1.5),
+        color: suivi ? AppColor.kPrimaryLight : AppColor.kPrimary,
+        borderRadius: AppDim.brGrand,
+        border: Border.all(
+          color: suivi ? AppColor.kPrimaryBorder : AppColor.kPrimary,
+        ),
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(21),
+          borderRadius: AppDim.brGrand,
           onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 18),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  suivi ? Icons.check_rounded : Icons.add_rounded,
-                  size: 19,
-                  color: suivi ? couleur : AppColor.kWhite,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                suivi ? Icons.check_rounded : Icons.add_rounded,
+                size: 20,
+                color: suivi ? AppColor.kPrimary : AppColor.kSecondary,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                suivi ? 'Boutique suivie' : 'Suivre la boutique',
+                style: TextStyle(
+                  fontFamily: kPolice,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: suivi ? AppColor.kPrimary : AppColor.kWhite,
                 ),
-                const SizedBox(width: 6),
-                Text(
-                  suivi ? 'Suivie' : 'Suivre',
-                  style: TextStyle(
-                    fontFamily: kPolice,
-                    fontSize: 14.5,
-                    fontWeight: FontWeight.w700,
-                    color: suivi ? couleur : AppColor.kWhite,
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -1060,31 +1309,31 @@ class _BoutonSuivre extends StatelessWidget {
 
 class _BoutonCloche extends StatelessWidget {
   final bool active;
-  final Color couleur;
   final VoidCallback onTap;
-  const _BoutonCloche({
-    required this.active,
-    required this.couleur,
-    required this.onTap,
-  });
+  const _BoutonCloche({required this.active, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: active ? couleur : AppColor.kWhite,
-      shape: CircleBorder(side: BorderSide(color: couleur, width: 1.5)),
+      color: active ? AppColor.kSecondary : AppColor.kWhite,
+      shape: RoundedRectangleBorder(
+        borderRadius: AppDim.brGrand,
+        side: BorderSide(
+          color: active ? AppColor.kSecondary : AppColor.kPrimaryBorder,
+        ),
+      ),
       child: InkWell(
-        customBorder: const CircleBorder(),
+        borderRadius: AppDim.brGrand,
         onTap: onTap,
         child: SizedBox(
-          width: 42,
-          height: 42,
+          width: 50,
+          height: 50,
           child: Icon(
             active
                 ? Icons.notifications_active_rounded
                 : Icons.notifications_none_rounded,
-            size: 20,
-            color: active ? AppColor.kWhite : couleur,
+            size: 22,
+            color: AppColor.kPrimary,
             semanticLabel: active
                 ? 'Désactiver les notifications'
                 : 'Activer les notifications',
@@ -1095,20 +1344,77 @@ class _BoutonCloche extends StatelessWidget {
   }
 }
 
-/// Une information courte en pastille (note, ancienneté, ville).
-class _Info extends StatelessWidget {
+/// Un chiffre clé (note, produits, ancienneté) et son libellé.
+class _Chiffre extends StatelessWidget {
+  final String valeur;
+  final String libelle;
+  final IconData? icone;
+  final VoidCallback? onTap;
+  const _Chiffre({
+    required this.valeur,
+    required this.libelle,
+    this.icone,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      borderRadius: AppDim.brMoyen,
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (icone != null) ...[
+                  Icon(icone, size: 18, color: AppColor.kSecondary),
+                  const SizedBox(width: 3),
+                ],
+                Flexible(
+                  child: Text(
+                    valeur,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontFamily: kPolice,
+                      fontSize: 17,
+                      fontWeight: FontWeight.w800,
+                      color: AppColor.kPrimary,
+                      fontFeatures: AppTypo.chiffres,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 2),
+            Text(
+              libelle,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppTypo.minuscule,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Une information courte en pastille (propriétaire, catégorie, réseau).
+class _Puce extends StatelessWidget {
   final IconData icone;
   final String texte;
-  final Color couleurIcone;
   final Color fond;
-  final bool fleche;
+  final Color couleur;
   final VoidCallback? onTap;
-  const _Info({
+  const _Puce({
     required this.icone,
     required this.texte,
-    this.couleurIcone = _encre,
-    this.fond = _fondDoux,
-    this.fleche = false,
+    this.fond = AppColor.kPrimaryLight,
+    this.couleur = AppColor.kPrimary,
     this.onTap,
   });
 
@@ -1116,39 +1422,31 @@ class _Info extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: fond,
-      borderRadius: BorderRadius.circular(20),
+      borderRadius: BorderRadius.circular(AppDim.rayonPastille),
       child: InkWell(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(AppDim.rayonPastille),
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icone, size: 16, color: couleurIcone),
-              const SizedBox(width: 5),
+              Icon(icone, size: 15, color: couleur),
+              const SizedBox(width: 6),
               ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 200),
+                constraints: const BoxConstraints(maxWidth: 220),
                 child: Text(
                   texte,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: kPolice,
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
-                    color: _encre,
+                    color: couleur,
                   ),
                 ),
               ),
-              if (fleche) ...[
-                const SizedBox(width: 2),
-                const Icon(
-                  Icons.chevron_right_rounded,
-                  size: 16,
-                  color: Color(0xFF8A93A6),
-                ),
-              ],
             ],
           ),
         ),
@@ -1166,48 +1464,224 @@ class _ActionContact extends StatelessWidget {
   const _ActionContact({
     required this.icone,
     required this.libelle,
-    required this.couleur,
     required this.onTap,
+    this.couleur = AppColor.kPrimary,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: _fondDoux,
-      borderRadius: BorderRadius.circular(16),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          child: Column(
-            children: [
-              Container(
-                width: 38,
-                height: 38,
-                decoration: BoxDecoration(
-                  color: couleur.withValues(alpha: 0.12),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(icone, size: 19, color: couleur),
+    return InkWell(
+      borderRadius: AppDim.brGrand,
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: Column(
+          children: [
+            Container(
+              width: 50,
+              height: 50,
+              decoration: BoxDecoration(
+                color: couleur.withValues(alpha: 0.10),
+                shape: BoxShape.circle,
               ),
-              const SizedBox(height: 6),
-              FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Text(
-                  libelle,
-                  maxLines: 1,
-                  style: const TextStyle(
-                    fontFamily: kPolice,
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.w700,
-                    color: _encre,
-                  ),
+              child: Icon(icone, size: 22, color: couleur),
+            ),
+            const SizedBox(height: 6),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                libelle,
+                maxLines: 1,
+                style: const TextStyle(
+                  fontFamily: kPolice,
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w600,
+                  color: AppColor.kGrayscale80,
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
+      ),
+    );
+  }
+}
+
+/// Carte blanche de l'onglet À propos, avec un titre facultatif.
+class _Carte extends StatelessWidget {
+  final String? titre;
+  final Widget child;
+  const _Carte({this.titre, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(20, 14, 20, 0),
+      padding: const EdgeInsets.all(18),
+      decoration: _decorationCarte,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (titre != null) ...[
+            Text(titre!, style: AppTypo.titreS.copyWith(color: _encre)),
+            const SizedBox(height: 12),
+          ],
+          child,
+        ],
+      ),
+    );
+  }
+}
+
+final _decorationCarte = BoxDecoration(
+  color: AppColor.kWhite,
+  borderRadius: AppDim.brCarte,
+  boxShadow: AppDim.ombreCarte,
+);
+
+/// Une ligne d'information : icône, intitulé, valeur ; touchable si `onTap`.
+class _LigneInfo extends StatelessWidget {
+  final IconData icone;
+  final String titre;
+  final String valeur;
+  final VoidCallback? onTap;
+  const _LigneInfo({
+    required this.icone,
+    required this.titre,
+    required this.valeur,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: AppDim.brMoyen,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 11),
+        child: Row(
+          children: [
+            Container(
+              width: 38,
+              height: 38,
+              decoration: BoxDecoration(
+                color: AppColor.kPrimaryLight,
+                borderRadius: AppDim.brMoyen,
+              ),
+              child: Icon(icone, size: 19, color: AppColor.kPrimary),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(titre, style: AppTypo.minuscule),
+                  const SizedBox(height: 1),
+                  Text(valeur, style: AppTypo.corpsFort.copyWith(fontSize: 14)),
+                ],
+              ),
+            ),
+            if (onTap != null)
+              const Icon(
+                Icons.chevron_right_rounded,
+                size: 20,
+                color: AppColor.kGrayscale30,
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Un engagement de la boutique (« Livraison rapide »…).
+class _Avantage extends StatelessWidget {
+  final IconData icone;
+  final String titre;
+  final String texte;
+  const _Avantage({
+    required this.icone,
+    required this.titre,
+    required this.texte,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    // Deux par ligne dans la carte (marges 2 × 20, rembourrage 2 × 18).
+    final largeur = (MediaQuery.sizeOf(context).width - 40 - 36 - 10) / 2;
+    return Container(
+      width: largeur,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColor.kSurface,
+        borderRadius: AppDim.brGrand,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            decoration: const BoxDecoration(
+              color: AppColor.kSecondaryLight,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icone, size: 19, color: AppColor.kSecondaryDark),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            titre,
+            style: const TextStyle(
+              fontFamily: kPolice,
+              fontSize: 13.5,
+              fontWeight: FontWeight.w700,
+              color: _encre,
+            ),
+          ),
+          if (texte.isNotEmpty) ...[
+            const SizedBox(height: 2),
+            Text(texte, style: texteDiscret(12)),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// Carte produit vide le temps du chargement.
+class _CarteFantome extends StatelessWidget {
+  const _CarteFantome();
+
+  @override
+  Widget build(BuildContext context) {
+    Widget barre(double largeur) => Container(
+      height: 12,
+      width: largeur,
+      decoration: BoxDecoration(
+        color: AppColor.kBackground2,
+        borderRadius: BorderRadius.circular(6),
+      ),
+    );
+    return Container(
+      decoration: _decorationCarte,
+      padding: const EdgeInsets.all(10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Container(
+              decoration: BoxDecoration(
+                color: AppColor.kBackground2,
+                borderRadius: AppDim.brGrand,
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          barre(110),
+          const SizedBox(height: 8),
+          barre(70),
+          const SizedBox(height: 6),
+        ],
       ),
     );
   }
