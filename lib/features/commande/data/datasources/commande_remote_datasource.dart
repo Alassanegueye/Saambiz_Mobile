@@ -1,11 +1,20 @@
+import '../../../../core/widgets/barre_pagination.dart';
 import 'package:dio/dio.dart';
 import '../../../../core/demo/donnees_demo.dart';
 import '../models/commande_model.dart';
 import '../../../../core/constants/api_endpoints.dart';
 
+/// Une page de commandes rendue par l'API : dix a la fois, plus de quoi
+/// savoir s'il en reste.
+class PageCommandes {
+  final List<CommandeModel> commandes;
+  final Pagination pagination;
+  const PageCommandes(this.commandes, this.pagination);
+}
+
 abstract class CommandeRemoteDataSource {
   Future<CommandeModel> creerCommande(Map<String, dynamic> body);
-  Future<List<CommandeModel>> mesCommandes({String? statut});
+  Future<PageCommandes> mesCommandes({String? statut, int page});
   Future<CommandeModel> getCommande(String id);
   Future<CommandeModel> annuler(String id, {String? motif});
   // Retourne l'URL de paiement (ou null pour Wave/à compléter)
@@ -15,7 +24,7 @@ abstract class CommandeRemoteDataSource {
     String? numeroTelephone,
   });
   // Vendeur
-  Future<List<CommandeModel>> commandesVendeur({String? statut});
+  Future<PageCommandes> commandesVendeur({String? statut, int page});
   Future<CommandeModel> changerStatut(String id, String statut);
   // Le vendeur confirme avoir reçu le paiement (commande réglée à la livraison).
   Future<CommandeModel> confirmerPaiement(String id);
@@ -36,6 +45,14 @@ abstract class CommandeRemoteDataSource {
 class CommandeRemoteDataSourceImpl implements CommandeRemoteDataSource {
   final Dio dio;
   CommandeRemoteDataSourceImpl(this.dio);
+
+  /// Une page de commandes : la liste, et où elle se situe.
+  PageCommandes _pageDepuis(dynamic data) => PageCommandes(
+    _parseListe(data),
+    Pagination.depuis(
+      data is Map ? Map<String, dynamic>.from(data) : null,
+    ),
+  );
 
   List<CommandeModel> _parseListe(dynamic data) {
     final raw = (data is Map && data['commandes'] is List)
@@ -60,12 +77,12 @@ class CommandeRemoteDataSourceImpl implements CommandeRemoteDataSource {
   }
 
   @override
-  Future<List<CommandeModel>> mesCommandes({String? statut}) async {
+  Future<PageCommandes> mesCommandes({String? statut, int page = 1}) async {
     final res = await dio.get(
       CommandeEndpoints.commandes,
-      queryParameters: statut != null ? {'statut': statut} : null,
+      queryParameters: {'page': page, if (statut != null) 'statut': statut},
     );
-    return _parseListe(res.data);
+    return _pageDepuis(res.data);
   }
 
   @override
@@ -104,15 +121,18 @@ class CommandeRemoteDataSourceImpl implements CommandeRemoteDataSource {
   }
 
   @override
-  Future<List<CommandeModel>> commandesVendeur({String? statut}) async {
+  Future<PageCommandes> commandesVendeur({String? statut, int page = 1}) async {
     if (modeDemo) {
-      return commandesDemo().map(CommandeModel.fromJson).toList();
+      return PageCommandes(
+        commandesDemo().map(CommandeModel.fromJson).toList(),
+        const Pagination(),
+      );
     }
     final res = await dio.get(
       CommandeEndpoints.commandesVendeur,
-      queryParameters: statut != null ? {'statut': statut} : null,
+      queryParameters: {'page': page, if (statut != null) 'statut': statut},
     );
-    return _parseListe(res.data);
+    return _pageDepuis(res.data);
   }
 
   @override

@@ -24,8 +24,8 @@ class CommandeRepository {
     });
   }
 
-  Future<List<CommandeModel>> mesCommandes({String? statut}) =>
-      remote.mesCommandes(statut: statut);
+  Future<PageCommandes> mesCommandes({String? statut, int page = 1}) =>
+      remote.mesCommandes(statut: statut, page: page);
 
   Future<CommandeModel> getCommande(String id) => remote.getCommande(id);
 
@@ -38,8 +38,8 @@ class CommandeRepository {
     String? numeroTelephone,
   }) => remote.payer(id, methode: methode, numeroTelephone: numeroTelephone);
 
-  Future<List<CommandeModel>> commandesVendeur({String? statut}) =>
-      remote.commandesVendeur(statut: statut);
+  Future<PageCommandes> commandesVendeur({String? statut, int page = 1}) =>
+      remote.commandesVendeur(statut: statut, page: page);
 
   Future<CommandeModel> changerStatut(String id, String statut) =>
       remote.changerStatut(id, statut);

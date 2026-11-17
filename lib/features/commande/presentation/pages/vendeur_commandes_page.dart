@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/barre_pagination.dart';
 import 'package:saambiz/core/widgets/ecouteur_commandes.dart';
 import 'package:saambiz/core/widgets/onglets_conserves.dart';
 import 'package:flutter/material.dart';
@@ -84,7 +85,10 @@ class VendeurCommandesPage extends StatelessWidget {
                     );
                   }
                   if (state is CommandesLoaded) {
-                    return _ListeCommandes(commandes: state.commandes);
+                    return _ListeCommandes(
+                      commandes: state.commandes,
+                      pagination: state.pagination,
+                    );
                   }
                   return const SizedBox.shrink();
                 },
@@ -100,7 +104,10 @@ class VendeurCommandesPage extends StatelessWidget {
 /// Les commandes, classées par ce qu'elles demandent au vendeur.
 class _ListeCommandes extends StatefulWidget {
   final List<CommandeModel> commandes;
-  const _ListeCommandes({required this.commandes});
+
+  /// Où l'on est dans la liste : le serveur en rend dix à la fois.
+  final Pagination pagination;
+  const _ListeCommandes({required this.commandes, required this.pagination});
 
   @override
   State<_ListeCommandes> createState() => _ListeCommandesState();
@@ -186,9 +193,18 @@ class _ListeCommandesState extends State<_ListeCommandes> {
                       16,
                       espaceBasVendeur(context) + 72,
                     ),
-                    itemCount: visibles.length,
+                    // +1 : la barre « Précédent / Suivant » en pied de liste.
+                    itemCount: visibles.length + 1,
                     separatorBuilder: (_, __) => const SizedBox(height: 10),
                     itemBuilder: (context, i) {
+                      if (i == visibles.length) {
+                        return BarrePagination(
+                          pagination: widget.pagination,
+                          onPage: (page) => context.read<CommandeBloc>().add(
+                            LoadCommandesVendeur(page: page),
+                          ),
+                        );
+                      }
                       final c = visibles[i];
                       return CommandeCard(
                         commande: c,

@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/barre_pagination.dart';
 import 'package:equatable/equatable.dart';
 
 import '../../data/models/signalement_model.dart';
@@ -13,9 +14,13 @@ class SignalementsLoading extends SignalementsState {}
 
 class SignalementsLoaded extends SignalementsState {
   final List<SignalementModel> signalements;
-  SignalementsLoaded(this.signalements);
+
+  /// Où l'on est dans la liste, et combien il reste.
+  final Pagination pagination;
+
+  SignalementsLoaded(this.signalements, [this.pagination = const Pagination()]);
   @override
-  List<Object?> get props => [signalements];
+  List<Object?> get props => [signalements, pagination.page, pagination.pages];
 }
 
 class SignalementEnvoye extends SignalementsState {}

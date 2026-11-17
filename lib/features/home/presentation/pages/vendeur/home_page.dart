@@ -238,11 +238,19 @@ class _HomePageState extends State<HomePage>
     }
     // 2) Commandes récentes (3 dernières)
     try {
-      final orders = await sl<CommandeRemoteDataSource>().commandesVendeur();
+      // Deux appels, et c'est voulu : la liste est paginee par dix, donc
+      // compter les « en attente » parmi les dix recues donnerait un chiffre
+      // faux des la onzieme. Le second appel ne rapatrie qu'une page, mais
+      // son `total` est exact.
+      final source = sl<CommandeRemoteDataSource>();
+      final [orders, enAttente] = await Future.wait([
+        source.commandesVendeur(),
+        source.commandesVendeur(statut: 'en_attente'),
+      ]);
       if (mounted) {
         setState(() {
-          _recentOrders = orders.take(3).toList();
-          _aTraiter = orders.where((o) => o.statut == 'en_attente').length;
+          _recentOrders = orders.commandes.take(3).toList();
+          _aTraiter = enAttente.pagination.total;
         });
       }
     } catch (e) {

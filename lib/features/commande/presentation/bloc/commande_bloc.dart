@@ -29,8 +29,11 @@ class CommandeBloc extends Bloc<CommandeEvent, CommandeState> {
   ) async {
     emit(CommandeLoading());
     try {
-      final list = await repository.mesCommandes(statut: event.statut);
-      emit(CommandesLoaded(list));
+      final page = await repository.mesCommandes(
+        statut: event.statut,
+        page: event.page,
+      );
+      emit(CommandesLoaded(page.commandes, page.pagination));
     } catch (e) {
       emit(CommandeError(_msg(e)));
     }
@@ -42,8 +45,11 @@ class CommandeBloc extends Bloc<CommandeEvent, CommandeState> {
   ) async {
     emit(CommandeLoading());
     try {
-      final list = await repository.commandesVendeur(statut: event.statut);
-      emit(CommandesLoaded(list));
+      final page = await repository.commandesVendeur(
+        statut: event.statut,
+        page: event.page,
+      );
+      emit(CommandesLoaded(page.commandes, page.pagination));
     } catch (e) {
       emit(CommandeError(_msg(e)));
     }

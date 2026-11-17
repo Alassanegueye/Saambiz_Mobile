@@ -76,8 +76,10 @@ class _ProfilPageState extends State<ProfilPage>
 
   Future<void> _chargerCompteurs() async {
     try {
-      final commandes = await sl<CommandeRemoteDataSource>().mesCommandes();
-      if (mounted) setState(() => _nbCommandes = commandes.length);
+      // Le TOTAL, pas la page : la liste est paginee par dix, et compter
+      // les elements recus donnerait « 10 » a qui en a cent.
+      final page = await sl<CommandeRemoteDataSource>().mesCommandes();
+      if (mounted) setState(() => _nbCommandes = page.pagination.total);
     } catch (_) {
       /* compteur laissé à 0 */
     }

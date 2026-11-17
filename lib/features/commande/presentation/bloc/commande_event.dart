@@ -8,17 +8,20 @@ abstract class CommandeEvent extends Equatable {
 /// Acheteur : charger mes commandes
 class LoadMesCommandes extends CommandeEvent {
   final String? statut;
-  LoadMesCommandes({this.statut});
+  /// Page demandée : le serveur en rend dix à la fois.
+  final int page;
+  LoadMesCommandes({this.statut, this.page = 1});
   @override
-  List<Object?> get props => [statut];
+  List<Object?> get props => [statut, page];
 }
 
 /// Vendeur : charger les commandes reçues
 class LoadCommandesVendeur extends CommandeEvent {
   final String? statut;
-  LoadCommandesVendeur({this.statut});
+  final int page;
+  LoadCommandesVendeur({this.statut, this.page = 1});
   @override
-  List<Object?> get props => [statut];
+  List<Object?> get props => [statut, page];
 }
 
 /// Acheteur : créer une commande à partir du panier

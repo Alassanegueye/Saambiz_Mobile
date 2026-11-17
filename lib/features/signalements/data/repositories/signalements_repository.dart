@@ -32,9 +32,11 @@ class SignalementsRepository {
     }
   }
 
-  Future<Either<Failure, List<SignalementModel>>> mesSignalements() async {
+  Future<Either<Failure, PageSignalements>> mesSignalements({
+    int page = 1,
+  }) async {
     try {
-      return Right(await remote.mesSignalements());
+      return Right(await remote.mesSignalements(page: page));
     } catch (e) {
       return Left(ServerFailure(errorMessage: _msg(e)));
     }

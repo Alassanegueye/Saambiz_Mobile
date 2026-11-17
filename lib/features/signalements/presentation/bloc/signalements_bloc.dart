@@ -34,10 +34,10 @@ class SignalementsBloc extends Bloc<SignalementsEvent, SignalementsState> {
     Emitter<SignalementsState> emit,
   ) async {
     emit(SignalementsLoading());
-    final result = await repository.mesSignalements();
+    final result = await repository.mesSignalements(page: event.page);
     result.fold(
       (f) => emit(SignalementsError(f.errorMessage)),
-      (list) => emit(SignalementsLoaded(list)),
+      (page) => emit(SignalementsLoaded(page.signalements, page.pagination)),
     );
   }
 }

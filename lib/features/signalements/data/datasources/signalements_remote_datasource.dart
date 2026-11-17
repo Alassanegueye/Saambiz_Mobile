@@ -1,3 +1,4 @@
+import '../../../../core/widgets/barre_pagination.dart';
 import 'package:dio/dio.dart';
 
 import '../../../../core/constants/api_endpoints.dart';
@@ -10,7 +11,16 @@ abstract class SignalementsRemoteDataSource {
     required String description,
     required String cibleId,
   });
-  Future<List<SignalementModel>> mesSignalements();
+
+  /// Une page de signalements, avec de quoi savoir s'il y en a d'autres.
+  Future<PageSignalements> mesSignalements({int page});
+}
+
+/// Une page de la liste : ce qu'elle contient, et où elle se situe.
+class PageSignalements {
+  final List<SignalementModel> signalements;
+  final Pagination pagination;
+  const PageSignalements(this.signalements, this.pagination);
 }
 
 class SignalementsRemoteDataSourceImpl implements SignalementsRemoteDataSource {
@@ -51,10 +61,19 @@ class SignalementsRemoteDataSourceImpl implements SignalementsRemoteDataSource {
   }
 
   @override
-  Future<List<SignalementModel>> mesSignalements() async {
-    final res = await dio.get(SignalementsEndpoints.mesSignalements);
-    return _extractList(
+  Future<PageSignalements> mesSignalements({int page = 1}) async {
+    final res = await dio.get(
+      SignalementsEndpoints.mesSignalements,
+      queryParameters: {'page': page},
+    );
+    final liste = _extractList(
       res.data,
     ).map((e) => SignalementModel.fromJson(e as Map<String, dynamic>)).toList();
+    return PageSignalements(
+      liste,
+      Pagination.depuis(
+        res.data is Map ? Map<String, dynamic>.from(res.data as Map) : null,
+      ),
+    );
   }
 }

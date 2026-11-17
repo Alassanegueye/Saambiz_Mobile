@@ -22,4 +22,11 @@ class CreerSignalement extends SignalementsEvent {
   List<Object?> get props => [type, raison, description, cibleId];
 }
 
-class LoadMesSignalements extends SignalementsEvent {}
+class LoadMesSignalements extends SignalementsEvent {
+  /// Page demandée. Les boutons « Précédent / Suivant » n'ont besoin de rien
+  /// d'autre : le serveur dit combien il y en a.
+  final int page;
+  LoadMesSignalements({this.page = 1});
+  @override
+  List<Object?> get props => [page];
+}

@@ -83,10 +83,14 @@ void main() {
         ],
       });
 
-      final liste = await source.mesSignalements();
+      final page = await source.mesSignalements();
 
       expect(espion.appel, 'GET /signalements/mes-signalements');
-      expect(liste, hasLength(2));
+      expect(page.signalements, hasLength(2));
+      // Sans bloc de pagination dans la réponse, une page unique : la barre
+      // « Précédent / Suivant » se replie et rien ne casse.
+      expect(page.pagination.pages, 1);
+      expect(page.pagination.inutile, isTrue);
     });
 
     test('un refus du serveur remonte à l’appelant', () async {

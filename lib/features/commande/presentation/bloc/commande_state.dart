@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/barre_pagination.dart';
 import 'package:equatable/equatable.dart';
 import '../../data/models/commande_model.dart';
 
@@ -13,9 +14,13 @@ class CommandeLoading extends CommandeState {}
 /// Liste de commandes (acheteur ou vendeur)
 class CommandesLoaded extends CommandeState {
   final List<CommandeModel> commandes;
-  CommandesLoaded(this.commandes);
+
+  /// Où l'on est dans la liste. Une page unique replie la barre.
+  final Pagination pagination;
+
+  CommandesLoaded(this.commandes, [this.pagination = const Pagination()]);
   @override
-  List<Object?> get props => [commandes];
+  List<Object?> get props => [commandes, pagination.page, pagination.pages];
 }
 
 /// Une commande vient d'être créée

@@ -13,6 +13,7 @@ import '../../../../core/theme/app_color.dart';
 import '../../../../core/widgets/barre_navigation_verre.dart'
     show kEspaceBarreBas;
 import '../../../../core/widgets/empty_state.dart';
+import '../../../../core/widgets/barre_pagination.dart';
 import '../../../../core/widgets/shimmer_list.dart';
 import '../../../../injection_container.dart';
 import '../../../home/presentation/pages/acheteur/main_client_page.dart'
@@ -105,7 +106,16 @@ class _ListeState extends State<_Liste> with RetourSurOnglet {
     super.dispose();
   }
 
-  void _recharger() => context.read<CommandeBloc>().add(LoadMesCommandes());
+  /// Page affichée. Les filtres et la recherche travaillent dessus : le
+  /// serveur en rend dix à la fois.
+  int _page = 1;
+
+  void _recharger() => _allerA(_page);
+
+  void _allerA(int page) {
+    setState(() => _page = page);
+    context.read<CommandeBloc>().add(LoadMesCommandes(page: page));
+  }
 
   int _calculerNombre(List<CommandeModel> toutes, String cle) {
     if (cle == 'tous') return toutes.length;
@@ -293,10 +303,18 @@ class _ListeState extends State<_Liste> with RetourSurOnglet {
                               16,
                               kEspaceBarreBas,
                             ),
-                            itemCount: filtrees.length,
+                            // +1 : la barre « Précédent / Suivant » en pied
+                            // de liste. Elle se replie s'il n'y a qu'une page.
+                            itemCount: filtrees.length + 1,
                             separatorBuilder: (_, __) =>
                                 const SizedBox(height: 14),
                             itemBuilder: (context, i) {
+                              if (i == filtrees.length) {
+                                return BarrePagination(
+                                  pagination: state.pagination,
+                                  onPage: _allerA,
+                                );
+                              }
                               final c = filtrees[i];
                               return CommandeCard(
                                 commande: c,

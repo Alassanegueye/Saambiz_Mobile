@@ -6,6 +6,7 @@ import 'package:saambiz/core/widgets/page_vendeur.dart';
 import '../../../../core/theme/app_color.dart';
 import '../../../../core/theme/police.dart';
 import '../../../../core/utils/dates.dart';
+import '../../../../core/widgets/barre_pagination.dart';
 import '../../../../core/widgets/ui_kit.dart';
 import '../../../../core/widgets/image_reseau.dart';
 import '../../../../injection_container.dart';
@@ -53,8 +54,10 @@ class _MesSignalementsView extends StatelessWidget {
           }
           if (state is! SignalementsLoaded) return const SizedBox.shrink();
 
-          void recharger() =>
-              context.read<SignalementsBloc>().add(LoadMesSignalements());
+          void allerA(int page) => context.read<SignalementsBloc>().add(
+            LoadMesSignalements(page: page),
+          );
+          void recharger() => allerA(state.pagination.page);
 
           if (state.signalements.isEmpty) {
             return RefreshIndicator(
@@ -79,12 +82,20 @@ class _MesSignalementsView extends StatelessWidget {
 
           return RefreshIndicator(
             onRefresh: () async => recharger(),
+            // +2 : le bandeau en tête, et la barre « Précédent / Suivant »
+            // en pied. Elle se replie d'elle-même s'il n'y a qu'une page.
             child: ListView.separated(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 28),
-              itemCount: state.signalements.length + 1,
+              itemCount: state.signalements.length + 2,
               separatorBuilder: (_, __) => const SizedBox(height: 12),
               itemBuilder: (context, i) {
                 if (i == 0) return _Bandeau(enAttente: enAttente);
+                if (i == state.signalements.length + 1) {
+                  return BarrePagination(
+                    pagination: state.pagination,
+                    onPage: allerA,
+                  );
+                }
                 return _CarteSignalement(
                   signalement: state.signalements[i - 1],
                 );
