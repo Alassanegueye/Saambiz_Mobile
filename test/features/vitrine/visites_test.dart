@@ -51,7 +51,7 @@ void main() {
 
   group('Visites lues par Ma boutique', () {
     test('le total et la semaine', () {
-      final v = VitrineModel.fromJson({
+      final v = VitrineModel.fromJson(const {
         'vitrine': {
           'slug': 'footshop-1',
           'vues': 9,
@@ -67,7 +67,7 @@ void main() {
     });
 
     test('un serveur pas encore à jour : la semaine vaut 0', () {
-      final v = VitrineModel.fromJson({
+      final v = VitrineModel.fromJson(const {
         'vitrine': {'slug': 'footshop-1', 'vues': 9},
       });
       expect(v.vues, 9);
