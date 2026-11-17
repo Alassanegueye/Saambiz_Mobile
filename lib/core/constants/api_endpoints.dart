@@ -57,6 +57,11 @@ class CommandeEndpoints {
   static String statut(String id) => '/commandes/$id/statut';
   static String paiement(String id) => '/commandes/$id/paiement';
   static String demandeRetour(String id) => '/commandes/$id/demande-retour';
+
+  /// Demande d'annulation d'une commande déjà en préparation : POST pour
+  /// l'acheteur qui demande, PATCH pour le vendeur qui répond.
+  static String demandeAnnulation(String id) =>
+      '/commandes/$id/demande-annulation';
 }
 
 /// Gestion des produits côté vendeur (feature `vendeur`).

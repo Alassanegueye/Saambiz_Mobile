@@ -33,10 +33,18 @@ class _FauxServeur implements CommandeRemoteDataSource {
   /// sinon une commande à régler en ligne redevient « à la réception ».
   final String modePaiement;
 
+  /// La relecture doit rendre la commande TELLE QU'ELLE EST en base : sans
+  /// ces deux champs, la fiche perdait le paiement et la demande en cours
+  /// dès son premier rafraîchissement.
+  final String statutPaiement;
+  final String? annulationDemandeeLe;
+
   _FauxServeur({
     bool rapide = false,
     this.statutServeur = 'en_attente',
     this.modePaiement = 'a_la_livraison',
+    this.statutPaiement = 'non_paye',
+    this.annulationDemandeeLe,
   }) {
     if (rapide) repondre();
   }
@@ -63,6 +71,9 @@ class _FauxServeur implements CommandeRemoteDataSource {
     'statut': statut,
     'modePaiement': modePaiement,
     'modeLivraison': 'retrait',
+    'statutPaiement': statutPaiement,
+    if (annulationDemandeeLe != null)
+      'annulationDemandeeLe': annulationDemandeeLe,
   });
 
   @override
@@ -73,7 +84,12 @@ class _FauxServeur implements CommandeRemoteDataSource {
 CommandeModel _commande({
   String statut = 'en_attente',
   String modePaiement = 'a_la_livraison',
+  String statutPaiement = 'non_paye',
+  String? annulationDemandeeLe,
 }) => CommandeModel.fromJson({
+  'statutPaiement': statutPaiement,
+  if (annulationDemandeeLe != null)
+    'annulationDemandeeLe': annulationDemandeeLe,
   'id': 'cmd-1',
   'referenceCommande': 'CMD-2026-TEST',
   'montantProduits': 9000,
@@ -91,11 +107,15 @@ void main() {
     bool rapide = false,
     String statut = 'en_attente',
     String modePaiement = 'a_la_livraison',
+    String statutPaiement = 'non_paye',
+    String? annulationDemandeeLe,
   }) {
     serveur = _FauxServeur(
       rapide: rapide,
       statutServeur: statut,
       modePaiement: modePaiement,
+      statutPaiement: statutPaiement,
+      annulationDemandeeLe: annulationDemandeeLe,
     );
     sl.registerLazySingleton<CommandeRemoteDataSource>(() => serveur);
     sl.registerFactory(() => CommandeBloc(CommandeRepository(sl())));
@@ -108,13 +128,17 @@ void main() {
   ///
   /// La page lit ses arguments dans la route : on la pousse donc nous-mêmes,
   /// comme le fait la liste des commandes.
-  Future<void> ouvrir(WidgetTester t, CommandeModel commande) async {
+  Future<void> ouvrir(
+    WidgetTester t,
+    CommandeModel commande, {
+    bool isVendeur = true,
+  }) async {
     final cle = GlobalKey<NavigatorState>();
     await t.pumpWidget(MaterialApp(navigatorKey: cle, home: const Scaffold()));
     cle.currentState!.push(
       MaterialPageRoute(
         settings: RouteSettings(
-          arguments: CommandeDetailArgs(commande, isVendeur: true),
+          arguments: CommandeDetailArgs(commande, isVendeur: isVendeur),
         ),
         builder: (_) => const CommandeDetailPage(),
       ),
@@ -200,5 +224,97 @@ void main() {
       find.widgetWithText(ElevatedButton, 'Passer à : En préparation'),
       findsNothing,
     );
+  });
+
+  group('Annulation : les règles validées après audit', () {
+    testWidgets('une commande payée ne propose plus « Annuler »', (t) async {
+      // Elle passait en « remboursé » sans qu'aucun argent ne bouge. Elle se
+      // traite désormais par une demande de retour, une fois livrée.
+      preparer(
+        rapide: true,
+        statut: 'payee',
+        statutPaiement: 'paye',
+        modePaiement: 'en_ligne',
+      );
+      await ouvrir(
+        t,
+        _commande(
+          statut: 'payee',
+          statutPaiement: 'paye',
+          modePaiement: 'en_ligne',
+        ),
+        isVendeur: false,
+      );
+
+      expect(find.widgetWithText(OutlinedButton, 'Annuler'), findsNothing);
+    });
+
+    testWidgets('en préparation, l’acheteur DEMANDE au lieu d’annuler', (
+      t,
+    ) async {
+      preparer(rapide: true, statut: 'en_preparation');
+      await ouvrir(t, _commande(statut: 'en_preparation'), isVendeur: false);
+
+      expect(find.text('Demander l’annulation'), findsOneWidget);
+      expect(find.widgetWithText(OutlinedButton, 'Annuler'), findsNothing);
+    });
+
+    testWidgets('une demande déjà envoyée ne se renvoie pas', (t) async {
+      preparer(
+        rapide: true,
+        statut: 'en_preparation',
+        annulationDemandeeLe: '2026-11-17T18:00:00.000Z',
+      );
+      await ouvrir(
+        t,
+        _commande(
+          statut: 'en_preparation',
+          annulationDemandeeLe: '2026-11-17T18:00:00.000Z',
+        ),
+        isVendeur: false,
+      );
+
+      expect(find.text('Demander l’annulation'), findsNothing);
+    });
+
+    testWidgets('le vendeur voit la demande et peut trancher', (t) async {
+      preparer(
+        rapide: true,
+        statut: 'en_preparation',
+        annulationDemandeeLe: '2026-11-17T18:00:00.000Z',
+      );
+      await ouvrir(
+        t,
+        _commande(
+          statut: 'en_preparation',
+          annulationDemandeeLe: '2026-11-17T18:00:00.000Z',
+        ),
+      );
+
+      expect(find.text('Accepter l’annulation'), findsOneWidget);
+      expect(find.widgetWithText(OutlinedButton, 'Refuser'), findsOneWidget);
+    });
+
+    testWidgets('sans demande, le vendeur ne voit rien de tout cela', (
+      t,
+    ) async {
+      preparer(rapide: true, statut: 'en_preparation');
+      await ouvrir(t, _commande(statut: 'en_preparation'));
+
+      expect(find.text('Accepter l’annulation'), findsNothing);
+    });
+
+    testWidgets('annuler demande confirmation avant de partir', (t) async {
+      // L'annulation acheteur partait au premier appui, sans rien demander,
+      // alors que toutes les autres actions destructives confirment.
+      preparer(statut: 'en_attente');
+      await ouvrir(t, _commande(statut: 'en_attente'), isVendeur: false);
+
+      await t.tap(find.widgetWithText(OutlinedButton, 'Annuler'));
+      await t.pumpAndSettle();
+
+      expect(find.text('Annuler cette commande ?'), findsOneWidget);
+      expect(serveur.appels, 0, reason: 'rien ne part avant la confirmation');
+    });
   });
 }

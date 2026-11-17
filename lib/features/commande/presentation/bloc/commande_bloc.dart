@@ -14,6 +14,8 @@ class CommandeBloc extends Bloc<CommandeEvent, CommandeState> {
     on<PayerCommande>(_onPayerCommande);
     on<AnnulerCommande>(_onAnnulerCommande);
     on<ChangerStatutCommande>(_onChangerStatut);
+    on<DemanderAnnulationCommande>(_onDemanderAnnulation);
+    on<RepondreAnnulationCommande>(_onRepondreAnnulation);
     on<ConfirmerPaiementCommande>(_onConfirmerPaiement);
     on<DemanderRetourCommande>(_onDemanderRetour);
   }
@@ -106,6 +108,39 @@ class CommandeBloc extends Bloc<CommandeEvent, CommandeState> {
       final commande = await repository.changerStatut(
         event.commandeId,
         event.statut,
+      );
+      emit(CommandeMiseAJour(commande));
+    } catch (e) {
+      emit(CommandeError(_msg(e)));
+    }
+  }
+
+  Future<void> _onDemanderAnnulation(
+    DemanderAnnulationCommande event,
+    Emitter<CommandeState> emit,
+  ) async {
+    emit(CommandeLoading());
+    try {
+      final commande = await repository.demanderAnnulation(
+        event.commandeId,
+        event.motif,
+      );
+      emit(CommandeMiseAJour(commande));
+    } catch (e) {
+      emit(CommandeError(_msg(e)));
+    }
+  }
+
+  Future<void> _onRepondreAnnulation(
+    RepondreAnnulationCommande event,
+    Emitter<CommandeState> emit,
+  ) async {
+    emit(CommandeLoading());
+    try {
+      final commande = await repository.repondreAnnulation(
+        event.commandeId,
+        accepte: event.accepte,
+        motif: event.motif,
       );
       emit(CommandeMiseAJour(commande));
     } catch (e) {

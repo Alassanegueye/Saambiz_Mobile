@@ -46,6 +46,15 @@ class CommandeRepository {
   Future<CommandeModel> confirmerPaiement(String id) =>
       remote.confirmerPaiement(id);
 
+  Future<CommandeModel> demanderAnnulation(String id, String motif) =>
+      remote.demanderAnnulation(id, motif: motif);
+
+  Future<CommandeModel> repondreAnnulation(
+    String id, {
+    required bool accepte,
+    String? motif,
+  }) => remote.repondreAnnulation(id, accepte: accepte, motif: motif);
+
   Future<void> demandeRetour(String id, {required String raison}) =>
       remote.demandeRetour(id, raison: raison);
 }

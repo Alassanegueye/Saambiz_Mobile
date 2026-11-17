@@ -77,6 +77,29 @@ class ChangerStatutCommande extends CommandeEvent {
   List<Object?> get props => [commandeId, statut];
 }
 
+/// Acheteur : demander l'annulation d'une commande déjà en préparation.
+class DemanderAnnulationCommande extends CommandeEvent {
+  final String commandeId;
+  final String motif;
+  DemanderAnnulationCommande(this.commandeId, this.motif);
+  @override
+  List<Object?> get props => [commandeId, motif];
+}
+
+/// Vendeur : accepter ou refuser une demande d'annulation.
+class RepondreAnnulationCommande extends CommandeEvent {
+  final String commandeId;
+  final bool accepte;
+  final String? motif;
+  RepondreAnnulationCommande(
+    this.commandeId, {
+    required this.accepte,
+    this.motif,
+  });
+  @override
+  List<Object?> get props => [commandeId, accepte, motif];
+}
+
 /// Vendeur : confirmer qu'une commande réglée à la livraison a été payée
 class ConfirmerPaiementCommande extends CommandeEvent {
   final String commandeId;

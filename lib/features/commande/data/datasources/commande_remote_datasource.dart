@@ -23,6 +23,14 @@ abstract class CommandeRemoteDataSource {
   Future<CommandeModel> creerCommandeVendeur(Map<String, dynamic> body);
   // Retour (acheteur), uniquement si la commande est au statut 'livree'
   Future<void> demandeRetour(String id, {required String raison});
+  // Annulation d'une commande en préparation : l'acheteur demande…
+  Future<CommandeModel> demanderAnnulation(String id, {required String motif});
+  // …et le vendeur répond.
+  Future<CommandeModel> repondreAnnulation(
+    String id, {
+    required bool accepte,
+    String? motif,
+  });
 }
 
 class CommandeRemoteDataSourceImpl implements CommandeRemoteDataSource {
@@ -113,6 +121,31 @@ class CommandeRemoteDataSourceImpl implements CommandeRemoteDataSource {
   @override
   Future<CommandeModel> creerCommandeVendeur(Map<String, dynamic> body) async {
     final res = await dio.post(CommandeEndpoints.commandesVendeur, data: body);
+    return _parseUne(res.data);
+  }
+
+  @override
+  Future<CommandeModel> demanderAnnulation(
+    String id, {
+    required String motif,
+  }) async {
+    final res = await dio.post(
+      CommandeEndpoints.demandeAnnulation(id),
+      data: {'motif': motif},
+    );
+    return _parseUne(res.data);
+  }
+
+  @override
+  Future<CommandeModel> repondreAnnulation(
+    String id, {
+    required bool accepte,
+    String? motif,
+  }) async {
+    final res = await dio.patch(
+      CommandeEndpoints.demandeAnnulation(id),
+      data: {'accepte': accepte, if (motif != null) 'motif': motif},
+    );
     return _parseUne(res.data);
   }
 

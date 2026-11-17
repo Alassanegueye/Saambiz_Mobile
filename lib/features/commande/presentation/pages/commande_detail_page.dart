@@ -4,7 +4,6 @@ import '../../../../core/services/socket_service.dart';
 
 import 'package:saambiz/core/widgets/messages.dart';
 import 'package:saambiz/core/widgets/libelle_obligatoire.dart';
-import 'package:saambiz/core/widgets/image_reseau.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:saambiz/core/theme/police.dart';
@@ -20,7 +19,13 @@ import '../bloc/commande_bloc.dart';
 import '../bloc/commande_event.dart';
 import '../bloc/commande_state.dart';
 import '../widgets/commande_card.dart'
-    show couleurStatutCommande, iconeStatutCommande, montantFcfa;
+    show
+        FriseSuiviCommande,
+        couleurStatutCommande,
+        etapesEtPosition,
+        iconeStatutCommande,
+        montantFcfa;
+import '../widgets/sections_detail_commande.dart';
 import '../../../../core/widgets/page_vendeur.dart';
 
 /// Argument de navigation pour la page détail.
@@ -278,8 +283,147 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
     if (confirme == true) bloc.add(ConfirmerPaiementCommande(commande.id));
   }
 
-  void _annuler() {
-    context.read<CommandeBloc>().add(AnnulerCommande(commande.id));
+  /// Annuler est irréversible et rend le stock : on demande confirmation,
+  /// comme pour toutes les autres actions destructives de l'application.
+  /// Celle-ci partait au premier appui, sans rien demander.
+  Future<void> _annuler() async {
+    final bloc = context.read<CommandeBloc>();
+    final confirme = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Annuler cette commande ?'),
+        content: const Text('Cette action est définitive.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Revenir'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: TextButton.styleFrom(foregroundColor: AppColor.kErreur),
+            child: const Text('Annuler la commande'),
+          ),
+        ],
+      ),
+    );
+    if (confirme == true) bloc.add(AnnulerCommande(commande.id));
+  }
+
+  /// Commande déjà en préparation : on demande, on ne décide pas. Le motif
+  /// est obligatoire — le vendeur doit savoir pourquoi tout s'arrête.
+  Future<void> _demanderAnnulation() async {
+    final bloc = context.read<CommandeBloc>();
+    final motif = await _saisirMotif(
+      titre: 'Demander l’annulation',
+      explication:
+          'Le vendeur a commencé à préparer votre commande : il doit accepter '
+          'votre demande.',
+      libelleChamp: 'Pourquoi souhaitez-vous annuler ?',
+      valider: 'Envoyer la demande',
+    );
+    if (motif != null && motif.isNotEmpty) {
+      bloc.add(DemanderAnnulationCommande(commande.id, motif));
+    }
+  }
+
+  /// Vendeur : accepter la demande (la commande est annulée, le stock rendu)
+  /// ou la refuser, avec un motif que l'acheteur pourra lire.
+  Future<void> _repondreAnnulation(bool accepte) async {
+    final bloc = context.read<CommandeBloc>();
+    if (accepte) {
+      final confirme = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('Accepter l’annulation ?'),
+          content: const Text(
+            'La commande sera annulée et le stock réservé sera rendu.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Revenir'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              style: TextButton.styleFrom(foregroundColor: AppColor.kErreur),
+              child: const Text('Accepter'),
+            ),
+          ],
+        ),
+      );
+      if (confirme == true) {
+        bloc.add(RepondreAnnulationCommande(commande.id, accepte: true));
+      }
+      return;
+    }
+    final motif = await _saisirMotif(
+      titre: 'Refuser l’annulation',
+      explication:
+          'La commande suivra son cours. Dites pourquoi, si vous le souhaitez.',
+      libelleChamp: 'Motif du refus (facultatif)',
+      valider: 'Refuser',
+      obligatoire: false,
+    );
+    if (motif != null) {
+      bloc.add(
+        RepondreAnnulationCommande(commande.id, accepte: false, motif: motif),
+      );
+    }
+  }
+
+  /// Boîte de saisie d'un motif. Rend `null` si on renonce.
+  Future<String?> _saisirMotif({
+    required String titre,
+    required String explication,
+    required String libelleChamp,
+    required String valider,
+    bool obligatoire = true,
+  }) async {
+    final controleur = TextEditingController();
+    try {
+      return await showDialog<String>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: Text(titre),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(explication, style: const TextStyle(fontSize: 13)),
+              const SizedBox(height: 12),
+              TextField(
+                controller: controleur,
+                maxLines: 3,
+                autofocus: true,
+                decoration: InputDecoration(
+                  label: obligatoire
+                      ? LibelleObligatoire(libelleChamp)
+                      : Text(libelleChamp),
+                  border: const OutlineInputBorder(),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Revenir'),
+            ),
+            TextButton(
+              onPressed: () {
+                final saisi = controleur.text.trim();
+                if (obligatoire && saisi.isEmpty) return;
+                Navigator.pop(ctx, saisi);
+              },
+              child: Text(valider),
+            ),
+          ],
+        ),
+      );
+    } finally {
+      // Sans ça, le contrôleur reste accroché à la boîte refermée.
+      controleur.dispose();
+    }
   }
 
   void _avancerStatut() {
@@ -329,15 +473,26 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
+    // Une commande PAYÉE ne s'annule plus : elle passait en « remboursé »
+    // sans qu'aucun argent ne bouge. Elle se traite par un retour.
+    // Une commande EN PRÉPARATION ne s'annule plus non plus d'un geste : le
+    // vendeur a engagé du travail, l'acheteur la DEMANDE (voir plus bas).
     final annulable =
         !isVendeur &&
+        commande.statutPaiement != 'paye' &&
         [
           'en_attente',
           'acceptee',
           'payee',
           'confirmee',
-          'en_preparation',
         ].contains(commande.statut);
+    final annulationDemandable =
+        !isVendeur &&
+        commande.statut == 'en_preparation' &&
+        commande.statutPaiement != 'paye' &&
+        !commande.annulationEnAttente;
+    // Le vendeur voit la demande et tranche.
+    final aRepondreAnnulation = isVendeur && commande.annulationEnAttente;
     final payable =
         !isVendeur &&
         commande.statut == 'acceptee' &&
@@ -435,9 +590,23 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
                             _suivi(),
                             const SizedBox(height: 12),
                           ],
-                          _articles(),
+                          CarteArticlesCommande(commande: commande),
                           const SizedBox(height: 12),
-                          _contact(),
+                          // Le client voit la boutique et son vendeur ; le
+                          // vendeur, lui, voit son client.
+                          if (isVendeur)
+                            _contact()
+                          else
+                            CarteBoutiqueCommande(
+                              boutiqueId: commande.boutiqueId,
+                              boutiqueNom: commande.boutiqueNom,
+                              boutiqueLogo: commande.boutiqueLogo,
+                              vendeurId: commande.vendeurId,
+                              vendeurNom: commande.vendeurNom,
+                              vendeurTelephone: commande.vendeurTelephone,
+                            ),
+                          const SizedBox(height: 12),
+                          CarteDetailsCommande(commande: commande),
                           const SizedBox(height: 12),
                           _livraison(),
                         ],
@@ -473,6 +642,8 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
               enVol: state is CommandeLoading,
               payable: payable,
               annulable: annulable,
+              annulationDemandable: annulationDemandable,
+              aRepondreAnnulation: aRepondreAnnulation,
               statutSuivant: statutSuivant,
               aDecider: aDecider,
               annulableVendeur: annulableVendeur,
@@ -487,12 +658,15 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
     required bool enVol,
     required bool payable,
     required bool annulable,
+    required bool annulationDemandable,
+    required bool aRepondreAnnulation,
     required String? statutSuivant,
     required bool retournable,
     required bool aDecider,
     required bool annulableVendeur,
   }) {
     final boutons = <Widget>[];
+
     /// `null` neutralise un bouton : Flutter le grise et ignore les appuis.
     VoidCallback? actif(VoidCallback action) => enVol ? null : action;
 
@@ -549,6 +723,42 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
               foregroundColor: _C.white,
             ),
             child: const Text('Payer maintenant'),
+          ),
+        ),
+      );
+    }
+    // Le vendeur tranche la demande avant toute autre action : c'est la
+    // question qui attend, et elle attend depuis le côté de l'acheteur.
+    if (aRepondreAnnulation) {
+      boutons.add(
+        Expanded(
+          child: OutlinedButton(
+            onPressed: actif(() => _repondreAnnulation(false)),
+            child: const Text('Refuser'),
+          ),
+        ),
+      );
+      boutons.add(
+        Expanded(
+          flex: 2,
+          child: ElevatedButton(
+            onPressed: actif(() => _repondreAnnulation(true)),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColor.kErreur,
+              foregroundColor: _C.white,
+            ),
+            child: const Text('Accepter l’annulation'),
+          ),
+        ),
+      );
+    }
+    if (annulationDemandable) {
+      boutons.add(
+        Expanded(
+          child: OutlinedButton(
+            onPressed: actif(_demanderAnnulation),
+            style: OutlinedButton.styleFrom(foregroundColor: AppColor.kErreur),
+            child: const Text('Demander l’annulation'),
           ),
         ),
       );
@@ -694,13 +904,12 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
     );
   }
 
-  /// Le suivi tient sur une barre : où en est la commande, et ce qui vient.
+  /// Le suivi : toutes les étapes numérotées, comme sur la carte de la
+  /// liste, l'étape en cours mise en avant, et ce qui vient ensuite.
   Widget _suivi() {
-    final etapes = etapesSuiviCommande(
-      commande.statut,
-      modePaiement: commande.modePaiement,
-    );
-    final idx = etapes.indexOf(commande.statut);
+    final parcours = etapesEtPosition(commande);
+    final etapes = parcours.etapes;
+    final idx = parcours.index;
     final suivante = idx >= 0 && idx < etapes.length - 1
         ? kStatutCommandeLabels[etapes[idx + 1]]
         : null;
@@ -711,35 +920,28 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
           Row(
             children: [
               Expanded(child: _titre('Suivi')),
-              Text(
-                'Étape ${idx + 1} sur ${etapes.length}',
-                style: const TextStyle(
-                  fontFamily: kPolice,
-                  fontSize: 12.5,
-                  color: _C.sub,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              for (var i = 0; i < etapes.length; i++) ...[
-                if (i > 0) const SizedBox(width: 4),
-                Expanded(
-                  child: Container(
-                    height: 6,
-                    decoration: BoxDecoration(
-                      color: i <= idx ? _C.green : _C.border,
-                      borderRadius: BorderRadius.circular(3),
-                    ),
+              if (idx >= 0)
+                Text(
+                  'Étape ${idx + 1} sur ${etapes.length}',
+                  style: const TextStyle(
+                    fontFamily: kPolice,
+                    fontSize: 12.5,
+                    color: _C.sub,
                   ),
                 ),
-              ],
             ],
           ),
+          if (idx >= 0) ...[
+            const SizedBox(height: 16),
+            FriseSuiviCommande(
+              etapes: etapes,
+              indexCourant: idx,
+              terminee: commande.statut == 'livree',
+              couleur: couleurStatutCommande(commande.statut),
+            ),
+          ],
           if (suivante != null) ...[
-            const SizedBox(height: 10),
+            const SizedBox(height: 12),
             Text(
               'Prochaine étape : $suivante',
               style: const TextStyle(
@@ -749,142 +951,6 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
               ),
             ),
           ],
-        ],
-      ),
-    );
-  }
-
-  /// Les articles et le détail du prix, réunis : on lit l'un puis l'autre.
-  Widget _articles() {
-    Widget ligne(String libelle, String valeur, {bool fort = false}) => Padding(
-      padding: const EdgeInsets.only(top: 6),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            libelle,
-            style: TextStyle(
-              fontFamily: kPolice,
-              fontSize: fort ? 15 : 13.5,
-              fontWeight: fort ? FontWeight.w700 : FontWeight.w400,
-              color: fort ? _C.black : _C.sub,
-            ),
-          ),
-          Text(
-            valeur,
-            style: TextStyle(
-              fontFamily: kPolice,
-              fontSize: fort ? 16 : 13.5,
-              fontWeight: fort ? FontWeight.w800 : FontWeight.w500,
-              color: _C.black,
-            ),
-          ),
-        ],
-      ),
-    );
-
-    final nbArticles = commande.lignes.fold<int>(0, (n, l) => n + l.quantite);
-    return _carte(
-      Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _titre('$nbArticles article${nbArticles > 1 ? 's' : ''}'),
-          const SizedBox(height: 8),
-          for (final l in commande.lignes) _ligneArticle(l),
-          const Divider(height: 20),
-          ligne('Produits', montantFcfa(commande.montantProduits)),
-          // Un retrait en boutique n'a pas de livraison à « offrir ».
-          if (commande.modeLivraison != 'retrait')
-            ligne(
-              'Livraison',
-              commande.fraisLivraison > 0
-                  ? montantFcfa(commande.fraisLivraison)
-                  : 'Offerte',
-            ),
-          const SizedBox(height: 4),
-          ligne('Total', montantFcfa(commande.montantTotal), fort: true),
-        ],
-      ),
-    );
-  }
-
-  Widget _ligneArticle(LigneCommandeModel l) {
-    final defaut = ColoredBox(
-      color: AppColor.kSurface,
-      child: const Icon(
-        Icons.shopping_bag_outlined,
-        size: 22,
-        color: AppColor.kGrayscale30,
-      ),
-    );
-    final image = l.imageProduit;
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: SizedBox(
-              width: 56,
-              height: 56,
-              child: image != null && image.isNotEmpty
-                  ? ImageReseau(
-                      image,
-                      largeurServeur: 160,
-                      fit: BoxFit.cover,
-                      repli: defaut,
-                    )
-                  : defaut,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  l.nomProduit,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontFamily: kPolice,
-                    color: _C.black,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                  ),
-                ),
-                // Taille, couleur, parfum… choisis par le client.
-                if (l.libelleOptions.isNotEmpty)
-                  Text(
-                    l.libelleOptions,
-                    style: const TextStyle(
-                      fontFamily: kPolice,
-                      color: _C.sub,
-                      fontSize: 12.5,
-                    ),
-                  ),
-                const SizedBox(height: 2),
-                Text(
-                  'Quantité : ${l.quantite}',
-                  style: const TextStyle(
-                    fontFamily: kPolice,
-                    color: _C.sub,
-                    fontSize: 12.5,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 8),
-          Text(
-            montantFcfa(l.sousTotal),
-            style: const TextStyle(
-              fontFamily: kPolice,
-              fontSize: 13.5,
-              fontWeight: FontWeight.w700,
-              color: _C.black,
-            ),
-          ),
         ],
       ),
     );
@@ -1016,6 +1082,12 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
           ),
           if (adresse != null && adresse.isNotEmpty)
             info(Icons.location_on_outlined, 'Adresse', adresse),
+          if ((commande.numeroTelephone ?? '').trim().isNotEmpty)
+            info(
+              Icons.phone_outlined,
+              'Téléphone de contact',
+              commande.numeroTelephone!.trim(),
+            ),
           info(
             Icons.payments_outlined,
             'Paiement',

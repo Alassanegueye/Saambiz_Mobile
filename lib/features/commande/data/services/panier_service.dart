@@ -86,7 +86,9 @@ class PanierService extends ChangeNotifier {
   /// Coche (ou décoche, si elle l'est déjà entièrement) toute une boutique.
   /// Renvoie `true` si une autre boutique était sélectionnée.
   bool basculerBoutique(String vendeur) {
-    final lignes = _items.where((e) => e.vendeurId == vendeur).map((e) => e.cle);
+    final lignes = _items
+        .where((e) => e.vendeurId == vendeur)
+        .map((e) => e.cle);
     final toutes = lignes.every(_selection.contains);
     var changement = false;
     if (toutes) {

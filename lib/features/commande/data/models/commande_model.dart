@@ -62,6 +62,9 @@ class CommandeModel {
   final String? numeroTelephone;
   final String? note;
   final DateTime? createdAt;
+
+  /// Dernière modification connue (statut, paiement…).
+  final DateTime? updatedAt;
   final List<LigneCommandeModel> lignes;
 
   // Infos de l'autre partie (selon le point de vue)
@@ -72,8 +75,23 @@ class CommandeModel {
 
   /// Boutique du vendeur : c'est par son nom que le client reconnaît sa
   /// commande. Nulle si le serveur ne l'envoie pas.
+  final String? boutiqueId;
   final String? boutiqueNom;
   final String? boutiqueLogo;
+
+  /// Demande d'annulation en attente de la réponse du vendeur.
+  ///
+  /// Une commande déjà en préparation ne s'annule plus d'un geste : le
+  /// vendeur a engagé du travail, il accepte ou refuse. Non nulle = une
+  /// demande attend. Le statut, lui, ne bouge pas.
+  final DateTime? annulationDemandeeLe;
+  final String? annulationMotif;
+
+  /// Motif du dernier refus, conservé pour que l'acheteur sache pourquoi.
+  final String? annulationRefusMotif;
+
+  /// Vrai quand une demande attend encore une réponse.
+  bool get annulationEnAttente => annulationDemandeeLe != null;
 
   CommandeModel({
     required this.id,
@@ -91,13 +109,18 @@ class CommandeModel {
     required this.numeroTelephone,
     required this.note,
     required this.createdAt,
+    this.updatedAt,
     required this.lignes,
     this.acheteurNom,
     this.acheteurTelephone,
     this.vendeurNom,
     this.vendeurTelephone,
+    this.boutiqueId,
     this.boutiqueNom,
     this.boutiqueLogo,
+    this.annulationDemandeeLe,
+    this.annulationMotif,
+    this.annulationRefusMotif,
   });
 
   factory CommandeModel.fromJson(Map<String, dynamic> json) {
@@ -152,13 +175,22 @@ class CommandeModel {
       createdAt: json['createdAt'] != null
           ? DateTime.tryParse(json['createdAt'].toString())
           : null,
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.tryParse(json['updatedAt'].toString())
+          : null,
       lignes: lignes,
       acheteurNom: joinNom(acheteur),
       acheteurTelephone: acheteur?['telephone'],
       vendeurNom: joinNom(vendeur),
       vendeurTelephone: vendeur?['telephone'],
+      boutiqueId: texte(boutique?['id']),
       boutiqueNom: texte(boutique?['nom']),
       boutiqueLogo: texte(boutique?['logo']),
+      annulationDemandeeLe: json['annulationDemandeeLe'] != null
+          ? DateTime.tryParse(json['annulationDemandeeLe'].toString())
+          : null,
+      annulationMotif: texte(json['annulationMotif']),
+      annulationRefusMotif: texte(json['annulationRefusMotif']),
     );
   }
 }
