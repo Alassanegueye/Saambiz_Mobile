@@ -8,7 +8,9 @@ import 'package:saambiz/core/routes/app_router.dart';
 
 import '../../../../../core/constants/infos_app.dart';
 import '../../../../../core/utils/url_externe.dart';
-import '../../../../../core/widgets/app_app_bar.dart';
+import '../../../../../core/widgets/image_reseau.dart';
+import '../../../../../core/widgets/page_vendeur.dart';
+import '../../../../../core/theme/police.dart';
 import '../../../../../core/widgets/barre_navigation_verre.dart'
     show kEspaceBarreBas;
 import '../../../../../core/widgets/profil_kit.dart';
@@ -28,6 +30,7 @@ import '../../../../messagerie/presentation/pages/conversations_page.dart';
 import '../../../../notifications/presentation/pages/notifications_page.dart';
 import '../../../../promotions/presentation/pages/promotions_actives_page.dart';
 import '../../../../signalements/presentation/pages/mes_signalements_page.dart';
+import 'main_client_page.dart' show ongletAcheteurDemande;
 import '../../../../commande/data/datasources/commande_remote_datasource.dart';
 import '../../../../commande/data/services/panier_service.dart';
 import '../../../../favoris/data/datasources/favoris_remote_datasource.dart';
@@ -202,33 +205,54 @@ class _ProfilPageState extends State<ProfilPage>
           afficherErreur(context, state.message);
         }
       },
-      child: Scaffold(
-        backgroundColor: AppColor.kBackground,
-        appBar: const AppAppBar(
-          title: 'Mon compte',
-          centerTitle: true,
-          implyLeading: false,
-          couleurFond: AppColor.kBackground,
+      // L'en-tête bleu des autres onglets, avec le profil dedans : le seul
+      // onglet sur fond clair, sous un titre centré, c'était celui-ci.
+      child: PageVendeur(
+        titre: 'Mon compte',
+        titreWidget: _EnteteCompte(
+          nom: _nomComplet,
+          initiales: _initiales,
+          email: _user?.email ?? '',
+          role: _user?.role ?? 'ACHETEUR',
+          photo: _user?.photoProfil,
         ),
-        body: FadeTransition(
+        actions: [
+          BoutonEnteteVendeur(
+            icone: Icons.edit_rounded,
+            infobulle: 'Modifier mon profil',
+            onTap: _onEditProfil,
+          ),
+        ],
+        corps: FadeTransition(
           opacity: _fadeAnim,
           child: ListView(
             physics: const BouncingScrollPhysics(),
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, kEspaceBarreBas),
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, kEspaceBarreBas),
             children: [
               ListenableBuilder(
                 listenable: sl<PanierService>(),
-                builder: (_, __) => CarteEnteteProfil(
-                  nom: _nomComplet,
-                  initiales: _initiales,
-                  email: _user?.email ?? '',
-                  role: _user?.role ?? 'ACHETEUR',
-                  photo: _user?.photoProfil,
-                  onTap: _onEditProfil,
-                  compteurs: [
-                    ('Commandes', '$_nbCommandes'),
-                    ('Favoris', '$_nbFavoris'),
-                    ('Panier', '${sl<PanierService>().nombreArticles}'),
+                builder: (_, __) => _Compteurs(
+                  entrees: [
+                    (
+                      Icons.receipt_long_outlined,
+                      'Commandes',
+                      '$_nbCommandes',
+                      () => ongletAcheteurDemande.value = 3,
+                    ),
+                    (
+                      Icons.favorite_border_rounded,
+                      'Favoris',
+                      '$_nbFavoris',
+                      () => ongletAcheteurDemande.value = 2,
+                    ),
+                    (
+                      Icons.shopping_cart_outlined,
+                      'Panier',
+                      '${sl<PanierService>().nombreArticles}',
+                      () => Navigator.of(
+                        context,
+                      ).pushNamed(AppRouter.panierRoute),
+                    ),
                   ],
                 ),
               ),
@@ -335,6 +359,174 @@ class _ProfilPageState extends State<ProfilPage>
               const VersionApp(),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Le profil dans l'en-tête bleu : photo (ou initiales), nom, adresse
+/// e-mail et type de compte.
+class _EnteteCompte extends StatelessWidget {
+  final String nom;
+  final String initiales;
+  final String email;
+  final String role;
+  final String? photo;
+  const _EnteteCompte({
+    required this.nom,
+    required this.initiales,
+    required this.email,
+    required this.role,
+    this.photo,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final lettres = Center(
+      child: Text(
+        initiales,
+        style: const TextStyle(
+          fontFamily: kPolice,
+          fontSize: 20,
+          fontWeight: FontWeight.w800,
+          color: AppColor.kPrimary,
+        ),
+      ),
+    );
+    final aUnePhoto = (photo ?? '').trim().isNotEmpty;
+    return Row(
+      children: [
+        Container(
+          width: 60,
+          height: 60,
+          clipBehavior: Clip.antiAlias,
+          decoration: BoxDecoration(
+            color: AppColor.kWhite,
+            shape: BoxShape.circle,
+            border: Border.all(color: AppColor.kSecondary, width: 2.5),
+          ),
+          child: aUnePhoto
+              ? ImageReseau(
+                  photo!,
+                  largeurServeur: 180,
+                  fit: BoxFit.cover,
+                  repli: lettres,
+                )
+              : lettres,
+        ),
+        const SizedBox(width: 14),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                nom,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontFamily: kPolice,
+                  fontSize: 21,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.4,
+                  color: AppColor.kWhite,
+                ),
+              ),
+              if (email.isNotEmpty)
+                Text(
+                  email,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontFamily: kPolice,
+                    fontSize: 13,
+                    color: AppColor.kWhite.withValues(alpha: 0.75),
+                  ),
+                ),
+              const SizedBox(height: 7),
+              BadgeTypeProfil(role: role),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Les compteurs du compte, côte à côte dans une carte blanche ; chacun
+/// mène à ce qu'il compte.
+class _Compteurs extends StatelessWidget {
+  final List<(IconData, String, String, VoidCallback)> entrees;
+  const _Compteurs({required this.entrees});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColor.kWhite,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: AppColor.kPrimary.withValues(alpha: 0.06),
+            blurRadius: 18,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: IntrinsicHeight(
+        child: Row(
+          children: [
+            for (var i = 0; i < entrees.length; i++) ...[
+              if (i > 0)
+                const VerticalDivider(
+                  width: 1,
+                  thickness: 1,
+                  indent: 16,
+                  endIndent: 16,
+                  color: AppColor.kLine,
+                ),
+              Expanded(
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: entrees[i].$4,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      child: Column(
+                        children: [
+                          Icon(
+                            entrees[i].$1,
+                            size: 20,
+                            color: AppColor.kPrimaryMedium,
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            entrees[i].$3,
+                            style: const TextStyle(
+                              fontFamily: kPolice,
+                              fontSize: 20,
+                              fontWeight: FontWeight.w800,
+                              color: AppColor.kGrayscaleDark100,
+                            ),
+                          ),
+                          Text(
+                            entrees[i].$2,
+                            style: const TextStyle(
+                              fontFamily: kPolice,
+                              fontSize: 12.5,
+                              color: AppColor.kGrayscale40,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ],
         ),
       ),
     );
