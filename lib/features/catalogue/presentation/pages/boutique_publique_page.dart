@@ -3,6 +3,7 @@ import 'package:saambiz/features/messagerie/presentation/pages/chat_page.dart';
 import 'package:dio/dio.dart';
 import 'package:saambiz/core/widgets/image_reseau.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:saambiz/core/widgets/logo_boutique.dart';
@@ -104,6 +105,22 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
   }
 
   // Données
+  /// Adresse publique du site de la boutique, vide s'il n'est pas en ligne.
+  String get _siteUrl => (_boutique?['siteUrl'] ?? '').toString().trim();
+
+  /// Ouvre le site dans le navigateur. En cas d'échec on le dit, plutôt que
+  /// de laisser l'appui sans effet.
+  Future<void> _ouvrirSite(String url) async {
+    final uri = Uri.tryParse(url);
+    final ouvert =
+        uri != null &&
+        uri.hasScheme &&
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!ouvert && mounted) {
+      afficherErreur(context, 'Le site n’a pas pu s’ouvrir.');
+    }
+  }
+
   Future<void> _chargerBoutique() async {
     try {
       // Ouvrir la boutique est une visite : le serveur la compte une fois
@@ -617,6 +634,19 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
           icone: Icons.near_me_outlined,
           libelle: 'Itinéraire',
           onTap: () => _carte(adresse),
+        ),
+      // Le site de la boutique, quand il est EN LIGNE. Le serveur ne renvoie
+      // `siteUrl` que dans ce cas : le `slug` existe dès la création de la
+      // boutique, bien avant la mise en ligne, et le fabriquer ici enverrait
+      // l'acheteur sur une adresse morte.
+      //
+      // L'adresse est celle qu'on partage : pas de marqueur `apercu`, un
+      // acheteur qui ouvre le site doit compter comme une visite.
+      if (_siteUrl.isNotEmpty)
+        _ActionContact(
+          icone: Icons.language_rounded,
+          libelle: 'Son site',
+          onTap: () => _ouvrirSite(_siteUrl),
         ),
     ];
 

@@ -921,36 +921,10 @@ class _ConfigurationState extends State<_Configuration> {
             ),
           ),
 
-          const SizedBox(height: 18),
-
-          // Le rappel de la gratuité n'est pas décoratif : un vendeur qui a un
-          // site suppose qu'on va le lui facturer, et se retient de le
-          // partager tant qu'il n'est pas fixé.
-          Container(
-            padding: const EdgeInsets.all(15),
-            decoration: BoxDecoration(
-              color: _C.navyLight,
-              borderRadius: BorderRadius.circular(13),
-            ),
-            child: const Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(Icons.favorite_rounded, color: _C.navy, size: 18),
-                SizedBox(width: 11),
-                Expanded(
-                  child: Text(
-                    'Votre site ne vous coûte rien : aucun abonnement, aucune '
-                    'commission sur vos ventes. Partagez-le sans crainte.',
-                    style: TextStyle(
-                      color: _C.navy,
-                      fontSize: 12.8,
-                      height: 1.5,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
+          // Retiré ici : le rappel « Votre site ne vous coûte rien… ». Il
+          // rassurait un vendeur qui découvre son site ; sous les réglages,
+          // consulté chaque jour, il n'apprenait plus rien. Le même message
+          // reste sur l'écran de mise en ligne, là où la question se pose.
         ],
       ),
     );
