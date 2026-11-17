@@ -525,7 +525,8 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
               ),
             ),
             Text(
-              '#${commande.referenceCommande}',
+              // « Code », comme sur les cartes de la liste.
+              'Code\u00A0: ${commande.referenceCommande}',
               style: TextStyle(
                 fontFamily: kPolice,
                 fontSize: 11.5,
