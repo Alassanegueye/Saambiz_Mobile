@@ -1,6 +1,8 @@
 import 'package:saambiz/core/widgets/messages.dart';
 import 'package:saambiz/core/widgets/onglets_conserves.dart';
 import 'package:flutter/material.dart';
+
+import '../../../../core/widgets/confirmation.dart';
 import '../../../../core/widgets/page_vendeur.dart';
 import '../../../../core/widgets/ui_kit.dart';
 import '../../../../core/theme/police.dart';
@@ -158,13 +160,23 @@ class _MesPromotionsView extends StatelessWidget {
                           ),
                         ),
                         PopupMenuButton<String>(
-                          onSelected: (v) {
+                          onSelected: (v) async {
                             if (v == 'edit') {
                               _ouvrirForm(context, promotion: p);
                             } else if (v == 'delete') {
-                              context.read<PromotionsBloc>().add(
-                                SupprimerPromotion(p.id),
+                              // Elle partait au premier appui, depuis un menu
+                              // dont l'entrée voisine est « Modifier ».
+                              final bloc = context.read<PromotionsBloc>();
+                              final confirme = await confirmerAction(
+                                context,
+                                icone: Icons.local_offer_outlined,
+                                titre: 'Supprimer cette promotion ?',
+                                message:
+                                    'Les clients ne la verront plus, et le prix '
+                                    'barré redeviendra le prix normal.',
+                                action: 'Supprimer la promotion',
                               );
+                              if (confirme) bloc.add(SupprimerPromotion(p.id));
                             }
                           },
                           itemBuilder: (_) => const [

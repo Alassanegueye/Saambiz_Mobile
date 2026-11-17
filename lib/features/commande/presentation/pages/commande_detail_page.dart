@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import '../../../../core/widgets/confirmation.dart';
+
 import '../../../../core/services/socket_service.dart';
 
 import 'package:saambiz/core/widgets/messages.dart';
@@ -150,27 +152,15 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
   /// stock réservé.
   Future<void> _annulerParVendeur() async {
     final bloc = context.read<CommandeBloc>();
-    final confirme = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Annuler cette commande ?'),
-        content: const Text(
-          'Le stock réservé sera rendu et le client sera prévenu.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Retour'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: TextButton.styleFrom(foregroundColor: AppColor.kErreur),
-            child: const Text('Annuler la commande'),
-          ),
-        ],
-      ),
+    final confirme = await confirmerAction(
+      context,
+      icone: Icons.cancel_outlined,
+      titre: 'Annuler cette commande ?',
+      message: 'Le stock réservé sera rendu et le client sera prévenu.',
+      action: 'Annuler la commande',
+      annuler: 'Retour',
     );
-    if (confirme != true) return;
+    if (!confirme) return;
     // Le paiement a pu arriver depuis le dernier affichage : le serveur a le
     // dernier mot, et on relit avant de décider.
     await _actualiser();
@@ -234,27 +224,15 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
 
   Future<void> _rejeter() async {
     final bloc = context.read<CommandeBloc>();
-    final confirme = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Rejeter cette commande ?'),
-        content: const Text('Le client sera prévenu par e-mail.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Retour'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: TextButton.styleFrom(foregroundColor: AppColor.kErreur),
-            child: const Text('Rejeter'),
-          ),
-        ],
-      ),
+    final confirme = await confirmerAction(
+      context,
+      icone: Icons.block_outlined,
+      titre: 'Rejeter cette commande ?',
+      message: 'Le client sera prévenu par e-mail.',
+      action: 'Rejeter la commande',
+      annuler: 'Retour',
     );
-    if (confirme == true) {
-      bloc.add(ChangerStatutCommande(commande.id, 'rejetee'));
-    }
+    if (confirme) bloc.add(ChangerStatutCommande(commande.id, 'rejetee'));
   }
 
   /// Le vendeur confirme avoir été payé (commande réglée à la réception).
@@ -327,27 +305,15 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
   Future<void> _repondreAnnulation(bool accepte) async {
     final bloc = context.read<CommandeBloc>();
     if (accepte) {
-      final confirme = await showDialog<bool>(
-        context: context,
-        builder: (ctx) => AlertDialog(
-          title: const Text('Accepter l’annulation ?'),
-          content: const Text(
-            'La commande sera annulée et le stock réservé sera rendu.',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Revenir'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              style: TextButton.styleFrom(foregroundColor: AppColor.kErreur),
-              child: const Text('Accepter'),
-            ),
-          ],
-        ),
+      final confirme = await confirmerAction(
+        context,
+        icone: Icons.cancel_outlined,
+        titre: 'Accepter l’annulation ?',
+        message: 'La commande sera annulée et le stock réservé sera rendu.',
+        action: 'Accepter l’annulation',
+        annuler: 'Revenir',
       );
-      if (confirme == true) {
+      if (confirme) {
         bloc.add(RepondreAnnulationCommande(commande.id, accepte: true));
       }
       return;

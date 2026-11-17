@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+
+import '../../../../core/widgets/confirmation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:saambiz/core/theme/app_color.dart';
 import 'package:saambiz/core/theme/police.dart';
@@ -110,6 +112,18 @@ class _ConversationsViewState extends State<_ConversationsView> {
       builder: (feuille) => _DetailMessageSite(
         message: m,
         onSupprimer: () async {
+          // Suppression definitive d'un message laisse par un visiteur du
+          // site : elle partait d'un appui, sans retour possible.
+          final confirme = await confirmerAction(
+            context,
+            icone: Icons.delete_outline_rounded,
+            titre: 'Supprimer ce message ?',
+            message:
+                'Il disparaîtra de votre boîte. Cette action est définitive.',
+            action: 'Supprimer le message',
+          );
+          if (!confirme) return;
+          if (!feuille.mounted) return;
           Navigator.of(feuille).pop();
           try {
             await _site.supprimer(m.id);

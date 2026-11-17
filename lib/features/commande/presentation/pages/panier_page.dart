@@ -1,5 +1,7 @@
 import 'package:saambiz/core/widgets/messages.dart';
 import 'package:flutter/material.dart';
+
+import '../../../../core/widgets/confirmation.dart';
 import '../../../../core/theme/police.dart';
 import '../../data/models/panier_item.dart';
 import 'package:saambiz/core/widgets/image_reseau.dart';
@@ -159,6 +161,19 @@ class PanierPage extends StatelessWidget {
                                 item.quantite + 1,
                               ),
                               onRetirer: () async {
+                                // La croix est à portée de pouce, juste à
+                                // côté des boutons de quantité : elle vidait
+                                // la ligne sans rien demander.
+                                final confirme = await confirmerAction(
+                                  context,
+                                  icone: Icons.remove_shopping_cart_outlined,
+                                  titre: 'Retirer « ${item.nom} » ?',
+                                  message:
+                                      'L’article quittera votre panier. Vous '
+                                      'pourrez l’y remettre depuis la boutique.',
+                                  action: 'Retirer du panier',
+                                );
+                                if (!confirme) return;
                                 await panier.retirer(item.cle);
                                 if (context.mounted) {
                                   afficherSucces(

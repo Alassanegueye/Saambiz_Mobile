@@ -1,5 +1,6 @@
 import 'package:saambiz/core/widgets/page_vendeur.dart';
 import 'package:saambiz/core/widgets/messages.dart';
+import 'package:saambiz/core/widgets/confirmation.dart';
 import 'package:saambiz/core/widgets/libelle_obligatoire.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -54,9 +55,23 @@ class _SignalerFormViewState extends State<_SignalerFormView> {
     super.dispose();
   }
 
-  void _envoyer() {
+  /// Un signalement part vers une équipe qui va le lire et agir : il se
+  /// confirme. Il partait au premier appui, sans rien demander.
+  Future<void> _envoyer() async {
     if (!_formKey.currentState!.validate()) return;
-    context.read<SignalementsBloc>().add(
+    final bloc = context.read<SignalementsBloc>();
+    final confirme = await confirmerAction(
+      context,
+      icone: Icons.flag_outlined,
+      titre: 'Envoyer ce signalement ?',
+      message:
+          'Il sera transmis à l’équipe SaamBiz, qui examinera votre demande.',
+      action: 'Envoyer le signalement',
+      // Rien n'est détruit : ce qui est engagé, c'est un examen.
+      destructive: false,
+    );
+    if (!confirme) return;
+    bloc.add(
       CreerSignalement(
         type: widget.type,
         raison: _raisonCtrl.text.trim(),
