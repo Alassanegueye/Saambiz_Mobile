@@ -99,8 +99,31 @@ Future<void> _commander(BuildContext context) async {
   );
 }
 
-class PanierPage extends StatelessWidget {
+class PanierPage extends StatefulWidget {
   const PanierPage({super.key});
+
+  @override
+  State<PanierPage> createState() => _PanierPageState();
+}
+
+class _PanierPageState extends State<PanierPage> {
+  @override
+  void initState() {
+    super.initState();
+    // Une seule boutique dans le panier : tout est coché d'office. Le client
+    // arrivait sur « 0 FCFA · Cochez un produit » alors qu'il n'y avait
+    // qu'un choix possible. Avec plusieurs boutiques, c'est à lui de choisir
+    // laquelle commander. Après la première image : cocher prévient les
+    // autres écrans qui écoutent le panier, ce qui ne se fait pas pendant
+    // une construction.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final panier = sl<PanierService>();
+      final boutiques = panier.parBoutique.keys.toList();
+      if (mounted && panier.selectionVide && boutiques.length == 1) {
+        panier.basculerBoutique(boutiques.first);
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -120,13 +143,15 @@ class PanierPage extends StatelessWidget {
                 child: ListView(
                   padding: const EdgeInsets.fromLTRB(16, 18, 16, 24),
                   children: [
-                    // Une commande = une boutique : le client coche les
-                    // produits d'une seule boutique avant de commander.
-                    const _Astuce(
-                      'Cochez les produits à commander. Une commande '
-                      'regroupe les produits d\'une seule boutique.',
-                    ),
-                    const SizedBox(height: 14),
+                    // Une commande = une boutique : la règle ne se pose
+                    // qu'avec plusieurs boutiques dans le panier.
+                    if (groupes.length > 1) ...[
+                      const _Astuce(
+                        'Une commande, une boutique : cochez les produits '
+                        'de celle à commander.',
+                      ),
+                      const SizedBox(height: 14),
+                    ],
                     for (final entree in groupes.entries) ...[
                       _CarteBoutique(
                         nom: entree.value.first.vendeurNom,
