@@ -80,9 +80,19 @@ class _ListeState extends State<_Liste> with RetourSurOnglet {
         if (mounted) _recharger();
       });
     }
-    // Filet de securite : le temps reel peut etre coupe (reseau, proxy qui
-    // ferme les websockets). Conserve, mais il n'est plus le seul recours.
-    _polling = Timer.periodic(const Duration(seconds: 30), (_) {
+    // FILET DE SÉCURITÉ, PAS MÉCANISME PRINCIPAL.
+    //
+    // Toutes les 30 secondes, cet écran retéléchargeait la liste entière des
+    // commandes — avec leurs lignes et leurs vendeurs — tant qu'il restait
+    // visible. Soit 120 requêtes par heure, par client, pour des données qui
+    // ne bougent presque jamais : une commande change deux ou trois fois dans
+    // sa vie, et le serveur le dit maintenant par `commande:statut`.
+    //
+    // Le sondage reste, parce que le temps réel peut être coupé — réseau
+    // mobile, proxy qui ferme les websockets. Mais à deux minutes : c'est un
+    // rattrapage, pas la source de vérité. L'écran se recharge aussi au
+    // retour d'onglet et au retour de la fiche.
+    _polling = Timer.periodic(const Duration(minutes: 2), (_) {
       if (mounted && OngletsConserves.estVisible(context)) _recharger();
     });
   }
