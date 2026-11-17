@@ -45,13 +45,17 @@ class DestinationNotification {
 /// est précisément le défaut constaté.
 DestinationNotification destinationNotification(NotificationModel n) {
   final commande = n.commandeId;
-  if (commande != null) return DestinationNotification(CibleNotification.commande, commande);
+  if (commande != null) {
+    return DestinationNotification(CibleNotification.commande, commande);
+  }
 
   // Promotion, nouveau produit, annonce d'une boutique suivie. Le produit
   // concerné n'est pas toujours joint ; la boutique, elle, l'est toujours, et
   // c'est là que le produit se trouve.
   final boutique = n.boutiqueId;
-  if (boutique != null) return DestinationNotification(CibleNotification.boutique, boutique);
+  if (boutique != null) {
+    return DestinationNotification(CibleNotification.boutique, boutique);
+  }
 
   final abonnement = n.abonnementId;
   if (abonnement != null || n.type == 'abonnement') {
@@ -60,7 +64,10 @@ DestinationNotification destinationNotification(NotificationModel n) {
 
   final interlocuteur = n.interlocuteurId;
   if (interlocuteur != null) {
-    return DestinationNotification(CibleNotification.conversation, interlocuteur);
+    return DestinationNotification(
+      CibleNotification.conversation,
+      interlocuteur,
+    );
   }
 
   // Anciennes notifications, enregistrées avant que le serveur ne joigne des
@@ -68,3 +75,21 @@ DestinationNotification destinationNotification(NotificationModel n) {
   // le repli, comme avant.
   return const DestinationNotification(CibleNotification.messagerie);
 }
+
+/// Reconstitue une notification depuis la charge d'un push.
+///
+/// Le système ne remet que la carte `data` du message, dont les valeurs sont
+/// toutes des chaînes — c'est une contrainte de FCM, pas un choix. Le titre et
+/// le corps vivent ailleurs dans le message et ne servent pas à l'aiguillage :
+/// seuls les identifiants comptent, et ils sont là.
+NotificationModel notificationDepuisPush(Map<String, dynamic> donnees) =>
+    NotificationModel(
+      id: donnees['notificationId']?.toString() ?? '',
+      titre: donnees['titre']?.toString() ?? '',
+      message: '',
+      date: DateTime.now(),
+      // Elle vient d'être touchée : la marquer non lue n'aurait aucun sens.
+      lue: true,
+      type: donnees['type']?.toString() ?? 'systeme',
+      donnees: donnees,
+    );

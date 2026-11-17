@@ -42,6 +42,17 @@ class NotificationModel {
   String? get boutiqueId => _id('boutiqueId');
   String? get abonnementId => _id('abonnementId');
 
+  /// Vrai quand c'est le vendeur qui lit cette notification.
+  ///
+  /// La fiche d'une commande n'affiche pas les mêmes boutons des deux côtés.
+  /// Dans l'application, l'écran sait déjà où il se trouve ; depuis un push
+  /// touché téléphone verrouillé, rien ne le dit — d'où ce drapeau, joint par
+  /// le serveur. Les charges de push ne transportent que du texte : `true`
+  /// arrive aussi bien en booléen qu'en chaîne.
+  bool get pourVendeur =>
+      donnees['pourVendeur'] == true ||
+      donnees['pourVendeur']?.toString().toLowerCase() == 'true';
+
   String? _id(String cle) {
     final valeur = donnees[cle]?.toString() ?? '';
     return valeur.isEmpty ? null : valeur;

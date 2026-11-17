@@ -10,7 +10,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import '../../features/notifications/data/repositories/notifications_repository.dart';
+import '../../features/abonnement/presentation/pages/mon_abonnement_page.dart';
+import '../../features/catalogue/presentation/pages/boutique_publique_page.dart';
+import '../../features/commande/data/datasources/commande_remote_datasource.dart';
+import '../../features/commande/presentation/pages/commande_detail_page.dart'
+    show CommandeDetailArgs;
+import '../../features/messagerie/presentation/pages/chat_page.dart';
+import '../../features/notifications/presentation/destination_notification.dart';
 import '../../features/notifications/presentation/pages/notifications_page.dart';
+import '../routes/app_router.dart';
 import '../../injection_container.dart';
 import '../connection/auth_interceptor.dart';
 import '../utils/app_logger.dart';
@@ -93,7 +101,9 @@ class FcmService {
       // qu'après la première image.
       final initial = await messagerie.getInitialMessage();
       if (initial != null) {
-        WidgetsBinding.instance.addPostFrameCallback((_) => _ouvrir(initial.data));
+        WidgetsBinding.instance.addPostFrameCallback(
+          (_) => _ouvrir(initial.data),
+        );
       }
     } catch (e) {
       logDebug('Notifications push : initialisation impossible ($e)');
@@ -244,11 +254,75 @@ class FcmService {
 
   /// Un toucher ouvre la liste des notifications, où le client retrouve le
   /// message et la boutique.
-  static void _ouvrir(Map<String, dynamic> donnees) {
+  /// Toucher la notification, hors de l'application, ouvre l'ecran qu'elle
+  /// annonce — la meme regle que dans la liste des notifications, voir
+  /// `destinationNotification`.
+  ///
+  /// Auparavant, toute notification touchee ouvrait la liste : le client
+  /// prevenu que sa commande etait prete devait encore la retrouver lui-meme.
+  static Future<void> _ouvrir(Map<String, dynamic> donnees) async {
     final navigateur = AuthInterceptor.navigatorKey.currentState;
     if (navigateur == null) return;
+
+    final notification = notificationDepuisPush(donnees);
+    final destination = destinationNotification(notification);
+
+    switch (destination.cible) {
+      case CibleNotification.commande:
+        // La fiche attend la commande entiere ; le push n'en porte que
+        // l'identifiant. Si la lecture echoue — reseau coupe au moment du
+        // reveil, commande supprimee —, la liste des notifications reste un
+        // repli honnete : l'utilisateur voit au moins de quoi il s'agissait.
+        try {
+          final commande = await sl<CommandeRemoteDataSource>().getCommande(
+            destination.id!,
+          );
+          await navigateur.pushNamed(
+            AppRouter.commandeDetailRoute,
+            arguments: CommandeDetailArgs(
+              commande,
+              isVendeur: notification.pourVendeur,
+            ),
+          );
+        } catch (e) {
+          logDebug('Commande du push illisible : $e');
+          _ouvrirListe(navigateur, notification.pourVendeur);
+        }
+
+      case CibleNotification.boutique:
+        navigateur.push(
+          MaterialPageRoute(
+            builder: (_) => BoutiquePubliquePage(boutiqueId: destination.id!),
+          ),
+        );
+
+      case CibleNotification.abonnement:
+        navigateur.push(
+          MaterialPageRoute(builder: (_) => const MonAbonnementPage()),
+        );
+
+      case CibleNotification.conversation:
+        navigateur.push(
+          MaterialPageRoute(
+            builder: (_) => ChatPage(
+              interlocuteurId: destination.id!,
+              interlocuteurNom: notification.interlocuteurNom.isNotEmpty
+                  ? notification.interlocuteurNom
+                  : notification.titre,
+            ),
+          ),
+        );
+
+      case CibleNotification.messagerie:
+        _ouvrirListe(navigateur, notification.pourVendeur);
+    }
+  }
+
+  static void _ouvrirListe(NavigatorState navigateur, bool pourVendeur) {
     navigateur.push(
-      MaterialPageRoute(builder: (_) => const NotificationsPage()),
+      MaterialPageRoute(
+        builder: (_) => NotificationsPage(pourVendeur: pourVendeur),
+      ),
     );
   }
 }

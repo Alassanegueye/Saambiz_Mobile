@@ -124,16 +124,67 @@ void main() {
       });
       expect(n.type, 'commande');
       expect(n.commandeId, 'cmd-1');
-      expect(
-        destinationNotification(n).cible,
-        CibleNotification.commande,
-      );
+      expect(destinationNotification(n).cible, CibleNotification.commande);
     });
 
     test('un type absent ne fait pas tomber la lecture', () {
       final n = NotificationModel.fromJson({'id': 'n1', 'titre': 'x'});
       expect(n.type, 'systeme');
       expect(n.commandeId, isNull);
+    });
+  });
+
+  group('Depuis la charge d’un push', () {
+    // FCM n'accepte que des chaînes dans `data` : tout arrive en texte, y
+    // compris les booléens. La charge est celle que push.service.js envoie,
+    // c'est-à-dire `{type, ...donnees}`.
+    test('une commande mène à la commande, du bon côté', () {
+      final n = notificationDepuisPush({
+        'type': 'commande',
+        'commandeId': 'cmd-1',
+        'pourVendeur': 'true',
+        'interlocuteurId': 'u-9',
+        'interlocuteurNom': 'Balla BEYE',
+      });
+      final d = destinationNotification(n);
+      expect(d.cible, CibleNotification.commande);
+      expect(d.id, 'cmd-1');
+      // Sans ce drapeau, la fiche s'ouvrirait côté acheteur pour un vendeur :
+      // ni « Accepter », ni « Passer à : En préparation ».
+      expect(n.pourVendeur, isTrue);
+    });
+
+    test('l’acheteur reçoit la version acheteur', () {
+      final n = notificationDepuisPush({
+        'type': 'commande',
+        'commandeId': 'cmd-1',
+        'pourVendeur': 'false',
+      });
+      expect(n.pourVendeur, isFalse);
+    });
+
+    test('un booléen non chaîné est accepté aussi', () {
+      // Dans l'application, la même fonction peut recevoir du JSON déjà typé.
+      expect(notificationDepuisPush({'pourVendeur': true}).pourVendeur, isTrue);
+    });
+
+    test('le drapeau absent vaut « acheteur »', () {
+      expect(notificationDepuisPush({}).pourVendeur, isFalse);
+    });
+
+    test('une promotion mène à la boutique', () {
+      final d = destinationNotification(
+        notificationDepuisPush({'type': 'promotion', 'boutiqueId': 'b-1'}),
+      );
+      expect(d.cible, CibleNotification.boutique);
+      expect(d.id, 'b-1');
+    });
+
+    test('une charge vide retombe sur la messagerie', () {
+      expect(
+        destinationNotification(notificationDepuisPush({})).cible,
+        CibleNotification.messagerie,
+      );
     });
   });
 }
