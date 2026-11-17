@@ -288,25 +288,21 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
   /// Celle-ci partait au premier appui, sans rien demander.
   Future<void> _annuler() async {
     final bloc = context.read<CommandeBloc>();
-    final confirme = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Annuler cette commande ?'),
-        content: const Text('Cette action est définitive.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Revenir'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: TextButton.styleFrom(foregroundColor: AppColor.kErreur),
-            child: const Text('Annuler la commande'),
-          ),
-        ],
-      ),
+    // Le motif reste facultatif : l'imposer pousserait à écrire n'importe
+    // quoi pour passer. Quand il est donné, il part avec l'annulation et
+    // reste lisible par le vendeur.
+    final motif = await _saisirMotif(
+      titre: 'Annuler cette commande ?',
+      explication: 'Cette action est définitive.',
+      libelleChamp: 'Raison (facultatif)',
+      valider: 'Annuler la commande',
+      obligatoire: false,
     );
-    if (confirme == true) bloc.add(AnnulerCommande(commande.id));
+    if (motif != null) {
+      bloc.add(
+        AnnulerCommande(commande.id, motif: motif.isEmpty ? null : motif),
+      );
+    }
   }
 
   /// Commande déjà en préparation : on demande, on ne décide pas. Le motif

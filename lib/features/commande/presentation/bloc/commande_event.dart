@@ -62,10 +62,12 @@ class PayerCommande extends CommandeEvent {
 
 /// Acheteur : annuler une commande
 class AnnulerCommande extends CommandeEvent {
+  /// Motif facultatif : l'imposer pousserait à écrire n'importe quoi.
+  final String? motif;
   final String commandeId;
-  AnnulerCommande(this.commandeId);
+  AnnulerCommande(this.commandeId, {this.motif});
   @override
-  List<Object?> get props => [commandeId];
+  List<Object?> get props => [commandeId, motif];
 }
 
 /// Vendeur : faire avancer le statut

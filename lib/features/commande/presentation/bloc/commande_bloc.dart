@@ -92,7 +92,10 @@ class CommandeBloc extends Bloc<CommandeEvent, CommandeState> {
   ) async {
     emit(CommandeLoading());
     try {
-      final commande = await repository.annuler(event.commandeId);
+      final commande = await repository.annuler(
+        event.commandeId,
+        motif: event.motif,
+      );
       emit(CommandeMiseAJour(commande));
     } catch (e) {
       emit(CommandeError(_msg(e)));

@@ -29,7 +29,8 @@ class CommandeRepository {
 
   Future<CommandeModel> getCommande(String id) => remote.getCommande(id);
 
-  Future<CommandeModel> annuler(String id) => remote.annuler(id);
+  Future<CommandeModel> annuler(String id, {String? motif}) =>
+      remote.annuler(id, motif: motif);
 
   Future<String?> payer(
     String id, {

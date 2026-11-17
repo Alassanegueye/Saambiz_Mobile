@@ -7,7 +7,7 @@ abstract class CommandeRemoteDataSource {
   Future<CommandeModel> creerCommande(Map<String, dynamic> body);
   Future<List<CommandeModel>> mesCommandes({String? statut});
   Future<CommandeModel> getCommande(String id);
-  Future<CommandeModel> annuler(String id);
+  Future<CommandeModel> annuler(String id, {String? motif});
   // Retourne l'URL de paiement (ou null pour Wave/à compléter)
   Future<String?> payer(
     String id, {
@@ -75,8 +75,11 @@ class CommandeRemoteDataSourceImpl implements CommandeRemoteDataSource {
   }
 
   @override
-  Future<CommandeModel> annuler(String id) async {
-    final res = await dio.put(CommandeEndpoints.annuler(id));
+  Future<CommandeModel> annuler(String id, {String? motif}) async {
+    final res = await dio.put(
+      CommandeEndpoints.annuler(id),
+      data: {if (motif != null && motif.isNotEmpty) 'motif': motif},
+    );
     return _parseUne(res.data);
   }
 
