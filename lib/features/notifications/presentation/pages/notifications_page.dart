@@ -180,96 +180,52 @@ class _NotificationsViewState extends State<_NotificationsView> {
                 ),
               );
             }
+            // Groupées par jour, dans l'ordre du serveur (les plus
+            // récentes d'abord) : un titre à chaque changement de jour.
+            final maintenant = DateTime.now();
+            final lignes = <Object>[];
+            String? jour;
+            for (final n in state.notifications) {
+              final j = libelleJourNotification(n.date, maintenant: maintenant);
+              if (j != jour) {
+                lignes.add(j);
+                jour = j;
+              }
+              lignes.add(n);
+            }
             return RefreshIndicator(
               color: AppColor.kPrimary,
               onRefresh: () async =>
                   context.read<NotificationsBloc>().add(LoadNotifications()),
-              child: ListView.separated(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-                itemCount: state.notifications.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 8),
+              child: ListView.builder(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                itemCount: lignes.length,
                 itemBuilder: (context, i) {
-                  final n = state.notifications[i];
-                  return Material(
-                    color: n.lue ? AppColor.kWhite : AppColor.kPrimaryLight,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                      side: BorderSide(
-                        color: n.lue ? AppColor.kLine : Colors.transparent,
-                      ),
-                    ),
-                    clipBehavior: Clip.antiAlias,
-                    child: InkWell(
-                      onTap: () => _ouvrir(n),
-                      child: Padding(
-                        padding: const EdgeInsets.all(14),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            CircleAvatar(
-                              radius: 20,
-                              backgroundColor: n.lue
-                                  ? AppColor.kPrimaryLight
-                                  : AppColor.kPrimary,
-                              // Ouvrir une commande demande un aller-retour au
-                              // serveur : sans ce signe, l'appui semble perdu.
-                              child: _enOuverture == n.id
-                                  ? SizedBox(
-                                      width: 18,
-                                      height: 18,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        color: n.lue
-                                            ? AppColor.kPrimary
-                                            : AppColor.kWhite,
-                                      ),
-                                    )
-                                  : Icon(
-                                      Icons.notifications_none_rounded,
-                                      size: 20,
-                                      color: n.lue
-                                          ? AppColor.kPrimary
-                                          : AppColor.kWhite,
-                                    ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    n.titre,
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: AppColor.kGrayscaleDark100,
-                                      fontWeight: n.lue
-                                          ? FontWeight.w500
-                                          : FontWeight.w700,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    n.message,
-                                    style: const TextStyle(
-                                      fontSize: 13,
-                                      height: 1.35,
-                                      color: _C.sub,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 6),
-                                  Text(
-                                    DateFormat('dd/MM à HH:mm').format(n.date),
-                                    style: const TextStyle(
-                                      fontSize: 11.5,
-                                      color: _C.sub,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
+                  final ligne = lignes[i];
+                  if (ligne is String) {
+                    return Padding(
+                      padding: EdgeInsets.fromLTRB(4, i == 0 ? 8 : 18, 4, 8),
+                      child: Text(
+                        ligne,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.2,
+                          color: AppColor.kGrayscale40,
                         ),
                       ),
+                    );
+                  }
+                  final n = ligne as NotificationModel;
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: _LigneNotification(
+                      notification: n,
+                      maintenant: maintenant,
+                      // Ouvrir une commande demande un aller-retour au
+                      // serveur : sans ce signe, l'appui semble perdu.
+                      enOuverture: _enOuverture == n.id,
+                      onTap: () => _ouvrir(n),
                     ),
                   );
                 },
@@ -278,6 +234,182 @@ class _NotificationsViewState extends State<_NotificationsView> {
           }
           return const SizedBox.shrink();
         },
+      ),
+    );
+  }
+}
+
+/// Le jour d'une notification, pour les titres de groupe.
+String libelleJourNotification(DateTime date, {DateTime? maintenant}) {
+  final m = maintenant ?? DateTime.now();
+  final d = date.toLocal();
+  final ecart = DateTime(
+    m.year,
+    m.month,
+    m.day,
+  ).difference(DateTime(d.year, d.month, d.day)).inDays;
+  if (ecart <= 0) return 'Aujourd’hui';
+  if (ecart == 1) return 'Hier';
+  if (ecart < 7) return 'Cette semaine';
+  return 'Plus tôt';
+}
+
+/// L'icône et la couleur d'une notification, d'après ce qu'elle annonce.
+/// Le type passe avant le reste, comme pour l'écran à ouvrir : une
+/// notification de commande qui nomme un interlocuteur reste une commande.
+({IconData icone, Color couleur}) apparenceNotification(NotificationModel n) {
+  switch (n.type) {
+    case 'commande':
+      return (icone: Icons.receipt_long_rounded, couleur: AppColor.kPrimary);
+    case 'promotion':
+      return (
+        icone: Icons.local_offer_rounded,
+        couleur: AppColor.kSecondaryDark,
+      );
+    case 'nouveau_produit':
+      return (
+        icone: Icons.new_releases_rounded,
+        couleur: AppColor.kPrimaryMedium,
+      );
+    case 'abonnement':
+      return (
+        icone: Icons.workspace_premium_rounded,
+        couleur: AppColor.kSecondaryDark,
+      );
+  }
+  if (n.interlocuteurId != null) {
+    return (icone: Icons.chat_bubble_rounded, couleur: AppColor.kSucces);
+  }
+  return (icone: Icons.notifications_rounded, couleur: AppColor.kGrayscale60);
+}
+
+/// Une notification : icône du type, titre, message, heure ; fond teinté et
+/// point tant qu'elle n'est pas lue.
+class _LigneNotification extends StatelessWidget {
+  final NotificationModel notification;
+  final DateTime maintenant;
+  final bool enOuverture;
+  final VoidCallback onTap;
+  const _LigneNotification({
+    required this.notification,
+    required this.maintenant,
+    required this.enOuverture,
+    required this.onTap,
+  });
+
+  String _heure() {
+    final d = notification.date.toLocal();
+    final ecart = maintenant.difference(d);
+    if (libelleJourNotification(d, maintenant: maintenant) == 'Aujourd’hui') {
+      if (ecart.inMinutes < 1) return 'À l’instant';
+      if (ecart.inMinutes < 60) return 'Il y a ${ecart.inMinutes} min';
+      return 'Il y a ${ecart.inHours} h';
+    }
+    return DateFormat('dd/MM à HH:mm').format(d);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final n = notification;
+    final a = apparenceNotification(n);
+    return Material(
+      color: n.lue ? AppColor.kWhite : AppColor.kPrimaryLight,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: n.lue ? AppColor.kLine : Colors.transparent),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 42,
+                height: 42,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: n.lue
+                      ? a.couleur.withValues(alpha: 0.10)
+                      : AppColor.kWhite,
+                  borderRadius: BorderRadius.circular(13),
+                ),
+                child: enOuverture
+                    ? SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: a.couleur,
+                        ),
+                      )
+                    : Icon(a.icone, size: 21, color: a.couleur),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            n.titre,
+                            style: TextStyle(
+                              fontSize: 14.5,
+                              color: AppColor.kGrayscaleDark100,
+                              fontWeight: n.lue
+                                  ? FontWeight.w600
+                                  : FontWeight.w800,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          _heure(),
+                          style: const TextStyle(fontSize: 11.5, color: _C.sub),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 3),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            n.message,
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              height: 1.35,
+                              color: _C.sub,
+                            ),
+                          ),
+                        ),
+                        if (!n.lue) ...[
+                          const SizedBox(width: 8),
+                          Container(
+                            width: 8,
+                            height: 8,
+                            margin: const EdgeInsets.only(top: 5),
+                            decoration: const BoxDecoration(
+                              color: AppColor.kPrimary,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
