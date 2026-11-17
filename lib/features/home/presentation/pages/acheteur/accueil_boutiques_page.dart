@@ -28,7 +28,8 @@ import '../../../../categories/presentation/icones_categories.dart';
 import '../../../../notifications/data/datasources/notifications_remote_datasource.dart';
 import '../../../../notifications/presentation/pages/notifications_page.dart';
 import '../../../data/datasources/accueil_remote_datasource.dart';
-import 'main_client_page.dart' show ongletAcheteurDemande;
+import '../../../../../core/widgets/avatar_utilisateur.dart';
+import 'main_client_page.dart' show ongletAcheteurDemande, ongletAcheteurCompte;
 import '../../../../../core/widgets/page_vendeur.dart';
 import '../../../../../core/widgets/activer_localisation.dart';
 
@@ -468,7 +469,8 @@ class _AccueilBoutiquesPageState extends State<AccueilBoutiquesPage>
 }
 
 /// En-tête fixe avec courbure arrondie au bas (32 px) comme sur l'image de référence :
-/// avatar utilisateur, salutation, cloche et panier en verre, carte hero active,
+/// avatar utilisateur (ouvre le compte), salutation, cloche et panier en
+/// verre, carte hero active,
 /// et grande barre de recherche en pilule.
 class _EnteteAccueil extends StatelessWidget {
   final User? user;
@@ -535,6 +537,17 @@ class _EnteteAccueil extends StatelessWidget {
                   const SizedBox(width: 8),
                   // Bouton Panier en verre
                   const _BoutonPanierVerreRond(),
+                  // L'avatar menait nulle part : il avait ete retire faute de
+                  // destination. Le meme widget que l'espace vendeur, avec sa
+                  // photo quand il y en a une, ouvre ici l'onglet « Compte ».
+                  if (!isGuest && user != null) ...[
+                    const SizedBox(width: 8),
+                    AvatarUtilisateur(
+                      utilisateur: user,
+                      onTap: () =>
+                          ongletAcheteurDemande.value = ongletAcheteurCompte,
+                    ),
+                  ],
                 ],
               ),
               if (!isGuest && user != null && _nomAffiche.isNotEmpty) ...[

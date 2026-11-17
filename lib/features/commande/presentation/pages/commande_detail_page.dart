@@ -457,18 +457,34 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
           );
         },
       ),
-      bottomNavigationBar: _actions(
-        payable: payable,
-        annulable: annulable,
-        statutSuivant: statutSuivant,
-        aDecider: aDecider,
-        annulableVendeur: annulableVendeur,
-        retournable: retournable,
+      // Les boutons vivent dans la barre du bas, donc HORS du corps : le voile
+      // de chargement, lui, ne couvre que le corps. Ils restaient donc
+      // cliquables pendant la requête, et un deuxième appui partait avant le
+      // retour du premier. Le serveur traitait alors le premier (en_attente →
+      // acceptee), puis refusait le second : « Transition impossible :
+      // acceptee → acceptee », sur un écran qui montrait encore « en attente »
+      // puisque aucune réponse n'était arrivée. D'où ce BlocBuilder : pendant
+      // qu'une demande est en vol, plus rien n'est cliquable.
+      bottomNavigationBar: BlocBuilder<CommandeBloc, CommandeState>(
+        builder: (context, state) =>
+            // `_actions` rend `null` quand la commande n'offre aucune action ;
+            // une barre de hauteur nulle revient au même à l'écran.
+            _actions(
+              enVol: state is CommandeLoading,
+              payable: payable,
+              annulable: annulable,
+              statutSuivant: statutSuivant,
+              aDecider: aDecider,
+              annulableVendeur: annulableVendeur,
+              retournable: retournable,
+            ) ??
+            const SizedBox.shrink(),
       ),
     );
   }
 
   Widget? _actions({
+    required bool enVol,
     required bool payable,
     required bool annulable,
     required String? statutSuivant,
@@ -477,12 +493,14 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
     required bool annulableVendeur,
   }) {
     final boutons = <Widget>[];
+    /// `null` neutralise un bouton : Flutter le grise et ignore les appuis.
+    VoidCallback? actif(VoidCallback action) => enVol ? null : action;
 
     if (annulableVendeur) {
       boutons.add(
         Expanded(
           child: OutlinedButton(
-            onPressed: _annulerParVendeur,
+            onPressed: actif(_annulerParVendeur),
             style: OutlinedButton.styleFrom(
               foregroundColor: AppColor.kErreur,
               side: const BorderSide(color: AppColor.kErreur),
@@ -497,7 +515,7 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
       boutons.add(
         Expanded(
           child: OutlinedButton(
-            onPressed: _rejeter,
+            onPressed: actif(_rejeter),
             style: OutlinedButton.styleFrom(
               foregroundColor: AppColor.kErreur,
               side: const BorderSide(color: AppColor.kErreur),
@@ -510,7 +528,7 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
         Expanded(
           flex: 2,
           child: ElevatedButton(
-            onPressed: _accepter,
+            onPressed: actif(_accepter),
             style: ElevatedButton.styleFrom(
               backgroundColor: _C.green,
               foregroundColor: _C.white,
@@ -525,7 +543,7 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
       boutons.add(
         Expanded(
           child: ElevatedButton(
-            onPressed: _payer,
+            onPressed: actif(_payer),
             style: ElevatedButton.styleFrom(
               backgroundColor: _C.green,
               foregroundColor: _C.white,
@@ -539,7 +557,7 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
       boutons.add(
         Expanded(
           child: OutlinedButton(
-            onPressed: _annuler,
+            onPressed: actif(_annuler),
             style: OutlinedButton.styleFrom(foregroundColor: AppColor.kErreur),
             child: const Text('Annuler'),
           ),
@@ -550,7 +568,7 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
       boutons.add(
         Expanded(
           child: ElevatedButton(
-            onPressed: _avancerStatut,
+            onPressed: actif(_avancerStatut),
             style: ElevatedButton.styleFrom(
               backgroundColor: _C.green,
               foregroundColor: _C.white,
@@ -564,7 +582,7 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
       boutons.add(
         Expanded(
           child: OutlinedButton(
-            onPressed: _demanderRetour,
+            onPressed: actif(_demanderRetour),
             style: OutlinedButton.styleFrom(foregroundColor: _C.green),
             child: const Text('Demander un retour'),
           ),

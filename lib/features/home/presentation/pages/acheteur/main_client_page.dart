@@ -20,6 +20,12 @@ import '../../../../../core/widgets/ui_kit.dart';
 /// 2 favoris, 3 commandes, 4 compte.
 final ValueNotifier<int?> ongletAcheteurDemande = ValueNotifier<int?>(null);
 
+/// Position de « Compte » dans la barre du bas.
+///
+/// Nommée plutôt qu'écrite en clair, comme côté vendeur : un onglet inséré
+/// un jour de plus ne doit pas envoyer l'acheteur sur un écran au hasard.
+const int ongletAcheteurCompte = 4;
+
 /// Espace acheteur : cinq onglets sous une barre de navigation flottante.
 class MainAcheteurPage extends StatefulWidget {
   final User? user;
