@@ -26,6 +26,7 @@ import 'package:saambiz/features/home/presentation/pages/vendeur/profil_page.dar
     as vendeur;
 import 'package:saambiz/features/onboarding/presentation/pages/onboarding_page.dart';
 import 'package:saambiz/features/vendeur/presentation/pages/produit_form_page.dart';
+import 'package:saambiz/features/signalements/presentation/pages/mes_signalements_page.dart';
 
 import 'donnees.dart';
 import 'outils.dart';
@@ -118,6 +119,13 @@ void main() {
       'client_05_compte',
       const MainAcheteurPage(user: client),
       action: onglet('Compte'),
+    );
+  });
+  testWidgets('client signalements', (t) async {
+    await capturer(
+      t,
+      'client_13_signalements',
+      const MesSignalementsPage(),
     );
   });
   testWidgets('client fiche produit', (t) async {

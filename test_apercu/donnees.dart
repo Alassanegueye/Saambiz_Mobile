@@ -611,6 +611,34 @@ class Donnees {
       };
     }
     if (c.startsWith('/favoris/') && c.endsWith('/statut')) return {'suivi': true, 'clocheActive': true};
+    if (c.startsWith('/signalements')) {
+      // Trois etats, pour relire la page dans ses trois couleurs.
+      return {
+        'signalements': [
+          {
+            'id': 's1', 'type': 'boutique', 'cibleId': 'b1',
+            'raison': 'Produits contrefaits',
+            'description': 'Plusieurs articles portent un logo de marque que la boutique ne semble pas distribuer.',
+            'statut': 'en_attente', 'createdAt': '2026-11-15T10:12:00.000Z',
+            'cible': {'id': 'b1', 'nom': 'Maison Ndiaye Couture', 'logo': null},
+          },
+          {
+            'id': 's2', 'type': 'produit', 'cibleId': 'p2',
+            'raison': 'Prix trompeur',
+            'description': 'Le prix barre ne correspond a aucun prix pratique auparavant.',
+            'statut': 'traite', 'createdAt': '2026-11-12T16:40:00.000Z',
+            'cible': {'id': 'p2', 'nom': 'Robe wax evasee Ndeye', 'image': null},
+          },
+          {
+            'id': 's3', 'type': 'boutique', 'cibleId': 'bX',
+            'raison': 'Boutique injoignable',
+            'description': 'Aucun retour apres deux messages.',
+            'statut': 'rejete', 'createdAt': '2026-11-05T08:00:00.000Z',
+            'cible': null,
+          },
+        ],
+      };
+    }
     if (c == '/commandes') return {'commandes': commandesClient};
     if (c == '/commandes/vendeur') {
       final statut = params['statut']?.toString();
