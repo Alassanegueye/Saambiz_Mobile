@@ -39,7 +39,20 @@ class CarteBoutiqueGrille extends StatelessWidget {
   /// que rien ne déborde.
   static double hauteur(BuildContext context) {
     final echelle = MediaQuery.textScalerOf(context).scale(10) / 10;
-    return 240 + (echelle - 1).clamp(0.0, 2.0).toDouble() * 64;
+    // 262 : le nom tient sur deux lignes. « Atelier Wax & Cuir » ou
+    // « Maison Ndiaye Couture » se coupaient en plein milieu sur une seule.
+    return 262 + (echelle - 1).clamp(0.0, 2.0).toDouble() * 64;
+  }
+
+  /// Largeur de la même carte dans un carrousel horizontal (l'accueil).
+  ///
+  /// Deux cartes entières, plus l'amorce d'une troisième : c'est cette amorce
+  /// qui dit qu'on peut faire défiler. Sans elle, une rangée pleine ressemble
+  /// à une grille arrêtée, et personne ne pense à glisser.
+  static double largeurCarrousel(BuildContext context) {
+    final ecran = MediaQuery.sizeOf(context).width;
+    // 32 de marges, 12 d'écart entre deux cartes, 28 laissés à l'amorce.
+    return ((ecran - 32 - 12 - 28) / 2).clamp(155.0, 230.0);
   }
 
   /// Grille de cartes : 2 colonnes sur téléphone, 3 sur petite tablette,
@@ -171,16 +184,42 @@ class CarteBoutiqueGrille extends StatelessWidget {
                               ),
                               boxShadow: AppDim.ombreFlottante,
                             ),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(15),
-                              child: logo.isNotEmpty
-                                  ? ImageReseau(
-                                      logo,
-                                      largeurServeur: 180,
-                                      fit: BoxFit.cover,
-                                      repli: const LogoBoutiqueParDefaut(),
-                                    )
-                                  : const LogoBoutiqueParDefaut(),
+                            child: Stack(
+                              clipBehavior: Clip.none,
+                              children: [
+                                Positioned.fill(
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(15),
+                                    child: logo.isNotEmpty
+                                        ? ImageReseau(
+                                            logo,
+                                            largeurServeur: 180,
+                                            fit: BoxFit.cover,
+                                            repli:
+                                                const LogoBoutiqueParDefaut(),
+                                          )
+                                        : const LogoBoutiqueParDefaut(),
+                                  ),
+                                ),
+                                if (verifiee)
+                                  Positioned(
+                                    right: -3,
+                                    bottom: -3,
+                                    child: Container(
+                                      padding: const EdgeInsets.all(2),
+                                      decoration: const BoxDecoration(
+                                        color: AppColor.kWhite,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: const Icon(
+                                        Icons.verified_rounded,
+                                        size: 16,
+                                        color: AppColor.kSecondary,
+                                        semanticLabel: 'Boutique vérifiée',
+                                      ),
+                                    ),
+                                  ),
+                              ],
                             ),
                           ),
                         ),
@@ -195,35 +234,27 @@ class CarteBoutiqueGrille extends StatelessWidget {
                     padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
                     child: Column(
                       children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Flexible(
-                              child: Text(
-                                nom,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                  fontFamily: kPolice,
-                                  fontSize: 15,
-                                  height: 1.25,
-                                  fontWeight: FontWeight.w800,
-                                  letterSpacing: -0.2,
-                                  color: AppColor.kGrayscaleDark100,
-                                ),
-                              ),
-                            ),
-                            if (verifiee) ...[
-                              const SizedBox(width: 4),
-                              const Icon(
-                                Icons.verified_rounded,
-                                size: 15,
-                                color: AppColor.kSecondary,
-                                semanticLabel: 'Boutique vérifiée',
-                              ),
-                            ],
-                          ],
+                        // Le nom seul. La pastille « vérifiée » vit sur le
+                        // logo : dans le fil du texte elle se retrouvait
+                        // seule sur la deuxième ligne des que le nom
+                        // remplissait la première, et une espace insécable
+                        // ne lie pas un WidgetSpan.
+                        Text(
+                          nom,
+                          // Deux lignes : les noms de boutique sont souvent
+                          // longs, et un nom coupé est un nom qu'on ne
+                          // reconnaît pas.
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontFamily: kPolice,
+                            fontSize: 15,
+                            height: 1.25,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: -0.2,
+                            color: AppColor.kGrayscaleDark100,
+                          ),
                         ),
                         if (categorie.isNotEmpty) ...[
                           const SizedBox(height: 2),

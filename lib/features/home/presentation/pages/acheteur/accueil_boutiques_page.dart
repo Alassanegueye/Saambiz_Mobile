@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:saambiz/core/theme/police.dart';
 import 'package:saambiz/core/widgets/image_reseau.dart';
-import 'package:saambiz/core/widgets/logo_boutique.dart';
 
 import '../../../../../core/routes/observateur_routes.dart';
 import '../../../../../core/services/localisation_service.dart';
@@ -18,7 +17,6 @@ import '../../../../../injection_container.dart';
 import '../../../../auth/domain/entities/user.dart';
 import '../../../../auth/presentation/signup/interets_page.dart';
 import '../../../../catalogue/data/produit_catalogue.dart';
-import '../../../../catalogue/presentation/pages/boutique_publique_page.dart';
 import '../../../../catalogue/presentation/pages/produits_page.dart';
 import '../../../../catalogue/presentation/pages/produit_detail_page.dart';
 import '../../../../catalogue/presentation/widgets/bouton_panier.dart';
@@ -1018,7 +1016,15 @@ class _SectionProduits extends StatelessWidget {
   }
 }
 
-/// Section de boutiques : un carrousel horizontal de grandes cartes boutiques.
+/// Section de boutiques : un carrousel horizontal de cartes boutiques.
+///
+/// LA MÊME CARTE QUE LES PAGES « VOIR TOUT » ([CarteBoutiqueGrille]), à une
+/// largeur de carrousel près. L'accueil avait la sienne, large et couchée :
+/// le logo à gauche, trois lignes serrées à droite, une flèche à l'extrémité.
+/// À 275 de large sur un téléphone, une seule carte occupait la rangée, la
+/// suivante était coupée en plein mot, et la ligne d'information finissait
+/// presque toujours en « Boutique acti… ». Deux dessins pour une même chose,
+/// dont un qui tronquait.
 class _SectionBoutiques extends StatelessWidget {
   final AccueilSection section;
   final VoidCallback onVoirTout;
@@ -1026,229 +1032,28 @@ class _SectionBoutiques extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final largeur = CarteBoutiqueGrille.largeurCarrousel(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _TitreSection(section: section, onVoirTout: onVoirTout),
         SizedBox(
-          height: _CarteBoutique.hauteur + 16,
+          // La hauteur suit la taille de texte du système : agrandie dans les
+          // réglages d'accessibilité, la carte grandit au lieu de déborder.
+          height: CarteBoutiqueGrille.hauteur(context) + 16,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             clipBehavior: Clip.none,
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
             itemCount: section.elements.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 14),
-            itemBuilder: (_, i) => _CarteBoutique(donnees: section.elements[i]),
+            separatorBuilder: (_, __) => const SizedBox(width: 12),
+            itemBuilder: (_, i) => SizedBox(
+              width: largeur,
+              child: CarteBoutiqueGrille(donnees: section.elements[i]),
+            ),
           ),
         ),
       ],
-    );
-  }
-}
-
-/// Carte d'une boutique amelioree : carte profil de magasin distinctive,
-/// differente d'une carte produit, avec avatar, categorie, note, et bouton Visiter.
-class _CarteBoutique extends StatelessWidget {
-  final Map<String, dynamic> donnees;
-  const _CarteBoutique({required this.donnees});
-
-  /// Taille dans le carrousel de l'accueil. Les pages « Voir tout » ont leur
-  /// propre carte, faite pour la grille : [CarteBoutiqueGrille].
-  static const double largeur = 275;
-  static const double hauteur = 126;
-
-  void _ouvrir(BuildContext context) {
-    final id = donnees['id']?.toString();
-    if (id == null) return;
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => BoutiquePubliquePage(
-          boutiqueId: id,
-          apercu: BoutiqueResume.fromJson(donnees),
-        ),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final logo = donnees['logo']?.toString();
-    final nom = donnees['nom']?.toString() ?? 'Boutique';
-    final verifiee = donnees['verifiee'] == true;
-    final distance = donnees['distanceKm'];
-    final note = donnees['note'];
-    final details = [
-      donnees['categorie']?.toString(),
-      donnees['localisation']?.toString(),
-    ].where((e) => e != null && e.isNotEmpty).join(' · ');
-
-    final nbArticles = donnees['nombreProduits'];
-
-    return Pressable(
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: () => _ouvrir(context),
-        child: Container(
-          width: largeur,
-          height: hauteur,
-          padding: const EdgeInsets.all(13),
-          decoration: BoxDecoration(
-            color: AppColor.kWhite,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: AppColor.kLine, width: 1.2),
-            boxShadow: [
-              BoxShadow(
-                color: AppColor.kPrimary.withValues(alpha: 0.05),
-                blurRadius: 16,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // Logo boutique dans un conteneur arrondi
-              Container(
-                width: 56,
-                height: 56,
-                decoration: BoxDecoration(
-                  color: AppColor.kPrimaryLight,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppColor.kLine),
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(15),
-                  child: logo != null && logo.isNotEmpty
-                      ? ImageReseau(
-                          logo,
-                          largeurServeur: 160,
-                          repli: const LogoBoutiqueParDefaut(rayon: 15),
-                        )
-                      : const LogoBoutiqueParDefaut(rayon: 15),
-                ),
-              ),
-              const SizedBox(width: 12),
-              // Nom, categorie, note et distance
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Row(
-                      children: [
-                        Flexible(
-                          child: Text(
-                            nom,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontFamily: kPolice,
-                              fontSize: 14.5,
-                              fontWeight: FontWeight.w800,
-                              color: AppColor.kGrayscaleDark100,
-                            ),
-                          ),
-                        ),
-                        if (verifiee) ...[
-                          const SizedBox(width: 4),
-                          const Icon(
-                            Icons.verified_rounded,
-                            size: 15,
-                            color: AppColor.kSecondary,
-                          ),
-                        ],
-                      ],
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      details.isNotEmpty ? details : 'Boutique certifiée',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontFamily: kPolice,
-                        fontSize: 11.5,
-                        color: AppColor.kGrayscale40,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        // Seulement une vraie note : une boutique sans avis
-                        // n'affiche pas de chiffre de remplissage.
-                        if (note is num) ...[
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 6,
-                              vertical: 2.5,
-                            ),
-                            decoration: BoxDecoration(
-                              color: AppColor.kSecondaryLight,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(
-                                  Icons.star_rounded,
-                                  size: 13,
-                                  color: AppColor.kSecondaryDark,
-                                ),
-                                const SizedBox(width: 3),
-                                Text(
-                                  note.toStringAsFixed(1).replaceAll('.', ','),
-                                  style: const TextStyle(
-                                    fontFamily: kPolice,
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w700,
-                                    color: AppColor.kSecondaryDark,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                        ],
-                        Flexible(
-                          child: Text(
-                            distance != null
-                                ? '${distance.toStringAsFixed(1)} km'
-                                : (nbArticles != null
-                                      ? '$nbArticles articles'
-                                      : 'Boutique active'),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontFamily: kPolice,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w500,
-                              color: AppColor.kGrayscale40,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 6),
-              // Bouton fleche vers la boutique
-              Container(
-                width: 32,
-                height: 32,
-                decoration: BoxDecoration(
-                  color: AppColor.kPrimaryLight,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: const Icon(
-                  Icons.arrow_forward_ios_rounded,
-                  size: 13,
-                  color: AppColor.kPrimary,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }
