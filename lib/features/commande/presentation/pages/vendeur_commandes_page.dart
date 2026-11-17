@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/ecouteur_commandes.dart';
 import 'package:saambiz/core/widgets/onglets_conserves.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/widgets/page_vendeur.dart';
@@ -25,63 +26,69 @@ class VendeurCommandesPage extends StatelessWidget {
       child: ActualiserAuRetour(
         onRetour: (context) =>
             context.read<CommandeBloc>().add(LoadCommandesVendeur()),
-        child: Builder(
-          builder: (context) => PageVendeur(
-            titre: 'Commandes',
-            boutonFlottant: FloatingActionButton.extended(
-              onPressed: () async {
-                final bloc = context.read<CommandeBloc>();
-                final creee = await Navigator.of(context).push<bool>(
-                  MaterialPageRoute(
-                    builder: (_) => const NouvelleCommandeVendeurPage(),
-                  ),
-                );
-                if (creee == true) bloc.add(LoadCommandesVendeur());
-              },
-              backgroundColor: AppColor.kSecondary,
-              foregroundColor: AppColor.kPrimary,
-              elevation: 2,
-              icon: const Icon(Icons.add_rounded),
-              label: const Text(
-                'Nouvelle commande',
-                style: TextStyle(
-                  fontFamily: kPolice,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
-            corps: BlocBuilder<CommandeBloc, CommandeState>(
-              buildWhen: (avant, apres) =>
-                  !(apres is CommandeLoading && avant is CommandesLoaded),
-              builder: (context, state) {
-                if (state is CommandeLoading || state is CommandeInitial) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                if (state is CommandeError) {
-                  return Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          state.message,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(color: Color(0xFF5B6C8A)),
-                        ),
-                        TextButton(
-                          onPressed: () => context.read<CommandeBloc>().add(
-                            LoadCommandesVendeur(),
-                          ),
-                          child: const Text('Réessayer'),
-                        ),
-                      ],
+        child: EcouteurCommandes(
+          // Le client paie ou annule, ou le vendeur agit depuis un autre
+          // appareil : la liste se relit sans qu'on ait à y revenir.
+          onChange: (context, _) =>
+              context.read<CommandeBloc>().add(LoadCommandesVendeur()),
+          child: Builder(
+            builder: (context) => PageVendeur(
+              titre: 'Commandes',
+              boutonFlottant: FloatingActionButton.extended(
+                onPressed: () async {
+                  final bloc = context.read<CommandeBloc>();
+                  final creee = await Navigator.of(context).push<bool>(
+                    MaterialPageRoute(
+                      builder: (_) => const NouvelleCommandeVendeurPage(),
                     ),
                   );
-                }
-                if (state is CommandesLoaded) {
-                  return _ListeCommandes(commandes: state.commandes);
-                }
-                return const SizedBox.shrink();
-              },
+                  if (creee == true) bloc.add(LoadCommandesVendeur());
+                },
+                backgroundColor: AppColor.kSecondary,
+                foregroundColor: AppColor.kPrimary,
+                elevation: 2,
+                icon: const Icon(Icons.add_rounded),
+                label: const Text(
+                  'Nouvelle commande',
+                  style: TextStyle(
+                    fontFamily: kPolice,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+              corps: BlocBuilder<CommandeBloc, CommandeState>(
+                buildWhen: (avant, apres) =>
+                    !(apres is CommandeLoading && avant is CommandesLoaded),
+                builder: (context, state) {
+                  if (state is CommandeLoading || state is CommandeInitial) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (state is CommandeError) {
+                    return Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            state.message,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(color: Color(0xFF5B6C8A)),
+                          ),
+                          TextButton(
+                            onPressed: () => context.read<CommandeBloc>().add(
+                              LoadCommandesVendeur(),
+                            ),
+                            child: const Text('Réessayer'),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+                  if (state is CommandesLoaded) {
+                    return _ListeCommandes(commandes: state.commandes);
+                  }
+                  return const SizedBox.shrink();
+                },
+              ),
             ),
           ),
         ),

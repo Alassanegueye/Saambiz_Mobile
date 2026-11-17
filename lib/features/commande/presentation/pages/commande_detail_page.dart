@@ -1,3 +1,7 @@
+import 'dart:async';
+
+import '../../../../core/services/socket_service.dart';
+
 import 'package:saambiz/core/widgets/messages.dart';
 import 'package:saambiz/core/widgets/libelle_obligatoire.dart';
 import 'package:saambiz/core/widgets/image_reseau.dart';
@@ -102,6 +106,7 @@ class _DetailView extends StatefulWidget {
 
 class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
   late CommandeModel commande = widget.args.commande;
+  StreamSubscription<Map<String, dynamic>>? _surCommande;
   bool get isVendeur => widget.args.isVendeur;
 
   @override
@@ -112,10 +117,19 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
     // serveur a le dernier mot. Sans cette relecture, une commande acceptée
     // ou mise en préparation réapparaissait « en attente » en revenant.
     WidgetsBinding.instance.addPostFrameCallback((_) => _actualiser());
+    // Le changement peut venir d'ailleurs : le client paie ou annule, le
+    // vendeur agit depuis un autre appareil, le site de la boutique encaisse.
+    // La fiche affichee doit suivre, pas attendre qu'on la quitte.
+    if (sl.isRegistered<SocketService>()) {
+      _surCommande = sl<SocketService>().onCommandeChangee.listen((donnees) {
+        if (mounted && donnees['id']?.toString() == commande.id) _actualiser();
+      });
+    }
   }
 
   @override
   void dispose() {
+    _surCommande?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }

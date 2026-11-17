@@ -3,6 +3,8 @@ import 'package:saambiz/core/widgets/onglets_conserves.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+
+import '../../../../core/services/socket_service.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:saambiz/core/theme/police.dart';
 
@@ -63,6 +65,7 @@ class _ListeState extends State<_Liste> with RetourSurOnglet {
   void surRetourOnglet() => _recharger();
 
   Timer? _polling;
+  StreamSubscription<Map<String, dynamic>>? _surCommande;
   final TextEditingController _rechercheCtrl = TextEditingController();
   String _recherche = '';
   String _statutFiltre = 'tous';
@@ -70,7 +73,15 @@ class _ListeState extends State<_Liste> with RetourSurOnglet {
   @override
   void initState() {
     super.initState();
-    // Recharge régulière : les statuts changent côté vendeur.
+    // Le serveur previent les deux parties des qu'une commande change
+    // (`commande:statut`) : le vendeur accepte, l'ecran suit aussitot.
+    if (sl.isRegistered<SocketService>()) {
+      _surCommande = sl<SocketService>().onCommandeChangee.listen((_) {
+        if (mounted) _recharger();
+      });
+    }
+    // Filet de securite : le temps reel peut etre coupe (reseau, proxy qui
+    // ferme les websockets). Conserve, mais il n'est plus le seul recours.
     _polling = Timer.periodic(const Duration(seconds: 30), (_) {
       if (mounted && OngletsConserves.estVisible(context)) _recharger();
     });
@@ -79,6 +90,7 @@ class _ListeState extends State<_Liste> with RetourSurOnglet {
   @override
   void dispose() {
     _polling?.cancel();
+    _surCommande?.cancel();
     _rechercheCtrl.dispose();
     super.dispose();
   }
@@ -158,144 +170,144 @@ class _ListeState extends State<_Liste> with RetourSurOnglet {
     return PageVendeur(
       titre: 'Mes commandes',
       corps: BlocBuilder<CommandeBloc, CommandeState>(
-          buildWhen: (avant, apres) =>
-              !(apres is CommandeLoading && avant is CommandesLoaded),
-          builder: (context, state) {
-            if (state is CommandeLoading || state is CommandeInitial) {
-              return const ShimmerList();
-            }
-            if (state is CommandeError) {
-              return _Erreur(message: state.message, onRetry: _recharger);
-            }
-            if (state is CommandesLoaded) {
-              final toutes = state.commandes;
-              final filtrees = _filtrer(toutes);
+        buildWhen: (avant, apres) =>
+            !(apres is CommandeLoading && avant is CommandesLoaded),
+        builder: (context, state) {
+          if (state is CommandeLoading || state is CommandeInitial) {
+            return const ShimmerList();
+          }
+          if (state is CommandeError) {
+            return _Erreur(message: state.message, onRetry: _recharger);
+          }
+          if (state is CommandesLoaded) {
+            final toutes = state.commandes;
+            final filtrees = _filtrer(toutes);
 
-              return RefreshIndicator(
-                color: AppColor.kPrimary,
-                onRefresh: () async => _recharger(),
-                child: Column(
-                  children: [
-                    // Barre de recherche de commande (comme sur l'image)
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 6, 16, 10),
-                      child: _BarreRechercheColis(
-                        controller: _rechercheCtrl,
-                        onChanged: (v) => setState(() => _recherche = v),
-                        onClear: () {
-                          _rechercheCtrl.clear();
-                          setState(() => _recherche = '');
-                        },
-                      ),
+            return RefreshIndicator(
+              color: AppColor.kPrimary,
+              onRefresh: () async => _recharger(),
+              child: Column(
+                children: [
+                  // Barre de recherche de commande (comme sur l'image)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 6, 16, 10),
+                    child: _BarreRechercheColis(
+                      controller: _rechercheCtrl,
+                      onChanged: (v) => setState(() => _recherche = v),
+                      onClear: () {
+                        _rechercheCtrl.clear();
+                        setState(() => _recherche = '');
+                      },
                     ),
+                  ),
 
-                    // Filtres horizontaux par statut avec compteur
-                    SizedBox(
-                      height: 44,
-                      child: ListView.separated(
-                        scrollDirection: Axis.horizontal,
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        itemCount: _kFiltresStatut.length,
-                        separatorBuilder: (_, __) => const SizedBox(width: 8),
-                        itemBuilder: (context, i) {
-                          final f = _kFiltresStatut[i];
-                          final count = _calculerNombre(toutes, f.cle);
-                          final actif = _statutFiltre == f.cle;
+                  // Filtres horizontaux par statut avec compteur
+                  SizedBox(
+                    height: 44,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      itemCount: _kFiltresStatut.length,
+                      separatorBuilder: (_, __) => const SizedBox(width: 8),
+                      itemBuilder: (context, i) {
+                        final f = _kFiltresStatut[i];
+                        final count = _calculerNombre(toutes, f.cle);
+                        final actif = _statutFiltre == f.cle;
 
-                          return _PuceFiltreCommande(
-                            label: f.label,
-                            count: count,
-                            actif: actif,
-                            onTap: () => setState(() => _statutFiltre = f.cle),
-                          );
-                        },
-                      ),
+                        return _PuceFiltreCommande(
+                          label: f.label,
+                          count: count,
+                          actif: actif,
+                          onTap: () => setState(() => _statutFiltre = f.cle),
+                        );
+                      },
                     ),
-                    const SizedBox(height: 10),
+                  ),
+                  const SizedBox(height: 10),
 
-                    // Liste des commandes ou état vide
-                    Expanded(
-                      child: filtrees.isEmpty
-                          ? (toutes.isEmpty
-                                ? EmptyState(
-                                    icon: Icons.receipt_long_outlined,
-                                    title: 'Aucune commande',
-                                    subtitle:
-                                        'Vos commandes passées apparaîtront ici.',
-                                    actionLabel: 'Découvrir les boutiques',
-                                    scrollable: false,
-                                    onAction: () {
-                                      explorerBoutiquesDemande.value++;
-                                      ongletAcheteurDemande.value = 1;
-                                    },
-                                  )
-                                : const Center(
-                                    child: Padding(
-                                      padding: EdgeInsets.all(24),
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Icon(
-                                            Icons.search_off_rounded,
-                                            size: 42,
+                  // Liste des commandes ou état vide
+                  Expanded(
+                    child: filtrees.isEmpty
+                        ? (toutes.isEmpty
+                              ? EmptyState(
+                                  icon: Icons.receipt_long_outlined,
+                                  title: 'Aucune commande',
+                                  subtitle:
+                                      'Vos commandes passées apparaîtront ici.',
+                                  actionLabel: 'Découvrir les boutiques',
+                                  scrollable: false,
+                                  onAction: () {
+                                    explorerBoutiquesDemande.value++;
+                                    ongletAcheteurDemande.value = 1;
+                                  },
+                                )
+                              : const Center(
+                                  child: Padding(
+                                    padding: EdgeInsets.all(24),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          Icons.search_off_rounded,
+                                          size: 42,
+                                          color: AppColor.kGrayscale40,
+                                        ),
+                                        SizedBox(height: 10),
+                                        Text(
+                                          'Aucune commande trouvée',
+                                          style: TextStyle(
+                                            fontFamily: kPolice,
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.w700,
+                                            color: AppColor.kGrayscaleDark100,
+                                          ),
+                                        ),
+                                        SizedBox(height: 4),
+                                        Text(
+                                          'Modifiez vos termes de recherche ou sélectionnez un autre statut.',
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                            fontFamily: kPolice,
+                                            fontSize: 12.5,
                                             color: AppColor.kGrayscale40,
                                           ),
-                                          SizedBox(height: 10),
-                                          Text(
-                                            'Aucune commande trouvée',
-                                            style: TextStyle(
-                                              fontFamily: kPolice,
-                                              fontSize: 15,
-                                              fontWeight: FontWeight.w700,
-                                              color: AppColor.kGrayscaleDark100,
-                                            ),
-                                          ),
-                                          SizedBox(height: 4),
-                                          Text(
-                                            'Modifiez vos termes de recherche ou sélectionnez un autre statut.',
-                                            textAlign: TextAlign.center,
-                                            style: TextStyle(
-                                              fontFamily: kPolice,
-                                              fontSize: 12.5,
-                                              color: AppColor.kGrayscale40,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
+                                        ),
+                                      ],
                                     ),
-                                  ))
-                          : ListView.separated(
-                              padding: const EdgeInsets.fromLTRB(
-                                16,
-                                4,
-                                16,
-                                kEspaceBarreBas,
-                              ),
-                              itemCount: filtrees.length,
-                              separatorBuilder: (_, __) =>
-                                  const SizedBox(height: 14),
-                              itemBuilder: (context, i) {
-                                final c = filtrees[i];
-                                return CommandeCard(
-                                  commande: c,
-                                  onTap: () async {
-                                    await Navigator.of(context).pushNamed(
-                                      AppRouter.commandeDetailRoute,
-                                      arguments: CommandeDetailArgs(c),
-                                    );
-                                    if (mounted) _recharger();
-                                  },
-                                );
-                              },
+                                  ),
+                                ))
+                        : ListView.separated(
+                            padding: const EdgeInsets.fromLTRB(
+                              16,
+                              4,
+                              16,
+                              kEspaceBarreBas,
                             ),
-                    ),
-                  ],
-                ),
-              );
-            }
-            return const SizedBox.shrink();
-          },
-        ),
+                            itemCount: filtrees.length,
+                            separatorBuilder: (_, __) =>
+                                const SizedBox(height: 14),
+                            itemBuilder: (context, i) {
+                              final c = filtrees[i];
+                              return CommandeCard(
+                                commande: c,
+                                onTap: () async {
+                                  await Navigator.of(context).pushNamed(
+                                    AppRouter.commandeDetailRoute,
+                                    arguments: CommandeDetailArgs(c),
+                                  );
+                                  if (mounted) _recharger();
+                                },
+                              );
+                            },
+                          ),
+                  ),
+                ],
+              ),
+            );
+          }
+          return const SizedBox.shrink();
+        },
+      ),
     );
   }
 }
@@ -323,164 +335,159 @@ class _InviteState extends State<_Invite> {
     return PageVendeur(
       titre: 'Mes commandes',
       corps: Column(
-          children: [
-            // Barre de recherche (identique connecté)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 6, 16, 10),
-              child: _BarreRechercheColis(
-                controller: _ctrl,
-                onChanged: (_) {},
-                onClear: () => _ctrl.clear(),
-              ),
+        children: [
+          // Barre de recherche (identique connecté)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 6, 16, 10),
+            child: _BarreRechercheColis(
+              controller: _ctrl,
+              onChanged: (_) {},
+              onClear: () => _ctrl.clear(),
             ),
+          ),
 
-            // Filtres de statut avec compteurs à 0 pour invité
-            SizedBox(
-              height: 44,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                itemCount: _kFiltresStatut.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 8),
-                itemBuilder: (context, i) {
-                  final f = _kFiltresStatut[i];
-                  final actif = _statutFiltre == f.cle;
+          // Filtres de statut avec compteurs à 0 pour invité
+          SizedBox(
+            height: 44,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              itemCount: _kFiltresStatut.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 8),
+              itemBuilder: (context, i) {
+                final f = _kFiltresStatut[i];
+                final actif = _statutFiltre == f.cle;
 
-                  return _PuceFiltreCommande(
-                    label: f.label,
-                    count: 0,
-                    actif: actif,
-                    onTap: () => setState(() => _statutFiltre = f.cle),
-                  );
-                },
-              ),
+                return _PuceFiltreCommande(
+                  label: f.label,
+                  count: 0,
+                  actif: actif,
+                  onTap: () => setState(() => _statutFiltre = f.cle),
+                );
+              },
             ),
-            const SizedBox(height: 20),
+          ),
+          const SizedBox(height: 20),
 
-            // Carte d'invitation à se connecter
-            Expanded(
-              child: Center(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(
-                    20,
-                    0,
-                    20,
-                    kEspaceBarreBas,
+          // Carte d'invitation à se connecter
+          Expanded(
+            child: Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, kEspaceBarreBas),
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.fromLTRB(22, 28, 22, 24),
+                  decoration: BoxDecoration(
+                    color: AppColor.kWhite,
+                    borderRadius: BorderRadius.circular(22),
+                    border: Border.all(color: AppColor.kLine),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColor.kPrimary.withValues(alpha: 0.06),
+                        blurRadius: 18,
+                        offset: const Offset(0, 6),
+                      ),
+                    ],
                   ),
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.fromLTRB(22, 28, 22, 24),
-                    decoration: BoxDecoration(
-                      color: AppColor.kWhite,
-                      borderRadius: BorderRadius.circular(22),
-                      border: Border.all(color: AppColor.kLine),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColor.kPrimary.withValues(alpha: 0.06),
-                          blurRadius: 18,
-                          offset: const Offset(0, 6),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 60,
+                        height: 60,
+                        decoration: const BoxDecoration(
+                          color: AppColor.kPrimaryLight,
+                          shape: BoxShape.circle,
                         ),
-                      ],
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          width: 60,
-                          height: 60,
-                          decoration: const BoxDecoration(
-                            color: AppColor.kPrimaryLight,
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.local_shipping_outlined,
-                            size: 28,
-                            color: AppColor.kPrimary,
-                          ),
+                        child: const Icon(
+                          Icons.local_shipping_outlined,
+                          size: 28,
+                          color: AppColor.kPrimary,
                         ),
-                        const SizedBox(height: 16),
-                        const Text(
-                          'Suivez vos commandes',
-                          style: TextStyle(
-                            fontFamily: kPolice,
-                            fontSize: 17,
-                            fontWeight: FontWeight.w800,
-                            color: AppColor.kGrayscaleDark100,
-                          ),
+                      ),
+                      const SizedBox(height: 16),
+                      const Text(
+                        'Suivez vos commandes',
+                        style: TextStyle(
+                          fontFamily: kPolice,
+                          fontSize: 17,
+                          fontWeight: FontWeight.w800,
+                          color: AppColor.kGrayscaleDark100,
                         ),
-                        const SizedBox(height: 6),
-                        const Text(
-                          'Connectez-vous pour retrouver vos achats, vérifier la préparation de vos colis et suivre la livraison en temps réel.',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontFamily: kPolice,
-                            fontSize: 13,
-                            height: 1.45,
-                            color: AppColor.kGrayscale40,
-                          ),
+                      ),
+                      const SizedBox(height: 6),
+                      const Text(
+                        'Connectez-vous pour retrouver vos achats, vérifier la préparation de vos colis et suivre la livraison en temps réel.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontFamily: kPolice,
+                          fontSize: 13,
+                          height: 1.45,
+                          color: AppColor.kGrayscale40,
                         ),
-                        const SizedBox(height: 20),
-                        SizedBox(
-                          width: double.infinity,
-                          child: FilledButton(
-                            onPressed: () => Navigator.of(
-                              context,
-                            ).pushNamed(AppRouter.loginRoute),
-                            style: FilledButton.styleFrom(
-                              backgroundColor: AppColor.kPrimary,
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(14),
-                              ),
-                            ),
-                            child: const Text(
-                              'Se connecter',
-                              style: TextStyle(
-                                fontFamily: kPolice,
-                                fontSize: 14.5,
-                                fontWeight: FontWeight.w700,
-                                color: AppColor.kWhite,
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        GestureDetector(
-                          onTap: () => Navigator.of(
+                      ),
+                      const SizedBox(height: 20),
+                      SizedBox(
+                        width: double.infinity,
+                        child: FilledButton(
+                          onPressed: () => Navigator.of(
                             context,
-                          ).pushNamed(AppRouter.profileChoiceRoute),
-                          child: RichText(
-                            text: const TextSpan(
-                              children: [
-                                TextSpan(
-                                  text: 'Pas encore de compte ? ',
-                                  style: TextStyle(
-                                    fontFamily: kPolice,
-                                    fontSize: 13,
-                                    color: AppColor.kGrayscale40,
-                                  ),
-                                ),
-                                TextSpan(
-                                  text: 'Créer un compte',
-                                  style: TextStyle(
-                                    fontFamily: kPolice,
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w700,
-                                    color: AppColor.kPrimary,
-                                  ),
-                                ),
-                              ],
+                          ).pushNamed(AppRouter.loginRoute),
+                          style: FilledButton.styleFrom(
+                            backgroundColor: AppColor.kPrimary,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                          ),
+                          child: const Text(
+                            'Se connecter',
+                            style: TextStyle(
+                              fontFamily: kPolice,
+                              fontSize: 14.5,
+                              fontWeight: FontWeight.w700,
+                              color: AppColor.kWhite,
                             ),
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                      const SizedBox(height: 12),
+                      GestureDetector(
+                        onTap: () => Navigator.of(
+                          context,
+                        ).pushNamed(AppRouter.profileChoiceRoute),
+                        child: RichText(
+                          text: const TextSpan(
+                            children: [
+                              TextSpan(
+                                text: 'Pas encore de compte ? ',
+                                style: TextStyle(
+                                  fontFamily: kPolice,
+                                  fontSize: 13,
+                                  color: AppColor.kGrayscale40,
+                                ),
+                              ),
+                              TextSpan(
+                                text: 'Créer un compte',
+                                style: TextStyle(
+                                  fontFamily: kPolice,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColor.kPrimary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:saambiz/core/services/socket_service.dart';
 import 'package:saambiz/core/widgets/messages.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:saambiz/core/widgets/onglets_conserves.dart';
@@ -71,6 +74,14 @@ class _HomePageState extends State<HomePage>
     _loadUtilisateur();
   }
 
+  /// Une commande a change d'etat, ici ou ailleurs.
+  ///
+  /// Le retour d'onglet couvrait deja le vendeur seul sur son telephone. Il
+  /// ne couvrait pas le client qui paie ou annule pendant que le tableau de
+  /// bord est a l'ecran : les compteurs et « Dernieres commandes » restaient
+  /// alors sur ce qu'ils avaient lu en arrivant, statut compris.
+  StreamSubscription<Map<String, dynamic>>? _surCommande;
+
   bool _loading = false;
   int _nbCommandes = 0;
   final int _nbFavoris = 0;
@@ -120,6 +131,11 @@ class _HomePageState extends State<HomePage>
       if (mounted) _contentCtrl.forward();
     });
     _utilisateur = widget.user;
+    if (sl.isRegistered<SocketService>()) {
+      _surCommande = sl<SocketService>().onCommandeChangee.listen((_) {
+        if (mounted) _loadStats();
+      });
+    }
     _loadStats();
     _loadUtilisateur();
     _loadCertification();
@@ -190,6 +206,7 @@ class _HomePageState extends State<HomePage>
 
   @override
   void dispose() {
+    _surCommande?.cancel();
     _contentCtrl.dispose();
     _produitBloc?.close();
     super.dispose();
@@ -266,9 +283,11 @@ class _HomePageState extends State<HomePage>
   );
 
   void _openNotifications() async {
-    await Navigator.of(
-      context,
-    ).push(MaterialPageRoute(builder: (_) => const NotificationsPage(pourVendeur: true)));
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => const NotificationsPage(pourVendeur: true),
+      ),
+    );
     _loadStats(); // rafraîchir le badge (notificationsNonLues) au retour
   }
 
@@ -1053,10 +1072,7 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
       }
     } catch (e) {
       if (mounted) {
-        afficherErreur(
-          context,
-          'WhatsApp n\'a pas pu s\'ouvrir. Réessayez.',
-        );
+        afficherErreur(context, 'WhatsApp n\'a pas pu s\'ouvrir. Réessayez.');
       }
     }
   }

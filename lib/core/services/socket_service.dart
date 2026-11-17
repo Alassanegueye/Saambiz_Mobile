@@ -20,6 +20,8 @@ class SocketService {
       StreamController<Map<String, dynamic>>.broadcast();
   final StreamController<Map<String, dynamic>> _onNewNotificationCtrl =
       StreamController<Map<String, dynamic>>.broadcast();
+  final StreamController<Map<String, dynamic>> _onCommandeChangeeCtrl =
+      StreamController<Map<String, dynamic>>.broadcast();
 
   SocketService({required this.tokenService}) {
     _authSub = tokenService.authChanges.listen(_onAuthChanged);
@@ -35,6 +37,17 @@ class SocketService {
   /// Flux des nouvelles notifications reçues (événement socket `notification:new`).
   Stream<Map<String, dynamic>> get onNewNotification =>
       _onNewNotificationCtrl.stream;
+
+  /// Une commande a changé d'état, quel que soit l'auteur du changement
+  /// (événement socket `commande:statut`).
+  ///
+  /// Le serveur l'envoie à l'acheteur ET au vendeur, avec le strict
+  /// nécessaire : `{id, statut, statutPaiement}`. Les écrans concernés s'en
+  /// servent pour se relire — sans ça, le tableau de bord du vendeur et la
+  /// fiche de l'acheteur affichaient deux statuts différents pour la même
+  /// commande, chacun figé sur ce qu'il avait lu en arrivant.
+  Stream<Map<String, dynamic>> get onCommandeChangee =>
+      _onCommandeChangeeCtrl.stream;
 
   Future<void> _onAuthChanged(bool authenticated) async {
     if (authenticated) {
@@ -90,6 +103,11 @@ class SocketService {
           _onNewNotificationCtrl.add(Map<String, dynamic>.from(data));
         }
       })
+      ..on('commande:statut', (data) {
+        if (data is Map) {
+          _onCommandeChangeeCtrl.add(Map<String, dynamic>.from(data));
+        }
+      })
       ..connect();
   }
 
@@ -103,5 +121,6 @@ class SocketService {
     _disconnect();
     _onNewMessageCtrl.close();
     _onNewNotificationCtrl.close();
+    _onCommandeChangeeCtrl.close();
   }
 }
