@@ -42,6 +42,11 @@ class ProduitModel {
   /// Mis en ligne par le vendeur (interrupteur « En ligne / Hors ligne »).
   final bool disponible;
 
+  /// Décision de la modération : `approuve`, `en_attente` ou `rejete`. Le
+  /// catalogue ne montre aux clients que les produits approuvés, quel que
+  /// soit l'interrupteur du vendeur.
+  final String statut;
+
   ProduitModel({
     required this.id,
     required this.nom,
@@ -60,6 +65,7 @@ class ProduitModel {
     this.categorieId = '',
     this.attributs = const {},
     this.disponible = true,
+    this.statut = 'approuve',
   });
 
   factory ProduitModel.fromJson(Map<String, dynamic> json) {
@@ -107,6 +113,7 @@ class ProduitModel {
       prixPromo: (json['prix_promo'] ?? json['prixPromo'])?.toString(),
       quantite: (json['quantite'] ?? 0) as int,
       disponible: json['disponible'] != false && json['disponible'] != 'false',
+      statut: (json['statut'] ?? 'approuve').toString(),
       image: json['image'] ?? '',
       ville: ville,
       categorie: categorie,
@@ -142,6 +149,7 @@ class ProduitModel {
     categorieId: categorieId,
     attributs: attributs,
     disponible: valeur,
+    statut: statut,
   );
 
   Map<String, dynamic> toJson() => {

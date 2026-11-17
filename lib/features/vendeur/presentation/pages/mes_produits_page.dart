@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/confirmation.dart';
 import 'package:saambiz/core/widgets/messages.dart';
 import 'package:saambiz/core/widgets/onglets_conserves.dart';
 import 'package:saambiz/core/widgets/image_reseau.dart';
@@ -21,9 +22,29 @@ class _C {
   static const white = Color(0xFFFFFFFF);
   static const sub = Color(0xFF5B6C8A);
   static const border = Color(0xFFE6EAF0);
-  static const success = Color(0xFF1E9E62);
   static const danger = Color(0xFFD64533);
   static const greenLight = Color(0xFFE8EEF7);
+}
+
+/// Le statut en mots et en couleur. La modération d'abord : un produit
+/// refusé ou en attente reste caché aux clients, même en ligne. Puis hors
+/// ligne en gris, la rupture en rouge, le stock qui s'épuise en or (3 ou
+/// moins, le seuil de la vitrine), le reste en vert.
+(String, Color) statutProduitVendeur(ProduitModel p) {
+  if (p.statut == 'rejete') {
+    return ('Refusé par la modération', AppColor.kErreur);
+  }
+  if (p.statut == 'en_attente') {
+    return ('En attente de validation', AppColor.kSecondaryDark);
+  }
+  if (!p.disponible) {
+    return ('Hors ligne · invisible pour vos clients', AppColor.kGrayscale40);
+  }
+  if (p.quantite <= 0) return ('Rupture de stock', AppColor.kErreur);
+  if (p.quantite <= 3) {
+    return ('Plus que ${p.quantite} en stock', AppColor.kSecondaryDark);
+  }
+  return ('En ligne · ${p.quantite} en stock', AppColor.kSucces);
 }
 
 class MesProduitsPage extends StatelessWidget {
@@ -230,96 +251,142 @@ class _MesProduitsViewState extends State<_MesProduitsView> {
     );
   }
 
-  // Carte produit
+  // Carte produit : le toucher ouvre le produit à modifier, l'interrupteur
+  // le met en ligne ou le retire, le menu garde Modifier et Supprimer.
   Widget _buildCard(BuildContext context, ProduitModel p) {
     final enLigne = _enLigne(p);
-    return Container(
-      padding: const EdgeInsets.fromLTRB(12, 12, 4, 12),
-      decoration: BoxDecoration(
-        color: _C.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: _C.border),
-      ),
-      child: Row(
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: p.image.isNotEmpty
-                ? ImageReseau(
-                    p.image,
-                    width: 64,
-                    height: 64,
-                    fit: BoxFit.cover,
-                    repli: _imgFallback(),
-                  )
-                : _imgFallback(),
+    final (statut, couleurStatut) = statutProduitVendeur(p);
+    // Caché aux clients : hors ligne, ou pas (encore) approuvé.
+    final visible = enLigne && p.statut == 'approuve';
+    return Material(
+      color: _C.white,
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: () => _ouvrirForm(context, produit: p),
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(10, 10, 0, 10),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: _C.border),
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  p.nom,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontFamily: kPolice,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: _C.black,
-                  ),
+          child: Row(
+            children: [
+              // Caché aux clients, la photo pâlit.
+              Opacity(
+                opacity: visible ? 1 : 0.45,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: p.image.isNotEmpty
+                      ? ImageReseau(
+                          p.image,
+                          width: 68,
+                          height: 68,
+                          fit: BoxFit.cover,
+                          repli: _imgFallback(),
+                        )
+                      : _imgFallback(),
                 ),
-                const SizedBox(height: 3),
-                Text(
-                  formaterPrix(double.tryParse(p.prix) ?? 0),
-                  style: const TextStyle(
-                    fontFamily: kPolice,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: _C.green,
-                  ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      p.nom,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontFamily: kPolice,
+                        fontSize: 14,
+                        height: 1.25,
+                        fontWeight: FontWeight.w700,
+                        color: _C.black,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      formaterPrix(double.tryParse(p.prix) ?? 0),
+                      style: const TextStyle(
+                        fontFamily: kPolice,
+                        fontSize: 14.5,
+                        fontWeight: FontWeight.w800,
+                        color: _C.green,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(top: 4.5),
+                          child: Container(
+                            width: 7,
+                            height: 7,
+                            decoration: BoxDecoration(
+                              color: couleurStatut,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            statut,
+                            style: TextStyle(
+                              fontFamily: kPolice,
+                              fontSize: 12,
+                              height: 1.3,
+                              fontWeight: FontWeight.w600,
+                              color: couleurStatut,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 3),
-                Text(
-                  !enLigne
-                      ? 'Hors ligne · invisible pour vos clients'
-                      : p.quantite > 0
-                      ? 'En ligne · ${p.quantite} en stock'
-                      : 'En ligne · rupture de stock',
-                  style: TextStyle(
-                    fontFamily: kPolice,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                    color: enLigne ? _C.success : _C.sub,
-                  ),
+              ),
+              // Comme l'interrupteur « Boutique en ligne » : piste verte.
+              // L'ancienne couleur marine effaçait la pastille sur la piste
+              // marine du thème.
+              Switch.adaptive(
+                value: enLigne,
+                activeTrackColor: AppColor.kSucces,
+                onChanged: (_) => context.read<VendeurProduitBloc>().add(
+                  ToggleDispoProduit(p.id),
                 ),
-              ],
-            ),
-          ),
-          Switch.adaptive(
-            value: enLigne,
-            activeColor: _C.green,
-            onChanged: (_) => context.read<VendeurProduitBloc>().add(
-              ToggleDispoProduit(p.id),
-            ),
-          ),
-          PopupMenuButton<String>(
-            icon: const Icon(Icons.more_vert_rounded, color: _C.sub, size: 20),
-            onSelected: (v) {
-              final bloc = context.read<VendeurProduitBloc>();
-              if (v == 'edit') {
-                _ouvrirForm(context, produit: p);
-              } else if (v == 'delete') {
-                _confirmerSuppression(context, bloc, p.id);
-              }
-            },
-            itemBuilder: (_) => const [
-              PopupMenuItem(value: 'edit', child: Text('Modifier')),
-              PopupMenuItem(value: 'delete', child: Text('Supprimer')),
+              ),
+              PopupMenuButton<String>(
+                tooltip: 'Plus d’actions',
+                icon: const Icon(
+                  Icons.more_vert_rounded,
+                  color: _C.sub,
+                  size: 20,
+                ),
+                onSelected: (v) {
+                  final bloc = context.read<VendeurProduitBloc>();
+                  if (v == 'edit') {
+                    _ouvrirForm(context, produit: p);
+                  } else if (v == 'delete') {
+                    _confirmerSuppression(context, bloc, p);
+                  }
+                },
+                itemBuilder: (_) => const [
+                  PopupMenuItem(value: 'edit', child: Text('Modifier')),
+                  PopupMenuItem(
+                    value: 'delete',
+                    child: Text(
+                      'Supprimer',
+                      style: TextStyle(color: AppColor.kErreur),
+                    ),
+                  ),
+                ],
+              ),
             ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -370,36 +437,27 @@ class _MesProduitsViewState extends State<_MesProduitsView> {
     );
   }
 
-  void _confirmerSuppression(
+  // La feuille de confirmation commune, comme pour toute suppression.
+  Future<void> _confirmerSuppression(
     BuildContext context,
     VendeurProduitBloc bloc,
-    String id,
-  ) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Supprimer ce produit ?'),
-        content: const Text('Cette action est irréversible.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Annuler'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(ctx);
-              bloc.add(SupprimerProduit(id));
-            },
-            child: const Text('Supprimer', style: TextStyle(color: _C.danger)),
-          ),
-        ],
-      ),
+    ProduitModel p,
+  ) async {
+    final ok = await confirmerAction(
+      context,
+      icone: Icons.delete_outline_rounded,
+      titre: 'Supprimer ce produit ?',
+      message:
+          '${p.nom} disparaîtra de votre boutique. Cette action est irréversible.',
+      action: 'Supprimer',
     );
+    if (ok) bloc.add(SupprimerProduit(p.id));
   }
 
+  // Même taille que la photo, pour que les cartes restent alignées.
   Widget _imgFallback() => Container(
-    width: 58,
-    height: 58,
+    width: 68,
+    height: 68,
     color: _C.greenLight,
     child: const Icon(Icons.image_not_supported_outlined, color: _C.sub),
   );
