@@ -5,6 +5,11 @@ class NotificationModel {
   final DateTime date;
   final bool lue;
 
+  /// Ce que la notification annonce, tel que le serveur le range :
+  /// `commande`, `promotion`, `nouveau_produit`, `abonnement` ou `systeme`.
+  /// Sert à choisir l'écran à ouvrir quand les données seules ne suffisent pas.
+  final String type;
+
   /// Ce que la notification concerne : `interlocuteurId` et
   /// `interlocuteurNom` (conversation à ouvrir), `commandeId`, `boutiqueId`…
   final Map<String, dynamic> donnees;
@@ -15,6 +20,7 @@ class NotificationModel {
     required this.message,
     required this.date,
     required this.lue,
+    this.type = 'systeme',
     this.donnees = const {},
   });
 
@@ -26,6 +32,21 @@ class NotificationModel {
 
   String get interlocuteurNom => donnees['interlocuteurNom']?.toString() ?? '';
 
+  /// Les identifiants que la notification transporte, quand elle en a un.
+  ///
+  /// Ce sont eux qui décident de l'écran à ouvrir : une notification de
+  /// commande porte `commandeId`, une promotion porte `boutiqueId`, et ainsi
+  /// de suite. L'ordre de lecture compte — voir `destinationNotification`.
+  String? get commandeId => _id('commandeId');
+  String? get produitId => _id('produitId');
+  String? get boutiqueId => _id('boutiqueId');
+  String? get abonnementId => _id('abonnementId');
+
+  String? _id(String cle) {
+    final valeur = donnees[cle]?.toString() ?? '';
+    return valeur.isEmpty ? null : valeur;
+  }
+
   factory NotificationModel.fromJson(Map<String, dynamic> json) {
     return NotificationModel(
       id: json['id']?.toString() ?? '',
@@ -35,6 +56,7 @@ class NotificationModel {
           ? DateTime.parse(json['createdAt'])
           : DateTime.now(),
       lue: json['lue'] ?? false,
+      type: json['type']?.toString() ?? 'systeme',
       donnees: json['donnees'] is Map
           ? Map<String, dynamic>.from(json['donnees'] as Map)
           : const {},

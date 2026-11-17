@@ -1,0 +1,139 @@
+import 'package:flutter_test/flutter_test.dart';
+import 'package:saambiz/features/home/domain/entities/notification_model.dart';
+import 'package:saambiz/features/notifications/presentation/destination_notification.dart';
+
+/// Où mène une notification quand on la touche.
+///
+/// Toutes ouvraient la messagerie, quel que soit leur contenu : « Nouvelle
+/// commande » menait à une conversation, jamais à la commande. Le serveur
+/// joignait pourtant déjà les identifiants utiles ; personne ne les lisait.
+
+NotificationModel _notif({
+  String type = 'systeme',
+  Map<String, dynamic> donnees = const {},
+}) => NotificationModel(
+  id: 'n1',
+  titre: 'Titre',
+  message: 'Message',
+  date: DateTime(2026, 11, 12, 22, 29),
+  lue: false,
+  type: type,
+  donnees: donnees,
+);
+
+void main() {
+  group('Une commande mène à la commande', () {
+    test('même quand un interlocuteur est joint', () {
+      // LE CAS QUI ÉTAIT CASSÉ. Une notification de commande porte les deux :
+      // `commandeId` et l'interlocuteur d'en face, pour pouvoir lui écrire.
+      // Lire l'interlocuteur d'abord ramenait à la messagerie.
+      final d = destinationNotification(
+        _notif(
+          type: 'commande',
+          donnees: {
+            'commandeId': 'cmd-1',
+            'interlocuteurId': 'u-9',
+            'interlocuteurNom': 'Balla BEYE',
+          },
+        ),
+      );
+      expect(d.cible, CibleNotification.commande);
+      expect(d.id, 'cmd-1');
+    });
+
+    test('et quand elle est seule', () {
+      final d = destinationNotification(
+        _notif(type: 'commande', donnees: {'commandeId': 'cmd-2'}),
+      );
+      expect(d.cible, CibleNotification.commande);
+      expect(d.id, 'cmd-2');
+    });
+  });
+
+  group('Une boutique mène à la boutique', () {
+    test('promotion', () {
+      final d = destinationNotification(
+        _notif(
+          type: 'promotion',
+          donnees: {'boutiqueId': 'b-1', 'produitId': 'p-1'},
+        ),
+      );
+      expect(d.cible, CibleNotification.boutique);
+      expect(d.id, 'b-1');
+    });
+
+    test('nouveau produit', () {
+      final d = destinationNotification(
+        _notif(type: 'nouveau_produit', donnees: {'boutiqueId': 'b-2'}),
+      );
+      expect(d.cible, CibleNotification.boutique);
+      expect(d.id, 'b-2');
+    });
+  });
+
+  group('Un abonnement mène à l’abonnement', () {
+    test('par son identifiant', () {
+      final d = destinationNotification(
+        _notif(type: 'abonnement', donnees: {'abonnementId': 'a-1'}),
+      );
+      expect(d.cible, CibleNotification.abonnement);
+    });
+
+    test('par son seul type, sans identifiant', () {
+      final d = destinationNotification(_notif(type: 'abonnement'));
+      expect(d.cible, CibleNotification.abonnement);
+    });
+  });
+
+  group('Le reste', () {
+    test('un interlocuteur seul ouvre la conversation', () {
+      final d = destinationNotification(
+        _notif(donnees: {'interlocuteurId': 'u-9'}),
+      );
+      expect(d.cible, CibleNotification.conversation);
+      expect(d.id, 'u-9');
+    });
+
+    test('une notification sans rien ouvre la messagerie', () {
+      // Les anciennes, enregistrées avant que le serveur ne joigne des
+      // identifiants. Elles gardent l'ancien comportement.
+      expect(
+        destinationNotification(_notif()).cible,
+        CibleNotification.messagerie,
+      );
+    });
+
+    test('un identifiant vide ne compte pas pour un identifiant', () {
+      expect(
+        destinationNotification(_notif(donnees: {'commandeId': ''})).cible,
+        CibleNotification.messagerie,
+      );
+    });
+  });
+
+  group('Le modèle lit ce que le serveur envoie', () {
+    test('type et données traversent fromJson', () {
+      final n = NotificationModel.fromJson({
+        'id': 'n1',
+        'titre': 'Nouvelle commande',
+        'message': 'Commande CMD-2026-N9WEBH — 9000.00 FCFA.',
+        'lue': false,
+        'type': 'commande',
+        'donnees': {'commandeId': 'cmd-1'},
+        'createdAt': '2026-11-12T22:29:00.000Z',
+      });
+      expect(n.type, 'commande');
+      expect(n.commandeId, 'cmd-1');
+      expect(
+        destinationNotification(n).cible,
+        CibleNotification.commande,
+      );
+    });
+
+    test('un type absent ne fait pas tomber la lecture', () {
+      final n = NotificationModel.fromJson({'id': 'n1', 'titre': 'x'});
+      expect(n.type, 'systeme');
+      expect(n.commandeId, isNull);
+    });
+  });
+}

@@ -10,6 +10,13 @@ import 'package:intl/intl.dart';
 
 import '../../../../injection_container.dart';
 import '../../../home/domain/entities/notification_model.dart';
+import '../../../../core/routes/app_router.dart';
+import '../../../abonnement/presentation/pages/mon_abonnement_page.dart';
+import '../../../catalogue/presentation/pages/boutique_publique_page.dart';
+import '../../../commande/data/datasources/commande_remote_datasource.dart';
+import '../../../commande/presentation/pages/commande_detail_page.dart'
+    show CommandeDetailArgs;
+import '../destination_notification.dart';
 import '../../../messagerie/presentation/pages/chat_page.dart';
 import '../../../messagerie/presentation/pages/conversations_page.dart';
 import '../../../../core/services/socket_service.dart';
@@ -63,26 +70,80 @@ class _NotificationsViewState extends State<_NotificationsView> {
     super.dispose();
   }
 
-  /// Toucher une notification la marque comme lue et ouvre la conversation
-  /// concernée : celle avec la boutique (ou le client) qui l'a envoyée. Les
-  /// anciennes notifications, sans interlocuteur connu, ouvrent la messagerie.
-  void _ouvrir(NotificationModel n) {
+  /// Une notification en cours d'ouverture : la fiche d'une commande demande
+  /// un aller-retour au serveur, et deux appuis ne doivent pas ouvrir deux
+  /// écrans.
+  String? _enOuverture;
+
+  /// Toucher une notification la marque comme lue et ouvre l'écran qu'elle
+  /// annonce : la commande concernée, la boutique qui publie, l'abonnement,
+  /// ou la conversation. Voir `destinationNotification` pour la règle.
+  Future<void> _ouvrir(NotificationModel n) async {
+    if (_enOuverture != null) return;
     if (!n.lue) {
       context.read<NotificationsBloc>().add(MarquerNotificationLue(n.id));
     }
-    final id = n.interlocuteurId;
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => id != null
-            ? ChatPage(
-                interlocuteurId: id,
-                interlocuteurNom: n.interlocuteurNom.isNotEmpty
-                    ? n.interlocuteurNom
-                    : n.titre,
-              )
-            : ConversationsPage(pourVendeur: widget.pourVendeur),
-      ),
-    );
+
+    final destination = destinationNotification(n);
+    final navigateur = Navigator.of(context);
+
+    switch (destination.cible) {
+      case CibleNotification.commande:
+        // La notification ne porte que l'identifiant ; la fiche attend la
+        // commande entière. On la lit, en montrant que quelque chose se passe.
+        setState(() => _enOuverture = n.id);
+        try {
+          final commande = await sl<CommandeRemoteDataSource>().getCommande(
+            destination.id!,
+          );
+          if (!mounted) return;
+          navigateur.pushNamed(
+            AppRouter.commandeDetailRoute,
+            arguments: CommandeDetailArgs(
+              commande,
+              isVendeur: widget.pourVendeur,
+            ),
+          );
+        } catch (_) {
+          // Commande supprimee, ou reseau coupe : le dire, et ne pas bouger.
+          if (mounted) {
+            afficherErreur(context, 'Cette commande n’est plus accessible.');
+          }
+        } finally {
+          if (mounted) setState(() => _enOuverture = null);
+        }
+
+      case CibleNotification.boutique:
+        navigateur.push(
+          MaterialPageRoute(
+            builder: (_) => BoutiquePubliquePage(boutiqueId: destination.id!),
+          ),
+        );
+
+      case CibleNotification.abonnement:
+        navigateur.push(
+          MaterialPageRoute(builder: (_) => const MonAbonnementPage()),
+        );
+
+      case CibleNotification.conversation:
+        navigateur.push(
+          MaterialPageRoute(
+            builder: (_) => ChatPage(
+              interlocuteurId: destination.id!,
+              interlocuteurNom: n.interlocuteurNom.isNotEmpty
+                  ? n.interlocuteurNom
+                  : n.titre,
+            ),
+          ),
+        );
+
+      case CibleNotification.messagerie:
+        navigateur.push(
+          MaterialPageRoute(
+            builder: (_) => ConversationsPage(pourVendeur: widget.pourVendeur),
+          ),
+        );
+    }
   }
 
   @override
@@ -150,13 +211,26 @@ class _NotificationsViewState extends State<_NotificationsView> {
                               backgroundColor: n.lue
                                   ? AppColor.kPrimaryLight
                                   : AppColor.kPrimary,
-                              child: Icon(
-                                Icons.notifications_none_rounded,
-                                size: 20,
-                                color: n.lue
-                                    ? AppColor.kPrimary
-                                    : AppColor.kWhite,
-                              ),
+                              // Ouvrir une commande demande un aller-retour au
+                              // serveur : sans ce signe, l'appui semble perdu.
+                              child: _enOuverture == n.id
+                                  ? SizedBox(
+                                      width: 18,
+                                      height: 18,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: n.lue
+                                            ? AppColor.kPrimary
+                                            : AppColor.kWhite,
+                                      ),
+                                    )
+                                  : Icon(
+                                      Icons.notifications_none_rounded,
+                                      size: 20,
+                                      color: n.lue
+                                          ? AppColor.kPrimary
+                                          : AppColor.kWhite,
+                                    ),
                             ),
                             const SizedBox(width: 12),
                             Expanded(

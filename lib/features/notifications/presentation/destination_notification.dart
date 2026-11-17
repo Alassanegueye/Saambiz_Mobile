@@ -1,0 +1,70 @@
+import '../../home/domain/entities/notification_model.dart';
+
+/// L'écran qu'une notification doit ouvrir.
+enum CibleNotification {
+  /// La fiche de la commande concernée.
+  commande,
+
+  /// La boutique qui a publié la promotion ou le nouveau produit.
+  boutique,
+
+  /// L'abonnement du vendeur.
+  abonnement,
+
+  /// La conversation avec l'interlocuteur nommé par la notification.
+  conversation,
+
+  /// Rien de précis : la liste des conversations, comme avant.
+  messagerie,
+}
+
+/// Où mène une notification, et avec quel identifiant.
+class DestinationNotification {
+  final CibleNotification cible;
+
+  /// L'identifiant à présenter à l'écran visé (`null` pour [messagerie]).
+  final String? id;
+
+  const DestinationNotification(this.cible, [this.id]);
+
+  @override
+  String toString() => 'DestinationNotification($cible, $id)';
+}
+
+/// Décide où mène une notification, d'après ce qu'elle transporte.
+///
+/// Toutes ouvraient la messagerie, quel que soit leur contenu : une
+/// notification « Nouvelle commande » menait à une conversation, jamais à la
+/// commande. Le serveur joignait pourtant déjà les identifiants utiles
+/// (`commandeId`, `boutiqueId`, `abonnementId`) ; personne ne les lisait.
+///
+/// L'ORDRE DE LECTURE EST LE CŒUR DE LA RÈGLE. Une notification de commande
+/// porte à la fois `commandeId` et `interlocuteurId` — l'acheteur ou le
+/// vendeur d'en face, pour pouvoir lui écrire. La commande doit gagner :
+/// c'est elle qu'on vient voir. L'inverse ramenait à la messagerie, ce qui
+/// est précisément le défaut constaté.
+DestinationNotification destinationNotification(NotificationModel n) {
+  final commande = n.commandeId;
+  if (commande != null) return DestinationNotification(CibleNotification.commande, commande);
+
+  // Promotion, nouveau produit, annonce d'une boutique suivie. Le produit
+  // concerné n'est pas toujours joint ; la boutique, elle, l'est toujours, et
+  // c'est là que le produit se trouve.
+  final boutique = n.boutiqueId;
+  if (boutique != null) return DestinationNotification(CibleNotification.boutique, boutique);
+
+  final abonnement = n.abonnementId;
+  if (abonnement != null || n.type == 'abonnement') {
+    return DestinationNotification(CibleNotification.abonnement, abonnement);
+  }
+
+  final interlocuteur = n.interlocuteurId;
+  if (interlocuteur != null) {
+    return DestinationNotification(CibleNotification.conversation, interlocuteur);
+  }
+
+  // Anciennes notifications, enregistrées avant que le serveur ne joigne des
+  // identifiants : elles n'ont rien pour viser un écran. La messagerie reste
+  // le repli, comme avant.
+  return const DestinationNotification(CibleNotification.messagerie);
+}
