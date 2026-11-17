@@ -70,6 +70,8 @@ class FavorisRepositoryImpl implements FavorisRepository {
                 nom: m.nom,
                 logo: m.logo,
                 localisation: m.localisation,
+                banniere: m.banniere,
+                categorie: m.categorie,
                 clocheActive: m.clocheActive,
               ),
             )

@@ -17,7 +17,20 @@ import '../../../catalogue/presentation/pages/boutique_publique_page.dart';
 /// n'affiche pas de chiffre de remplissage.
 class CarteBoutiqueGrille extends StatelessWidget {
   final Map<String, dynamic> donnees;
-  const CarteBoutiqueGrille({super.key, required this.donnees});
+
+  /// Remplace « Voir la boutique » en bas de la carte (par exemple les
+  /// alertes d'une boutique suivie). Hauteur attendue : 36.
+  final Widget? action;
+
+  /// Posé dans l'angle haut droit de la couverture (par exemple le cœur).
+  final Widget? coin;
+
+  const CarteBoutiqueGrille({
+    super.key,
+    required this.donnees,
+    this.action,
+    this.coin,
+  });
 
   static const double _hauteurCouverture = 74;
   static const double _tailleLogo = 60;
@@ -172,6 +185,8 @@ class CarteBoutiqueGrille extends StatelessWidget {
                           ),
                         ),
                       ),
+                      if (coin != null)
+                        Positioned(top: 4, right: 4, child: coin!),
                     ],
                   ),
                 ),
@@ -253,38 +268,39 @@ class CarteBoutiqueGrille extends StatelessWidget {
                           ),
                         ],
                         const Spacer(),
-                        Container(
-                          height: 36,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color: AppColor.kPrimaryLight,
-                            borderRadius: AppDim.brMoyen,
-                          ),
-                          child: const Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Flexible(
-                                child: Text(
-                                  'Voir la boutique',
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    fontFamily: kPolice,
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w700,
+                        action ??
+                            Container(
+                              height: 36,
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                color: AppColor.kPrimaryLight,
+                                borderRadius: AppDim.brMoyen,
+                              ),
+                              child: const Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Flexible(
+                                    child: Text(
+                                      'Voir la boutique',
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        fontFamily: kPolice,
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w700,
+                                        color: AppColor.kPrimary,
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(width: 4),
+                                  Icon(
+                                    Icons.arrow_forward_rounded,
+                                    size: 15,
                                     color: AppColor.kPrimary,
                                   ),
-                                ),
+                                ],
                               ),
-                              SizedBox(width: 4),
-                              Icon(
-                                Icons.arrow_forward_rounded,
-                                size: 15,
-                                color: AppColor.kPrimary,
-                              ),
-                            ],
-                          ),
-                        ),
+                            ),
                       ],
                     ),
                   ),

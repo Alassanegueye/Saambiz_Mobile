@@ -30,27 +30,45 @@ class FavorisBloc extends Bloc<FavorisEvent, FavorisState> {
   }
 
   Future<void> _onCharger(LoadFavoris event, Emitter<FavorisState> emit) async {
+    final avant = state;
     emit(FavorisLoading());
-    await _recharger(emit);
+    await _recharger(emit, avant: avant);
   }
 
   /// Recharge la liste ; [succes] accompagne la liste quand elle suit une
   /// action, pour que l'écran la confirme.
-  Future<void> _recharger(Emitter<FavorisState> emit, {String? succes}) async {
+  Future<void> _recharger(
+    Emitter<FavorisState> emit, {
+    String? succes,
+    FavorisState? avant,
+  }) async {
     final resultat = await getBoutiquesSuivies();
     resultat.fold(
-      (panne) => emit(FavorisError(panne.errorMessage)),
+      (panne) => _echec(emit, panne.errorMessage, avant ?? state),
       (boutiques) => emit(FavorisLoaded(boutiques, succes: succes)),
     );
+  }
+
+  /// Signale l'échec, puis remet la liste qui était affichée.
+  ///
+  /// Sans ce retour, l'état restait `FavorisError` : l'écran, qui n'a rien
+  /// à montrer pour une erreur, effaçait toutes les boutiques suivies au
+  /// premier refus du serveur (ne plus suivre, alertes, actualisation).
+  /// La liste remise ne porte pas de message de succès : celui de l'action
+  /// précédente ne doit pas s'afficher une seconde fois.
+  void _echec(Emitter<FavorisState> emit, String message, FavorisState avant) {
+    emit(FavorisError(message));
+    if (avant is FavorisLoaded) emit(FavorisLoaded(avant.boutiques));
   }
 
   Future<void> _onSuivre(
     AjouterFavori event,
     Emitter<FavorisState> emit,
   ) async {
+    final avant = state;
     final resultat = await suivreBoutique(event.boutiqueId);
     await resultat.fold(
-      (panne) async => emit(FavorisError(panne.errorMessage)),
+      (panne) async => _echec(emit, panne.errorMessage, avant),
       (_) => _recharger(emit, succes: 'Boutique ajoutée à vos favoris.'),
     );
   }
@@ -59,9 +77,10 @@ class FavorisBloc extends Bloc<FavorisEvent, FavorisState> {
     SupprimerFavori event,
     Emitter<FavorisState> emit,
   ) async {
+    final avant = state;
     final resultat = await nePlusSuivreBoutique(event.boutiqueId);
     await resultat.fold(
-      (panne) async => emit(FavorisError(panne.errorMessage)),
+      (panne) async => _echec(emit, panne.errorMessage, avant),
       (_) => _recharger(emit, succes: 'Vous ne suivez plus cette boutique.'),
     );
   }
@@ -92,12 +111,9 @@ class FavorisBloc extends Bloc<FavorisEvent, FavorisState> {
     );
 
     resultat.fold(
-      (panne) {
-        // Échec : on remet l'état d'avant, sinon l'interface affiche une
-        // cloche activée que le serveur n'a jamais enregistrée.
-        if (avant is FavorisLoaded) emit(avant);
-        emit(FavorisError(panne.errorMessage));
-      },
+      // Échec : on remet l'état d'avant, sinon l'interface affiche une
+      // cloche activée que le serveur n'a jamais enregistrée.
+      (panne) => _echec(emit, panne.errorMessage, avant),
       (etatReel) {
         // Le serveur peut renvoyer autre chose que ce qu'on a demandé.
         final courant = state;

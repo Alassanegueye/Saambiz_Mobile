@@ -5,6 +5,12 @@ class BoutiqueModel {
   final String localisation;
   final String? telephone;
   final String? logo;
+
+  /// Image de couverture de la boutique, si elle en a mis une.
+  final String? banniere;
+
+  /// Catégorie principale (« Mode homme »…), si renseignée.
+  final String? categorie;
   final String vendeurId;
   final String vendeurNom;
   final String vendeurPrenom;
@@ -22,6 +28,8 @@ class BoutiqueModel {
     required this.localisation,
     this.telephone,
     this.logo,
+    this.banniere,
+    this.categorie,
     required this.vendeurId,
     required this.vendeurNom,
     required this.vendeurPrenom,
@@ -37,14 +45,23 @@ class BoutiqueModel {
     final vendeurNom = vendeur?['nom']?.toString() ?? '';
     final vendeurPrenom = vendeur?['prenom']?.toString() ?? '';
     final vendeurNumero = vendeur?['telephone']?.toString() ?? '';
+    String? texte(Object? v) {
+      final t = (v ?? '').toString().trim();
+      return t.isEmpty ? null : t;
+    }
+
+    final categorie = json['categorie'];
 
     return BoutiqueModel(
       id: json['id']?.toString() ?? '',
       nom: json['nom']?.toString() ?? '',
       description: json['description']?.toString() ?? '',
-      localisation: json['localisation']?.toString() ?? '',
+      // La ville sert de repli, comme dans les autres réponses du serveur.
+      localisation: texte(json['localisation']) ?? texte(json['ville']) ?? '',
       telephone: json['telephone']?.toString(),
       logo: json['logo']?.toString(),
+      banniere: texte(json['banniere']),
+      categorie: categorie is Map ? texte(categorie['nom']) : texte(categorie),
       vendeurId: vendeurId,
       vendeurNom: vendeurNom,
       vendeurPrenom: vendeurPrenom,
@@ -73,6 +90,8 @@ class BoutiqueModel {
     'localisation': localisation,
     'telephone': telephone,
     'logo': logo,
+    'banniere': banniere,
+    'categorie': categorie,
     'vendeur': {
       'id': vendeurId,
       'nom': vendeurNom,

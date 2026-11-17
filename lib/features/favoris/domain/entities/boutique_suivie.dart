@@ -11,6 +11,12 @@ class BoutiqueSuivie extends Equatable {
   final String? logo;
   final String? localisation;
 
+  /// Image de couverture, si la boutique en a une.
+  final String? banniere;
+
+  /// Catégorie principale (« Mode homme »…), si renseignée.
+  final String? categorie;
+
   /// Notifications push actives pour cette boutique.
   ///
   /// Distinct du fait de suivre : on peut suivre une boutique sans vouloir
@@ -22,6 +28,8 @@ class BoutiqueSuivie extends Equatable {
     required this.nom,
     this.logo,
     this.localisation,
+    this.banniere,
+    this.categorie,
     this.clocheActive = false,
   });
 
@@ -30,9 +38,19 @@ class BoutiqueSuivie extends Equatable {
     nom: nom,
     logo: logo,
     localisation: localisation,
+    banniere: banniere,
+    categorie: categorie,
     clocheActive: clocheActive ?? this.clocheActive,
   );
 
   @override
-  List<Object?> get props => [id, nom, logo, localisation, clocheActive];
+  List<Object?> get props => [
+    id,
+    nom,
+    logo,
+    localisation,
+    banniere,
+    categorie,
+    clocheActive,
+  ];
 }
