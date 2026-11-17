@@ -70,6 +70,11 @@ class CommandeModel {
   final String? vendeurNom;
   final String? vendeurTelephone;
 
+  /// Boutique du vendeur : c'est par son nom que le client reconnaît sa
+  /// commande. Nulle si le serveur ne l'envoie pas.
+  final String? boutiqueNom;
+  final String? boutiqueLogo;
+
   CommandeModel({
     required this.id,
     required this.referenceCommande,
@@ -91,6 +96,8 @@ class CommandeModel {
     this.acheteurTelephone,
     this.vendeurNom,
     this.vendeurTelephone,
+    this.boutiqueNom,
+    this.boutiqueLogo,
   });
 
   factory CommandeModel.fromJson(Map<String, dynamic> json) {
@@ -113,6 +120,19 @@ class CommandeModel {
     final acheteur =
         (json['acheteur'] ?? json['client']) as Map<String, dynamic>?;
     final vendeur = json['vendeur'] as Map<String, dynamic>?;
+
+    // La boutique arrive avec le vendeur (`vendeur.boutiques`, une par
+    // vendeur en pratique) ; une `boutique` à la racine est acceptée aussi.
+    final boutiques = vendeur?['boutiques'];
+    final boutique = json['boutique'] is Map
+        ? json['boutique'] as Map
+        : (boutiques is List && boutiques.isNotEmpty && boutiques.first is Map)
+        ? boutiques.first as Map
+        : null;
+    String? texte(Object? v) {
+      final t = (v ?? '').toString().trim();
+      return t.isEmpty ? null : t;
+    }
 
     return CommandeModel(
       id: json['id']?.toString() ?? '',
@@ -137,6 +157,8 @@ class CommandeModel {
       acheteurTelephone: acheteur?['telephone'],
       vendeurNom: joinNom(vendeur),
       vendeurTelephone: vendeur?['telephone'],
+      boutiqueNom: texte(boutique?['nom']),
+      boutiqueLogo: texte(boutique?['logo']),
     );
   }
 }

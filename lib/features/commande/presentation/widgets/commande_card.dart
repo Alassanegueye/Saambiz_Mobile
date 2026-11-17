@@ -182,7 +182,6 @@ class CommandeCard extends StatelessWidget {
     final titre = isVendeur
         ? (nomClient.isEmpty ? 'Client' : nomClient)
         : (nbArticles > 1 ? '$premier +${nbArticles - 1}' : premier);
-    final paye = commande.statutPaiement == 'paye';
 
     return Material(
       color: Colors.transparent,
@@ -231,8 +230,19 @@ class CommandeCard extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'ID: #${commande.referenceCommande}',
+                        Text.rich(
+                          TextSpan(
+                            children: [
+                              const TextSpan(
+                                text: 'Code\u00A0: ',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColor.kGrayscale40,
+                                ),
+                              ),
+                              TextSpan(text: commande.referenceCommande),
+                            ],
+                          ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
@@ -263,113 +273,224 @@ class CommandeCard extends StatelessWidget {
               _Suivi(commande: commande, isVendeur: isVendeur),
               const SizedBox(height: 14),
               const Divider(height: 1, color: AppColor.kLine),
-              const SizedBox(height: 10),
-
-              // De (boutique) / À (destination) et prix.
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'DE',
-                          style: TextStyle(
-                            fontFamily: kPolice,
-                            fontSize: 9.5,
-                            fontWeight: FontWeight.w700,
-                            color: AppColor.kGrayscale40,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          commande.vendeurNom?.isNotEmpty == true
-                              ? commande.vendeurNom!
-                              : 'Boutique SaamBiz',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontFamily: kPolice,
-                            fontSize: 12.5,
-                            fontWeight: FontWeight.w700,
-                            color: AppColor.kGrayscaleDark100,
-                          ),
-                        ),
-                        Text(
-                          _date(commande.createdAt),
-                          style: const TextStyle(
-                            fontFamily: kPolice,
-                            fontSize: 11,
-                            color: AppColor.kGrayscale40,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        const Text(
-                          'À',
-                          style: TextStyle(
-                            fontFamily: kPolice,
-                            fontSize: 9.5,
-                            fontWeight: FontWeight.w700,
-                            color: AppColor.kGrayscale40,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          (commande.adresseLivraison?.isNotEmpty == true)
-                              ? commande.adresseLivraison!
-                              : (commande.acheteurNom?.isNotEmpty == true
-                                    ? commande.acheteurNom!
-                                    : 'Dakar, Sénégal'),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontFamily: kPolice,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: AppColor.kGrayscaleDark100,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              montantFcfa(commande.montantTotal),
-                              style: const TextStyle(
-                                fontFamily: kPolice,
-                                fontSize: 13.5,
-                                fontWeight: FontWeight.w800,
-                                color: AppColor.kPrimary,
-                              ),
-                            ),
-                            if (paye) ...[
-                              const SizedBox(width: 4),
-                              const Icon(
-                                Icons.check_circle_rounded,
-                                size: 13,
-                                color: AppColor.kSucces,
-                              ),
-                            ],
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+              const SizedBox(height: 12),
+              _PiedCarte(commande: commande, isVendeur: isVendeur),
             ],
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Bas de carte. Côté client : la boutique (son logo, son nom, puis
+/// « Vendeur : Prénom Nom »), le montant et l'état du paiement ; dessous, la
+/// date et la destination. Côté vendeur, qui connaît sa boutique : où livrer.
+class _PiedCarte extends StatelessWidget {
+  final CommandeModel commande;
+  final bool isVendeur;
+  const _PiedCarte({required this.commande, required this.isVendeur});
+
+  @override
+  Widget build(BuildContext context) {
+    final boutique = (commande.boutiqueNom ?? '').trim();
+    final vendeur = (commande.vendeurNom ?? '').trim();
+    final retrait = commande.modeLivraison == 'retrait';
+    final adresse = (commande.adresseLivraison ?? '').trim();
+    final destination = retrait
+        ? 'Retrait en boutique'
+        : (adresse.isNotEmpty ? adresse : 'Adresse non précisée');
+
+    final String titre;
+    final String? detail;
+    final Widget pastille;
+    if (isVendeur) {
+      titre = destination;
+      detail = retrait ? null : 'Adresse de livraison';
+      pastille = _Pastille(
+        icone: retrait ? Icons.storefront_outlined : Icons.location_on_outlined,
+      );
+    } else {
+      titre = boutique.isNotEmpty
+          ? boutique
+          : (vendeur.isNotEmpty ? vendeur : 'Boutique SaamBiz');
+      detail = boutique.isNotEmpty && vendeur.isNotEmpty
+          ? 'Vendeur\u00A0: $vendeur'
+          : null;
+      pastille = _Pastille(
+        icone: Icons.storefront_outlined,
+        image: commande.boutiqueLogo,
+      );
+    }
+
+    final paye = commande.statutPaiement == 'paye';
+    final close = commande.statut == 'annulee' || commande.statut == 'rejetee';
+    final paiement = paye
+        ? 'Payée'
+        : close
+        ? null
+        : commande.modePaiement == 'en_ligne'
+        ? 'Non payée'
+        : 'À la livraison';
+
+    const discret = TextStyle(
+      fontFamily: kPolice,
+      fontSize: 11.5,
+      color: AppColor.kGrayscale40,
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          children: [
+            pastille,
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    titre,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontFamily: kPolice,
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w800,
+                      color: AppColor.kGrayscaleDark100,
+                    ),
+                  ),
+                  if (detail != null) ...[
+                    const SizedBox(height: 1),
+                    Text(
+                      detail,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: discret,
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            const SizedBox(width: 10),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  montantFcfa(commande.montantTotal),
+                  style: const TextStyle(
+                    fontFamily: kPolice,
+                    fontSize: 14.5,
+                    fontWeight: FontWeight.w800,
+                    color: AppColor.kPrimary,
+                  ),
+                ),
+                if (paiement != null) ...[
+                  const SizedBox(height: 1),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (paye) ...[
+                        const Icon(
+                          Icons.check_circle_rounded,
+                          size: 13,
+                          color: AppColor.kSucces,
+                        ),
+                        const SizedBox(width: 3),
+                      ],
+                      Text(
+                        paiement,
+                        style: TextStyle(
+                          fontFamily: kPolice,
+                          fontSize: 11.5,
+                          fontWeight: paye ? FontWeight.w700 : FontWeight.w500,
+                          color: paye
+                              ? AppColor.kSucces
+                              : AppColor.kGrayscale40,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ],
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        Row(
+          children: [
+            const Icon(
+              Icons.calendar_today_outlined,
+              size: 13,
+              color: AppColor.kGrayscale40,
+            ),
+            const SizedBox(width: 5),
+            Text('Commandée le ${_date(commande.createdAt)}', style: discret),
+            if (!isVendeur) ...[
+              const SizedBox(width: 12),
+              // La destination prend toute la place laissée par la date.
+              Expanded(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Icon(
+                      retrait
+                          ? Icons.storefront_outlined
+                          : Icons.location_on_outlined,
+                      size: 13,
+                      color: AppColor.kGrayscale40,
+                    ),
+                    const SizedBox(width: 3),
+                    Flexible(
+                      child: Text(
+                        destination,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: discret,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+/// Pastille du bas de carte : le logo de la boutique s'il y en a un, sinon
+/// une icône.
+class _Pastille extends StatelessWidget {
+  final IconData icone;
+  final String? image;
+  const _Pastille({required this.icone, this.image});
+
+  @override
+  Widget build(BuildContext context) {
+    final repli = Icon(icone, size: 19, color: AppColor.kPrimary);
+    final img = (image ?? '').trim();
+    return Container(
+      width: 38,
+      height: 38,
+      clipBehavior: Clip.antiAlias,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: AppColor.kPrimaryLight,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: img.isEmpty
+          ? repli
+          : ImageReseau(
+              img,
+              largeurServeur: 120,
+              fit: BoxFit.cover,
+              width: 38,
+              height: 38,
+              repli: Center(child: repli),
+            ),
     );
   }
 }

@@ -6,6 +6,8 @@ import 'package:saambiz/features/commande/presentation/widgets/commande_card.dar
 CommandeModel _commande(
   String statut, {
   String modePaiement = 'a_la_livraison',
+  String statutPaiement = 'non_paye',
+  String? boutiqueNom = 'FootShop',
 }) => CommandeModel(
   id: 'c1',
   referenceCommande: 'CMD-2026-N9WEBH',
@@ -15,7 +17,7 @@ CommandeModel _commande(
   fraisLivraison: 0,
   montantTotal: 9000,
   statut: statut,
-  statutPaiement: 'en_attente',
+  statutPaiement: statutPaiement,
   modeLivraison: 'livraison',
   modePaiement: modePaiement,
   adresseLivraison: 'Dakar, Sénégal',
@@ -24,6 +26,7 @@ CommandeModel _commande(
   createdAt: DateTime(2026, 11, 12),
   lignes: const [],
   vendeurNom: 'Alassane GUEYE',
+  boutiqueNom: boutiqueNom,
 );
 
 Future<void> _afficher(WidgetTester tester, CommandeModel commande) async {
@@ -103,6 +106,40 @@ void main() {
 
       expect(auMilieu, greaterThan(auDebut));
       expect(versLaFin, greaterThan(auMilieu));
+    });
+  });
+
+  group('Carte commande : qui vend, et sous quel code', () {
+    testWidgets('« Code » remplace « ID »', (tester) async {
+      await _afficher(tester, _commande('en_attente'));
+      expect(find.textContaining('ID'), findsNothing);
+      expect(find.textContaining('Code'), findsOneWidget);
+      expect(find.textContaining('CMD-2026-N9WEBH'), findsOneWidget);
+      expect(find.textContaining('#'), findsNothing);
+    });
+
+    testWidgets('la boutique, puis son vendeur', (tester) async {
+      await _afficher(tester, _commande('en_preparation'));
+      expect(find.text('FootShop'), findsOneWidget);
+      // Espace insécable avant « : », comme partout en français.
+      expect(find.text('Vendeur\u00A0: Alassane GUEYE'), findsOneWidget);
+    });
+
+    testWidgets('sans boutique connue, le vendeur seul', (tester) async {
+      await _afficher(tester, _commande('en_preparation', boutiqueNom: null));
+      expect(find.text('Alassane GUEYE'), findsOneWidget);
+      expect(find.textContaining('Vendeur'), findsNothing);
+    });
+
+    testWidgets('l’état du paiement est écrit', (tester) async {
+      await _afficher(tester, _commande('livree', statutPaiement: 'paye'));
+      expect(find.text('Payée'), findsOneWidget);
+
+      await _afficher(tester, _commande('en_attente'));
+      expect(find.text('À la livraison'), findsOneWidget);
+
+      await _afficher(tester, _commande('acceptee', modePaiement: 'en_ligne'));
+      expect(find.text('Non payée'), findsOneWidget);
     });
   });
 }
