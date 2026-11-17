@@ -22,10 +22,10 @@ class MessagerieBloc extends Bloc<MessagerieEvent, MessagerieState> {
     Emitter<MessagerieState> emit,
   ) async {
     emit(MessagerieLoading());
-    final result = await repository.conversations();
+    final result = await repository.conversations(page: event.page);
     result.fold(
       (f) => emit(MessagerieError(f.errorMessage)),
-      (list) => emit(ConversationsLoaded(list)),
+      (page) => emit(ConversationsLoaded(page.conversations, page.pagination)),
     );
   }
 

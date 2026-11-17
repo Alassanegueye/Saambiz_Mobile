@@ -1,14 +1,24 @@
+import '../../../../core/widgets/barre_pagination.dart';
 import 'package:dio/dio.dart';
 
 import '../../../../core/constants/api_endpoints.dart';
 import '../models/message_model.dart';
+
+/// Une page de conversations : la liste, et où elle se situe.
+class PageConversations {
+  final List<ConversationModel> conversations;
+  final Pagination pagination;
+  const PageConversations(this.conversations, this.pagination);
+}
 
 abstract class MessagerieRemoteDataSource {
   Future<MessageModel> envoyerMessage({
     required String destinataireId,
     required String contenu,
   });
-  Future<List<ConversationModel>> conversations();
+
+  /// Une page de conversations.
+  Future<PageConversations> conversations({int page});
   Future<List<MessageModel>> historique(String userId);
   Future<void> marquerLu(String messageId);
   Future<int> nombreNonLus();
@@ -51,11 +61,19 @@ class MessagerieRemoteDataSourceImpl implements MessagerieRemoteDataSource {
   }
 
   @override
-  Future<List<ConversationModel>> conversations() async {
-    final res = await dio.get(MessagerieEndpoints.conversations);
-    return _extractList(res.data)
-        .map((e) => ConversationModel.fromJson(e as Map<String, dynamic>))
-        .toList();
+  Future<PageConversations> conversations({int page = 1}) async {
+    final res = await dio.get(
+      MessagerieEndpoints.conversations,
+      queryParameters: {'page': page},
+    );
+    return PageConversations(
+      _extractList(res.data)
+          .map((e) => ConversationModel.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      Pagination.depuis(
+        res.data is Map ? Map<String, dynamic>.from(res.data as Map) : null,
+      ),
+    );
   }
 
   @override

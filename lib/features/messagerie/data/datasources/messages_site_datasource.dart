@@ -22,27 +22,28 @@ class MessageSite {
     required this.date,
   });
 
-  String get auteur => (nom ?? '').trim().isEmpty ? 'Visiteur du site' : nom!.trim();
+  String get auteur =>
+      (nom ?? '').trim().isEmpty ? 'Visiteur du site' : nom!.trim();
 
   MessageSite copieLu() => MessageSite(
-        id: id,
-        nom: nom,
-        telephone: telephone,
-        contenu: contenu,
-        lu: true,
-        date: date,
-      );
+    id: id,
+    nom: nom,
+    telephone: telephone,
+    contenu: contenu,
+    lu: true,
+    date: date,
+  );
 
   factory MessageSite.fromJson(Map<String, dynamic> j) => MessageSite(
-        id: j['id']?.toString() ?? '',
-        nom: j['nom']?.toString(),
-        telephone: j['telephone']?.toString() ?? '',
-        contenu: j['contenu']?.toString() ?? '',
-        lu: j['lu'] == true,
-        date: DateTime.tryParse(
-          (j['createdAt'] ?? j['created_at'] ?? '').toString(),
-        )?.toLocal(),
-      );
+    id: j['id']?.toString() ?? '',
+    nom: j['nom']?.toString(),
+    telephone: j['telephone']?.toString() ?? '',
+    contenu: j['contenu']?.toString() ?? '',
+    lu: j['lu'] == true,
+    date: DateTime.tryParse(
+      (j['createdAt'] ?? j['created_at'] ?? '').toString(),
+    )?.toLocal(),
+  );
 }
 
 class MessagesSiteDataSource {
@@ -60,8 +61,7 @@ class MessagesSiteDataSource {
         .toList();
   }
 
-  Future<void> marquerLu(String id) =>
-      dio.put(MessagerieEndpoints.siteLu(id));
+  Future<void> marquerLu(String id) => dio.put(MessagerieEndpoints.siteLu(id));
 
   Future<void> supprimer(String id) =>
       dio.delete(MessagerieEndpoints.siteMessage(id));

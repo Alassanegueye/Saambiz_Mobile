@@ -5,7 +5,13 @@ abstract class FavorisEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-class LoadFavoris extends FavorisEvent {}
+class LoadFavoris extends FavorisEvent {
+  /// Page demandée : le serveur en rend dix à la fois.
+  final int page;
+  LoadFavoris({this.page = 1});
+  @override
+  List<Object?> get props => [page];
+}
 
 class AjouterFavori extends FavorisEvent {
   final String boutiqueId;

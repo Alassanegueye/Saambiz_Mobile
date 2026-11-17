@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/barre_pagination.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -253,6 +254,19 @@ class _ConversationsViewState extends State<_ConversationsView> {
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
                 child: _tuileConversation(c),
+              ),
+            );
+          }
+          // La barre « Précédent / Suivant » ne porte que sur les
+          // conversations : les messages laissés sur le site, au-dessus,
+          // viennent d'une autre source et ne paginent pas.
+          if (state is ConversationsLoaded) {
+            elements.add(
+              BarrePagination(
+                pagination: state.pagination,
+                onPage: (page) => context.read<MessagerieBloc>().add(
+                  LoadConversations(page: page),
+                ),
               ),
             );
           }

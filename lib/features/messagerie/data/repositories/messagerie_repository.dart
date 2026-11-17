@@ -28,9 +28,11 @@ class MessagerieRepository {
     }
   }
 
-  Future<Either<Failure, List<ConversationModel>>> conversations() async {
+  Future<Either<Failure, PageConversations>> conversations({
+    int page = 1,
+  }) async {
     try {
-      return Right(await remote.conversations());
+      return Right(await remote.conversations(page: page));
     } catch (e) {
       return Left(ServerFailure(errorMessage: _msg(e)));
     }

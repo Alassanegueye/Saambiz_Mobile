@@ -5,7 +5,13 @@ abstract class NotificationsEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-class LoadNotifications extends NotificationsEvent {}
+class LoadNotifications extends NotificationsEvent {
+  /// Page demandée : le serveur en rend dix à la fois.
+  final int page;
+  LoadNotifications({this.page = 1});
+  @override
+  List<Object?> get props => [page];
+}
 
 class LoadNombreNonLues extends NotificationsEvent {}
 

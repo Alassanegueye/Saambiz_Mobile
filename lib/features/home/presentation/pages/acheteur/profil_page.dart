@@ -84,8 +84,9 @@ class _ProfilPageState extends State<ProfilPage>
       /* compteur laissé à 0 */
     }
     try {
-      final favoris = await sl<FavorisRemoteDataSource>().mesFavoris();
-      if (mounted) setState(() => _nbFavoris = favoris.length);
+      // Le TOTAL, pas la page : la liste est paginee par dix.
+      final page = await sl<FavorisRemoteDataSource>().mesFavoris();
+      if (mounted) setState(() => _nbFavoris = page.pagination.total);
     } catch (_) {
       /* compteur laissé à 0 */
     }

@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/barre_pagination.dart';
 import 'package:equatable/equatable.dart';
 
 import '../../data/models/message_model.dart';
@@ -13,9 +14,16 @@ class MessagerieLoading extends MessagerieState {}
 
 class ConversationsLoaded extends MessagerieState {
   final List<ConversationModel> conversations;
-  ConversationsLoaded(this.conversations);
+
+  /// Où l'on est dans la liste. Une page unique replie la barre.
+  final Pagination pagination;
+
+  ConversationsLoaded(
+    this.conversations, [
+    this.pagination = const Pagination(),
+  ]);
   @override
-  List<Object?> get props => [conversations];
+  List<Object?> get props => [conversations, pagination.page, pagination.pages];
 }
 
 class HistoriqueLoaded extends MessagerieState {

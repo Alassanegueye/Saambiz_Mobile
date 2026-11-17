@@ -1,12 +1,22 @@
+import '../../../../core/widgets/barre_pagination.dart';
 import 'package:dio/dio.dart';
 
 import '../../../../core/constants/api_endpoints.dart';
 import '../../../home/data/models/boutique_model.dart';
 
+/// Une page de boutiques suivies : la liste, et où elle se situe.
+class PageFavoris {
+  final List<BoutiqueModel> boutiques;
+  final Pagination pagination;
+  const PageFavoris(this.boutiques, this.pagination);
+}
+
 abstract class FavorisRemoteDataSource {
   Future<void> ajouter(String boutiqueId);
   Future<void> supprimer(String boutiqueId);
-  Future<List<BoutiqueModel>> mesFavoris();
+
+  /// Une page de boutiques suivies.
+  Future<PageFavoris> mesFavoris({int page});
 
   ///  Active/désactive la cloche. Retourne l'état final (true = activée).
   Future<bool> toggleCloche(String boutiqueId, bool active);
@@ -40,9 +50,12 @@ class FavorisRemoteDataSourceImpl implements FavorisRemoteDataSource {
   }
 
   @override
-  Future<List<BoutiqueModel>> mesFavoris() async {
-    final res = await dio.get(FavorisEndpoints.favoris);
-    return _extractList(res.data).map((e) {
+  Future<PageFavoris> mesFavoris({int page = 1}) async {
+    final res = await dio.get(
+      FavorisEndpoints.favoris,
+      queryParameters: {'page': page},
+    );
+    final liste = _extractList(res.data).map((e) {
       // Chaque élément est un favori { boutique, clocheActive } ; on fusionne
       // clocheActive dans la map boutique pour le modèle.
       if (e is Map && e['boutique'] is Map) {
@@ -52,6 +65,12 @@ class FavorisRemoteDataSourceImpl implements FavorisRemoteDataSource {
       }
       return BoutiqueModel.fromJson(e as Map<String, dynamic>);
     }).toList();
+    return PageFavoris(
+      liste,
+      Pagination.depuis(
+        res.data is Map ? Map<String, dynamic>.from(res.data as Map) : null,
+      ),
+    );
   }
 
   @override

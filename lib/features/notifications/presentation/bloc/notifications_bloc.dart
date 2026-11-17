@@ -20,10 +20,12 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
     Emitter<NotificationsState> emit,
   ) async {
     emit(NotificationsLoading());
-    final result = await repository.notifications();
+    final result = await repository.notifications(page: event.page);
     result.fold(
       (f) => emit(NotificationsError(f.errorMessage)),
-      (list) => emit(NotificationsLoaded(list)),
+      (page) => emit(
+        NotificationsLoaded(page.notifications, pagination: page.pagination),
+      ),
     );
   }
 
@@ -47,12 +49,16 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
       result.fold((f) => emit(NotificationsError(f.errorMessage)), (_) {});
       return;
     }
+    // On revient a la premiere page : « tout marquer comme lu » change
+    // l'etat de chaque element, et rester sur la page sept n'aurait aucun
+    // sens apres une action qui concerne toute la liste.
     final liste = await repository.notifications();
     liste.fold(
       (f) => emit(NotificationsError(f.errorMessage)),
-      (notifications) => emit(
+      (page) => emit(
         NotificationsLoaded(
-          notifications,
+          page.notifications,
+          pagination: page.pagination,
           succes: 'Toutes vos notifications sont marquées comme lues.',
         ),
       ),

@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/barre_pagination.dart';
 import 'package:dartz/dartz.dart';
 
 import '../../../../core/errors/failure.dart';
@@ -15,7 +16,9 @@ abstract class FavorisRepository {
 
   Future<Either<Failure, void>> nePlusSuivre(String boutiqueId);
 
-  Future<Either<Failure, List<BoutiqueSuivie>>> mesBoutiquesSuivies();
+  /// Une page de boutiques suivies, avec de quoi atteindre les suivantes.
+  Future<Either<Failure, (List<BoutiqueSuivie>, Pagination)>>
+  mesBoutiquesSuivies({int page});
 
   /// Bascule la cloche et renvoie son état réel après l'opération.
   Future<Either<Failure, bool>> basculerCloche(String boutiqueId, bool active);

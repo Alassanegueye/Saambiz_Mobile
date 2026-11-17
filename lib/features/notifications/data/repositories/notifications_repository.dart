@@ -12,9 +12,11 @@ class NotificationsRepository {
 
   String _msg(Object e) => messageErreurReseau(e);
 
-  Future<Either<Failure, List<NotificationModel>>> notifications() async {
+  Future<Either<Failure, PageNotifications>> notifications({
+    int page = 1,
+  }) async {
     try {
-      return Right(await remote.notifications());
+      return Right(await remote.notifications(page: page));
     } catch (e) {
       return Left(ServerFailure(errorMessage: _msg(e)));
     }

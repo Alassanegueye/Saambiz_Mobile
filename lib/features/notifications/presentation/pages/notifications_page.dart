@@ -11,6 +11,7 @@ import 'package:intl/intl.dart';
 import '../../../../injection_container.dart';
 import '../../../home/domain/entities/notification_model.dart';
 import '../../../../core/routes/app_router.dart';
+import '../../../../core/widgets/barre_pagination.dart';
 import '../../../abonnement/presentation/pages/mon_abonnement_page.dart';
 import '../../../catalogue/presentation/pages/boutique_publique_page.dart';
 import '../../../commande/data/datasources/commande_remote_datasource.dart';
@@ -195,12 +196,23 @@ class _NotificationsViewState extends State<_NotificationsView> {
             }
             return RefreshIndicator(
               color: AppColor.kPrimary,
-              onRefresh: () async =>
-                  context.read<NotificationsBloc>().add(LoadNotifications()),
+              onRefresh: () async => context.read<NotificationsBloc>().add(
+                LoadNotifications(page: state.pagination.page),
+              ),
+              // +1 : la barre « Précédent / Suivant » en pied de liste. Les
+              // intertitres par jour valent pour la page affichée.
               child: ListView.builder(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                itemCount: lignes.length,
+                itemCount: lignes.length + 1,
                 itemBuilder: (context, i) {
+                  if (i == lignes.length) {
+                    return BarrePagination(
+                      pagination: state.pagination,
+                      onPage: (page) => context.read<NotificationsBloc>().add(
+                        LoadNotifications(page: page),
+                      ),
+                    );
+                  }
                   final ligne = lignes[i];
                   if (ligne is String) {
                     return Padding(

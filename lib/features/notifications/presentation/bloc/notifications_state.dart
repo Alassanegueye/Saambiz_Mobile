@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/barre_pagination.dart';
 import 'package:equatable/equatable.dart';
 
 import '../../../home/domain/entities/notification_model.dart';
@@ -16,9 +17,22 @@ class NotificationsLoaded extends NotificationsState {
 
   /// Confirmation d'une action (« tout marquer comme lu »), `null` sinon.
   final String? succes;
-  NotificationsLoaded(this.notifications, {this.succes});
+
+  /// Où l'on est dans la liste. Une page unique replie la barre.
+  final Pagination pagination;
+
+  NotificationsLoaded(
+    this.notifications, {
+    this.succes,
+    this.pagination = const Pagination(),
+  });
   @override
-  List<Object?> get props => [notifications, succes];
+  List<Object?> get props => [
+    notifications,
+    succes,
+    pagination.page,
+    pagination.pages,
+  ];
 }
 
 class NombreNonLuesLoaded extends NotificationsState {

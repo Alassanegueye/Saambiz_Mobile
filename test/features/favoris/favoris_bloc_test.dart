@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/barre_pagination.dart';
 import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:saambiz/core/errors/failure.dart';
@@ -24,8 +25,12 @@ class _Depot implements FavorisRepository {
   final _panne = ServerFailure(errorMessage: 'Serveur injoignable');
 
   @override
-  Future<Either<Failure, List<BoutiqueSuivie>>> mesBoutiquesSuivies() async =>
-      listeEnPanne ? Left(_panne) : Right(List.of(boutiques));
+  Future<Either<Failure, (List<BoutiqueSuivie>, Pagination)>>
+  mesBoutiquesSuivies({int page = 1}) async => listeEnPanne
+      ? Left(_panne)
+      // Une seule page : le depot factice n'a pas a simuler la pagination,
+      // ce sont les regles du bloc qu'on verifie ici.
+      : Right((List.of(boutiques), Pagination(total: boutiques.length)));
 
   @override
   Future<Either<Failure, void>> nePlusSuivre(String boutiqueId) async {

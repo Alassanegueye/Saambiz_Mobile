@@ -10,6 +10,7 @@ import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/messages.dart';
 import '../../../../core/widgets/onglets_conserves.dart';
 import '../../../../core/widgets/page_vendeur.dart';
+import '../../../../core/widgets/barre_pagination.dart';
 import '../../../../core/widgets/profil_kit.dart' show confirmerAction;
 import '../../../../core/widgets/ui_kit.dart' show EtatVide;
 import '../../../../injection_container.dart';
@@ -106,6 +107,9 @@ class _FavorisView extends StatelessWidget {
     final boutiques = state is FavorisLoaded
         ? state.boutiques.where((b) => vues.add(b.id)).toList()
         : const <BoutiqueSuivie>[];
+    final pagination = state is FavorisLoaded
+        ? state.pagination
+        : const Pagination();
 
     if (boutiques.isEmpty && produits.isEmpty) {
       return const EmptyState(
@@ -150,7 +154,10 @@ class _FavorisView extends StatelessWidget {
           SliverToBoxAdapter(
             child: _EnTeteSection(
               titre: 'Boutiques suivies',
-              nombre: boutiques.length,
+              // Le TOTAL, pas la page : la liste est paginée par dix.
+              nombre: pagination.total > 0
+                  ? pagination.total
+                  : boutiques.length,
               sousTitre: resumeAlertes,
             ),
           ),
@@ -170,6 +177,13 @@ class _FavorisView extends StatelessWidget {
                 ),
               ),
             ),
+          SliverToBoxAdapter(
+            child: BarrePagination(
+              pagination: pagination,
+              onPage: (page) =>
+                  context.read<FavorisBloc>().add(LoadFavoris(page: page)),
+            ),
+          ),
           SliverToBoxAdapter(
             child: SizedBox(height: espaceBasVendeur(context)),
           ),

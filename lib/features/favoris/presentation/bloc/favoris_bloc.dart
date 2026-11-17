@@ -32,7 +32,7 @@ class FavorisBloc extends Bloc<FavorisEvent, FavorisState> {
   Future<void> _onCharger(LoadFavoris event, Emitter<FavorisState> emit) async {
     final avant = state;
     emit(FavorisLoading());
-    await _recharger(emit, avant: avant);
+    await _recharger(emit, avant: avant, page: event.page);
   }
 
   /// Recharge la liste ; [succes] accompagne la liste quand elle suit une
@@ -41,11 +41,13 @@ class FavorisBloc extends Bloc<FavorisEvent, FavorisState> {
     Emitter<FavorisState> emit, {
     String? succes,
     FavorisState? avant,
+    int page = 1,
   }) async {
-    final resultat = await getBoutiquesSuivies();
+    final resultat = await getBoutiquesSuivies(page: page);
     resultat.fold(
       (panne) => _echec(emit, panne.errorMessage, avant ?? state),
-      (boutiques) => emit(FavorisLoaded(boutiques, succes: succes)),
+      (recue) =>
+          emit(FavorisLoaded(recue.$1, succes: succes, pagination: recue.$2)),
     );
   }
 

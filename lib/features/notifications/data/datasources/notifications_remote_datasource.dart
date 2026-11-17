@@ -1,10 +1,19 @@
+import '../../../../core/widgets/barre_pagination.dart';
 import 'package:dio/dio.dart';
 
 import '../../../../core/constants/api_endpoints.dart';
 import '../../../home/domain/entities/notification_model.dart';
 
+/// Une page de notifications : la liste, et où elle se situe.
+class PageNotifications {
+  final List<NotificationModel> notifications;
+  final Pagination pagination;
+  const PageNotifications(this.notifications, this.pagination);
+}
+
 abstract class NotificationsRemoteDataSource {
-  Future<List<NotificationModel>> notifications();
+  /// Une page de notifications, avec de quoi atteindre les suivantes.
+  Future<PageNotifications> notifications({int page});
   Future<int> nombreNonLues();
   Future<void> marquerToutesLues();
   Future<void> marquerLue(String id);
@@ -34,11 +43,19 @@ class NotificationsRemoteDataSourceImpl
   }
 
   @override
-  Future<List<NotificationModel>> notifications() async {
-    final res = await dio.get(NotificationsEndpoints.notifications);
-    return _extractList(res.data)
-        .map((e) => NotificationModel.fromJson(e as Map<String, dynamic>))
-        .toList();
+  Future<PageNotifications> notifications({int page = 1}) async {
+    final res = await dio.get(
+      NotificationsEndpoints.notifications,
+      queryParameters: {'page': page},
+    );
+    return PageNotifications(
+      _extractList(res.data)
+          .map((e) => NotificationModel.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      Pagination.depuis(
+        res.data is Map ? Map<String, dynamic>.from(res.data as Map) : null,
+      ),
+    );
   }
 
   @override

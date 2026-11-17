@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/barre_pagination.dart';
 import 'package:dartz/dartz.dart';
 
 import '../../../../core/errors/failure.dart';
@@ -8,6 +9,7 @@ class GetBoutiquesSuivies {
   final FavorisRepository repository;
   GetBoutiquesSuivies(this.repository);
 
-  Future<Either<Failure, List<BoutiqueSuivie>>> call() =>
-      repository.mesBoutiquesSuivies();
+  Future<Either<Failure, (List<BoutiqueSuivie>, Pagination)>> call({
+    int page = 1,
+  }) => repository.mesBoutiquesSuivies(page: page);
 }

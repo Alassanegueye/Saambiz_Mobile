@@ -5,7 +5,13 @@ abstract class MessagerieEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-class LoadConversations extends MessagerieEvent {}
+class LoadConversations extends MessagerieEvent {
+  /// Page demandée : le serveur en rend dix à la fois.
+  final int page;
+  LoadConversations({this.page = 1});
+  @override
+  List<Object?> get props => [page];
+}
 
 class LoadHistorique extends MessagerieEvent {
   final String userId;

@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/barre_pagination.dart';
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 
@@ -59,11 +60,12 @@ class FavorisRepositoryImpl implements FavorisRepository {
   }
 
   @override
-  Future<Either<Failure, List<BoutiqueSuivie>>> mesBoutiquesSuivies() async {
+  Future<Either<Failure, (List<BoutiqueSuivie>, Pagination)>>
+  mesBoutiquesSuivies({int page = 1}) async {
     try {
-      final modeles = await remote.mesFavoris();
-      return Right(
-        modeles
+      final recue = await remote.mesFavoris(page: page);
+      return Right((
+        recue.boutiques
             .map(
               (m) => BoutiqueSuivie(
                 id: m.id,
@@ -76,7 +78,8 @@ class FavorisRepositoryImpl implements FavorisRepository {
               ),
             )
             .toList(),
-      );
+        recue.pagination,
+      ));
     } catch (e) {
       return Left(_panne(e));
     }
