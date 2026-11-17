@@ -78,11 +78,30 @@ class _VueBoutiqueState extends State<_VueBoutique> {
   Vitrine? _derniere;
   List<SecteurVitrine> _secteurs = const [];
 
+  /// L'écran du site, pour que le crayon de l'en-tête ouvre ses
+  /// modifications.
+  final _cleConfiguration = GlobalKey<_ConfigurationState>();
+
   @override
   Widget build(BuildContext context) {
     return PageVendeur(
       titre: 'Ma boutique',
       actions: [
+        // Le crayon du site, en haut de l'écran : posé sur l'aperçu, il ne
+        // se voyait qu'une fois l'aperçu atteint et n'ouvrait que le nom et
+        // le logo. Ici, il réunit tout ce qui se modifie. Seulement quand le
+        // site existe.
+        BlocBuilder<VitrineBloc, VitrineState>(
+          builder: (context, state) {
+            final v = state is VitrineChargee ? state.vitrine : _derniere;
+            if (v == null || !v.configuree) return const SizedBox.shrink();
+            return BoutonEnteteVendeur(
+              icone: Icons.edit_rounded,
+              infobulle: 'Modifier mon site',
+              onTap: () => _cleConfiguration.currentState?.menuModifier(),
+            );
+          },
+        ),
         BoutonEnteteVendeur(
           icone: Icons.refresh_rounded,
           infobulle: 'Actualiser',
@@ -153,6 +172,7 @@ class _VueBoutiqueState extends State<_VueBoutique> {
                 ),
                 Expanded(
                   child: _Configuration(
+                    key: _cleConfiguration,
                     vitrine: apercu,
                     secteurs: _secteurs,
                     ouvrirProduits: widget.ouvrirProduits,
@@ -297,6 +317,7 @@ class _Configuration extends StatefulWidget {
   final bool occupe;
 
   const _Configuration({
+    super.key,
     required this.vitrine,
     required this.secteurs,
     this.ouvrirProduits,
@@ -706,6 +727,64 @@ class _ConfigurationState extends State<_Configuration> {
     }
   }
 
+  /// Le crayon de l'en-tête : tout ce qui se modifie sur le site, réuni.
+  Future<void> menuModifier() async {
+    if (widget.occupe) return;
+    final action = await showModalBottomSheet<String>(
+      context: context,
+      backgroundColor: _C.white,
+      showDragHandle: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Padding(
+              padding: EdgeInsets.fromLTRB(20, 0, 20, 8),
+              child: Text(
+                'Modifier mon site',
+                style: TextStyle(
+                  fontFamily: kPolice,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w800,
+                  color: _C.navy,
+                ),
+              ),
+            ),
+            _ActionMenu(
+              icone: Icons.storefront_outlined,
+              texte: 'Nom, logo et adresse',
+              onTap: () => Navigator.of(ctx).pop('identite'),
+            ),
+            _ActionMenu(
+              icone: Icons.palette_outlined,
+              texte: 'Apparence : couleur et mise en page',
+              onTap: () => Navigator.of(ctx).pop('apparence'),
+            ),
+            _ActionMenu(
+              icone: Icons.add_circle_outline_rounded,
+              texte: 'Ajouter une section',
+              onTap: () => Navigator.of(ctx).pop('section'),
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+    if (!mounted) return;
+    switch (action) {
+      case 'identite':
+        await _modifierIdentite();
+      case 'apparence':
+        _modifierApparence();
+      case 'section':
+        await _ajouterSection();
+    }
+  }
+
   Future<void> _modifierIdentite() async {
     await Navigator.of(
       context,
@@ -794,7 +873,8 @@ class _ConfigurationState extends State<_Configuration> {
           const SizedBox(height: 26),
           const _TitreBloc(
             'Ce que voient vos clients',
-            aide: 'Touchez un élément ou son crayon pour le modifier.',
+            aide:
+                'Touchez un élément pour le modifier, ou le crayon en haut de l\'écran.',
           ),
           _CadreSite(
             adresse: vitrine.url,
@@ -830,6 +910,9 @@ class _ConfigurationState extends State<_Configuration> {
               _BlocModifiable(
                 infobulle: 'Modifier le nom, le logo et l\'adresse',
                 onModifier: occupe ? null : _modifierIdentite,
+                // Son crayon est monté dans l'en-tête (« Modifier mon
+                // site ») ; le bloc, lui, reste touchable.
+                avecCrayon: false,
                 enfant: _EnteteSite(
                   boutique: _boutique,
                   vitrine: vitrine,
@@ -906,18 +989,22 @@ class _ConfigurationState extends State<_Configuration> {
                   sousTitre: 'Créer, modifier ou retirer un produit',
                   onTap: widget.ouvrirProduits,
                 ),
-                const Divider(height: 1, color: _C.border),
-                // `DELETE /vendeur/ma-vitrine` existait côté backend sans
-                // qu'aucun écran ne l'appelle : un vendeur pouvait créer son
-                // site, jamais le retirer.
-                _LigneReglage(
-                  icone: Icons.delete_outline_rounded,
-                  titre: 'Retirer mon site',
-                  sousTitre: 'La boutique reste, seul le site disparaît',
-                  couleur: _C.danger,
-                  onTap: occupe ? null : _supprimerSite,
-                ),
               ],
+            ),
+          ),
+          // À part et plus bas : un geste qui ne se rattrape pas ne doit
+          // pas se toucher par mégarde en visant la ligne voisine.
+          const SizedBox(height: 14),
+          _Bloc(
+            // `DELETE /vendeur/ma-vitrine` existait côté backend sans
+            // qu'aucun écran ne l'appelle : un vendeur pouvait créer son
+            // site, jamais le retirer.
+            enfant: _LigneReglage(
+              icone: Icons.delete_outline_rounded,
+              titre: 'Retirer mon site',
+              sousTitre: 'La boutique reste, seul le site disparaît',
+              couleur: _C.danger,
+              onTap: occupe ? null : _supprimerSite,
             ),
           ),
 
@@ -1028,7 +1115,11 @@ class _CarteEnLigne extends StatelessWidget {
       decoration: BoxDecoration(
         color: _C.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: _C.border),
+        // Le contour dit l'état d'un coup d'œil : vert en ligne, gris sinon.
+        border: Border.all(
+          color: enLigne ? _C.success.withValues(alpha: 0.4) : _C.border,
+          width: enLigne ? 1.5 : 1,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1319,31 +1410,49 @@ class _TitreBloc extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // La barre dorée des titres de section, comme sur les autres écrans.
     return Padding(
-      padding: const EdgeInsets.only(left: 4, bottom: 10),
-      child: Column(
+      padding: const EdgeInsets.only(left: 2, bottom: 12),
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            titre,
-            style: const TextStyle(
-              fontFamily: kPolice,
-              fontSize: 16,
-              fontWeight: FontWeight.w800,
-              color: _C.navy,
+          Container(
+            width: 4,
+            height: 18,
+            margin: const EdgeInsets.only(top: 2),
+            decoration: BoxDecoration(
+              color: _C.gold,
+              borderRadius: BorderRadius.circular(2),
             ),
           ),
-          if (aide != null) ...[
-            const SizedBox(height: 2),
-            Text(
-              aide!,
-              style: const TextStyle(
-                color: _C.muted,
-                fontSize: 12.5,
-                height: 1.4,
-              ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  titre,
+                  style: const TextStyle(
+                    fontFamily: kPolice,
+                    fontSize: 17,
+                    fontWeight: FontWeight.w800,
+                    color: _C.navy,
+                  ),
+                ),
+                if (aide != null) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    aide!,
+                    style: const TextStyle(
+                      color: _C.muted,
+                      fontSize: 12.5,
+                      height: 1.4,
+                    ),
+                  ),
+                ],
+              ],
             ),
-          ],
+          ),
         ],
       ),
     );
@@ -1777,26 +1886,36 @@ class _BlocModifiable extends StatelessWidget {
   final Widget enfant;
   final String infobulle;
   final VoidCallback? onModifier;
+
+  /// Faux quand le crayon vit ailleurs (l'en-tête) : le bloc reste
+  /// touchable.
+  final bool avecCrayon;
   const _BlocModifiable({
     required this.enfant,
     required this.infobulle,
     this.onModifier,
+    this.avecCrayon = true,
   });
 
   @override
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        InkWell(onTap: onModifier, child: enfant),
-        Positioned(
-          top: 10,
-          right: 10,
-          child: _PastilleAction(
-            icone: Icons.edit_rounded,
-            infobulle: infobulle,
-            onTap: onModifier,
-          ),
+        Semantics(
+          button: onModifier != null,
+          label: infobulle,
+          child: InkWell(onTap: onModifier, child: enfant),
         ),
+        if (avecCrayon)
+          Positioned(
+            top: 10,
+            right: 10,
+            child: _PastilleAction(
+              icone: Icons.edit_rounded,
+              infobulle: infobulle,
+              onTap: onModifier,
+            ),
+          ),
       ],
     );
   }
