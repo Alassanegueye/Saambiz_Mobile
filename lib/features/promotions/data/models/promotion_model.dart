@@ -15,6 +15,10 @@ class PromotionModel {
   final String? produitNom;
   final String? produitImage;
 
+  /// Prix normal du produit : de quoi afficher la remise et le prix barré.
+  /// Nul si le serveur ne l'envoie pas.
+  final double? produitPrix;
+
   PromotionModel({
     required this.id,
     required this.titre,
@@ -25,10 +29,24 @@ class PromotionModel {
     required this.produitId,
     this.produitNom,
     this.produitImage,
+    this.produitPrix,
   });
 
+  /// Remise en pour cent, arrondie ; nulle sans prix normal connu.
+  int? get remise {
+    final prix = produitPrix;
+    if (prix == null || prix <= 0 || prixPromo <= 0 || prixPromo >= prix) {
+      return null;
+    }
+    return ((prix - prixPromo) / prix * 100).round();
+  }
+
   factory PromotionModel.fromJson(Map<String, dynamic> json) {
-    final produit = json['produit'] as Map<String, dynamic>?;
+    // Le serveur inclut le produit sans alias : Sequelize le range alors sous
+    // le nom du modèle, « Produit ». Lue sous « produit » seulement, la clé
+    // ne trouvait rien : ni photo, ni nom de produit sur les promotions.
+    final brut = json['produit'] ?? json['Produit'];
+    final produit = brut is Map ? Map<String, dynamic>.from(brut) : null;
     return PromotionModel(
       id: json['id']?.toString() ?? '',
       titre: json['titre']?.toString() ?? '',
@@ -43,6 +61,9 @@ class PromotionModel {
       produitId: (json['produitId'] ?? produit?['id'])?.toString() ?? '',
       produitNom: produit?['nom']?.toString(),
       produitImage: produit?['image']?.toString(),
+      produitPrix: produit?['prix'] == null
+          ? null
+          : _toDouble(produit!['prix']),
     );
   }
 }
