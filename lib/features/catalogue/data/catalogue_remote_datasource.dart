@@ -13,23 +13,6 @@ class CatalogueRemoteDataSource {
       .map((e) => ProduitCatalogue.fromJson(Map<String, dynamic>.from(e)))
       .toList();
 
-  /// Signale au backend qu'une fiche produit a été ouverte.
-  ///
-  /// `POST /acheteurs/produit/:id/vue` existait depuis le début sans être
-  /// appelé par personne. Ce compteur alimente pourtant « Visites » sur le
-  /// tableau de bord du vendeur et le tri `populaires` du catalogue : l'un
-  /// restait à zéro, l'autre sans effet.
-  ///
-  /// Volontairement silencieux : une vue perdue ne doit jamais empêcher la
-  /// fiche de s'afficher.
-  Future<void> signalerVue(String produitId) async {
-    try {
-      await dio.post('/acheteurs/produit/$produitId/vue');
-    } on DioException {
-      // Compteur d'audience : rien à dire à l'utilisateur.
-    }
-  }
-
   /// [tri] : recents, populaires, prix_asc, prix_desc, promos.
   Future<PageProduits> produits({
     String? categorie,
@@ -140,8 +123,18 @@ class CatalogueRemoteDataSource {
   }
 
   /// Fiche publique d'une boutique.
-  Future<Map<String, dynamic>> boutique(String id) async {
-    final res = await dio.get('/catalogue/boutiques/$id');
+  ///
+  /// [visiteur] : l'identifiant anonyme de l'appareil, à passer SEULEMENT
+  /// quand le client ouvre la boutique : le serveur compte alors une visite
+  /// (une par personne et par jour). La fiche d'une commande relit la
+  /// boutique pour l'afficher, sans le passer.
+  Future<Map<String, dynamic>> boutique(String id, {String? visiteur}) async {
+    final res = await dio.get(
+      '/catalogue/boutiques/$id',
+      options: visiteur == null
+          ? null
+          : Options(headers: {'X-Visiteur': visiteur}),
+    );
     return Map<String, dynamic>.from((res.data as Map)['boutique'] as Map);
   }
 }

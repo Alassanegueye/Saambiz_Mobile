@@ -22,6 +22,7 @@ import '../../domain/entities/vitrine.dart';
 import '../bloc/vitrine_bloc.dart';
 import '../bloc/vitrine_event.dart';
 import '../bloc/vitrine_state.dart';
+import '../lien_apercu.dart';
 import 'assistant_vitrine_page.dart';
 import 'sections_boutique_page.dart';
 
@@ -817,8 +818,9 @@ class _ConfigurationState extends State<_Configuration> {
                   ? _boutique!.description.trim()
                   : (vitrine.activite ?? '').trim(),
               telephone: (_boutique?.telephone ?? '').trim(),
-              whatsapp: (vitrine.reseaux['whatsapp'] ?? _boutique?.telephone ?? '')
-                  .trim(),
+              whatsapp:
+                  (vitrine.reseaux['whatsapp'] ?? _boutique?.telephone ?? '')
+                      .trim(),
               adresse: _boutique?.localisation ?? '',
               horaires: horaires,
               reseaux: vitrine.reseaux,
@@ -1091,11 +1093,6 @@ class _CarteEnLigne extends StatelessWidget {
                   ),
                 ),
               ),
-              if (vitrine.vues > 0)
-                Text(
-                  '${vitrine.vues} visites',
-                  style: const TextStyle(color: _C.muted, fontSize: 12),
-                ),
             ],
           ),
           const SizedBox(height: 4),
@@ -1105,6 +1102,38 @@ class _CarteEnLigne extends StatelessWidget {
                 : 'Personne ne peut la visiter pour l\'instant.',
             style: const TextStyle(color: _C.muted, fontSize: 13, height: 1.4),
           ),
+          // Une par personne et par jour, application et site : le même
+          // nombre que « Visites » sur le tableau de bord. Sur sa propre
+          // ligne, pour laisser au titre toute la largeur.
+          if (vitrine.vues > 0) ...[
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                const Icon(
+                  Icons.visibility_outlined,
+                  size: 15,
+                  color: _C.muted,
+                ),
+                const SizedBox(width: 6),
+                Flexible(
+                  child: Text(
+                    [
+                      '${vitrine.vues} ${vitrine.vues > 1 ? 'visites' : 'visite'}',
+                      if (vitrine.visitesSemaine > 0)
+                        '${vitrine.visitesSemaine} cette semaine',
+                    ].join(' · '),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: _C.muted,
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
           const SizedBox(height: 14),
           _GrandInterrupteur(enLigne: enLigne, onChanged: onChanged),
           const SizedBox(height: 14),
@@ -1116,7 +1145,7 @@ class _CarteEnLigne extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                   child: InkWell(
                     borderRadius: BorderRadius.circular(12),
-                    onTap: () => _ouvrirLien(vitrine.url),
+                    onTap: () => _ouvrirLien(lienApercu(vitrine.url)),
                     child: Container(
                       height: 46,
                       padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -1609,8 +1638,7 @@ class _PiedSite extends StatelessWidget {
       if (whatsapp.isNotEmpty)
         (icone: Icons.chat_outlined, texte: 'Écrire sur WhatsApp'),
       if (adresse.isNotEmpty) (icone: Icons.place_outlined, texte: adresse),
-      if (horaires.isNotEmpty)
-        (icone: Icons.schedule_rounded, texte: horaires),
+      if (horaires.isNotEmpty) (icone: Icons.schedule_rounded, texte: horaires),
     ];
 
     final liens = _icones.entries

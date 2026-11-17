@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../domain/entities/vitrine.dart';
+import '../lien_apercu.dart';
 
 class _C {
   static const navy = Color(0xFF01154B);
@@ -229,7 +230,7 @@ class VitrinePretePage extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                onPressed: () => _ouvrir(vitrine.url),
+                onPressed: () => _ouvrir(lienApercu(vitrine.url)),
                 child: const Text(
                   'Voir mon site',
                   style: TextStyle(fontSize: 15.5, fontWeight: FontWeight.w700),

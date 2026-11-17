@@ -4,9 +4,11 @@ import 'package:dio/dio.dart';
 import 'package:saambiz/core/widgets/image_reseau.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:saambiz/core/widgets/logo_boutique.dart';
 import 'package:saambiz/core/theme/police.dart';
 
+import '../../../../core/services/identifiant_visiteur.dart';
 import '../../../../core/services/token_service.dart';
 import '../../../../core/theme/app_color.dart';
 import '../../../../core/theme/app_dimensions.dart';
@@ -104,7 +106,12 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
   // Données
   Future<void> _chargerBoutique() async {
     try {
-      final b = await _ds.boutique(widget.boutiqueId);
+      // Ouvrir la boutique est une visite : le serveur la compte une fois
+      // par jour, ni pour son vendeur ni pour un robot.
+      final b = await _ds.boutique(
+        widget.boutiqueId,
+        visiteur: IdentifiantVisiteur.lire(sl<SharedPreferences>()),
+      );
       if (mounted) setState(() => _boutique = b);
     } catch (_) {
       /* l'aperçu reste affiché */

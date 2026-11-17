@@ -224,7 +224,11 @@ class _HomePageState extends State<HomePage>
           _ventes = _fmtNombre(stats['chiffreAffaires']);
           _commandesCount = _toInt(stats['nombreCommandes']);
           _nbCommandes = _commandesCount;
-          _visites = _toInt(stats['totalVues']).toString();
+          // Visites de la boutique (application et site, une par personne
+          // et par jour) : le même nombre que sur Ma boutique. `totalVues`
+          // additionnait les vues des produits ; il ne sert plus qu'à un
+          // serveur pas encore mis à jour.
+          _visites = _toInt(stats['visites'] ?? stats['totalVues']).toString();
           _clients = _toInt(stats['nombreAbonnes']).toString();
           _notifNonLues = _toInt(data['notificationsNonLues']);
         });

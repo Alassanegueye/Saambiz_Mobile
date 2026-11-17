@@ -77,6 +77,7 @@ class VitrineModel extends Vitrine {
     super.commande,
     super.paiementLivraison,
     super.vues,
+    super.visitesSemaine,
     super.logoEnregistre,
     super.blocs,
   });
@@ -108,6 +109,8 @@ class VitrineModel extends Vitrine {
       commande: v['commande'] != false,
       paiementLivraison: v['paiementLivraison'] != false,
       vues: (v['vues'] as num?)?.toInt() ?? 0,
+      visitesSemaine:
+          ((v['visitesRecentes'] as Map?)?['septJours'] as num?)?.toInt() ?? 0,
       // Posé à la racine par la création, absent partout ailleurs : `null`
       // signifie donc « la question ne se pose pas », et non « échec ».
       logoEnregistre: racine.containsKey('logoEnregistre')

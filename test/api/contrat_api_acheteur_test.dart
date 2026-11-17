@@ -105,23 +105,52 @@ void main() {
       expect(espion.appel, 'GET /catalogue/boutiques/b1');
     });
 
-    test("l'ouverture d'une fiche est comptabilisée", () async {
-      // Ce compteur alimente « Visites » chez le vendeur et le tri
-      // `populaires` : il était absent de l'application.
-      espion.repond({'success': true});
+    test('ouvrir la boutique signale la visite (X-Visiteur)', () async {
+      // Le serveur compte une visite par personne et par jour quand la page
+      // de la boutique l'annonce.
+      espion.repond({
+        'success': true,
+        'boutique': {'id': 'b1', 'nom': 'Aloushop'},
+      });
 
-      await CatalogueRemoteDataSource(dio).signalerVue('p1');
+      await CatalogueRemoteDataSource(
+        dio,
+      ).boutique('b1', visiteur: '0123456789abcdef0123456789abcdef');
 
-      expect(espion.appel, 'POST /acheteurs/produit/p1/vue');
+      expect(espion.appel, 'GET /catalogue/boutiques/b1');
+      expect(
+        espion.requete.headers['X-Visiteur'],
+        '0123456789abcdef0123456789abcdef',
+      );
     });
 
-    test('un échec du compteur de vues ne remonte pas', () async {
-      espion.repondErreur(500, corps: {'message': 'boum'});
+    test(
+      'relire la boutique (fiche commande) ne compte pas de visite',
+      () async {
+        espion.repond({
+          'success': true,
+          'boutique': {'id': 'b1', 'nom': 'Aloushop'},
+        });
 
-      // Ne doit pas lever : une vue perdue ne vaut pas un écran en erreur.
-      await CatalogueRemoteDataSource(dio).signalerVue('p1');
+        await CatalogueRemoteDataSource(dio).boutique('b1');
 
-      expect(espion.appel, 'POST /acheteurs/produit/p1/vue');
+        expect(espion.requete.headers.containsKey('X-Visiteur'), isFalse);
+      },
+    );
+
+    test('une fiche produit : une seule requête, donc une seule vue', () async {
+      // La vue est comptée par le serveur à la lecture de la fiche. Un second
+      // appel (POST /acheteurs/produit/:id/vue) la comptait en double.
+      espion.repond({
+        'success': true,
+        'produit': {'id': 'p1', 'nom': 'Robe', 'prix': 1000},
+        'similaires': [],
+      });
+
+      await CatalogueRemoteDataSource(dio).detail('p1');
+
+      expect(espion.requetes, hasLength(1));
+      expect(espion.appel, 'GET /catalogue/produits/p1');
     });
   });
 

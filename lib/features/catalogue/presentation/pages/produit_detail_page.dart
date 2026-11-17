@@ -63,11 +63,8 @@ class _ProduitDetailPageState extends State<ProduitDetailPage> {
   Future<void> _charger() async {
     final source = CatalogueRemoteDataSource(sl<Dio>());
 
-    // Comptabilise l'ouverture de la fiche. Lancé sans `await` : le compteur
-    // du vendeur ne doit pas retarder l'affichage, et son échec ne doit rien
-    // casser.
-    unawaited(source.signalerVue(widget.produit.id));
-
+    // La vue est comptée par le serveur à cette lecture de la fiche. Un
+    // second appel (POST /acheteurs/produit/:id/vue) la comptait en double.
     try {
       final res = await source.detail(widget.produit.id);
       if (!mounted) return;

@@ -77,6 +77,9 @@ class Vitrine extends Equatable {
   final bool paiementLivraison;
   final int vues;
 
+  /// Visites uniques des 7 derniers jours (aujourd'hui compris).
+  final int visitesSemaine;
+
   /// Renseigné uniquement au retour de la création : faux si le vendeur avait
   /// choisi un logo mais que l'hébergeur d'images l'a refusé. Le site est créé
   /// quand même, il serait absurde de perdre quatre réponses pour une image
@@ -106,6 +109,7 @@ class Vitrine extends Equatable {
     this.commande = true,
     this.paiementLivraison = true,
     this.vues = 0,
+    this.visitesSemaine = 0,
     this.logoEnregistre,
     this.blocs = const {},
   });
@@ -130,6 +134,7 @@ class Vitrine extends Equatable {
     commande,
     paiementLivraison,
     vues,
+    visitesSemaine,
     logoEnregistre,
     blocs,
   ];
