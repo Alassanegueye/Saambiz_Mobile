@@ -8,7 +8,7 @@ import 'package:saambiz/core/routes/app_router.dart';
 
 import '../../../../../core/constants/infos_app.dart';
 import '../../../../../core/utils/url_externe.dart';
-import '../../../../../core/widgets/image_reseau.dart';
+import '../../../../../core/widgets/entete_compte.dart';
 import '../../../../../core/widgets/page_vendeur.dart';
 import '../../../../../core/theme/police.dart';
 import '../../../../../core/widgets/barre_navigation_verre.dart'
@@ -212,7 +212,7 @@ class _ProfilPageState extends State<ProfilPage>
       // onglet sur fond clair, sous un titre centré, c'était celui-ci.
       child: PageVendeur(
         titre: 'Mon compte',
-        titreWidget: _EnteteCompte(
+        titreWidget: EnteteCompte(
           nom: _nomComplet,
           initiales: _initiales,
           email: _user?.email ?? '',
@@ -364,95 +364,6 @@ class _ProfilPageState extends State<ProfilPage>
           ),
         ),
       ),
-    );
-  }
-}
-
-/// Le profil dans l'en-tête bleu : photo (ou initiales), nom, adresse
-/// e-mail et type de compte.
-class _EnteteCompte extends StatelessWidget {
-  final String nom;
-  final String initiales;
-  final String email;
-  final String role;
-  final String? photo;
-  const _EnteteCompte({
-    required this.nom,
-    required this.initiales,
-    required this.email,
-    required this.role,
-    this.photo,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final lettres = Center(
-      child: Text(
-        initiales,
-        style: const TextStyle(
-          fontFamily: kPolice,
-          fontSize: 20,
-          fontWeight: FontWeight.w800,
-          color: AppColor.kPrimary,
-        ),
-      ),
-    );
-    final aUnePhoto = (photo ?? '').trim().isNotEmpty;
-    return Row(
-      children: [
-        Container(
-          width: 60,
-          height: 60,
-          clipBehavior: Clip.antiAlias,
-          decoration: BoxDecoration(
-            color: AppColor.kWhite,
-            shape: BoxShape.circle,
-            border: Border.all(color: AppColor.kSecondary, width: 2.5),
-          ),
-          child: aUnePhoto
-              ? ImageReseau(
-                  photo!,
-                  largeurServeur: 180,
-                  fit: BoxFit.cover,
-                  repli: lettres,
-                )
-              : lettres,
-        ),
-        const SizedBox(width: 14),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                nom,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontFamily: kPolice,
-                  fontSize: 21,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: -0.4,
-                  color: AppColor.kWhite,
-                ),
-              ),
-              if (email.isNotEmpty)
-                Text(
-                  email,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontFamily: kPolice,
-                    fontSize: 13,
-                    color: AppColor.kWhite.withValues(alpha: 0.75),
-                  ),
-                ),
-              const SizedBox(height: 7),
-              BadgeTypeProfil(role: role),
-            ],
-          ),
-        ),
-      ],
     );
   }
 }

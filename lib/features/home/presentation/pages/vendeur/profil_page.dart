@@ -12,9 +12,10 @@ import 'package:saambiz/core/routes/app_router.dart';
 import '../../../../../core/constants/infos_app.dart';
 import '../../../../../core/theme/app_color.dart';
 import '../../../../../core/utils/url_externe.dart';
-import '../../../../../core/widgets/app_app_bar.dart';
 import '../../../../../core/widgets/barre_navigation_verre.dart'
     show kEspaceBarreBas;
+import '../../../../../core/widgets/entete_compte.dart';
+import '../../../../../core/widgets/page_vendeur.dart';
 import '../../../../../core/widgets/profil_kit.dart';
 import '../../../../../injection_container.dart';
 import '../../../../auth/presentation/bloc/auth_bloc.dart';
@@ -34,8 +35,8 @@ import '../../../../notifications/presentation/pages/notifications_page.dart';
 import '../../../../catalogue/presentation/widgets/produit_card.dart'
     show formaterPrix;
 
-/// Onglet « Compte » du vendeur : carte bleue d'en-tête, puis des groupes
-/// d’entrées dans des cartes blanches.
+/// Onglet « Compte » du vendeur : le profil dans l'en-tête bleu, le solde,
+/// puis des groupes d’entrées dans des cartes blanches.
 class ProfilPage extends StatefulWidget {
   final User? user;
   const ProfilPage({super.key, this.user});
@@ -199,41 +200,34 @@ class _ProfilPageState extends State<ProfilPage> with RetourSurOnglet {
             Navigator.of(context).maybePop();
           }
         },
-        child: Scaffold(
-          backgroundColor: AppColor.kBackground,
-          appBar: AppAppBar(
-            title: 'Compte',
-            implyLeading: false,
-            leading: Navigator.of(context).canPop()
-                ? IconButton(
-                    icon: const Icon(
-                      Icons.arrow_back_ios_new_rounded,
-                      size: 20,
-                    ),
-                    color: AppColor.kGrayscaleDark100,
-                    tooltip: 'Retour à l\'accueil',
-                    onPressed: () => Navigator.of(context).maybePop(),
-                  )
-                : null,
+        // L'en-tête bleu des autres pages, avec le profil dedans, comme le
+        // compte acheteur. Il s'ouvrait sur deux cartes marine empilées
+        // (solde puis profil), sous une barre blanche.
+        child: PageVendeur(
+          titre: 'Mon compte',
+          titreWidget: EnteteCompte(
+            nom: _nomComplet,
+            initiales: _initiales,
+            email: _user?.email ?? '',
+            role: _user?.role ?? 'VENDEUR',
+            photo: _user?.photoProfil,
           ),
-          body: ListView(
+          actions: [
+            BoutonEnteteVendeur(
+              icone: Icons.edit_rounded,
+              infobulle: 'Modifier mon profil',
+              onTap: _onEditProfil,
+            ),
+          ],
+          corps: ListView(
             physics: const BouncingScrollPhysics(),
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, kEspaceBarreBas),
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, kEspaceBarreBas),
             children: [
               _CarteSolde(montant: _user?.soldeDisponible ?? 0),
-              const SizedBox(height: 14),
-              CarteEnteteProfil(
-                nom: _nomComplet,
-                initiales: _initiales,
-                email: _user?.email ?? '',
-                role: _user?.role ?? 'VENDEUR',
-                photo: _user?.photoProfil,
-                onTap: _onEditProfil,
-              ),
               // Tant que la boutique n'est pas certifiée, l'invitation reste en
               // haut du compte : c'est ce qu'annonce le point rouge de l'accueil.
               if (_certification != null && _certification!.actionRequise) ...[
-                const SizedBox(height: 14),
+                const SizedBox(height: 12),
                 _CarteCertification(
                   rejetee: _certification!.rejete,
                   onTap: _ouvrirCertification,
@@ -278,7 +272,8 @@ class _ProfilPageState extends State<ProfilPage> with RetourSurOnglet {
                     icone: Icons.notifications_none_rounded,
                     libelle: 'Notifications',
                     sousTitre: 'Nouvelles commandes et alertes',
-                    onTap: () => _ouvrir(const NotificationsPage(pourVendeur: true)),
+                    onTap: () =>
+                        _ouvrir(const NotificationsPage(pourVendeur: true)),
                   ),
                   LigneProfil(
                     icone: Icons.chat_bubble_outline_rounded,
@@ -354,12 +349,14 @@ class _ProfilPageState extends State<ProfilPage> with RetourSurOnglet {
   }
 }
 
-/// Montant disponible sur le compte du vendeur, en tete de l'onglet Compte.
+/// Montant disponible sur le compte du vendeur, en tête de l'onglet Compte.
 ///
 /// Rien ne l'alimente encore : le serveur expose la colonne, les reversements
-/// seront traites plus tard. D'ou l'absence de bouton de retrait — afficher
-/// une action qui ne fait rien serait pire que de n'en afficher aucune — et la
-/// ligne qui explique pourquoi le montant est a zero.
+/// seront traités plus tard. D'où l'absence de bouton de retrait — afficher
+/// une action qui ne fait rien serait pire que de n'en afficher aucune — et,
+/// à zéro, la ligne qui explique pourquoi.
+///
+/// Carte blanche sous l'en-tête : en marine, elle se confondait avec lui.
 class _CarteSolde extends StatelessWidget {
   final double montant;
   const _CarteSolde({required this.montant});
@@ -367,52 +364,70 @@ class _CarteSolde extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(18, 16, 18, 17),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColor.kPrimary,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Icon(
-                Icons.account_balance_wallet_outlined,
-                color: AppColor.kSecondary,
-                size: 18,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                'Montant disponible',
-                style: TextStyle(
-                  fontFamily: kPolice,
-                  fontSize: 12.5,
-                  fontWeight: FontWeight.w600,
-                  color: AppColor.kWhite.withValues(alpha: 0.75),
-                ),
-              ),
-            ],
+        color: AppColor.kWhite,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: AppColor.kPrimary.withValues(alpha: 0.06),
+            blurRadius: 18,
+            offset: const Offset(0, 6),
           ),
-          const SizedBox(height: 9),
-          Text(
-            formaterPrix(montant),
-            style: const TextStyle(
-              fontFamily: kPolice,
-              fontSize: 26,
-              fontWeight: FontWeight.w800,
-              color: AppColor.kWhite,
-              height: 1.1,
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: AppColor.kSecondaryLight,
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: const Icon(
+              Icons.account_balance_wallet_outlined,
+              color: AppColor.kSecondaryDark,
+              size: 24,
             ),
           ),
-          const SizedBox(height: 6),
-          Text(
-            'Vos encaissements apparaîtront ici.',
-            style: TextStyle(
-              fontFamily: kPolice,
-              fontSize: 11.8,
-              color: AppColor.kWhite.withValues(alpha: 0.6),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Montant disponible',
+                  style: TextStyle(
+                    fontFamily: kPolice,
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w600,
+                    color: AppColor.kGrayscale40,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  formaterPrix(montant),
+                  style: const TextStyle(
+                    fontFamily: kPolice,
+                    fontSize: 22,
+                    fontWeight: FontWeight.w800,
+                    height: 1.15,
+                    color: AppColor.kGrayscaleDark100,
+                  ),
+                ),
+                if (montant <= 0) ...[
+                  const SizedBox(height: 3),
+                  const Text(
+                    'Vos encaissements apparaîtront ici.',
+                    style: TextStyle(
+                      fontFamily: kPolice,
+                      fontSize: 12,
+                      color: AppColor.kGrayscale40,
+                    ),
+                  ),
+                ],
+              ],
             ),
           ),
         ],
