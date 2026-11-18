@@ -1,4 +1,5 @@
 import 'package:saambiz/core/widgets/messages.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:saambiz/core/theme/app_color.dart';
@@ -10,6 +11,7 @@ import 'package:saambiz/core/widgets/profil_kit.dart';
 import 'package:saambiz/core/widgets/ui_kit.dart';
 
 import '../../../../injection_container.dart';
+import '../../../categories/data/categorie.dart';
 import '../../domain/entities/boutique.dart';
 import '../bloc/boutique_bloc.dart';
 import '../bloc/boutique_event.dart';
@@ -164,6 +166,9 @@ class _Contenu extends StatelessWidget {
                 vide: 'Ajoutez une description',
                 onTap: onModifier,
               ),
+              // Annoncées dans le compte (« Nom, logo, catégories, pause »),
+              // elles n'apparaissaient nulle part ici.
+              _LigneCategories(valeurs: b.categories, onTap: onModifier),
             ],
           ),
           const SizedBox(height: 20),
@@ -186,27 +191,8 @@ class _Contenu extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 28),
-          SizedBox(
-            height: 52,
-            child: FilledButton.icon(
-              onPressed: onModifier,
-              icon: const Icon(Icons.edit_rounded, size: 19),
-              label: const Text('Modifier la boutique'),
-              style: FilledButton.styleFrom(
-                backgroundColor: AppColor.kPrimary,
-                foregroundColor: AppColor.kWhite,
-                textStyle: const TextStyle(
-                  fontFamily: kPolice,
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
-              ),
-            ),
-          ),
+          // Plus de grand bouton « Modifier la boutique » ici : le crayon de
+          // l'en-tête et chaque ligne ouvrent déjà le formulaire.
         ],
       ),
     );
@@ -442,6 +428,57 @@ class _Section extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// Les noms des catégories d'une boutique, d'après le référentiel (des
+/// slugs, des ids ou des noms selon l'ancienneté de la boutique), la
+/// principale d'abord. Ce qui n'y correspond pas s'affiche tel quel.
+List<String> nomsCategories(List<String> valeurs, List<Categorie> referentiel) {
+  return [
+    for (final v in valeurs)
+      referentiel.where((c) => c.correspond(v)).map((c) => c.nom).firstOrNull ??
+          v,
+  ];
+}
+
+/// La ligne « Catégories » : la liste de secours d'abord, le référentiel
+/// du serveur dès qu'il arrive (gardé en cache trente minutes).
+class _LigneCategories extends StatefulWidget {
+  final List<String> valeurs;
+  final VoidCallback onTap;
+  const _LigneCategories({required this.valeurs, required this.onTap});
+
+  @override
+  State<_LigneCategories> createState() => _LigneCategoriesState();
+}
+
+class _LigneCategoriesState extends State<_LigneCategories> {
+  List<Categorie> _referentiel = kCategoriesSecours;
+
+  @override
+  void initState() {
+    super.initState();
+    _charger();
+  }
+
+  Future<void> _charger() async {
+    try {
+      final liste = await CategoriesRemoteDataSource(sl<Dio>()).lister();
+      if (mounted && liste.isNotEmpty) setState(() => _referentiel = liste);
+    } catch (_) {}
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final noms = nomsCategories(widget.valeurs, _referentiel);
+    return _LigneInfo(
+      icone: Icons.category_outlined,
+      libelle: noms.length > 1 ? 'Catégories' : 'Catégorie',
+      valeur: noms.isEmpty ? null : noms.join(' · '),
+      vide: 'Choisissez vos catégories',
+      onTap: widget.onTap,
     );
   }
 }
