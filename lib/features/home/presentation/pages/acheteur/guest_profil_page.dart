@@ -4,8 +4,8 @@ import 'package:saambiz/core/routes/app_router.dart';
 import 'package:saambiz/core/theme/app_color.dart';
 import 'package:saambiz/core/theme/police.dart';
 import 'package:saambiz/core/utils/url_externe.dart';
-import 'package:saambiz/core/widgets/app_app_bar.dart';
-import 'package:saambiz/core/widgets/degrade_fond.dart';
+import 'package:saambiz/core/widgets/entete_compte.dart';
+import 'package:saambiz/core/widgets/page_vendeur.dart';
 import 'package:saambiz/core/widgets/barre_navigation_verre.dart'
     show kEspaceBarreBas;
 import 'package:saambiz/core/widgets/profil_kit.dart';
@@ -13,9 +13,9 @@ import 'package:saambiz/features/compte/presentation/pages/a_propos_page.dart';
 import 'package:saambiz/features/compte/presentation/pages/aide_page.dart';
 import 'package:saambiz/features/promotions/presentation/pages/promotions_actives_page.dart';
 
-/// Onglet « Compte » d'un visiteur sans compte : carte hero de bienvenue
-/// invitant a la connexion / inscription, activites accessibles ou necessitant
-/// connexion, puis aide et informations.
+/// Onglet « Compte » d'un visiteur sans compte : l'en-tête bleu du compte
+/// connecté, une carte qui invite à se connecter ou à s'inscrire, les
+/// activités (certaines demandent un compte), puis aide et informations.
 class GuestProfilPage extends StatefulWidget {
   const GuestProfilPage({super.key});
 
@@ -62,146 +62,126 @@ class _GuestProfilPageState extends State<GuestProfilPage>
 
   @override
   Widget build(BuildContext context) {
-    return FondDegradeSubtil(
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        appBar: const AppAppBar(
-          title: 'Compte',
-          centerTitle: true,
-          implyLeading: false,
-          couleurFond: Colors.transparent,
-        ),
-        body: FadeTransition(
-          opacity: _fadeAnim,
-          child: ListView(
-            physics: const BouncingScrollPhysics(),
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, kEspaceBarreBas),
-            children: [
-              _carteBienvenue(),
-              const SizedBox(height: 24),
-              SectionProfil(
-                titre: 'Mon activité',
-                entrees: [
-                  LigneProfil(
-                    icone: Icons.local_offer_outlined,
-                    libelle: 'Promotions actives',
-                    sousTitre: 'Bons plans du moment',
-                    onTap: () => _ouvrir(const PromotionsActivesPage()),
-                  ),
-                  LigneProfil(
-                    icone: Icons.receipt_long_outlined,
-                    libelle: 'Mes commandes',
-                    sousTitre: 'Suivez vos achats et livraisons',
-                    onTap: () => _demanderConnexion('suivre vos commandes.'),
-                  ),
-                  LigneProfil(
-                    icone: Icons.favorite_border_rounded,
-                    libelle: 'Mes favoris',
-                    sousTitre: 'Vos boutiques enregistrées',
-                    onTap: () => _demanderConnexion('retrouver vos favoris.'),
-                  ),
-                  LigneProfil(
-                    icone: Icons.chat_bubble_outline_rounded,
-                    libelle: 'Messages',
-                    sousTitre: 'Vos échanges avec les vendeurs',
-                    onTap: () =>
-                        _demanderConnexion('échanger avec les vendeurs.'),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              SectionProfil(
-                titre: 'Aide et informations',
-                entrees: [
-                  LigneProfil(
-                    icone: Icons.help_outline_rounded,
-                    libelle: 'Centre d\'aide',
-                    sousTitre: 'Questions fréquentes',
-                    onTap: () => _ouvrir(const AidePage()),
-                  ),
-                  LigneProfil(
-                    icone: Icons.support_agent_outlined,
-                    libelle: 'Nous contacter',
-                    sousTitre: 'Service client SaamBiz',
-                    onTap: () =>
-                        _ouvrir(const AidePage(contactSeulement: true)),
-                  ),
-                  LigneProfil(
-                    icone: Icons.star_border_rounded,
-                    libelle: 'Noter l\'application',
-                    sousTitre: 'Votre avis compte pour nous',
-                    onTap: () => UrlExterne.lancer(InfosApp.lienPlayStore),
-                  ),
-                  LigneProfil(
-                    icone: Icons.info_outline_rounded,
-                    libelle: 'À propos',
-                    sousTitre:
-                        'Version ${InfosApp.version}, conditions et confidentialité',
-                    onTap: () => _ouvrir(const AProposPage()),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-              const VersionApp(),
-            ],
-          ),
+    // L'en-tête bleu du compte connecté, avec un visiteur dedans : c'était
+    // le dernier onglet sous une barre claire, avec une carte marine à part.
+    return PageVendeur(
+      titre: 'Mon compte',
+      titreWidget: const EnteteCompte.visiteur(),
+      corps: FadeTransition(
+        opacity: _fadeAnim,
+        child: ListView(
+          physics: const BouncingScrollPhysics(),
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, kEspaceBarreBas),
+          children: [
+            _carteConnexion(),
+            const SizedBox(height: 24),
+            SectionProfil(
+              titre: 'Mon activité',
+              entrees: [
+                LigneProfil(
+                  icone: Icons.local_offer_outlined,
+                  libelle: 'Promotions actives',
+                  sousTitre: 'Bons plans du moment',
+                  onTap: () => _ouvrir(const PromotionsActivesPage()),
+                ),
+                LigneProfil(
+                  icone: Icons.receipt_long_outlined,
+                  libelle: 'Mes commandes',
+                  sousTitre: 'Suivez vos achats et livraisons',
+                  onTap: () => _demanderConnexion('suivre vos commandes.'),
+                ),
+                LigneProfil(
+                  icone: Icons.favorite_border_rounded,
+                  libelle: 'Mes favoris',
+                  sousTitre: 'Vos boutiques enregistrées',
+                  onTap: () => _demanderConnexion('retrouver vos favoris.'),
+                ),
+                LigneProfil(
+                  icone: Icons.chat_bubble_outline_rounded,
+                  libelle: 'Messages',
+                  sousTitre: 'Vos échanges avec les vendeurs',
+                  onTap: () =>
+                      _demanderConnexion('échanger avec les vendeurs.'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            SectionProfil(
+              titre: 'Aide et informations',
+              entrees: [
+                LigneProfil(
+                  icone: Icons.help_outline_rounded,
+                  libelle: 'Centre d\'aide',
+                  sousTitre: 'Questions fréquentes',
+                  onTap: () => _ouvrir(const AidePage()),
+                ),
+                LigneProfil(
+                  icone: Icons.support_agent_outlined,
+                  libelle: 'Nous contacter',
+                  sousTitre: 'Service client SaamBiz',
+                  onTap: () => _ouvrir(const AidePage(contactSeulement: true)),
+                ),
+                LigneProfil(
+                  icone: Icons.star_border_rounded,
+                  libelle: 'Noter l\'application',
+                  sousTitre: 'Votre avis compte pour nous',
+                  onTap: () => UrlExterne.lancer(InfosApp.lienPlayStore),
+                ),
+                LigneProfil(
+                  icone: Icons.info_outline_rounded,
+                  libelle: 'À propos',
+                  sousTitre:
+                      'Version ${InfosApp.version}, conditions et confidentialité',
+                  onTap: () => _ouvrir(const AProposPage()),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            const VersionApp(),
+          ],
         ),
       ),
     );
   }
 
-  /// Carte hero marine SaamBiz : icone de marque, message clair et deux boutons
-  /// d'action directe.
-  Widget _carteBienvenue() {
+  /// Ce qu'apporte un compte, et les deux portes pour l'ouvrir. Carte
+  /// blanche sous l'en-tête, à la place des compteurs du compte connecté.
+  Widget _carteConnexion() {
+    const forme = RoundedRectangleBorder(
+      borderRadius: BorderRadius.all(Radius.circular(14)),
+    );
+    const texteBouton = TextStyle(
+      fontFamily: kPolice,
+      fontSize: 14.5,
+      fontWeight: FontWeight.w700,
+    );
     return Container(
-      padding: const EdgeInsets.all(22),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColor.kPrimary,
-        borderRadius: BorderRadius.circular(22),
+        color: AppColor.kWhite,
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: AppColor.kPrimary.withValues(alpha: 0.2),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
+            color: AppColor.kPrimary.withValues(alpha: 0.06),
+            blurRadius: 18,
+            offset: const Offset(0, 6),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: AppColor.kWhite,
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Image.asset(
-              'assets/images/picto_navy.png',
-              width: 32,
-              height: 32,
-            ),
-          ),
-          const SizedBox(height: 16),
           const Text(
-            'Bienvenue sur SaamBiz',
-            style: TextStyle(
-              fontFamily: kPolice,
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
-              color: AppColor.kWhite,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            'Connectez-vous pour commander, retrouver vos favoris, échanger avec les boutiques et suivre vos livraisons.',
+            'Avec un compte, commandez, retrouvez vos favoris, échangez avec '
+            'les boutiques et suivez vos livraisons.',
             style: TextStyle(
               fontFamily: kPolice,
               fontSize: 13.5,
               height: 1.45,
-              color: AppColor.kWhite.withValues(alpha: 0.8),
+              color: AppColor.kGrayscale60,
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 14),
           Row(
             children: [
               Expanded(
@@ -214,14 +194,8 @@ class _GuestProfilPageState extends State<GuestProfilPage>
                     elevation: 0,
                     padding: const EdgeInsets.symmetric(horizontal: 10),
                     minimumSize: const Size.fromHeight(48),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    textStyle: const TextStyle(
-                      fontFamily: kPolice,
-                      fontSize: 14.5,
-                      fontWeight: FontWeight.w700,
-                    ),
+                    shape: forme,
+                    textStyle: texteBouton,
                   ),
                   child: const FittedBox(
                     fit: BoxFit.scaleDown,
@@ -231,36 +205,24 @@ class _GuestProfilPageState extends State<GuestProfilPage>
               ),
               const SizedBox(width: 10),
               Expanded(
-                child: ElevatedButton(
+                child: OutlinedButton(
                   onPressed: () => Navigator.of(
                     context,
                   ).pushNamed(AppRouter.profileChoiceRoute),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
+                  style: OutlinedButton.styleFrom(
                     foregroundColor: AppColor.kPrimary,
-                    elevation: 0,
+                    side: const BorderSide(
+                      color: AppColor.kPrimary,
+                      width: 1.4,
+                    ),
                     padding: const EdgeInsets.symmetric(horizontal: 10),
                     minimumSize: const Size.fromHeight(48),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    textStyle: const TextStyle(
-                      fontFamily: kPolice,
-                      fontSize: 14.5,
-                      fontWeight: FontWeight.w700,
-                    ),
+                    shape: forme,
+                    textStyle: texteBouton,
                   ),
                   child: const FittedBox(
                     fit: BoxFit.scaleDown,
-                    child: Text(
-                      'Créer un compte',
-                      style: TextStyle(
-                        fontFamily: kPolice,
-                        fontSize: 14.5,
-                        fontWeight: FontWeight.w700,
-                        color: AppColor.kPrimary,
-                      ),
-                    ),
+                    child: Text('Créer un compte'),
                   ),
                 ),
               ),

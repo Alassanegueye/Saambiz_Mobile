@@ -14,6 +14,11 @@ class EnteteCompte extends StatelessWidget {
   final String email;
   final String role;
   final String? photo;
+
+  /// Visiteur sans compte : le pictogramme SaamBiz à la place de la photo,
+  /// « Visiteur » à la place du type de compte.
+  final bool visiteur;
+
   const EnteteCompte({
     super.key,
     required this.nom,
@@ -21,7 +26,15 @@ class EnteteCompte extends StatelessWidget {
     required this.email,
     required this.role,
     this.photo,
-  });
+  }) : visiteur = false;
+
+  const EnteteCompte.visiteur({super.key})
+    : nom = 'Bienvenue !',
+      initiales = '',
+      email = 'Vous visitez SaamBiz sans compte',
+      role = '',
+      photo = null,
+      visiteur = true;
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +61,12 @@ class EnteteCompte extends StatelessWidget {
             shape: BoxShape.circle,
             border: Border.all(color: AppColor.kSecondary, width: 2.5),
           ),
-          child: aUnePhoto
+          child: visiteur
+              ? Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Image.asset('assets/images/picto_navy.png'),
+                )
+              : aUnePhoto
               ? ImageReseau(
                   photo!,
                   largeurServeur: 180,
@@ -87,11 +105,47 @@ class EnteteCompte extends StatelessWidget {
                   ),
                 ),
               const SizedBox(height: 7),
-              BadgeTypeProfil(role: role),
+              visiteur ? const _BadgeVisiteur() : BadgeTypeProfil(role: role),
             ],
           ),
         ),
       ],
+    );
+  }
+}
+
+/// La pastille or de BadgeTypeProfil, pour un visiteur sans compte.
+class _BadgeVisiteur extends StatelessWidget {
+  const _BadgeVisiteur();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+      decoration: BoxDecoration(
+        color: AppColor.kSecondary,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: const Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.person_outline_rounded,
+            size: 13,
+            color: AppColor.kPrimary,
+          ),
+          SizedBox(width: 4),
+          Text(
+            'Visiteur',
+            style: TextStyle(
+              fontFamily: kPolice,
+              fontSize: 11.5,
+              fontWeight: FontWeight.w800,
+              color: AppColor.kPrimary,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
