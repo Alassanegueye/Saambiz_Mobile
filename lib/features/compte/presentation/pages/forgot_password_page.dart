@@ -1,25 +1,20 @@
-import 'package:saambiz/core/widgets/page_vendeur.dart';
 import 'package:saambiz/core/widgets/messages.dart';
-import 'package:saambiz/core/widgets/libelle_obligatoire.dart';
 import 'package:flutter/material.dart';
 import 'package:saambiz/core/utils/email.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../injection_container.dart';
+import '../../../auth/presentation/signup/signup_kit.dart';
 import '../bloc/compte_bloc.dart';
 import '../bloc/compte_event.dart';
 import '../bloc/compte_state.dart';
 import 'reset_password_page.dart';
 
-class _C {
-  static const green = Color(0xFF01154B);
-  static const white = Color(0xFFFFFFFF);
-  static const bg = Color(0xFFF4F5F8);
-  static const sub = Color(0xFF5B6C8A);
-  static const border = Color(0xFFE3E8F0);
-}
-
 /// POST /account/forgot-password
+///
+/// On y arrive depuis l'écran de connexion : même présentation que lui
+/// (en-tête bleu, carte blanche, champ à icône). C'était une simple barre
+/// de titre au-dessus d'un champ nu.
 class ForgotPasswordPage extends StatelessWidget {
   const ForgotPasswordPage({super.key});
 
@@ -39,8 +34,17 @@ class _ForgotPasswordView extends StatefulWidget {
 }
 
 class _ForgotPasswordViewState extends State<_ForgotPasswordView> {
-  final _formKey = GlobalKey<FormState>();
   final _emailCtrl = TextEditingController();
+  String? _erreurEmail;
+
+  @override
+  void initState() {
+    super.initState();
+    // L'erreur s'efface dès qu'on corrige.
+    _emailCtrl.addListener(() {
+      if (_erreurEmail != null) setState(() => _erreurEmail = null);
+    });
+  }
 
   @override
   void dispose() {
@@ -49,103 +53,59 @@ class _ForgotPasswordViewState extends State<_ForgotPasswordView> {
   }
 
   void _envoyer() {
-    if (!_formKey.currentState!.validate()) return;
-    context.read<CompteBloc>().add(
-      ForgotPasswordRequested(_emailCtrl.text.trim()),
-    );
+    final email = _emailCtrl.text.trim();
+    final erreur = verifierEmail(email);
+    setState(() => _erreurEmail = erreur);
+    if (erreur != null) return;
+    context.read<CompteBloc>().add(ForgotPasswordRequested(email));
   }
 
   @override
   Widget build(BuildContext context) {
-    return ScaffoldMarine(
-      backgroundColor: _C.bg,
-      appBar: AppBar(title: const Text('Mot de passe oublié')),
-      body: BlocConsumer<CompteBloc, CompteState>(
-        listener: (context, state) {
-          if (state is CompteError) {
-            afficherErreur(context, state.message);
-          } else if (state is CompteMessageSucces) {
-            afficherSucces(
-              context,
-              'Code envoyé : consultez votre boîte e-mail',
-            );
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(
-                builder: (_) =>
-                    ResetPasswordPage(email: _emailCtrl.text.trim()),
-              ),
-            );
-          }
-        },
-        builder: (context, state) {
-          final loading = state is CompteLoading;
-          return Form(
-            key: _formKey,
-            child: ListView(
-              padding: const EdgeInsets.all(16),
-              children: [
-                const Text(
-                  'Saisissez votre e-mail, un code de réinitialisation vous sera envoyé.',
-                  style: TextStyle(color: _C.sub),
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _emailCtrl,
-                  keyboardType: TextInputType.emailAddress,
-                  inputFormatters: formatsEmail,
-                  validator: verifierEmail,
-                  decoration: InputDecoration(
-                    label: const LibelleObligatoire('E-mail'),
-                    filled: true,
-                    fillColor: _C.white,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 14,
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: _C.border),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: _C.green),
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: _C.border),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                ElevatedButton(
-                  onPressed: loading ? null : _envoyer,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: _C.green,
-                    foregroundColor: _C.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                  ),
-                  child: loading
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : const Text(
-                          'Envoyer le code',
-                          style: TextStyle(fontWeight: FontWeight.w700),
-                        ),
-                ),
-              ],
+    return BlocConsumer<CompteBloc, CompteState>(
+      listener: (context, state) {
+        if (state is CompteError) {
+          afficherErreur(context, state.message);
+        } else if (state is CompteMessageSucces) {
+          afficherSucces(context, 'Code envoyé : consultez votre boîte e-mail');
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (_) => ResetPasswordPage(email: _emailCtrl.text.trim()),
             ),
           );
-        },
-      ),
+        }
+      },
+      builder: (context, state) {
+        final loading = state is CompteLoading;
+        return SbPageAuth(
+          icone: Icons.lock_reset_rounded,
+          titre: 'Mot de passe oublié ?',
+          sousTitre:
+              'Recevez un code par e-mail pour choisir un nouveau mot de passe.',
+          carte: [
+            SbField(
+              obligatoire: true,
+              label: 'E-mail',
+              hint: 'exemple@mail.com',
+              icon: Icons.mail_outline_rounded,
+              controller: _emailCtrl,
+              keyboardType: TextInputType.emailAddress,
+              textInputAction: TextInputAction.done,
+              autofillHint: AutofillHints.email,
+              formatters: formatsEmail,
+              errorText: _erreurEmail,
+              onSubmitted: (_) => _envoyer(),
+            ),
+            const SizedBox(height: 20),
+            SbPrimaryButton(
+              label: 'Recevoir le code',
+              icon: Icons.arrow_forward_rounded,
+              loading: loading,
+              onPressed: _envoyer,
+            ),
+          ],
+        );
+      },
     );
   }
 }

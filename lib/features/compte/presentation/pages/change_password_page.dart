@@ -1,22 +1,25 @@
 import 'package:saambiz/core/widgets/page_vendeur.dart';
 import 'package:saambiz/core/widgets/messages.dart';
-import 'package:saambiz/core/widgets/libelle_obligatoire.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:saambiz/core/theme/app_color.dart';
+import 'package:saambiz/core/theme/police.dart';
 
 import '../../../../injection_container.dart';
+import '../../../auth/presentation/signup/signup_kit.dart';
+import '../../../auth/presentation/widgets/mise_en_page_auth.dart'
+    show CarteAuth;
 import '../bloc/compte_bloc.dart';
 import '../bloc/compte_event.dart';
 import '../bloc/compte_state.dart';
 
-class _C {
-  static const green = Color(0xFF01154B);
-  static const white = Color(0xFFFFFFFF);
-  static const bg = Color(0xFFF4F5F8);
-  static const border = Color(0xFFE3E8F0);
-}
-
 /// PUT /account/change-password
+///
+/// Dans l'application (Compte → Sécurité) : la barre bleue des pages du
+/// compte, puis les trois champs avec leur œil, les règles du serveur sous
+/// le nouveau mot de passe et une coche quand la confirmation correspond.
+/// On tapait trois mots de passe à l'aveugle, sans savoir ce qui était
+/// exigé.
 class ChangePasswordPage extends StatelessWidget {
   const ChangePasswordPage({super.key});
 
@@ -36,25 +39,57 @@ class _ChangePasswordView extends StatefulWidget {
 }
 
 class _ChangePasswordViewState extends State<_ChangePasswordView> {
-  final _formKey = GlobalKey<FormState>();
-  final _ancienCtrl = TextEditingController();
+  final _actuelCtrl = TextEditingController();
   final _nouveauCtrl = TextEditingController();
   final _confirmCtrl = TextEditingController();
+  String? _erreurActuel;
+  String? _erreurNouveau;
+  String? _erreurConfirm;
+
+  @override
+  void initState() {
+    super.initState();
+    // Chaque erreur s'efface dès qu'on corrige son champ.
+    _actuelCtrl.addListener(() {
+      if (_erreurActuel != null) setState(() => _erreurActuel = null);
+    });
+    _nouveauCtrl.addListener(() {
+      if (_erreurNouveau != null) setState(() => _erreurNouveau = null);
+    });
+    _confirmCtrl.addListener(() {
+      if (_erreurConfirm != null) setState(() => _erreurConfirm = null);
+    });
+  }
 
   @override
   void dispose() {
-    _ancienCtrl.dispose();
+    _actuelCtrl.dispose();
     _nouveauCtrl.dispose();
     _confirmCtrl.dispose();
     super.dispose();
   }
 
   void _soumettre() {
-    if (!_formKey.currentState!.validate()) return;
+    final actuel = _actuelCtrl.text;
+    final nouveau = _nouveauCtrl.text;
+    setState(() {
+      _erreurActuel = actuel.isEmpty
+          ? 'Saisissez votre mot de passe actuel.'
+          : null;
+      _erreurNouveau = validateMotDePasse(nouveau);
+      _erreurConfirm = _confirmCtrl.text != nouveau
+          ? 'Les mots de passe ne correspondent pas.'
+          : null;
+    });
+    if (_erreurActuel != null ||
+        _erreurNouveau != null ||
+        _erreurConfirm != null) {
+      return;
+    }
     context.read<CompteBloc>().add(
       ChangePasswordRequested(
-        ancienMotDePasse: _ancienCtrl.text,
-        nouveauMotDePasse: _nouveauCtrl.text,
+        ancienMotDePasse: actuel,
+        nouveauMotDePasse: nouveau,
       ),
     );
   }
@@ -62,7 +97,7 @@ class _ChangePasswordViewState extends State<_ChangePasswordView> {
   @override
   Widget build(BuildContext context) {
     return ScaffoldMarine(
-      backgroundColor: _C.bg,
+      backgroundColor: AppColor.kBackground,
       appBar: AppBar(title: const Text('Changer le mot de passe')),
       body: BlocConsumer<CompteBloc, CompteState>(
         listener: (context, state) {
@@ -77,87 +112,132 @@ class _ChangePasswordViewState extends State<_ChangePasswordView> {
         builder: (context, state) {
           final loading =
               state is CompteActionEnCours || state is CompteLoading;
-          return Form(
-            key: _formKey,
-            child: ListView(
-              padding: const EdgeInsets.all(16),
-              children: [
-                _input(_ancienCtrl, 'Ancien mot de passe'),
-                const SizedBox(height: 12),
-                _input(_nouveauCtrl, 'Nouveau mot de passe'),
-                const SizedBox(height: 12),
-                _input(
-                  _confirmCtrl,
-                  'Confirmer le nouveau mot de passe',
-                  validator: (v) => v != _nouveauCtrl.text
-                      ? 'Les mots de passe ne correspondent pas'
-                      : null,
-                ),
-                const SizedBox(height: 24),
-                ElevatedButton(
-                  onPressed: loading ? null : _soumettre,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: _C.green,
-                    foregroundColor: _C.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                  ),
-                  child: loading
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : const Text(
-                          'Confirmer',
-                          style: TextStyle(fontWeight: FontWeight.w700),
-                        ),
-                ),
-              ],
+          return ListView(
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            padding: EdgeInsets.fromLTRB(
+              16,
+              16,
+              16,
+              24 + MediaQuery.paddingOf(context).bottom,
             ),
+            children: [
+              const Padding(
+                padding: EdgeInsets.fromLTRB(4, 0, 4, 14),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      Icons.shield_outlined,
+                      size: 18,
+                      color: AppColor.kGrayscale40,
+                    ),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Saisissez d’abord votre mot de passe actuel, puis '
+                        'le nouveau.',
+                        style: TextStyle(
+                          fontFamily: kPolice,
+                          fontSize: 13,
+                          height: 1.4,
+                          color: AppColor.kGrayscale40,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              CarteAuth(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    SbChampMotDePasse(
+                      label: 'Mot de passe actuel',
+                      hint: 'Votre mot de passe actuel',
+                      controller: _actuelCtrl,
+                      autofillHint: AutofillHints.password,
+                      errorText: _erreurActuel,
+                    ),
+                    const SizedBox(height: 16),
+                    SbChampMotDePasse(
+                      label: 'Nouveau mot de passe',
+                      hint: 'Votre nouveau mot de passe',
+                      icon: Icons.lock_reset_rounded,
+                      controller: _nouveauCtrl,
+                      autofillHint: AutofillHints.newPassword,
+                      errorText: _erreurNouveau,
+                    ),
+                    const SizedBox(height: 14),
+                    SbReglesMotDePasse(controller: _nouveauCtrl),
+                    const SizedBox(height: 8),
+                    SbChampMotDePasse(
+                      label: 'Confirmer le nouveau mot de passe',
+                      hint: 'Le même, une seconde fois',
+                      icon: Icons.lock_reset_rounded,
+                      controller: _confirmCtrl,
+                      textInputAction: TextInputAction.done,
+                      autofillHint: AutofillHints.newPassword,
+                      errorText: _erreurConfirm,
+                      onSubmitted: (_) => _soumettre(),
+                    ),
+                    _Correspondance(
+                      nouveau: _nouveauCtrl,
+                      confirmation: _confirmCtrl,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+              SbPrimaryButton(
+                label: 'Enregistrer le nouveau mot de passe',
+                loading: loading,
+                onPressed: _soumettre,
+              ),
+            ],
           );
         },
       ),
     );
   }
+}
 
-  Widget _input(
-    TextEditingController c,
-    String label, {
-    String? Function(String?)? validator,
-  }) {
-    return TextFormField(
-      controller: c,
-      obscureText: true,
-      validator:
-          validator ??
-          (v) => (v == null || v.trim().isEmpty) ? '$label requis' : null,
-      decoration: InputDecoration(
-        label: LibelleObligatoire(label),
-        filled: true,
-        fillColor: _C.white,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 14,
-          vertical: 14,
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: _C.border),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: _C.green),
-        ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: _C.border),
-        ),
-      ),
+/// La coche verte sous la confirmation, dès qu'elle reprend le nouveau mot
+/// de passe. Rien tant qu'elle est vide ou différente : l'erreur vient à
+/// l'envoi, pas à chaque lettre.
+class _Correspondance extends StatelessWidget {
+  final TextEditingController nouveau;
+  final TextEditingController confirmation;
+  const _Correspondance({required this.nouveau, required this.confirmation});
+
+  @override
+  Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: Listenable.merge([nouveau, confirmation]),
+      builder: (context, _) {
+        final identiques =
+            confirmation.text.isNotEmpty && confirmation.text == nouveau.text;
+        if (!identiques) return const SizedBox.shrink();
+        return const Padding(
+          padding: EdgeInsets.only(top: 10),
+          child: Row(
+            children: [
+              Icon(Icons.check_circle_rounded, size: 18, color: Sb.green),
+              SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Les deux mots de passe sont identiques',
+                  style: TextStyle(
+                    fontFamily: kPolice,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: Sb.navy,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

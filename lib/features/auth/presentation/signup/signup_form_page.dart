@@ -1,7 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:saambiz/core/theme/police.dart';
 
 import '../../../../core/routes/app_router.dart';
 import '../../../../core/utils/email.dart';
@@ -65,7 +64,6 @@ class _SignupFormPageState extends State<SignupFormPage> {
   final _passCtrl = TextEditingController();
 
   int _page = 0;
-  bool _obscure = true;
   bool _loading = false;
   String? _error;
   String? _nameError;
@@ -100,7 +98,8 @@ class _SignupFormPageState extends State<SignupFormPage> {
   }
 
   /// Le numéro au format international (« +221771234567 »), ou vide.
-  String get _telNormalise => telephoneInternational(_telCtrl.text, _paysTel.value);
+  String get _telNormalise =>
+      telephoneInternational(_telCtrl.text, _paysTel.value);
 
   bool _valider() {
     setState(() {
@@ -307,42 +306,24 @@ class _SignupFormPageState extends State<SignupFormPage> {
   );
 
   _Etape _etapeMotDePasse() {
-    final mdp = _passCtrl.text;
     return _Etape(
       icone: Icons.lock_outline_rounded,
       titre: 'Mot de passe',
       texte: 'Protégez votre compte.',
+      // Le champ à l'œil et la liste des règles sont partagés avec la
+      // réinitialisation et le changement du mot de passe.
       champs: [
-        SbField(
-          obligatoire: true,
+        SbChampMotDePasse(
           label: 'Mot de passe',
           hint: 'Votre mot de passe',
-          icon: Icons.lock_outline_rounded,
           controller: _passCtrl,
-          obscure: _obscure,
           textInputAction: TextInputAction.done,
           autofillHint: AutofillHints.newPassword,
           errorText: _passError,
           onSubmitted: (_) => _suivant(),
-          suffix: IconButton(
-            onPressed: () => setState(() => _obscure = !_obscure),
-            icon: Icon(
-              _obscure
-                  ? Icons.visibility_outlined
-                  : Icons.visibility_off_outlined,
-              size: 20,
-              color: Sb.textLight,
-            ),
-            tooltip: _obscure
-                ? 'Afficher le mot de passe'
-                : 'Masquer le mot de passe',
-          ),
         ),
         const SizedBox(height: 14),
-        _Regle('8 caractères', mdp.length >= 8),
-        _Regle('Une majuscule', RegExp(r'[A-Z]').hasMatch(mdp)),
-        _Regle('Un chiffre', RegExp(r'[0-9]').hasMatch(mdp)),
-        _Regle('Un caractère spécial', RegExp(r'[^A-Za-z0-9]').hasMatch(mdp)),
+        SbReglesMotDePasse(controller: _passCtrl),
       ],
     );
   }
@@ -361,45 +342,4 @@ class _Etape {
     required this.texte,
     required this.champs,
   });
-}
-
-/// Regle du mot de passe, cochee des qu'elle est respectee.
-class _Regle extends StatelessWidget {
-  final String texte;
-  final bool ok;
-  const _Regle(this.texte, this.ok);
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        children: [
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 180),
-            width: 20,
-            height: 20,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: ok ? Sb.green : Colors.transparent,
-              border: Border.all(color: ok ? Sb.green : Sb.border, width: 1.6),
-            ),
-            child: ok
-                ? const Icon(Icons.check_rounded, size: 13, color: Sb.white)
-                : null,
-          ),
-          const SizedBox(width: 10),
-          Text(
-            texte,
-            style: const TextStyle(
-              fontFamily: kPolice,
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-              color: Sb.navy,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }

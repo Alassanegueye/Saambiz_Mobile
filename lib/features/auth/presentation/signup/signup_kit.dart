@@ -213,7 +213,14 @@ class SbPrimaryButton extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(label),
+                  // Un libellé long rétrécit au lieu de déborder du bouton
+                  // sur un petit écran.
+                  Flexible(
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(label, maxLines: 1),
+                    ),
+                  ),
                   if (icon != null) ...[
                     const SizedBox(width: 8),
                     Icon(icon, size: 18),
@@ -637,12 +644,155 @@ final RegExp kEmailRegExp = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]{2,}$');
 
 /// Regle du backend (MED-02) : 8 caracteres, une majuscule, un chiffre,
 /// un caractere special. On la verifie cote app pour eviter un aller-retour.
+/// La même règle s'applique à l'inscription, à la réinitialisation et au
+/// changement du mot de passe (passwordSchema du serveur).
 String? validateMotDePasse(String value) {
-  if (value.length < 8) return 'Au moins 8 caracteres.';
+  if (value.length < 8) return 'Au moins 8 caractères.';
   if (!RegExp(r'[A-Z]').hasMatch(value)) return 'Au moins une majuscule.';
   if (!RegExp(r'[0-9]').hasMatch(value)) return 'Au moins un chiffre.';
   if (!RegExp(r'[^A-Za-z0-9]').hasMatch(value)) {
-    return 'Au moins un caractere special.';
+    return 'Au moins un caractère spécial.';
   }
   return null;
+}
+
+/// Les quatre règles du serveur, dans l'ordre de la liste, chacune avec
+/// son libellé et si elle est respectée. « Spécial » : tout ce qui n'est
+/// ni une lettre ni un chiffre, comme côté serveur (une espace compte).
+List<(String, bool)> reglesMotDePasse(String mdp) => [
+  ('8 caractères', mdp.length >= 8),
+  ('Une majuscule', RegExp(r'[A-Z]').hasMatch(mdp)),
+  ('Un chiffre', RegExp(r'[0-9]').hasMatch(mdp)),
+  ('Un caractère spécial', RegExp(r'[^A-Za-z0-9]').hasMatch(mdp)),
+];
+
+/// La liste des règles sous un champ mot de passe, chacune cochée dès
+/// qu'elle est respectée. Elle suit le champ toute seule : le serveur ne
+/// signale qu'une règle manquante à la fois, la liste les montre toutes.
+class SbReglesMotDePasse extends StatelessWidget {
+  final TextEditingController controller;
+  const SbReglesMotDePasse({super.key, required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<TextEditingValue>(
+      valueListenable: controller,
+      builder: (context, valeur, _) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          for (final (texte, ok) in reglesMotDePasse(valeur.text))
+            _RegleMotDePasse(texte, ok),
+        ],
+      ),
+    );
+  }
+}
+
+/// Une règle, cochée en vert dès qu'elle est respectée.
+class _RegleMotDePasse extends StatelessWidget {
+  final String texte;
+  final bool ok;
+  const _RegleMotDePasse(this.texte, this.ok);
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      label: '$texte : ${ok ? 'respecté' : 'à respecter'}',
+      excludeSemantics: true,
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 8),
+        child: Row(
+          children: [
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 180),
+              width: 20,
+              height: 20,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: ok ? Sb.green : Colors.transparent,
+                border: Border.all(
+                  color: ok ? Sb.green : Sb.border,
+                  width: 1.6,
+                ),
+              ),
+              child: ok
+                  ? const Icon(Icons.check_rounded, size: 13, color: Sb.white)
+                  : null,
+            ),
+            const SizedBox(width: 10),
+            Text(
+              texte,
+              style: const TextStyle(
+                fontFamily: kPolice,
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: Sb.navy,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Champ mot de passe avec son œil, pour afficher ou masquer ce qu'on
+/// tape : sans lui, on saisissait à l'aveugle.
+class SbChampMotDePasse extends StatefulWidget {
+  final String label;
+  final String hint;
+  final TextEditingController controller;
+  final IconData icon;
+  final String? errorText;
+  final TextInputAction textInputAction;
+  final String? autofillHint;
+  final ValueChanged<String>? onSubmitted;
+  final bool obligatoire;
+
+  const SbChampMotDePasse({
+    super.key,
+    required this.label,
+    required this.hint,
+    required this.controller,
+    this.icon = Icons.lock_outline_rounded,
+    this.errorText,
+    this.textInputAction = TextInputAction.next,
+    this.autofillHint,
+    this.onSubmitted,
+    this.obligatoire = true,
+  });
+
+  @override
+  State<SbChampMotDePasse> createState() => _SbChampMotDePasseState();
+}
+
+class _SbChampMotDePasseState extends State<SbChampMotDePasse> {
+  bool _masque = true;
+
+  @override
+  Widget build(BuildContext context) {
+    return SbField(
+      obligatoire: widget.obligatoire,
+      label: widget.label,
+      hint: widget.hint,
+      icon: widget.icon,
+      controller: widget.controller,
+      obscure: _masque,
+      textInputAction: widget.textInputAction,
+      autofillHint: widget.autofillHint,
+      errorText: widget.errorText,
+      onSubmitted: widget.onSubmitted,
+      suffix: IconButton(
+        onPressed: () => setState(() => _masque = !_masque),
+        icon: Icon(
+          _masque ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+          size: 20,
+          color: Sb.textLight,
+        ),
+        tooltip: _masque
+            ? 'Afficher le mot de passe'
+            : 'Masquer le mot de passe',
+      ),
+    );
+  }
 }
