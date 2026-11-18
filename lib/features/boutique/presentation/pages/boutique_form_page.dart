@@ -10,6 +10,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../../core/theme/app_color.dart';
+import '../../../../core/theme/police.dart';
 import '../../../../injection_container.dart';
 import '../../../categories/presentation/widgets/selecteur_categories.dart';
 import '../../domain/entities/boutique.dart';
@@ -21,7 +23,6 @@ class _C {
   static const green = Color(0xFF01154B);
   static const white = Color(0xFFFFFFFF);
   static const bg = Color(0xFFF4F5F8);
-  static const sub = Color(0xFF5B6C8A);
   static const border = Color(0xFFE3E8F0);
 }
 
@@ -104,7 +105,10 @@ class _BoutiqueFormViewState extends State<_BoutiqueFormView> {
           nom: _nomCtrl.text.trim(),
           description: _descCtrl.text.trim(),
           localisation: _localisationCtrl.text.trim(),
-          telephone: telephoneInternational(_telephoneCtrl.text, _paysTel.value),
+          telephone: telephoneInternational(
+            _telephoneCtrl.text,
+            _paysTel.value,
+          ),
           categories: _categories,
           logoPath: _logoPath,
         ),
@@ -115,7 +119,10 @@ class _BoutiqueFormViewState extends State<_BoutiqueFormView> {
           nom: _nomCtrl.text.trim(),
           description: _descCtrl.text.trim(),
           localisation: _localisationCtrl.text.trim(),
-          telephone: telephoneInternational(_telephoneCtrl.text, _paysTel.value),
+          telephone: telephoneInternational(
+            _telephoneCtrl.text,
+            _paysTel.value,
+          ),
           categories: _categories,
           logoPath: _logoPath,
         ),
@@ -153,7 +160,8 @@ class _BoutiqueFormViewState extends State<_BoutiqueFormView> {
               padding: const EdgeInsets.all(16),
               children: [
                 _logoPicker(),
-                const SizedBox(height: 16),
+                const SizedBox(height: 22),
+                _titreSection('Identité'),
                 _input(
                   _nomCtrl,
                   'Nom de la boutique',
@@ -163,7 +171,8 @@ class _BoutiqueFormViewState extends State<_BoutiqueFormView> {
                 ),
                 const SizedBox(height: 12),
                 _input(_descCtrl, 'Description', maxLines: 3),
-                const SizedBox(height: 12),
+                const SizedBox(height: 22),
+                _titreSection('Coordonnées'),
                 _input(_localisationCtrl, 'Localisation (ville)'),
                 const SizedBox(height: 12),
                 _input(
@@ -177,7 +186,7 @@ class _BoutiqueFormViewState extends State<_BoutiqueFormView> {
                     onChange: () => setState(_telephoneCtrl.clear),
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 22),
                 SelecteurCategories(
                   initiales: _categories,
                   erreur: _erreurCategories,
@@ -192,7 +201,8 @@ class _BoutiqueFormViewState extends State<_BoutiqueFormView> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: _C.green,
                     foregroundColor: _C.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    elevation: 0,
+                    minimumSize: const Size.fromHeight(52),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                     ),
@@ -207,8 +217,14 @@ class _BoutiqueFormViewState extends State<_BoutiqueFormView> {
                           ),
                         )
                       : Text(
-                          _isEdit ? 'Enregistrer' : 'Créer la boutique',
-                          style: const TextStyle(fontWeight: FontWeight.w700),
+                          _isEdit
+                              ? 'Enregistrer les modifications'
+                              : 'Créer la boutique',
+                          style: const TextStyle(
+                            fontFamily: kPolice,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                 ),
               ],
@@ -219,32 +235,106 @@ class _BoutiqueFormViewState extends State<_BoutiqueFormView> {
     );
   }
 
+  /// Le logo : un aperçu carré avec sa pastille d'appareil photo, et ce
+  /// que fait le toucher. C'était un grand cadre vide, sans un mot.
   Widget _logoPicker() {
-    Widget content;
-    if (_logoPath != null) {
-      content = Image.file(File(_logoPath!), fit: BoxFit.cover);
-    } else if (_isEdit && (widget.boutique!.logo ?? '').isNotEmpty) {
-      content = ImageReseau(widget.boutique!.logo!, fit: BoxFit.cover);
-    } else {
-      content = const Center(
-        child: Icon(Icons.storefront_outlined, color: _C.sub, size: 32),
-      );
-    }
-    return GestureDetector(
-      onTap: _choisirLogo,
-      child: Container(
-        height: 140,
-        width: double.infinity,
-        decoration: BoxDecoration(
-          color: _C.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: _C.border),
+    final aUnLogo =
+        _logoPath != null ||
+        (_isEdit && (widget.boutique!.logo ?? '').isNotEmpty);
+    const vide = Center(
+      child: Icon(
+        Icons.add_photo_alternate_outlined,
+        color: AppColor.kPrimary,
+        size: 34,
+      ),
+    );
+    final Widget apercu = _logoPath != null
+        ? Image.file(File(_logoPath!), fit: BoxFit.cover)
+        : aUnLogo
+        ? ImageReseau(widget.boutique!.logo!, fit: BoxFit.cover, repli: vide)
+        : vide;
+    return Center(
+      child: Semantics(
+        button: true,
+        label: aUnLogo ? 'Changer le logo' : 'Ajouter un logo',
+        child: GestureDetector(
+          onTap: _choisirLogo,
+          behavior: HitTestBehavior.opaque,
+          child: Column(
+            children: [
+              Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Container(
+                    width: 104,
+                    height: 104,
+                    decoration: BoxDecoration(
+                      color: AppColor.kPrimaryLight,
+                      borderRadius: BorderRadius.circular(26),
+                      border: Border.all(color: AppColor.kPrimaryBorder),
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: apercu,
+                  ),
+                  Positioned(
+                    right: -6,
+                    bottom: -6,
+                    child: Container(
+                      width: 34,
+                      height: 34,
+                      decoration: BoxDecoration(
+                        color: AppColor.kSecondary,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: AppColor.kWhite, width: 2.5),
+                      ),
+                      child: const Icon(
+                        Icons.photo_camera_rounded,
+                        size: 17,
+                        color: AppColor.kPrimary,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Text(
+                aUnLogo ? 'Changer le logo' : 'Ajouter un logo',
+                style: const TextStyle(
+                  fontFamily: kPolice,
+                  fontSize: 14.5,
+                  fontWeight: FontWeight.w700,
+                  color: AppColor.kPrimary,
+                ),
+              ),
+              const SizedBox(height: 2),
+              const Text(
+                'Une image carrée rend le mieux',
+                style: TextStyle(
+                  fontFamily: kPolice,
+                  fontSize: 12,
+                  color: AppColor.kGrayscale40,
+                ),
+              ),
+            ],
+          ),
         ),
-        clipBehavior: Clip.antiAlias,
-        child: content,
       ),
     );
   }
+
+  /// Titre gris au-dessus d'un groupe de champs, comme sur « Ma boutique ».
+  Widget _titreSection(String titre) => Padding(
+    padding: const EdgeInsets.only(left: 4, bottom: 10),
+    child: Text(
+      titre,
+      style: const TextStyle(
+        fontFamily: kPolice,
+        fontSize: 13,
+        fontWeight: FontWeight.w600,
+        color: AppColor.kGrayscale40,
+      ),
+    ),
+  );
 
   Widget _input(
     TextEditingController c,
