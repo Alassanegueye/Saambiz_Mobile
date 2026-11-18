@@ -15,6 +15,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:saambiz/core/connection/auth_interceptor.dart';
 import 'core/routes/observateur_routes.dart';
 import 'core/services/fcm_service.dart';
+import 'core/services/veille_session.dart';
 
 void main() async {
   // Capture toute erreur non interceptée (synchrone ou asynchrone) pour éviter
@@ -92,7 +93,10 @@ class MyApp extends StatelessWidget {
         // Défilement élastique partout, Android compris : les listes
         // « respirent » au lieu de buter sur un halo.
         scrollBehavior: const _DefilementSouple(),
-        home: const AppBootstrap(),
+        // Sous surveillance : trois heures sans revenir, et la session se
+        // ferme d'elle-même au retour, sans laisser le compte s'afficher une
+        // seconde avant que le serveur ne refuse le renouvellement.
+        home: const SousVeille(enfant: AppBootstrap()),
         onGenerateRoute: AppRouter.onGenerateRoute,
         navigatorObservers: [observateurRoutes],
         // Barre d'état par défaut : fond transparent, icônes sombres (heure,
