@@ -90,7 +90,12 @@ class CompteRemoteDataSourceImpl implements CompteRemoteDataSource {
       CompteEndpoints.resetPassword,
       data: {
         'email': email,
-        'code': code,
+        // Le serveur attend « otp », et refuse toute clé qu'il ne connaît
+        // pas : son schéma Joi n'autorise aucun champ supplémentaire. Envoyé
+        // sous le nom « code », il répondait 400 « Le code OTP est requis,
+        // "code" is not allowed » — donc réinitialiser son mot de passe était
+        // impossible, avec le bon code sous les yeux.
+        'otp': code,
         'nouveauMotDePasse': nouveauMotDePasse,
       },
     );

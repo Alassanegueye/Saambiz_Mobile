@@ -380,6 +380,35 @@ void main() {
       expect(espion.corpsEnvoye['email'], 'a@b.sn');
     });
 
+    test('la réinitialisation envoie le code sous le nom « otp »', () async {
+      // Le code partait sous le nom « code ». Le schéma Joi du serveur veut
+      // « otp » et n'autorise aucun champ qu'il ne connaît pas : il répondait
+      // 400 « Le code OTP est requis, "code" is not allowed ». Personne ne
+      // pouvait réinitialiser son mot de passe, avec le bon code sous les
+      // yeux — et depuis toujours, pas depuis une régression.
+      //
+      // Le changement de mot de passe et le mot de passe oublié ont leur
+      // propre test ci-dessus ; cette ligne-là n'en avait aucun.
+      espion.repond({'success': true});
+
+      await CompteRemoteDataSourceImpl(dio).resetPassword(
+        email: 'a@b.sn',
+        code: '548229',
+        nouveauMotDePasse: 'Passer@1234',
+      );
+
+      expect(espion.appel, 'POST /account/reset-password');
+      expect(espion.corpsEnvoye['otp'], '548229');
+      expect(espion.corpsEnvoye['email'], 'a@b.sn');
+      expect(espion.corpsEnvoye['nouveauMotDePasse'], 'Passer@1234');
+      // Rien d'autre : un champ en trop suffit à faire refuser l'envoi.
+      expect(espion.corpsEnvoye.keys.toSet(), {
+        'email',
+        'otp',
+        'nouveauMotDePasse',
+      });
+    });
+
     test('la suppression de compte passe par DELETE /account/me', () async {
       // Exigence des deux magasins : l'utilisateur doit pouvoir supprimer son
       // compte depuis l'application.
