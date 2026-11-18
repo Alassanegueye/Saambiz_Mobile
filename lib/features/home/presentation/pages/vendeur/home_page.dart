@@ -228,8 +228,9 @@ class _HomePageState extends State<HomePage>
           // et par jour) : le même nombre que sur Ma boutique. `totalVues`
           // additionnait les vues des produits ; il ne sert plus qu'à un
           // serveur pas encore mis à jour.
-          _visites = _toInt(stats['visites'] ?? stats['totalVues']).toString();
-          _clients = _toInt(stats['nombreAbonnes']).toString();
+          // « 3 412 » comme le chiffre d'affaires, et non « 3412 ».
+          _visites = _fmtNombre(stats['visites'] ?? stats['totalVues']);
+          _clients = _fmtNombre(stats['nombreAbonnes']);
           _notifNonLues = _toInt(data['notificationsNonLues']);
         });
       });
@@ -669,7 +670,7 @@ class _HomePageState extends State<HomePage>
             chiffre(
               Icons.receipt_long_outlined,
               'Commandes',
-              '$_commandesCount',
+              _fmtNombre(_commandesCount),
               onTap: () => widget.ouvrirOnglet?.call(1),
             ),
             separateur(),
