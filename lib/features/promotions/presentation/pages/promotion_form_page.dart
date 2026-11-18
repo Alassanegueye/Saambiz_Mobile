@@ -4,7 +4,12 @@ import 'package:saambiz/core/widgets/libelle_obligatoire.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/theme/app_color.dart';
+import '../../../../core/theme/police.dart';
+import '../../../../core/widgets/image_reseau.dart';
 import '../../../../injection_container.dart';
+import '../../../catalogue/presentation/widgets/produit_card.dart'
+    show formaterPrix;
 import '../../../home/data/models/produit_model.dart';
 import '../../../vendeur/data/datasources/vendeur_produit_datasource.dart';
 import '../../data/models/promotion_model.dart';
@@ -13,11 +18,19 @@ import '../bloc/promotions_event.dart';
 import '../bloc/promotions_state.dart';
 import '../../../../core/utils/dates.dart';
 
-class _C {
-  static const green = Color(0xFF01154B);
-  static const white = Color(0xFFFFFFFF);
-  static const bg = Color(0xFFF4F5F8);
-}
+/// Le prix tel qu'on le saisit : « 14900 », pas « 14900.0 ».
+String prixSaisi(double prix) =>
+    prix == prix.roundToDouble() ? prix.toStringAsFixed(0) : prix.toString();
+
+/// Le nombre de jours entre deux dates du calendrier, bornes comprises
+/// (du 18 au 25 : 8 jours).
+int joursDePromo(DateTime debut, DateTime fin) =>
+    DateTime(
+      fin.year,
+      fin.month,
+      fin.day,
+    ).difference(DateTime(debut.year, debut.month, debut.day)).inDays +
+    1;
 
 /// Création (POST /promotions) ou modification (PUT /promotions/:id) d'une
 /// promotion vendeur.
@@ -49,9 +62,10 @@ class _PromotionFormViewState extends State<_PromotionFormView> {
   late final _descCtrl = TextEditingController(
     text: widget.promotion?.description ?? '',
   );
+  // « 14900 » et non « 14900.0 », que le champ affichait en modification.
   late final _prixCtrl = TextEditingController(
     text: widget.promotion != null
-        ? widget.promotion!.prixPromo.toString()
+        ? prixSaisi(widget.promotion!.prixPromo)
         : '',
   );
   DateTime _dateDebut = DateTime.now();
@@ -61,6 +75,28 @@ class _PromotionFormViewState extends State<_PromotionFormView> {
   bool _loadingProduits = true;
 
   bool get _isEdit => widget.promotion != null;
+
+  /// Le produit visé : celui de la promotion en modification, sinon celui
+  /// choisi dans la liste. Nul tant qu'il n'est pas connu.
+  ({String nom, String? image, double? prix})? get _produit {
+    final promo = widget.promotion;
+    if (promo != null) {
+      return (
+        nom: promo.produitNom ?? '',
+        image: promo.produitImage,
+        prix: promo.produitPrix,
+      );
+    }
+    for (final p in _produits) {
+      if (p.id == _produitId) {
+        return (nom: p.nom, image: p.image, prix: double.tryParse(p.prix));
+      }
+    }
+    return null;
+  }
+
+  double? get _prixPromo =>
+      double.tryParse(_prixCtrl.text.trim().replaceAll(RegExp(r'\s'), ''));
 
   @override
   void initState() {
@@ -119,10 +155,15 @@ class _PromotionFormViewState extends State<_PromotionFormView> {
       afficherErreur(context, 'Choisissez un produit');
       return;
     }
+    // La règle du serveur, dite avant l'envoi plutôt qu'après.
+    if (!_dateFin.isAfter(_dateDebut)) {
+      afficherErreur(context, 'La date de fin doit suivre la date de début');
+      return;
+    }
     final bloc = context.read<PromotionsBloc>();
     final isoDebut = dateIso.format(_dateDebut);
     final isoFin = dateIso.format(_dateFin);
-    final prix = num.tryParse(_prixCtrl.text.trim()) ?? 0;
+    final num prix = _prixPromo ?? 0;
     if (_isEdit) {
       bloc.add(
         ModifierPromotion(
@@ -150,8 +191,11 @@ class _PromotionFormViewState extends State<_PromotionFormView> {
 
   @override
   Widget build(BuildContext context) {
+    final produit = _produit;
+    final remise = remiseEnPourcent(produit?.prix, _prixPromo);
+    final jours = joursDePromo(_dateDebut, _dateFin);
     return ScaffoldMarine(
-      backgroundColor: _C.bg,
+      backgroundColor: AppColor.kBackground,
       appBar: AppBar(
         title: Text(_isEdit ? 'Modifier la promotion' : 'Nouvelle promotion'),
       ),
@@ -174,7 +218,12 @@ class _PromotionFormViewState extends State<_PromotionFormView> {
           return Form(
             key: _formKey,
             child: ListView(
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.fromLTRB(
+                16,
+                16,
+                16,
+                24 + MediaQuery.paddingOf(context).bottom,
+              ),
               children: [
                 if (!_isEdit) ...[
                   _loadingProduits
@@ -197,40 +246,89 @@ class _PromotionFormViewState extends State<_PromotionFormView> {
                         ),
                   const SizedBox(height: 12),
                 ],
+                // Le produit en promotion : la modification ne disait pas
+                // lequel, ni son prix normal.
+                if (produit != null) ...[
+                  _CarteProduit(
+                    nom: produit.nom,
+                    image: produit.image,
+                    prix: produit.prix,
+                    remise: remise,
+                  ),
+                  const SizedBox(height: 16),
+                ],
                 _input(_titreCtrl, 'Titre de la promotion'),
                 const SizedBox(height: 12),
                 _input(_descCtrl, 'Description', maxLines: 3),
                 const SizedBox(height: 12),
-                _input(
-                  _prixCtrl,
-                  'Prix promo (FCFA)',
-                  keyboard: TextInputType.number,
+                TextFormField(
+                  controller: _prixCtrl,
+                  keyboardType: TextInputType.number,
+                  onChanged: (_) => setState(() {}),
+                  validator: (_) {
+                    final prix = _prixPromo;
+                    if (prix == null || prix <= 0) {
+                      return 'Indiquez le prix promo';
+                    }
+                    final normal = produit?.prix;
+                    if (normal != null && prix >= normal) {
+                      return 'Le prix promo doit être inférieur à '
+                          '${formaterPrix(normal)}';
+                    }
+                    return null;
+                  },
+                  decoration: InputDecoration(
+                    label: const LibelleObligatoire('Prix promo'),
+                    suffixText: 'FCFA',
+                    helperText: remise != null && produit?.prix != null
+                        ? 'Soit -$remise % sur ${formaterPrix(produit!.prix!)}'
+                        : null,
+                  ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 16),
                 Row(
                   children: [
                     Expanded(
-                      child: OutlinedButton(
-                        onPressed: () => _choisirDate(debut: true),
-                        child: Text('Début : ${dateCourte.format(_dateDebut)}'),
+                      child: _ChampDate(
+                        libelle: 'Début',
+                        date: _dateDebut,
+                        onTap: () => _choisirDate(debut: true),
                       ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: OutlinedButton(
-                        onPressed: () => _choisirDate(debut: false),
-                        child: Text('Fin : ${dateCourte.format(_dateFin)}'),
+                      child: _ChampDate(
+                        libelle: 'Fin',
+                        date: _dateFin,
+                        onTap: () => _choisirDate(debut: false),
                       ),
                     ),
                   ],
+                ),
+                const SizedBox(height: 6),
+                Padding(
+                  padding: const EdgeInsets.only(left: 4),
+                  child: Text(
+                    _dateFin.isAfter(_dateDebut)
+                        ? 'Durée : $jours jours'
+                        : 'La date de fin doit suivre la date de début',
+                    style: TextStyle(
+                      fontFamily: kPolice,
+                      fontSize: 12.5,
+                      color: _dateFin.isAfter(_dateDebut)
+                          ? AppColor.kGrayscale40
+                          : AppColor.kErreur,
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 24),
                 ElevatedButton(
                   onPressed: loading ? null : _soumettre,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: _C.green,
-                    foregroundColor: _C.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    backgroundColor: AppColor.kPrimary,
+                    foregroundColor: AppColor.kWhite,
+                    elevation: 0,
+                    minimumSize: const Size.fromHeight(52),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                     ),
@@ -245,8 +343,14 @@ class _PromotionFormViewState extends State<_PromotionFormView> {
                           ),
                         )
                       : Text(
-                          _isEdit ? 'Enregistrer' : 'Créer la promotion',
-                          style: const TextStyle(fontWeight: FontWeight.w700),
+                          _isEdit
+                              ? 'Enregistrer les modifications'
+                              : 'Créer la promotion',
+                          style: const TextStyle(
+                            fontFamily: kPolice,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                 ),
               ],
@@ -267,9 +371,142 @@ class _PromotionFormViewState extends State<_PromotionFormView> {
       controller: c,
       keyboardType: keyboard,
       maxLines: maxLines,
+      textCapitalization: TextCapitalization.sentences,
       validator: (v) =>
           (v == null || v.trim().isEmpty) ? '$label requis' : null,
       decoration: InputDecoration(label: LibelleObligatoire(label)),
+    );
+  }
+}
+
+/// Le produit en promotion : photo, nom, prix normal, et la remise que
+/// donne le prix promo saisi.
+class _CarteProduit extends StatelessWidget {
+  final String nom;
+  final String? image;
+  final double? prix;
+  final int? remise;
+  const _CarteProduit({
+    required this.nom,
+    required this.image,
+    required this.prix,
+    required this.remise,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    const repli = ColoredBox(
+      color: AppColor.kPrimaryLight,
+      child: Center(
+        child: Icon(Icons.local_offer_outlined, color: AppColor.kPrimary),
+      ),
+    );
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColor.kWhite,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColor.kLine),
+      ),
+      child: Row(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: SizedBox(
+              width: 60,
+              height: 60,
+              child: (image ?? '').isNotEmpty
+                  ? ImageReseau(
+                      image!,
+                      largeurServeur: 180,
+                      fit: BoxFit.cover,
+                      repli: repli,
+                    )
+                  : repli,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  nom.isEmpty ? 'Produit' : nom,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontFamily: kPolice,
+                    fontSize: 14.5,
+                    fontWeight: FontWeight.w700,
+                    color: AppColor.kGrayscaleDark100,
+                  ),
+                ),
+                if (prix != null)
+                  Text(
+                    'Prix normal : ${formaterPrix(prix!)}',
+                    style: const TextStyle(
+                      fontFamily: kPolice,
+                      fontSize: 12.5,
+                      color: AppColor.kGrayscale40,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          if (remise != null)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: AppColor.kSecondary,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text(
+                '-$remise %',
+                style: const TextStyle(
+                  fontFamily: kPolice,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w800,
+                  color: AppColor.kPrimary,
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Une date à toucher, présentée comme un champ du formulaire.
+class _ChampDate extends StatelessWidget {
+  final String libelle;
+  final DateTime date;
+  final VoidCallback onTap;
+  const _ChampDate({
+    required this.libelle,
+    required this.date,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(14),
+      child: InputDecorator(
+        decoration: InputDecoration(
+          labelText: libelle,
+          prefixIcon: const Icon(Icons.event_outlined, size: 20),
+        ),
+        child: Text(
+          dateCourte.format(date),
+          style: const TextStyle(
+            fontFamily: kPolice,
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
+            color: AppColor.kGrayscaleDark100,
+          ),
+        ),
+      ),
     );
   }
 }

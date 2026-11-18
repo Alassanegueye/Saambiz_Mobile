@@ -4,6 +4,14 @@ double _toDouble(dynamic v) {
   return double.tryParse(v.toString()) ?? 0;
 }
 
+/// Remise en pour cent d'un prix promo sur un prix normal, arrondie ; nulle
+/// si l'un manque ou si le prix promo n'est pas une baisse.
+int? remiseEnPourcent(double? prix, double? prixPromo) {
+  if (prix == null || prixPromo == null) return null;
+  if (prix <= 0 || prixPromo <= 0 || prixPromo >= prix) return null;
+  return ((prix - prixPromo) / prix * 100).round();
+}
+
 class PromotionModel {
   final String id;
   final String titre;
@@ -33,13 +41,7 @@ class PromotionModel {
   });
 
   /// Remise en pour cent, arrondie ; nulle sans prix normal connu.
-  int? get remise {
-    final prix = produitPrix;
-    if (prix == null || prix <= 0 || prixPromo <= 0 || prixPromo >= prix) {
-      return null;
-    }
-    return ((prix - prixPromo) / prix * 100).round();
-  }
+  int? get remise => remiseEnPourcent(produitPrix, prixPromo);
 
   factory PromotionModel.fromJson(Map<String, dynamic> json) {
     // Le serveur inclut le produit sans alias : Sequelize le range alors sous
