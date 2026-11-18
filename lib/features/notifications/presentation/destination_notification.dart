@@ -14,6 +14,9 @@ enum CibleNotification {
   /// La conversation avec l'interlocuteur nommé par la notification.
   conversation,
 
+  /// La certification de la boutique : l'administrateur a tranché.
+  certification,
+
   /// Rien de précis : la liste des conversations, comme avant.
   messagerie,
 }
@@ -60,6 +63,15 @@ DestinationNotification destinationNotification(NotificationModel n) {
   final abonnement = n.abonnementId;
   if (abonnement != null || n.type == 'abonnement') {
     return DestinationNotification(CibleNotification.abonnement, abonnement);
+  }
+
+  // Réponse à une demande de certification, approuvée ou refusée. Elle ne
+  // porte aucun identifiant — ce n'est ni une commande, ni une boutique à
+  // visiter —, donc elle retombait sur la messagerie : le vendeur à qui on
+  // disait « vous pouvez renvoyer vos photos » arrivait dans ses
+  // conversations. L'écran de certification est celui qui le permet.
+  if (n.certification != null) {
+    return DestinationNotification(CibleNotification.certification);
   }
 
   final interlocuteur = n.interlocuteurId;

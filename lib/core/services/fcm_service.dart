@@ -22,6 +22,7 @@ import '../routes/app_router.dart';
 import '../../injection_container.dart';
 import '../connection/auth_interceptor.dart';
 import '../utils/app_logger.dart';
+import '../../features/certification/certification_page.dart';
 
 // Même mise en place que le projet SIGNS : Firebase Cloud Messaging pour
 // l'acheminement, flutter_local_notifications pour l'affichage quand
@@ -299,6 +300,13 @@ class FcmService {
       case CibleNotification.abonnement:
         navigateur.push(
           MaterialPageRoute(builder: (_) => const MonAbonnementPage()),
+        );
+
+      case CibleNotification.certification:
+        // L'écran où le vendeur lit la décision et, s'il a été refusé,
+        // renvoie ses photos — ce que la notification lui dit de faire.
+        navigateur.push(
+          MaterialPageRoute(builder: (_) => const CertificationPage()),
         );
 
       case CibleNotification.conversation:

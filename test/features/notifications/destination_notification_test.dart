@@ -187,4 +187,47 @@ void main() {
       );
     });
   });
+
+  group('La réponse à une demande de certification', () {
+    test('une certification approuvée mène à l’écran de certification', () {
+      // Elle ne porte ni commande ni boutique : sans la clé `certification`,
+      // elle retombait sur la messagerie, et le vendeur prévenu que sa
+      // boutique était certifiée arrivait dans ses conversations.
+      final d = destinationNotification(
+        notificationDepuisPush({
+          'type': 'systeme',
+          'certification': 'approuve',
+        }),
+      );
+      expect(d.cible, CibleNotification.certification);
+    });
+
+    test('un refus y mène aussi : c’est là qu’on renvoie ses photos', () {
+      final d = destinationNotification(
+        notificationDepuisPush({'type': 'systeme', 'certification': 'rejete'}),
+      );
+      expect(d.cible, CibleNotification.certification);
+    });
+
+    test('une notification système ordinaire n’y mène pas', () {
+      // Seule la présence de la clé compte, pas le type « systeme », que
+      // d'autres annonces utilisent aussi.
+      final d = destinationNotification(
+        notificationDepuisPush({'type': 'systeme'}),
+      );
+      expect(d.cible, CibleNotification.messagerie);
+    });
+
+    test('une commande garde la priorité sur la certification', () {
+      // L'ordre de lecture ne doit pas se déplacer : une notification qui
+      // porte une commande ouvre la commande, quoi qu'elle porte d'autre.
+      final d = destinationNotification(
+        notificationDepuisPush({
+          'commandeId': 'cmd-1',
+          'certification': 'approuve',
+        }),
+      );
+      expect(d.cible, CibleNotification.commande);
+    });
+  });
 }

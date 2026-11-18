@@ -24,6 +24,7 @@ import '../../../../core/services/socket_service.dart';
 import '../bloc/notifications_bloc.dart';
 import '../bloc/notifications_event.dart';
 import '../bloc/notifications_state.dart';
+import '../../../certification/certification_page.dart';
 
 class _C {
   static const sub = Color(0xFF5B6C8A);
@@ -124,6 +125,13 @@ class _NotificationsViewState extends State<_NotificationsView> {
       case CibleNotification.abonnement:
         navigateur.push(
           MaterialPageRoute(builder: (_) => const MonAbonnementPage()),
+        );
+
+      case CibleNotification.certification:
+        // L'écran où le vendeur lit la décision et, s'il a été refusé,
+        // renvoie ses photos — ce que la notification lui dit de faire.
+        navigateur.push(
+          MaterialPageRoute(builder: (_) => const CertificationPage()),
         );
 
       case CibleNotification.conversation:

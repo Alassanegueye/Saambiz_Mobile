@@ -42,6 +42,10 @@ class NotificationModel {
   String? get boutiqueId => _id('boutiqueId');
   String? get abonnementId => _id('abonnementId');
 
+  /// La décision rendue sur la certification : « approuve » ou « rejete ».
+  /// Présente uniquement sur la réponse de l'administrateur.
+  String? get certification => _id('certification');
+
   /// Vrai quand c'est le vendeur qui lit cette notification.
   ///
   /// La fiche d'une commande n'affiche pas les mêmes boutons des deux côtés.
