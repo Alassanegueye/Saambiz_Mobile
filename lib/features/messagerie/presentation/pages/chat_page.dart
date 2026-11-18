@@ -15,6 +15,7 @@ import '../../data/models/message_model.dart';
 import '../bloc/messagerie_bloc.dart';
 import '../bloc/messagerie_event.dart';
 import '../bloc/messagerie_state.dart';
+import '../../../../core/services/fcm_service.dart';
 
 /// Le jour d'un message, pour les séparateurs : « Aujourd'hui », « Hier »,
 /// sinon la date en toutes lettres.
@@ -73,6 +74,9 @@ class _ChatViewState extends State<_ChatView> {
   @override
   void initState() {
     super.initState();
+    // Tant que cette conversation est à l'écran, pas de bannière pour ses
+    // propres messages : ils arrivent déjà dans le fil.
+    FcmService.conversationOuverte(widget.interlocuteurId);
     _sub = sl<SocketService>().onNewMessage.listen((data) {
       if (mounted) {
         context.read<MessagerieBloc>().add(MessageRecuTempsReel(data));
@@ -82,6 +86,7 @@ class _ChatViewState extends State<_ChatView> {
 
   @override
   void dispose() {
+    FcmService.conversationOuverte(null);
     _sub?.cancel();
     _msgCtrl.dispose();
     super.dispose();

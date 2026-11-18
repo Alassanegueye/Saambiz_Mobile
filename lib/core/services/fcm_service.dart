@@ -59,6 +59,36 @@ class FcmService {
   static bool _ecouteurs = false;
   static String? _jeton;
 
+  /// La conversation ouverte à l'écran, s'il y en a une.
+  ///
+  /// Les messages arrivent en push pour atteindre un téléphone rangé dans une
+  /// poche. Mais application ouverte, c'est NOUS qui dessinons la bannière
+  /// (FCM n'affiche rien dans ce cas) : sans cette information, on affichait
+  /// une bannière pour le message que l'utilisateur était en train de lire,
+  /// par-dessus la conversation elle-même. Le temps réel l'a déjà posé dans
+  /// le fil.
+  static String? _conversationOuverte;
+
+  /// Appelé par l'écran de discussion à son ouverture et à sa fermeture.
+  static void conversationOuverte(String? interlocuteurId) {
+    _conversationOuverte = interlocuteurId;
+  }
+
+  /// Faut-il dessiner une bannière pour ce message, application ouverte ?
+  ///
+  /// Non quand il vient de la conversation déjà sous les yeux : le temps réel
+  /// l'a posé dans le fil une fraction de seconde plus tôt, et la bannière ne
+  /// ferait que masquer ce qu'elle annonce. Oui pour tout le reste, y compris
+  /// un message d'une AUTRE conversation.
+  static bool banniereUtile(
+    Map<String, dynamic> donnees, {
+    String? conversationOuverte,
+  }) {
+    final de = donnees['interlocuteurId']?.toString();
+    if (de == null || de.isEmpty) return true;
+    return de != conversationOuverte;
+  }
+
   static bool get _firebasePret => Firebase.apps.isNotEmpty;
 
   /// À appeler une fois le client ou le vendeur connecté (pages principales).
@@ -88,6 +118,15 @@ class FcmService {
       FirebaseMessaging.onMessage.listen((message) {
         final n = message.notification;
         if (n == null) return;
+        // Sauf pour la conversation déjà sous les yeux : le message vient
+        // d'arriver dans le fil par le temps réel, une bannière par-dessus
+        // ne ferait que masquer ce qu'elle annonce.
+        if (!banniereUtile(
+          message.data,
+          conversationOuverte: _conversationOuverte,
+        )) {
+          return;
+        }
         _afficher(
           titre: n.title ?? 'SaamBiz',
           texte: n.body ?? '',
