@@ -71,7 +71,7 @@ class _NouvelleCommandeVendeurPageState
       _erreurProduits = null;
     });
     try {
-      final produits = await sl<VendeurProduitDataSource>().mesProduits();
+      final produits = await sl<VendeurProduitDataSource>().tousMesProduits();
       if (!mounted) return;
       setState(() {
         _produits = produits;

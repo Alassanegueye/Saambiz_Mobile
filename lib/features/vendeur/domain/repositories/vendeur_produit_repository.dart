@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/barre_pagination.dart';
 import 'package:dartz/dartz.dart';
 
 import '../../../../core/errors/failure.dart';
@@ -6,7 +7,10 @@ import '../entities/produit_vendeur.dart';
 
 /// Contrat du domaine pour la gestion des produits + dashboard côté vendeur.
 abstract class VendeurProduitRepository {
-  Future<Either<Failure, List<ProduitVendeur>>> mesProduits();
+  /// Une page de produits, avec de quoi atteindre les suivantes.
+  Future<Either<Failure, (List<ProduitVendeur>, Pagination)>> mesProduits({
+    int page,
+  });
 
   Future<Either<Failure, List<CategorieModel>>> categories();
 

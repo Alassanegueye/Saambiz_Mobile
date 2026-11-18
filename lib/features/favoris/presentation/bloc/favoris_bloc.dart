@@ -29,10 +29,15 @@ class FavorisBloc extends Bloc<FavorisEvent, FavorisState> {
     on<ToggleClocheFavori>(_onBasculerCloche);
   }
 
+  /// Page affichee, conservee entre deux rechargements : ne plus suivre une
+  /// boutique, ou basculer une cloche, ne doit pas renvoyer en page un.
+  int _page = 1;
+
   Future<void> _onCharger(LoadFavoris event, Emitter<FavorisState> emit) async {
     final avant = state;
+    _page = event.page;
     emit(FavorisLoading());
-    await _recharger(emit, avant: avant, page: event.page);
+    await _recharger(emit, avant: avant);
   }
 
   /// Recharge la liste ; [succes] accompagne la liste quand elle suit une
@@ -41,9 +46,20 @@ class FavorisBloc extends Bloc<FavorisEvent, FavorisState> {
     Emitter<FavorisState> emit, {
     String? succes,
     FavorisState? avant,
-    int page = 1,
   }) async {
-    final resultat = await getBoutiquesSuivies(page: page);
+    var resultat = await getBoutiquesSuivies(page: _page);
+
+    // Ne plus suivre la derniere boutique d'une page la vide. Sans ce
+    // rattrapage, l'ecran affichait « aucune boutique suivie » sur la page
+    // trois alors qu'il en restait vingt, sans moyen de revenir en arriere.
+    // Uniquement sur une reponse recue : en cas de panne, la liste est vide
+    // elle aussi, et relancer la requete masquerait le message d'erreur.
+    final recue = resultat.fold((_) => null, (r) => r);
+    if (recue != null && recue.$1.isEmpty && _page > 1) {
+      _page = recue.$2.pages;
+      resultat = await getBoutiquesSuivies(page: _page);
+    }
+
     resultat.fold(
       (panne) => _echec(emit, panne.errorMessage, avant ?? state),
       (recue) =>
@@ -60,7 +76,11 @@ class FavorisBloc extends Bloc<FavorisEvent, FavorisState> {
   /// précédente ne doit pas s'afficher une seconde fois.
   void _echec(Emitter<FavorisState> emit, String message, FavorisState avant) {
     emit(FavorisError(message));
-    if (avant is FavorisLoaded) emit(FavorisLoaded(avant.boutiques));
+    // La pagination de l'etat remis est celle d'avant : sans elle, la barre
+    // « Precedent / Suivant » disparaissait au premier refus du serveur.
+    if (avant is FavorisLoaded) {
+      emit(FavorisLoaded(avant.boutiques, pagination: avant.pagination));
+    }
   }
 
   Future<void> _onSuivre(
@@ -103,7 +123,7 @@ class FavorisBloc extends Bloc<FavorisEvent, FavorisState> {
             b.id == event.boutiqueId
                 ? b.copyWith(clocheActive: event.active)
                 : b,
-        ]),
+        ], pagination: avant.pagination),
       );
     }
 
@@ -128,6 +148,7 @@ class FavorisBloc extends Bloc<FavorisEvent, FavorisState> {
                       ? b.copyWith(clocheActive: etatReel)
                       : b,
               ],
+              pagination: courant.pagination,
               succes: etatReel
                   ? 'Alertes activées : vous serez prévenu des promotions et nouveautés.'
                   : 'Alertes désactivées pour cette boutique.',

@@ -1,3 +1,4 @@
+import '../../../../core/widgets/barre_pagination.dart';
 import 'package:saambiz/core/utils/fichier_envoi.dart';
 import 'dart:convert';
 
@@ -9,6 +10,13 @@ import '../../../../core/constants/api_endpoints.dart';
 
 /// Accès aux endpoints VENDEUR de gestion des produits (.../vendeur/...).
 /// Le token est ajouté automatiquement par l'intercepteur du Dio partagé.
+/// Une page de produits du vendeur : la liste, et où elle se situe.
+class PageProduitsVendeur {
+  final List<ProduitModel> produits;
+  final Pagination pagination;
+  const PageProduitsVendeur(this.produits, this.pagination);
+}
+
 class VendeurProduitDataSource {
   final Dio dio;
   VendeurProduitDataSource(this.dio);
@@ -35,14 +43,45 @@ class VendeurProduitDataSource {
     return const {};
   }
 
-  Future<List<ProduitModel>> mesProduits() async {
+  /// Une page de produits du vendeur. Le serveur en rend dix.
+  Future<PageProduitsVendeur> mesProduits({int page = 1}) async {
     if (modeDemo) {
-      return produitsDemo().map(ProduitModel.fromJson).toList();
+      return PageProduitsVendeur(
+        produitsDemo().map(ProduitModel.fromJson).toList(),
+        const Pagination(),
+      );
     }
-    final res = await dio.get(VendeurProduitEndpoints.listeProduits);
-    return _extractList(
-      res.data,
-    ).map((e) => ProduitModel.fromJson(e as Map<String, dynamic>)).toList();
+    final res = await dio.get(
+      VendeurProduitEndpoints.listeProduits,
+      queryParameters: {'page': page},
+    );
+    return PageProduitsVendeur(
+      _extractList(
+        res.data,
+      ).map((e) => ProduitModel.fromJson(e as Map<String, dynamic>)).toList(),
+      Pagination.depuis(
+        res.data is Map ? Map<String, dynamic>.from(res.data as Map) : null,
+      ),
+    );
+  }
+
+  /// TOUS les produits du vendeur, page après page.
+  ///
+  /// Pour les écrans qui doivent en PROPOSER UN À CHOISIR — nouvelle
+  /// commande, formulaire de promotion, sections du site : un choix tronqué
+  /// aux dix premiers produits n'est pas un choix. Ils demandaient la liste
+  /// entière, et la pagination la leur aurait coupée sans prévenir.
+  ///
+  /// Bornée à vingt pages : au-delà, ce n'est plus une liste de choix mais
+  /// un catalogue, et il faudra une recherche côté serveur.
+  Future<List<ProduitModel>> tousMesProduits() async {
+    final tous = <ProduitModel>[];
+    for (var page = 1; page <= 20; page++) {
+      final recue = await mesProduits(page: page);
+      tous.addAll(recue.produits);
+      if (page >= recue.pagination.pages) break;
+    }
+    return tous;
   }
 
   Future<List<CategorieModel>> categories() async {
@@ -73,7 +112,10 @@ class VendeurProduitDataSource {
       if (attributs != null) 'attributs': jsonEncode(attributs),
       if (imagePath != null) 'image': await fichierAEnvoyer(imagePath),
     });
-    final res = await dio.post(VendeurProduitEndpoints.ajouterProduit, data: form);
+    final res = await dio.post(
+      VendeurProduitEndpoints.ajouterProduit,
+      data: form,
+    );
     final data = res.data;
     if (data is Map && data['produit'] is Map) {
       return (data['produit'] as Map)['id']?.toString();
@@ -120,9 +162,7 @@ class VendeurProduitDataSource {
   /// Contrat backend en cours de déploiement en parallèle.
   Future<void> ajouterImages(String produitId, List<String> imagePaths) async {
     final form = FormData.fromMap({
-      'images': [
-        for (final path in imagePaths) await fichierAEnvoyer(path),
-      ],
+      'images': [for (final path in imagePaths) await fichierAEnvoyer(path)],
     });
     await dio.post(VendeurProduitEndpoints.images(produitId), data: form);
   }

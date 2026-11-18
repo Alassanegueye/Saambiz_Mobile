@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/barre_pagination.dart';
 import 'package:saambiz/core/widgets/confirmation.dart';
 import 'package:saambiz/core/widgets/messages.dart';
 import 'package:saambiz/core/widgets/onglets_conserves.dart';
@@ -148,7 +149,17 @@ class _MesProduitsViewState extends State<_MesProduitsView> {
 
             return Column(
               children: [
-                _buildTabs(all.length, enLigne.length, horsLigne.length),
+                // Le total du serveur pour « Tous » : compter la liste
+                // chargee donnerait « 10 » a qui a cent produits. « En
+                // ligne » et « Hors ligne » restent comptes sur la page
+                // affichee — le serveur ne les distingue pas encore.
+                _buildTabs(
+                  state.pagination.total > 0
+                      ? state.pagination.total
+                      : all.length,
+                  enLigne.length,
+                  horsLigne.length,
+                ),
                 Expanded(
                   child: shown.isEmpty
                       ? _buildEmpty()
@@ -166,11 +177,22 @@ class _MesProduitsViewState extends State<_MesProduitsView> {
                               16,
                               espaceBasVendeur(context) + 72,
                             ),
-                            itemCount: shown.length,
+                            // +1 : la barre « Precedent / Suivant » en pied
+                            // de liste, repliee s'il n'y a qu'une page.
+                            itemCount: shown.length + 1,
                             separatorBuilder: (_, __) =>
                                 const SizedBox(height: 8),
-                            itemBuilder: (_, i) =>
-                                _buildCard(context, shown[i]),
+                            itemBuilder: (_, i) {
+                              if (i == shown.length) {
+                                return BarrePagination(
+                                  pagination: state.pagination,
+                                  onPage: (page) => context
+                                      .read<VendeurProduitBloc>()
+                                      .add(LoadMesProduits(page: page)),
+                                );
+                              }
+                              return _buildCard(context, shown[i]);
+                            },
                           ),
                         ),
                 ),

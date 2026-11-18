@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../data/datasources/promotions_remote_datasource.dart';
 import '../../data/repositories/promotions_repository.dart';
 import 'promotions_event.dart';
 import 'promotions_state.dart';
@@ -27,15 +28,35 @@ class PromotionsBloc extends Bloc<PromotionsEvent, PromotionsState> {
     );
   }
 
+  /// Page affichée, conservée entre deux rechargements : supprimer une
+  /// promotion ne doit pas renvoyer en page un.
+  int _page = 1;
+
   Future<void> _onLoadMes(
     LoadMesPromotions event,
     Emitter<PromotionsState> emit,
   ) async {
+    if (event.page != null) _page = event.page!;
     emit(PromotionsLoading());
-    final result = await repository.mesPromotions();
+    var result = await repository.mesPromotions(page: _page);
+
+    // Supprimer le dernier élément d'une page la vide. Sans ce rattrapage,
+    // l'écran afficherait « aucune promotion » sur la page trois alors qu'il
+    // en reste vingt, sans aucun moyen de revenir en arrière.
+    //
+    // Uniquement sur une réponse reçue : en cas d'erreur réseau, la liste est
+    // vide elle aussi, et relancer la requête masquerait le message.
+    final page = result.fold<PagePromotions?>((_) => null, (p) => p);
+    if (page != null && page.promotions.isEmpty && _page > 1) {
+      _page = page.pagination.pages;
+      result = await repository.mesPromotions(page: _page);
+    }
+
     result.fold(
       (f) => emit(PromotionsError(f.errorMessage)),
-      (list) => emit(PromotionsLoaded(list)),
+      (recue) => emit(
+        PromotionsLoaded(recue.promotions, pagination: recue.pagination),
+      ),
     );
   }
 

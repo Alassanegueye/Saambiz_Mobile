@@ -7,7 +7,13 @@ abstract class PromotionsEvent extends Equatable {
 
 class LoadPromotionsActives extends PromotionsEvent {}
 
-class LoadMesPromotions extends PromotionsEvent {}
+class LoadMesPromotions extends PromotionsEvent {
+  /// Page demandée. Omise, on recharge celle qui est affichée.
+  final int? page;
+  LoadMesPromotions({this.page});
+  @override
+  List<Object?> get props => [page];
+}
 
 class CreerPromotion extends PromotionsEvent {
   final String titre;

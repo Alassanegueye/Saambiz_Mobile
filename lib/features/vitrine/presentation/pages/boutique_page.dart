@@ -362,7 +362,7 @@ class _ConfigurationState extends State<_Configuration> {
   }
 
   Future<void> _chargerProduits() async {
-    final r = await sl<GetMesProduits>()();
+    final r = await sl<GetMesProduits>().tous();
     if (!mounted) return;
     r.fold(
       (_) => setState(() => _produitsCharges = true),

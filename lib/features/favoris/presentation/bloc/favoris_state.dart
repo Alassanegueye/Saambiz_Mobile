@@ -27,8 +27,11 @@ class FavorisLoaded extends FavorisState {
     this.succes,
     this.pagination = const Pagination(),
   });
+  // La page fait partie de l'identite de l'etat : sans elle, deux pages
+  // qui porteraient les memes boutiques seraient jugees egales et l'ecran
+  // ne se redessinerait pas apres un appui sur « Suivant ».
   @override
-  List<Object?> get props => [boutiques, succes];
+  List<Object?> get props => [boutiques, succes, pagination.page];
 }
 
 class FavorisError extends FavorisState {

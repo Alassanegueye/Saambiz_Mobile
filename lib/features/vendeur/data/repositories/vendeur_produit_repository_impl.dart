@@ -1,3 +1,4 @@
+import 'package:saambiz/core/widgets/barre_pagination.dart';
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 
@@ -21,9 +22,12 @@ class VendeurProduitRepositoryImpl implements VendeurProduitRepository {
       ServerFailure(errorMessage: _errorMessage(e), statusCode: _statusCode(e));
 
   @override
-  Future<Either<Failure, List<ProduitVendeur>>> mesProduits() async {
+  Future<Either<Failure, (List<ProduitVendeur>, Pagination)>> mesProduits({
+    int page = 1,
+  }) async {
     try {
-      return Right(await dataSource.mesProduits());
+      final recue = await dataSource.mesProduits(page: page);
+      return Right((recue.produits, recue.pagination));
     } catch (e) {
       return Left(_failure(e));
     }

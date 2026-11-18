@@ -1,11 +1,21 @@
 import 'package:dio/dio.dart';
 
 import '../../../../core/constants/api_endpoints.dart';
+import '../../../../core/widgets/barre_pagination.dart';
 import '../models/promotion_model.dart';
+
+/// Une page de promotions : la liste, et où elle se situe.
+class PagePromotions {
+  final List<PromotionModel> promotions;
+  final Pagination pagination;
+  const PagePromotions(this.promotions, this.pagination);
+}
 
 abstract class PromotionsRemoteDataSource {
   Future<List<PromotionModel>> promotionsActives();
-  Future<List<PromotionModel>> mesPromotions();
+
+  /// Une page de promotions du vendeur.
+  Future<PagePromotions> mesPromotions({int page});
   Future<PromotionModel> creerPromotion({
     required String titre,
     required String description,
@@ -55,11 +65,20 @@ class PromotionsRemoteDataSourceImpl implements PromotionsRemoteDataSource {
   }
 
   @override
-  Future<List<PromotionModel>> mesPromotions() async {
-    final res = await dio.get(PromotionsEndpoints.promotions);
-    return _extractList(
+  Future<PagePromotions> mesPromotions({int page = 1}) async {
+    final res = await dio.get(
+      PromotionsEndpoints.promotions,
+      queryParameters: {'page': page},
+    );
+    final liste = _extractList(
       res.data,
     ).map((e) => PromotionModel.fromJson(e as Map<String, dynamic>)).toList();
+    return PagePromotions(
+      liste,
+      Pagination.depuis(
+        res.data is Map ? Map<String, dynamic>.from(res.data as Map) : null,
+      ),
+    );
   }
 
   @override

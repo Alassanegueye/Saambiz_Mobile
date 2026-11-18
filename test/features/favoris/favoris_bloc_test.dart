@@ -24,13 +24,31 @@ class _Depot implements FavorisRepository {
 
   final _panne = ServerFailure(errorMessage: 'Serveur injoignable');
 
+  /// Pages demandées, dans l'ordre : c'est ce qui dit si le bloc a gardé sa
+  /// place ou s'il est reparti en page un.
+  final demandees = <int>[];
+
+  /// Dix par page, comme le serveur.
   @override
   Future<Either<Failure, (List<BoutiqueSuivie>, Pagination)>>
-  mesBoutiquesSuivies({int page = 1}) async => listeEnPanne
-      ? Left(_panne)
-      // Une seule page : le depot factice n'a pas a simuler la pagination,
-      // ce sont les regles du bloc qu'on verifie ici.
-      : Right((List.of(boutiques), Pagination(total: boutiques.length)));
+  mesBoutiquesSuivies({int page = 1}) async {
+    demandees.add(page);
+    if (listeEnPanne) return Left(_panne);
+    const parPage = 10;
+    final total = boutiques.length;
+    final debut = (page - 1) * parPage;
+    final tranche = debut >= total
+        ? <BoutiqueSuivie>[]
+        : boutiques.sublist(debut, (debut + parPage).clamp(0, total));
+    return Right((
+      tranche,
+      Pagination(
+        page: page,
+        pages: total == 0 ? 1 : (total / parPage).ceil(),
+        total: total,
+      ),
+    ));
+  }
 
   @override
   Future<Either<Failure, void>> nePlusSuivre(String boutiqueId) async {
@@ -161,4 +179,112 @@ void main() {
       await suite;
     },
   );
+
+  group('La place dans la liste, dix boutiques par page', () {
+    /// Vingt-cinq boutiques suivies : trois pages.
+    void beaucoup() => depot.boutiques = List.generate(
+      25,
+      (i) => BoutiqueSuivie(id: 'b$i', nom: 'Boutique $i'),
+    );
+
+    Future<FavorisLoaded> allerA(int page) async {
+      bloc.add(LoadFavoris(page: page));
+      return await bloc.stream.firstWhere((e) => e is FavorisLoaded)
+          as FavorisLoaded;
+    }
+
+    test('« Suivant » demande la page d’après au serveur', () async {
+      beaucoup();
+      final etat = await allerA(2);
+
+      expect(etat.boutiques.length, 10);
+      expect(etat.pagination.page, 2);
+      expect(etat.pagination.pages, 3);
+      expect(etat.pagination.total, 25);
+    });
+
+    test('ne plus suivre ne renvoie pas en page un', () async {
+      // Avant, le rechargement qui suit l'action repartait de la page un :
+      // on perdait sa place à chaque boutique retirée.
+      beaucoup();
+      await allerA(3);
+      depot.demandees.clear();
+
+      bloc.add(SupprimerFavori('b20'));
+      final etat =
+          await bloc.stream.firstWhere(
+                (e) => e is FavorisLoaded && e.succes != null,
+              )
+              as FavorisLoaded;
+
+      expect(depot.demandees, [3]);
+      expect(etat.pagination.page, 3);
+    });
+
+    test('la barre survit à une bascule de cloche', () async {
+      // La bascule optimiste reconstruisait l'état sans sa pagination : la
+      // barre « Précédent / Suivant » disparaissait au premier appui sur
+      // une cloche, et la page affichée n'était plus atteignable.
+      beaucoup();
+      await allerA(2);
+
+      bloc.add(ToggleClocheFavori('b12', true));
+      final etat =
+          await bloc.stream.firstWhere(
+                (e) => e is FavorisLoaded && e.succes != null,
+              )
+              as FavorisLoaded;
+
+      expect(etat.pagination.page, 2);
+      expect(etat.pagination.pages, 3);
+    });
+
+    test('un refus du serveur garde la barre', () async {
+      beaucoup();
+      await allerA(2);
+      depot.actionsEnPanne = true;
+
+      bloc.add(SupprimerFavori('b12'));
+      final etat =
+          await bloc.stream.firstWhere(
+                (e) => e is FavorisLoaded && e.pagination.pages == 3,
+              )
+              as FavorisLoaded;
+
+      expect(etat.pagination.page, 2);
+    });
+
+    test('vider la dernière page ramène sur la précédente', () async {
+      // Vingt et une boutiques : la page trois n'en porte qu'une. La retirer
+      // vide la page ; sans rattrapage l'écran affichait « aucune boutique
+      // suivie » alors qu'il en restait vingt, sans moyen de revenir.
+      depot.boutiques = List.generate(
+        21,
+        (i) => BoutiqueSuivie(id: 'b$i', nom: 'Boutique $i'),
+      );
+      await allerA(3);
+
+      bloc.add(SupprimerFavori('b20'));
+      final etat =
+          await bloc.stream.firstWhere(
+                (e) => e is FavorisLoaded && e.boutiques.isNotEmpty,
+              )
+              as FavorisLoaded;
+
+      expect(etat.pagination.page, 2);
+      expect(etat.boutiques.length, 10);
+    });
+
+    test('une panne réseau n’est pas masquée par un second essai', () async {
+      beaucoup();
+      await allerA(3);
+      depot.listeEnPanne = true;
+      depot.demandees.clear();
+
+      bloc.add(LoadFavoris(page: 3));
+      await bloc.stream.firstWhere((e) => e is FavorisError);
+
+      expect(depot.demandees, [3], reason: 'un seul appel');
+    });
+  });
 }

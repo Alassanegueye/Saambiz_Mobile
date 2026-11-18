@@ -8,10 +8,7 @@ import 'package:saambiz/core/widgets/confirmation.dart';
 /// fait rien, et refermer la feuille d'un glissé vaut refus — pas accord.
 
 /// Un écran minimal qui lance la feuille et retient sa réponse.
-Future<bool?> _reponse(
-  WidgetTester t, {
-  bool destructive = true,
-}) async {
+Future<bool?> _reponse(WidgetTester t, {bool destructive = true}) async {
   bool? recue;
   await t.pumpWidget(
     MaterialApp(
@@ -209,5 +206,19 @@ void main() {
         .resolve({});
 
     expect(rouge, isNot(marine));
+  });
+
+  testWidgets('une seule poignée, pas deux', (t) async {
+    // Le thème en pose une sur toutes les feuilles de l'application
+    // (app_theme.dart, `showDragHandle: true`). En dessiner une seconde ici
+    // en affichait deux, l'une au-dessus de l'autre.
+    await _reponse(t);
+
+    final poignees = find.byWidgetPredicate((w) {
+      if (w is! Container) return false;
+      final c = w.constraints;
+      return c != null && c.maxWidth == 40 && c.maxHeight == 4;
+    });
+    expect(poignees, findsNothing, reason: 'le thème s’en charge déjà');
   });
 }

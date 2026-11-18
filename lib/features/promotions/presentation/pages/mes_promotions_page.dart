@@ -21,6 +21,7 @@ import 'nouvelle_campagne_page.dart';
 import 'promotion_form_page.dart';
 import 'promotions_actives_page.dart' show libelleFinPromo;
 import '../../../../core/utils/dates.dart';
+import '../../../../core/widgets/barre_pagination.dart';
 
 /// Où en est une promotion, d'après ses dates.
 enum EtatPromo { enCours, bientotFinie, aVenir, terminee }
@@ -147,6 +148,8 @@ class _MesPromotionsView extends StatelessWidget {
             return RefreshIndicator(
               onRefresh: () async =>
                   context.read<PromotionsBloc>().add(LoadMesPromotions()),
+              // +1 : la barre « Précédent / Suivant » en pied de liste. Elle
+              // se replie d'elle-même s'il n'y a qu'une page.
               child: ListView.separated(
                 padding: EdgeInsets.fromLTRB(
                   16,
@@ -154,9 +157,17 @@ class _MesPromotionsView extends StatelessWidget {
                   16,
                   espaceBasVendeur(context) + 72,
                 ),
-                itemCount: state.promotions.length,
+                itemCount: state.promotions.length + 1,
                 separatorBuilder: (_, __) => const SizedBox(height: 12),
                 itemBuilder: (context, i) {
+                  if (i == state.promotions.length) {
+                    return BarrePagination(
+                      pagination: state.pagination,
+                      onPage: (page) => context.read<PromotionsBloc>().add(
+                        LoadMesPromotions(page: page),
+                      ),
+                    );
+                  }
                   final p = state.promotions[i];
                   return _CartePromoVendeur(
                     promotion: p,

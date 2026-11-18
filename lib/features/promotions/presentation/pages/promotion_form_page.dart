@@ -77,7 +77,7 @@ class _PromotionFormViewState extends State<_PromotionFormView> {
 
   Future<void> _chargerProduits() async {
     try {
-      final produits = await sl<VendeurProduitDataSource>().mesProduits();
+      final produits = await sl<VendeurProduitDataSource>().tousMesProduits();
       setState(() {
         _produits = produits;
         _loadingProduits = false;

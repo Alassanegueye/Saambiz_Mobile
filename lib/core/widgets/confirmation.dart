@@ -42,20 +42,15 @@ Future<bool> confirmerAction(
     ),
     builder: (ctx) => SafeArea(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // La poignée : elle dit que la feuille se referme d'un glissé.
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: AppColor.kGrayscale30,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            const SizedBox(height: 22),
+            // PAS DE POIGNÉE DESSINÉE ICI. Le thème en pose déjà une sur
+            // toutes les feuilles de l'application (app_theme.dart,
+            // `showDragHandle: true`) : en ajouter une seconde en affichait
+            // deux, l'une au-dessus de l'autre, sur la déconnexion, la
+            // suppression de compte et celle d'un produit.
             Container(
               width: 60,
               height: 60,

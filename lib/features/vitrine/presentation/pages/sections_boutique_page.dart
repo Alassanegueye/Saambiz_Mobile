@@ -170,7 +170,7 @@ class _SectionsBoutiquePageState extends State<SectionsBoutiquePage> {
       _chargement = true;
       _erreur = null;
     });
-    final r = await sl<GetMesProduits>()();
+    final r = await sl<GetMesProduits>().tous();
     if (!mounted) return;
     r.fold(
       (f) => setState(() {

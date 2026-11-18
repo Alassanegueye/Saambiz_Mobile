@@ -20,9 +20,10 @@ class PromotionsRepository {
     }
   }
 
-  Future<Either<Failure, List<PromotionModel>>> mesPromotions() async {
+  /// Une page des promotions du vendeur — dix par page, comme le serveur.
+  Future<Either<Failure, PagePromotions>> mesPromotions({int page = 1}) async {
     try {
-      return Right(await remote.mesPromotions());
+      return Right(await remote.mesPromotions(page: page));
     } catch (e) {
       return Left(ServerFailure(errorMessage: _msg(e)));
     }
