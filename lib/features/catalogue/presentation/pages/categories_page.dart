@@ -19,6 +19,7 @@ import '../../../categories/presentation/pages/categorie_boutiques_page.dart'
     show LigneBoutique;
 import '../../data/catalogue_remote_datasource.dart';
 import 'produits_page.dart';
+import '../../../../core/utils/remplir_ecran.dart';
 
 enum _Onglet { boutiques, categories }
 
@@ -112,6 +113,9 @@ class _CategoriesPageState extends State<CategoriesPage> {
         _total = res.total;
         _chargementBoutiques = false;
       });
+      // Dix boutiques ne débordent pas toujours de l'écran : sans cela, la
+      // liste s'arrêtait là, sans geste possible pour charger la suite.
+      remplirEcran(_defilement, _chargerSuite);
     } catch (_) {
       if (!mounted || numero != _requete) return;
       setState(() {
@@ -143,6 +147,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
         _total = res.total;
         _boutiques.addAll(res.boutiques);
       });
+      remplirEcran(_defilement, _chargerSuite);
     } catch (_) {
       // La suite se rechargera au prochain défilement.
     } finally {
@@ -200,33 +205,28 @@ class _CategoriesPageState extends State<CategoriesPage> {
     return PageVendeur(
       titre: 'Explorer',
       corps: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
-              child: ChampRecherche(
-                controleur: _ctrl,
-                indication: _onglet == _Onglet.boutiques
-                    ? 'Rechercher une boutique, une ville…'
-                    : 'Rechercher une catégorie',
-                surFondClair: true,
-                onChanged: _surFrappe,
-                onSubmitted: (_) => FocusScope.of(context).unfocus(),
-              ),
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
+            child: ChampRecherche(
+              controleur: _ctrl,
+              indication: _onglet == _Onglet.boutiques
+                  ? 'Rechercher une boutique, une ville…'
+                  : 'Rechercher une catégorie',
+              surFondClair: true,
+              onChanged: _surFrappe,
+              onSubmitted: (_) => FocusScope.of(context).unfocus(),
             ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-              child: _SelecteurOnglet(
-                onglet: _onglet,
-                onChanged: _changerOnglet,
-              ),
-            ),
-            Expanded(
-              child: _onglet == _Onglet.boutiques
-                  ? _corpsBoutiques()
-                  : _corps(),
-            ),
-          ],
-        ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+            child: _SelecteurOnglet(onglet: _onglet, onChanged: _changerOnglet),
+          ),
+          Expanded(
+            child: _onglet == _Onglet.boutiques ? _corpsBoutiques() : _corps(),
+          ),
+        ],
+      ),
     );
   }
 

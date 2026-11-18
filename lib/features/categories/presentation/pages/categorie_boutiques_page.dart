@@ -11,6 +11,7 @@ import '../../../catalogue/data/produit_catalogue.dart' show BoutiqueResume;
 import '../../../catalogue/presentation/pages/boutique_publique_page.dart';
 import '../../data/categorie.dart';
 import '../icones_categories.dart';
+import '../../../../core/utils/remplir_ecran.dart';
 
 class _C {
   static const navy = Color(0xFF01154B);
@@ -83,6 +84,9 @@ class _CategorieBoutiquesPageState extends State<CategorieBoutiquesPage> {
         _total = res.total;
         _chargement = false;
       });
+      // Dix boutiques ne débordent pas toujours de l'écran : sans cela, la
+      // liste s'arrêtait là, sans geste possible pour charger la suite.
+      remplirEcran(_scroll, _chargerSuite);
     } catch (_) {
       if (!mounted) return;
       setState(() {
@@ -110,6 +114,7 @@ class _CategorieBoutiquesPageState extends State<CategorieBoutiquesPage> {
         _boutiques.addAll(res.boutiques);
         _total = res.total;
       });
+      remplirEcran(_scroll, _chargerSuite);
     } catch (_) {
       // La suite se rechargera au prochain défilement.
     } finally {

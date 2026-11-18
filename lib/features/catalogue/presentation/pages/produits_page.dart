@@ -16,6 +16,7 @@ import '../widgets/bouton_panier.dart';
 import 'boutique_publique_page.dart';
 import '../widgets/produit_card.dart';
 import '../../../../core/widgets/page_vendeur.dart';
+import '../../../../core/utils/remplir_ecran.dart';
 
 /// Liste de produits : une catégorie, une recherche ou les promotions.
 /// Tri en un geste (récents, populaires, prix), défilement infini.
@@ -124,6 +125,9 @@ class _ProduitsPageState extends State<ProduitsPage> {
         _total = res.total;
         _chargement = false;
       });
+      // Dix fiches ne débordent pas toujours de l'écran : sans cela, la
+      // grille s'arrêtait là, sans geste possible pour charger la suite.
+      remplirEcran(_scroll, _chargerSuite);
     } catch (_) {
       if (mounted) {
         setState(() {
@@ -145,6 +149,7 @@ class _ProduitsPageState extends State<ProduitsPage> {
         _produits.addAll(res.produits);
         _page += 1;
       });
+      remplirEcran(_scroll, _chargerSuite);
     } catch (_) {
     } finally {
       if (mounted) setState(() => _suite = false);

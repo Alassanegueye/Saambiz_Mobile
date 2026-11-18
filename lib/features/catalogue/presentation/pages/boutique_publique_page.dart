@@ -27,6 +27,7 @@ import '../widgets/bouton_panier.dart';
 import '../widgets/produit_card.dart';
 import '../../../avis/presentation/feuille_avis_boutique.dart';
 import '../../../signalements/presentation/ouvrir_signalement.dart';
+import '../../../../core/utils/remplir_ecran.dart';
 
 const _bleuVerifie = Color(0xFF1D9BF0);
 const _encre = Color(0xFF1B1F27);
@@ -187,6 +188,9 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
         _pages = res.pages;
         _chargement = false;
       });
+      // Dix fiches ne débordent pas toujours de l'écran : sans cela, la
+      // grille s'arrêtait là, sans geste possible pour charger la suite.
+      remplirEcran(_scroll, _chargerSuite);
     } catch (_) {
       if (mounted) {
         setState(() {
@@ -212,6 +216,7 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
         _produits.addAll(res.produits);
         _page += 1;
       });
+      remplirEcran(_scroll, _chargerSuite);
     } catch (_) {
     } finally {
       if (mounted) setState(() => _suite = false);
