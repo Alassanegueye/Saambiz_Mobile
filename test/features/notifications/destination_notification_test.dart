@@ -218,6 +218,48 @@ void main() {
       expect(d.cible, CibleNotification.messagerie);
     });
 
+    test('un écran nommé mène à cet écran', () {
+      // Rupture de stock, produit refusé, avis reçu, signalement traité : ces
+      // notifications ne portent aucun identifiant à viser. Sans le nom de
+      // l'écran, elles tombaient toutes sur le repli.
+      const attendus = {
+        'mes_produits': CibleNotification.mesProduits,
+        'ma_boutique': CibleNotification.maBoutique,
+        'abonnes': CibleNotification.abonnes,
+        'mes_signalements': CibleNotification.mesSignalements,
+      };
+
+      attendus.forEach((nom, cible) {
+        final d = destinationNotification(
+          notificationDepuisPush({'type': 'systeme', 'ecran': nom}),
+        );
+        expect(d.cible, cible, reason: nom);
+      });
+    });
+
+    test('un écran inconnu ne bloque pas la lecture', () {
+      // Un serveur plus récent peut nommer un écran que cette version de
+      // l'application ne connaît pas : elle doit continuer avec les règles
+      // suivantes plutôt que de s'arrêter là.
+      final d = destinationNotification(
+        notificationDepuisPush({
+          'ecran': 'ecran_du_futur',
+          'interlocuteurId': 'u-1',
+        }),
+      );
+      expect(d.cible, CibleNotification.conversation);
+    });
+
+    test('une commande garde la priorité sur un écran nommé', () {
+      final d = destinationNotification(
+        notificationDepuisPush({
+          'commandeId': 'cmd-1',
+          'ecran': 'mes_produits',
+        }),
+      );
+      expect(d.cible, CibleNotification.commande);
+    });
+
     test('une commande garde la priorité sur la certification', () {
       // L'ordre de lecture ne doit pas se déplacer : une notification qui
       // porte une commande ouvre la commande, quoi qu'elle porte d'autre.

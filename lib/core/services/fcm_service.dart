@@ -23,6 +23,10 @@ import '../../injection_container.dart';
 import '../connection/auth_interceptor.dart';
 import '../utils/app_logger.dart';
 import '../../features/certification/certification_page.dart';
+import '../../features/vendeur/presentation/pages/mes_produits_page.dart';
+import '../../features/boutique/presentation/pages/ma_boutique_page.dart';
+import '../../features/abonnes/abonnes_page.dart';
+import '../../features/signalements/presentation/pages/mes_signalements_page.dart';
 
 // Même mise en place que le projet SIGNS : Firebase Cloud Messaging pour
 // l'acheminement, flutter_local_notifications pour l'affichage quand
@@ -339,6 +343,24 @@ class FcmService {
       case CibleNotification.abonnement:
         navigateur.push(
           MaterialPageRoute(builder: (_) => const MonAbonnementPage()),
+        );
+
+      case CibleNotification.mesProduits:
+        navigateur.push(
+          MaterialPageRoute(builder: (_) => const MesProduitsPage()),
+        );
+
+      case CibleNotification.maBoutique:
+        navigateur.push(
+          MaterialPageRoute(builder: (_) => const MaBoutiquePage()),
+        );
+
+      case CibleNotification.abonnes:
+        navigateur.push(MaterialPageRoute(builder: (_) => const AbonnesPage()));
+
+      case CibleNotification.mesSignalements:
+        navigateur.push(
+          MaterialPageRoute(builder: (_) => const MesSignalementsPage()),
         );
 
       case CibleNotification.certification:

@@ -42,6 +42,11 @@ class NotificationModel {
   String? get boutiqueId => _id('boutiqueId');
   String? get abonnementId => _id('abonnementId');
 
+  /// L'écran à ouvrir, quand la notification ne porte aucun identifiant qui
+  /// le désigne : « mes_produits », « ma_boutique », « abonnes »,
+  /// « mes_signalements ».
+  String? get ecran => _id('ecran');
+
   /// La décision rendue sur la certification : « approuve » ou « rejete ».
   /// Présente uniquement sur la réponse de l'administrateur.
   String? get certification => _id('certification');

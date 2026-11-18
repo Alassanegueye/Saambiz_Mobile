@@ -17,6 +17,18 @@ enum CibleNotification {
   /// La certification de la boutique : l'administrateur a tranché.
   certification,
 
+  /// Les produits du vendeur : rupture de stock, modération.
+  mesProduits,
+
+  /// La boutique du vendeur : avis reçu, site activé ou coupé.
+  maBoutique,
+
+  /// Les abonnés de la boutique.
+  abonnes,
+
+  /// Les signalements envoyés par l'utilisateur.
+  mesSignalements,
+
   /// Rien de précis : la liste des conversations, comme avant.
   messagerie,
 }
@@ -72,6 +84,24 @@ DestinationNotification destinationNotification(NotificationModel n) {
   // conversations. L'écran de certification est celui qui le permet.
   if (n.certification != null) {
     return DestinationNotification(CibleNotification.certification);
+  }
+
+  // Écrans sans identifiant à viser : le serveur les nomme directement.
+  // Une rupture de stock ou un produit refusé mène aux produits du vendeur,
+  // un avis reçu à sa boutique — rien de tout cela ne se devine depuis un
+  // identifiant, et sans ce nom ces notifications tombaient sur le repli.
+  final ecran = n.ecran;
+  if (ecran != null) {
+    final cible = switch (ecran) {
+      'mes_produits' => CibleNotification.mesProduits,
+      'ma_boutique' => CibleNotification.maBoutique,
+      'abonnes' => CibleNotification.abonnes,
+      'mes_signalements' => CibleNotification.mesSignalements,
+      _ => null,
+    };
+    // Un nom d'écran inconnu — une version plus récente du serveur — ne
+    // bloque pas la lecture : on continue avec les règles suivantes.
+    if (cible != null) return DestinationNotification(cible);
   }
 
   final interlocuteur = n.interlocuteurId;

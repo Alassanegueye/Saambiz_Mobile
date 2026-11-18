@@ -25,6 +25,10 @@ import '../bloc/notifications_bloc.dart';
 import '../bloc/notifications_event.dart';
 import '../bloc/notifications_state.dart';
 import '../../../certification/certification_page.dart';
+import '../../../vendeur/presentation/pages/mes_produits_page.dart';
+import '../../../boutique/presentation/pages/ma_boutique_page.dart';
+import '../../../abonnes/abonnes_page.dart';
+import '../../../signalements/presentation/pages/mes_signalements_page.dart';
 
 class _C {
   static const sub = Color(0xFF5B6C8A);
@@ -125,6 +129,24 @@ class _NotificationsViewState extends State<_NotificationsView> {
       case CibleNotification.abonnement:
         navigateur.push(
           MaterialPageRoute(builder: (_) => const MonAbonnementPage()),
+        );
+
+      case CibleNotification.mesProduits:
+        navigateur.push(
+          MaterialPageRoute(builder: (_) => const MesProduitsPage()),
+        );
+
+      case CibleNotification.maBoutique:
+        navigateur.push(
+          MaterialPageRoute(builder: (_) => const MaBoutiquePage()),
+        );
+
+      case CibleNotification.abonnes:
+        navigateur.push(MaterialPageRoute(builder: (_) => const AbonnesPage()));
+
+      case CibleNotification.mesSignalements:
+        navigateur.push(
+          MaterialPageRoute(builder: (_) => const MesSignalementsPage()),
         );
 
       case CibleNotification.certification:
