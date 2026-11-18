@@ -201,13 +201,13 @@ class Donnees {
     },
     'abonnements' => {
       'cle': 'abonnements',
-      'titre': 'Chez les boutiques que vous suivez',
+      'titre': 'Chez vos boutiques',
       'type': 'produits',
       'elements': _ids(['p1', 'p17', 'p18', 'p5']),
     },
     'suivies' => {
       'cle': 'suivies',
-      'titre': 'Vos boutiques',
+      'titre': 'Vos boutiques suivies',
       'type': 'boutiques',
       'elements': _boutiquesIds(['b1', 'b3']),
     },

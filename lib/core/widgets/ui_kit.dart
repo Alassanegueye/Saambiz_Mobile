@@ -67,9 +67,11 @@ class EnteteSection extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Deux lignes plutôt qu'un titre coupé : ceux de l'accueil
+              // viennent du serveur, leur longueur n'est pas connue ici.
               Text(
                 titre,
-                maxLines: 1,
+                maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: titreSection(17).copyWith(color: couleurTitre),
               ),
