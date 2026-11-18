@@ -16,6 +16,7 @@ import '../../../../injection_container.dart';
 import '../bloc/abonnement_bloc.dart';
 import '../bloc/abonnement_event.dart';
 import '../bloc/abonnement_state.dart';
+import 'package:saambiz/core/widgets/barre_pagination.dart';
 
 class _C {
   static const green = Color(0xFF01154B);
@@ -353,13 +354,24 @@ class _MonAbonnementViewState extends State<_MonAbonnementView> {
       );
     }
     return RefreshIndicator(
-      onRefresh: () async =>
-          context.read<AbonnementBloc>().add(LoadHistoriquePaiements()),
+      onRefresh: () async => context.read<AbonnementBloc>().add(
+        LoadHistoriquePaiements(page: state.pagination.page),
+      ),
+      // +1 : la barre « Precedent / Suivant » en pied de liste, qui se
+      // replie d'elle-meme quand il n'y a qu'une page.
       child: ListView.separated(
         padding: const EdgeInsets.all(16),
-        itemCount: state.paiements.length,
+        itemCount: state.paiements.length + 1,
         separatorBuilder: (_, __) => const SizedBox(height: 10),
         itemBuilder: (context, i) {
+          if (i == state.paiements.length) {
+            return BarrePagination(
+              pagination: state.pagination,
+              onPage: (page) => context.read<AbonnementBloc>().add(
+                LoadHistoriquePaiements(page: page),
+              ),
+            );
+          }
           final p = state.paiements[i];
           return Container(
             padding: const EdgeInsets.all(14),

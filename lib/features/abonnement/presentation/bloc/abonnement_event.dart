@@ -7,7 +7,13 @@ abstract class AbonnementEvent extends Equatable {
 
 class LoadAbonnement extends AbonnementEvent {}
 
-class LoadHistoriquePaiements extends AbonnementEvent {}
+class LoadHistoriquePaiements extends AbonnementEvent {
+  /// Page demandee : le serveur en rend dix a la fois.
+  final int page;
+  LoadHistoriquePaiements({this.page = 1});
+  @override
+  List<Object?> get props => [page];
+}
 
 class RenouvelerAbonnement extends AbonnementEvent {
   final num? montant;

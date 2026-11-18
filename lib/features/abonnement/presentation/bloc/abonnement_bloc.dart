@@ -42,10 +42,11 @@ class AbonnementBloc extends Bloc<AbonnementEvent, AbonnementState> {
     Emitter<AbonnementState> emit,
   ) async {
     emit(AbonnementLoading());
-    final result = await getHistoriquePaiements();
+    final result = await getHistoriquePaiements(page: event.page);
     result.fold(
       (f) => emit(AbonnementError(f.errorMessage)),
-      (p) => emit(HistoriquePaiementsLoaded(p)),
+      (recue) =>
+          emit(HistoriquePaiementsLoaded(recue.$1, pagination: recue.$2)),
     );
   }
 

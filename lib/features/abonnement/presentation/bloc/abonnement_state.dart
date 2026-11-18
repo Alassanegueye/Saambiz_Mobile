@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 
 import '../../domain/entities/abonnement.dart';
 import '../../domain/entities/paiement.dart';
+import 'package:saambiz/core/widgets/barre_pagination.dart';
 
 abstract class AbonnementState extends Equatable {
   @override
@@ -21,9 +22,17 @@ class AbonnementLoaded extends AbonnementState {
 
 class HistoriquePaiementsLoaded extends AbonnementState {
   final List<Paiement> paiements;
-  HistoriquePaiementsLoaded(this.paiements);
+
+  /// Ou l'on se situe dans l'historique. La page fait partie de l'identite
+  /// de l'etat : sinon l'ecran ne se redessine pas apres « Suivant ».
+  final Pagination pagination;
+
+  HistoriquePaiementsLoaded(
+    this.paiements, {
+    this.pagination = const Pagination(),
+  });
   @override
-  List<Object?> get props => [paiements];
+  List<Object?> get props => [paiements, pagination.page];
 }
 
 class PaiementInitieAbonnement extends AbonnementState {

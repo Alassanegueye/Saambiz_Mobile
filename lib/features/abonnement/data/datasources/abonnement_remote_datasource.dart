@@ -3,11 +3,21 @@ import 'package:dio/dio.dart';
 import '../../../../core/constants/api_endpoints.dart';
 import '../models/abonnement_model.dart';
 import '../models/paiement_model.dart';
+import 'package:saambiz/core/widgets/barre_pagination.dart';
+
+/// Une page de l'historique des paiements : la liste, et ou elle se situe.
+class PagePaiements {
+  final List<PaiementModel> paiements;
+  final Pagination pagination;
+  const PagePaiements(this.paiements, this.pagination);
+}
 
 abstract class AbonnementRemoteDataSource {
   Future<AbonnementModel> monAbonnement();
   Future<String> initierRenouvellement({num? montant});
-  Future<List<PaiementModel>> historiquePaiementsAbonnement();
+
+  /// Une page de l'historique des paiements — dix, comme le serveur.
+  Future<PagePaiements> historiquePaiementsAbonnement({int page});
 
   Future<Map<String, String?>> payer({
     required num montant,
@@ -52,11 +62,20 @@ class AbonnementRemoteDataSourceImpl implements AbonnementRemoteDataSource {
   }
 
   @override
-  Future<List<PaiementModel>> historiquePaiementsAbonnement() async {
-    final res = await dio.get(AbonnementEndpoints.historiquePaiements);
-    return _extractList(
+  Future<PagePaiements> historiquePaiementsAbonnement({int page = 1}) async {
+    final res = await dio.get(
+      AbonnementEndpoints.historiquePaiements,
+      queryParameters: {'page': page},
+    );
+    final liste = _extractList(
       res.data,
     ).map((e) => PaiementModel.fromJson(e as Map<String, dynamic>)).toList();
+    return PagePaiements(
+      liste,
+      Pagination.depuis(
+        res.data is Map ? Map<String, dynamic>.from(res.data as Map) : null,
+      ),
+    );
   }
 
   @override

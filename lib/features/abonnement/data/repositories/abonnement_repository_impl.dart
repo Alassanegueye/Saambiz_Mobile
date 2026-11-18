@@ -6,6 +6,7 @@ import '../../domain/entities/abonnement.dart';
 import '../../domain/entities/paiement.dart';
 import '../../domain/repositories/abonnement_repository.dart';
 import '../datasources/abonnement_remote_datasource.dart';
+import 'package:saambiz/core/widgets/barre_pagination.dart';
 
 class AbonnementRepositoryImpl implements AbonnementRepository {
   final AbonnementRemoteDataSource remoteDataSource;
@@ -36,9 +37,14 @@ class AbonnementRepositoryImpl implements AbonnementRepository {
   }
 
   @override
-  Future<Either<Failure, List<Paiement>>> historiquePaiements() async {
+  Future<Either<Failure, (List<Paiement>, Pagination)>> historiquePaiements({
+    int page = 1,
+  }) async {
     try {
-      return Right(await remoteDataSource.historiquePaiementsAbonnement());
+      final recue = await remoteDataSource.historiquePaiementsAbonnement(
+        page: page,
+      );
+      return Right((recue.paiements, recue.pagination));
     } catch (e) {
       return Left(ServerFailure(errorMessage: _errorMessage(e)));
     }
