@@ -177,17 +177,11 @@ class _CreerBoutiquePageState extends State<CreerBoutiquePage> {
         sousTitre: _titres[_page].$2,
         onRetour: _retour,
         carte: [
+          // Les trois temps de l'étape, nommés : « Page 1 sur 3 » sous
+          // « Étape 5 sur 5 » faisait deux compteurs qui se contredisaient.
           Padding(
-            padding: const EdgeInsets.only(bottom: 14),
-            child: Text(
-              'Page ${_page + 1} sur 3',
-              style: const TextStyle(
-                fontFamily: kPolice,
-                fontSize: 12.5,
-                fontWeight: FontWeight.w600,
-                color: Sb.textMid,
-              ),
-            ),
+            padding: const EdgeInsets.only(bottom: 18),
+            child: SousEtapesBoutique(courante: _page),
           ),
           SbErrorBanner(_error),
           if (_page == 0)
@@ -309,6 +303,101 @@ class _Dropdown extends StatelessWidget {
           onChanged: (v) {
             if (v != null) onChanged(v);
           },
+        ),
+      ],
+    );
+  }
+}
+
+/// Les trois temps de l'étape « Votre boutique » : Nom, Catégories,
+/// Adresse. Fait : rond marine coché ; en cours : rond or ; à venir : rond
+/// clair, comme les segments de la barre d'étapes.
+class SousEtapesBoutique extends StatelessWidget {
+  final int courante;
+  const SousEtapesBoutique({super.key, required this.courante});
+
+  static const noms = ['Nom', 'Catégories', 'Adresse'];
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      label: '${noms[courante]}, ${courante + 1} sur ${noms.length}',
+      excludeSemantics: true,
+      child: Row(
+        children: [
+          for (var i = 0; i < noms.length; i++) ...[
+            if (i > 0)
+              Expanded(
+                child: Container(
+                  height: 1.5,
+                  margin: const EdgeInsets.symmetric(horizontal: 6),
+                  color: i <= courante ? Sb.navy : Sb.border,
+                ),
+              ),
+            _SousEtape(
+              numero: i + 1,
+              nom: noms[i],
+              faite: i < courante,
+              enCours: i == courante,
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _SousEtape extends StatelessWidget {
+  final int numero;
+  final String nom;
+  final bool faite;
+  final bool enCours;
+  const _SousEtape({
+    required this.numero,
+    required this.nom,
+    required this.faite,
+    required this.enCours,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 22,
+          height: 22,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: faite
+                ? Sb.navy
+                : enCours
+                ? Sb.gold
+                : Sb.white,
+            border: faite || enCours ? null : Border.all(color: Sb.border),
+          ),
+          child: faite
+              ? const Icon(Icons.check_rounded, size: 14, color: Sb.white)
+              : Text(
+                  '$numero',
+                  style: TextStyle(
+                    fontFamily: kPolice,
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w800,
+                    color: enCours ? Sb.navy : Sb.textLight,
+                  ),
+                ),
+        ),
+        const SizedBox(width: 6),
+        Text(
+          nom,
+          style: TextStyle(
+            fontFamily: kPolice,
+            fontSize: 12.5,
+            fontWeight: enCours ? FontWeight.w800 : FontWeight.w600,
+            color: enCours || faite ? Sb.navy : Sb.textLight,
+          ),
         ),
       ],
     );

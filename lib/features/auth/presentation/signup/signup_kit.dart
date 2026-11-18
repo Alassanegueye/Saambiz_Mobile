@@ -100,11 +100,13 @@ class SbEtapes extends StatelessWidget {
     this.surFonce = false,
   });
 
-  static const _communes = ['Vous', 'Contact', 'Securite', 'Verification'];
+  // Les accents manquaient à l'écran : « Securite », « Verification »,
+  // « Centres d'interet ».
+  static const _communes = ['Vous', 'Contact', 'Sécurité', 'Vérification'];
 
   List<String> get etapes => [
     ..._communes,
-    vendeur ? 'Votre boutique' : 'Centres d\'interet',
+    vendeur ? 'Votre boutique' : 'Centres d’intérêt',
   ];
 
   @override
@@ -185,6 +187,9 @@ class SbPrimaryButton extends StatelessWidget {
           backgroundColor: Sb.navy,
           foregroundColor: Sb.white,
           disabledBackgroundColor: Sb.navy.withValues(alpha: 0.6),
+          // Sans elle, le libellé désactivé passait en gris foncé sur le
+          // marine pâli : « Découvrir SaamBiz » ne se lisait plus.
+          disabledForegroundColor: Sb.white.withValues(alpha: 0.75),
           elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
