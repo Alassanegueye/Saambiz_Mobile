@@ -243,9 +243,7 @@ class _LoginPageState extends State<LoginPage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              _EnteteConnexion(
-                                titre: choix ? 'Bon retour !' : 'Connexion',
-                              ),
+                              _EnteteConnexion(titre: 'Se connecter'),
                               Expanded(
                                 child: Container(
                                   decoration: const BoxDecoration(

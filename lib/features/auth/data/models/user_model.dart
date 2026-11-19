@@ -1,5 +1,15 @@
 import '../../domain/entities/user.dart';
 
+/// Le nom d'une boutique, qu'elle arrive en objet ou en simple chaine.
+String? _nomBoutique(dynamic valeur) {
+  if (valeur is Map) {
+    final nom = valeur['nom']?.toString().trim();
+    return (nom == null || nom.isEmpty) ? null : nom;
+  }
+  final nom = valeur?.toString().trim();
+  return (nom == null || nom.isEmpty) ? null : nom;
+}
+
 class UserModel extends User {
   const UserModel({
     required super.id,
@@ -12,6 +22,7 @@ class UserModel extends User {
     required super.role,
     super.photoProfil,
     super.soldeDisponible,
+    super.boutiqueNom,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -26,6 +37,9 @@ class UserModel extends User {
       role: json['role'] ?? '',
       photoProfil: json['photoProfil'],
       soldeDisponible: montantDepuisJson(json['soldeDisponible']),
+      // Le serveur la joint a la session d'un vendeur. Absente d'un jeton
+      // relu (il ne porte que l'identite), d'ou la lecture tolerante.
+      boutiqueNom: _nomBoutique(json['boutique']),
     );
   }
 
@@ -42,6 +56,7 @@ class UserModel extends User {
       'role': role,
       'photoProfil': photoProfil,
       'soldeDisponible': soldeDisponible,
+      if (boutiqueNom != null) 'boutique': {'nom': boutiqueNom},
     };
   }
 }

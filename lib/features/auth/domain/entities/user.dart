@@ -28,6 +28,14 @@ class User extends Equatable {
   /// reversements seront traites plus tard.
   final double soldeDisponible;
 
+  /// Nom de la boutique, pour un vendeur qui en a une. `null` pour un
+  /// acheteur, et pour un vendeur qui n'a pas encore cree la sienne.
+  ///
+  /// Il sert a distinguer deux comptes au MEME nom sur l'ecran de
+  /// connexion : « Alassane GUEYE » deux fois, c'est la boutique qui dit
+  /// lequel est lequel.
+  final String? boutiqueNom;
+
   const User({
     required this.id,
     required this.nom,
@@ -39,6 +47,7 @@ class User extends Equatable {
     required this.role,
     this.photoProfil,
     this.soldeDisponible = 0,
+    this.boutiqueNom,
   });
 
   /// Le nom à montrer à l'écran : prénom et nom, sinon l'e-mail, sinon le
@@ -73,5 +82,6 @@ class User extends Equatable {
     photoProfil,
     role,
     soldeDisponible,
+    boutiqueNom,
   ];
 }

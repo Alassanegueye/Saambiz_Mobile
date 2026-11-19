@@ -92,7 +92,6 @@ class _AppBootstrapState extends State<AppBootstrap> {
 
     if (!mounted) return;
 
-
     // Session encore valide → on entre directement, selon le rôle.
     if (token != null && token.isNotEmpty) {
       try {

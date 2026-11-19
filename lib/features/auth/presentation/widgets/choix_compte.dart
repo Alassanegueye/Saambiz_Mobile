@@ -164,6 +164,37 @@ class _LigneCompte extends StatelessWidget {
                         color: AppColor.kGrayscaleDark100,
                       ),
                     ),
+                    // LA BOUTIQUE AVANT L'ADRESSE. Deux vendeurs peuvent
+                    // porter le même nom — deux « Alassane GUEYE » l'un sous
+                    // l'autre —, et on ne les distinguait qu'en lisant deux
+                    // adresses e-mail presque identiques. La boutique est ce
+                    // qu'un vendeur reconnaît du premier coup d'œil.
+                    if (compte.boutique != null) ...[
+                      const SizedBox(height: 3),
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.storefront_rounded,
+                            size: 13,
+                            color: AppColor.kSecondaryDark,
+                          ),
+                          const SizedBox(width: 4),
+                          Flexible(
+                            child: Text(
+                              compte.boutique!,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontFamily: kPolice,
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.w600,
+                                color: AppColor.kSecondaryDark,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                     const SizedBox(height: 2),
                     Text(
                       compte.identifiant,

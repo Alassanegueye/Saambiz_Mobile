@@ -20,6 +20,14 @@ class CompteMemorise {
   final String? refreshToken;
   final DateTime derniereUtilisation;
 
+  /// Nom de la boutique, pour un compte vendeur qui en a une.
+  ///
+  /// Deux vendeurs portaient parfois le MÊME nom sur cet écran — deux
+  /// « Alassane GUEYE » l'un sous l'autre, qu'on ne distinguait qu'à
+  /// l'adresse e-mail. La boutique est ce que le vendeur reconnaît en
+  /// premier.
+  final String? boutique;
+
   const CompteMemorise({
     required this.id,
     required this.prenom,
@@ -30,6 +38,7 @@ class CompteMemorise {
     required this.derniereUtilisation,
     this.photoProfil,
     this.refreshToken,
+    this.boutique,
   });
 
   bool get sessionOuverte => refreshToken != null && refreshToken!.isNotEmpty;
@@ -54,6 +63,7 @@ class CompteMemorise {
         photoProfil: photoProfil,
         derniereUtilisation: derniereUtilisation,
         refreshToken: effacerJeton ? null : (refreshToken ?? this.refreshToken),
+        boutique: boutique,
       );
 
   Map<String, dynamic> toJson() => {
@@ -66,6 +76,7 @@ class CompteMemorise {
     'photoProfil': photoProfil,
     'refreshToken': refreshToken,
     'derniereUtilisation': derniereUtilisation.toIso8601String(),
+    'boutique': boutique,
   };
 
   factory CompteMemorise.fromJson(Map<String, dynamic> json) => CompteMemorise(
@@ -79,6 +90,11 @@ class CompteMemorise {
     refreshToken: json['refreshToken'],
     derniereUtilisation:
         DateTime.tryParse('${json['derniereUtilisation']}') ?? DateTime(2000),
+    // Absent des comptes enregistrés avant cette version : la ligne
+    // s'affiche alors comme avant, sans boutique.
+    boutique: (json['boutique'] as String?)?.trim().isEmpty ?? true
+        ? null
+        : json['boutique'] as String?,
   );
 }
 
@@ -124,6 +140,11 @@ class ComptesMemorises {
   /// session.
   Future<void> enregistrer(User user, String? refreshToken) async {
     final comptes = await lister();
+    // Ce que l'on savait déjà de ce compte : le nom de la boutique n'arrive
+    // qu'avec une connexion complète. Une reprise de session relit le jeton,
+    // qui ne porte que l'identité — sans ce rattrapage, la boutique
+    // disparaissait de la ligne au premier retour sur l'application.
+    final connu = comptes.where((c) => c.id == user.id).firstOrNull;
     comptes.removeWhere((c) => c.id == user.id);
     comptes.insert(
       0,
@@ -137,6 +158,7 @@ class ComptesMemorises {
         photoProfil: user.photoProfil,
         refreshToken: refreshToken,
         derniereUtilisation: DateTime.now(),
+        boutique: user.boutiqueNom ?? connu?.boutique,
       ),
     );
     await _ecrire(comptes.take(maximum).toList());
