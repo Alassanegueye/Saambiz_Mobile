@@ -18,6 +18,7 @@ import '../bloc/commande_event.dart';
 import '../bloc/commande_state.dart';
 import '../../../../core/widgets/page_vendeur.dart';
 import '../../../../core/services/config_publique_service.dart';
+import '../../../../core/widgets/formulaire_defilant.dart';
 
 class _C {
   static const green = Color(0xFF01154B);
@@ -129,136 +130,131 @@ class _CheckoutViewState extends State<_CheckoutView> {
             absorbing: loading,
             child: Form(
               key: _formKey,
-              child: Column(
-                children: [
-                  Expanded(
-                    child: ListView(
-                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-                      children: [
-                        _section('Récapitulatif'),
-                        _Recapitulatif(lignes: _panier.selection),
-                        const SizedBox(height: 20),
-                        _section('Mode de réception'),
-                        _choix(
-                          ['livraison', 'retrait'],
-                          _modeLivraison,
-                          {
-                            'livraison': (
-                              Icons.local_shipping_outlined,
-                              'Livraison',
+              // LA BARRE N'EST PLUS COLLÉE EN BAS. Elle l'était, et elle
+              // remontait au-dessus du clavier : la note au vendeur, à trois
+              // lignes, se retrouvait coupée pendant qu'on l'écrivait.
+              // Clavier fermé, elle reste en bas de l'écran comme avant.
+              child: FormulaireDefilant(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                paddingBouton: EdgeInsets.zero,
+                enfants: [
+                  _section('Récapitulatif'),
+                  _Recapitulatif(lignes: _panier.selection),
+                  const SizedBox(height: 20),
+                  _section('Mode de réception'),
+                  _choix(
+                    ['livraison', 'retrait'],
+                    _modeLivraison,
+                    {
+                      'livraison': (Icons.local_shipping_outlined, 'Livraison'),
+                      'retrait': (Icons.storefront_outlined, 'Retrait'),
+                    },
+                    (v) => setState(() => _modeLivraison = v),
+                  ),
+                  if (_modeLivraison == 'livraison') ...[
+                    const SizedBox(height: 12),
+                    _input(
+                      _adresseCtrl,
+                      'Adresse de livraison',
+                      obligatoire: true,
+                      validator: (v) =>
+                          (_modeLivraison == 'livraison' &&
+                              (v == null || v.trim().isEmpty))
+                          ? 'Adresse requise'
+                          : null,
+                    ),
+                  ],
+                  const SizedBox(height: 12),
+                  _input(
+                    _telCtrl,
+                    'Téléphone',
+                    obligatoire: true,
+                    keyboard: TextInputType.phone,
+                    formats: [FormatTelephone(_paysTel)],
+                    prefixe: BoutonIndicatif(
+                      pays: _paysTel,
+                      onChange: () => setState(_telCtrl.clear),
+                    ),
+                    validator: (v) => verifierTelephone(v, _paysTel.value),
+                  ),
+                  const SizedBox(height: 20),
+                  _section('Paiement'),
+                  _choix(
+                    ['en_ligne', 'a_la_livraison'],
+                    _modePaiement,
+                    {
+                      'en_ligne': (
+                        Icons.phone_iphone_rounded,
+                        'Wave ou Orange Money',
+                      ),
+                      'a_la_livraison': (
+                        Icons.payments_outlined,
+                        'À la réception',
+                      ),
+                    },
+                    (v) => setState(() => _modePaiement = v),
+                    indisponibles: _paiementEnLigneOuvert
+                        ? const {}
+                        : const {'en_ligne'},
+                    // Les logos des opérateurs remplacent l'icône : on
+                    // reconnaît Wave et Orange Money d'un coup d'œil, bien
+                    // avant d'avoir lu « Wave ou Orange Money ».
+                    logos: const {
+                      'en_ligne': [
+                        'assets/images/wave.jpg',
+                        'assets/images/OM.png',
+                      ],
+                    },
+                  ),
+                  if (!_paiementEnLigneOuvert)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 10),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Icon(
+                            Icons.info_outline_rounded,
+                            size: 16,
+                            color: AppColor.kErreur,
+                          ),
+                          const SizedBox(width: 7),
+                          Expanded(
+                            child: Text(
+                              'Le paiement en ligne n’est pas encore '
+                              'disponible. Vous réglerez votre commande '
+                              'directement avec la boutique.',
+                              style: TextStyle(
+                                fontSize: 12.5,
+                                height: 1.45,
+                                color: AppColor.kErreur,
+                              ),
                             ),
-                            'retrait': (Icons.storefront_outlined, 'Retrait'),
-                          },
-                          (v) => setState(() => _modeLivraison = v),
-                        ),
-                        if (_modeLivraison == 'livraison') ...[
-                          const SizedBox(height: 12),
-                          _input(
-                            _adresseCtrl,
-                            'Adresse de livraison',
-                            obligatoire: true,
-                            validator: (v) =>
-                                (_modeLivraison == 'livraison' &&
-                                    (v == null || v.trim().isEmpty))
-                                ? 'Adresse requise'
-                                : null,
                           ),
                         ],
-                        const SizedBox(height: 12),
-                        _input(
-                          _telCtrl,
-                          'Téléphone',
-                          obligatoire: true,
-                          keyboard: TextInputType.phone,
-                          formats: [FormatTelephone(_paysTel)],
-                          prefixe: BoutonIndicatif(
-                            pays: _paysTel,
-                            onChange: () => setState(_telCtrl.clear),
-                          ),
-                          validator: (v) =>
-                              verifierTelephone(v, _paysTel.value),
-                        ),
-                        const SizedBox(height: 20),
-                        _section('Paiement'),
-                        _choix(
-                          ['en_ligne', 'a_la_livraison'],
-                          _modePaiement,
-                          {
-                            'en_ligne': (
-                              Icons.phone_iphone_rounded,
-                              'Wave ou Orange Money',
-                            ),
-                            'a_la_livraison': (
-                              Icons.payments_outlined,
-                              'À la réception',
-                            ),
-                          },
-                          (v) => setState(() => _modePaiement = v),
-                          indisponibles: _paiementEnLigneOuvert
-                              ? const {}
-                              : const {'en_ligne'},
-                          // Les logos des opérateurs remplacent l'icône : on
-                          // reconnaît Wave et Orange Money d'un coup d'œil, bien
-                          // avant d'avoir lu « Wave ou Orange Money ».
-                          logos: const {
-                            'en_ligne': [
-                              'assets/images/wave.jpg',
-                              'assets/images/OM.png',
-                            ],
-                          },
-                        ),
-                        if (!_paiementEnLigneOuvert)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 10),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Icon(
-                                  Icons.info_outline_rounded,
-                                  size: 16,
-                                  color: AppColor.kErreur,
-                                ),
-                                const SizedBox(width: 7),
-                                Expanded(
-                                  child: Text(
-                                    'Le paiement en ligne n’est pas encore '
-                                    'disponible. Vous réglerez votre commande '
-                                    'directement avec la boutique.',
-                                    style: TextStyle(
-                                      fontSize: 12.5,
-                                      height: 1.45,
-                                      color: AppColor.kErreur,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          )
-                        else if (_modePaiement == 'en_ligne')
-                          const Padding(
-                            padding: EdgeInsets.only(top: 8),
-                            child: Text(
-                              'Vous paierez une fois la commande acceptée par le vendeur.',
-                              style: TextStyle(fontSize: 12.5, color: _C.sub),
-                            ),
-                          ),
-                        const SizedBox(height: 20),
-                        _section('Note (optionnel)'),
-                        _input(
-                          _noteCtrl,
-                          'Une précision pour le vendeur ?',
-                          maxLines: 3,
-                        ),
-                      ],
+                      ),
+                    )
+                  else if (_modePaiement == 'en_ligne')
+                    const Padding(
+                      padding: EdgeInsets.only(top: 8),
+                      child: Text(
+                        'Vous paierez une fois la commande acceptée par le vendeur.',
+                        style: TextStyle(fontSize: 12.5, color: _C.sub),
+                      ),
                     ),
-                  ),
-                  _BarreConfirmation(
-                    total: _panier.totalSelection,
-                    livraison: _modeLivraison == 'livraison',
-                    loading: loading,
-                    onConfirmer: () => _soumettre(context),
+                  const SizedBox(height: 20),
+                  _section('Note (optionnel)'),
+                  _input(
+                    _noteCtrl,
+                    'Une précision pour le vendeur ?',
+                    maxLines: 3,
                   ),
                 ],
+                bouton: _BarreConfirmation(
+                  total: _panier.totalSelection,
+                  livraison: _modeLivraison == 'livraison',
+                  loading: loading,
+                  onConfirmer: () => _soumettre(context),
+                ),
               ),
             ),
           );

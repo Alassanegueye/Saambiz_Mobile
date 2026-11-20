@@ -12,6 +12,7 @@ import '../../../../injection_container.dart';
 import '../../../home/data/models/produit_model.dart';
 import '../../../vendeur/data/datasources/vendeur_produit_datasource.dart';
 import '../../data/datasources/commande_remote_datasource.dart';
+import '../../../../core/widgets/formulaire_defilant.dart';
 
 /// Saisie d'une commande prise hors de l'application (téléphone, WhatsApp,
 /// en boutique…). Le vendeur renseigne le client, choisit ses produits et
@@ -178,111 +179,109 @@ class _NouvelleCommandeVendeurPageState
       titre: 'Nouvelle commande',
       corps: Form(
         key: _formKey,
-        child: Column(
-          children: [
-            Expanded(
-              child: ListView(
-                padding: const EdgeInsets.fromLTRB(16, 22, 16, 16),
+        // La barre de validation n'est plus collée en bas : collée, elle
+        // remontait au-dessus du clavier et prenait la place du champ en
+        // cours de saisie. Clavier fermé, rien ne change à l'écran.
+        child: FormulaireDefilant(
+          padding: const EdgeInsets.fromLTRB(16, 22, 16, 0),
+          paddingBouton: EdgeInsets.zero,
+          enfants: [
+            const _TitreSection('Client'),
+            _Carte(
+              child: Column(
                 children: [
-                  const _TitreSection('Client'),
-                  _Carte(
-                    child: Column(
-                      children: [
-                        _champ(
-                          _prenomCtrl,
-                          'Prénom',
-                          icone: Icons.person_outline_rounded,
-                          requis: true,
-                          capitalisation: TextCapitalization.words,
-                        ),
-                        const SizedBox(height: 12),
-                        _champ(
-                          _nomCtrl,
-                          'Nom (facultatif)',
-                          icone: Icons.badge_outlined,
-                          capitalisation: TextCapitalization.words,
-                        ),
-                        const SizedBox(height: 12),
-                        _champ(
-                          _telCtrl,
-                          'Téléphone',
-                          icone: Icons.phone_outlined,
-                          requis: true,
-                          clavier: TextInputType.phone,
-                          formats: [FormatTelephone(_paysTel)],
-                          prefixe: BoutonIndicatif(
-                            pays: _paysTel,
-                            onChange: () => setState(_telCtrl.clear),
-                          ),
-                          verifier: (v) => verifierTelephone(v, _paysTel.value),
-                        ),
-                      ],
-                    ),
+                  _champ(
+                    _prenomCtrl,
+                    'Prénom',
+                    icone: Icons.person_outline_rounded,
+                    requis: true,
+                    capitalisation: TextCapitalization.words,
                   ),
-                  const SizedBox(height: 22),
-                  _TitreSection(
-                    'Produits',
-                    complement: _nbArticles > 0
-                        ? '$_nbArticles article${_nbArticles > 1 ? 's' : ''}'
-                        : null,
+                  const SizedBox(height: 12),
+                  _champ(
+                    _nomCtrl,
+                    'Nom (facultatif)',
+                    icone: Icons.badge_outlined,
+                    capitalisation: TextCapitalization.words,
                   ),
-                  _blocProduits(),
-                  const SizedBox(height: 22),
-                  const _TitreSection('Remise au client'),
-                  _Carte(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        SegmentedButton<String>(
-                          segments: const [
-                            ButtonSegment(
-                              value: 'retrait',
-                              label: Text('Retrait'),
-                              icon: Icon(Icons.storefront_outlined),
-                            ),
-                            ButtonSegment(
-                              value: 'livraison',
-                              label: Text('Livraison'),
-                              icon: Icon(Icons.local_shipping_outlined),
-                            ),
-                          ],
-                          selected: {_modeLivraison},
-                          showSelectedIcon: false,
-                          onSelectionChanged: (v) =>
-                              setState(() => _modeLivraison = v.first),
-                          style: SegmentedButton.styleFrom(
-                            selectedBackgroundColor: AppColor.kPrimary,
-                            selectedForegroundColor: AppColor.kWhite,
-                            textStyle: const TextStyle(
-                              fontFamily: kPolice,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                        if (_modeLivraison == 'livraison') ...[
-                          const SizedBox(height: 12),
-                          _champ(
-                            _adresseCtrl,
-                            'Adresse de livraison',
-                            icone: Icons.place_outlined,
-                            requis: true,
-                          ),
-                        ],
-                        const SizedBox(height: 12),
-                        _champ(
-                          _noteCtrl,
-                          'Note (facultatif)',
-                          icone: Icons.notes_rounded,
-                          lignes: 2,
-                        ),
-                      ],
+                  const SizedBox(height: 12),
+                  _champ(
+                    _telCtrl,
+                    'Téléphone',
+                    icone: Icons.phone_outlined,
+                    requis: true,
+                    clavier: TextInputType.phone,
+                    formats: [FormatTelephone(_paysTel)],
+                    prefixe: BoutonIndicatif(
+                      pays: _paysTel,
+                      onChange: () => setState(_telCtrl.clear),
                     ),
+                    verifier: (v) => verifierTelephone(v, _paysTel.value),
                   ),
                 ],
               ),
             ),
-            _barreValidation(context),
+            const SizedBox(height: 22),
+            _TitreSection(
+              'Produits',
+              complement: _nbArticles > 0
+                  ? '$_nbArticles article${_nbArticles > 1 ? 's' : ''}'
+                  : null,
+            ),
+            _blocProduits(),
+            const SizedBox(height: 22),
+            const _TitreSection('Remise au client'),
+            _Carte(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  SegmentedButton<String>(
+                    segments: const [
+                      ButtonSegment(
+                        value: 'retrait',
+                        label: Text('Retrait'),
+                        icon: Icon(Icons.storefront_outlined),
+                      ),
+                      ButtonSegment(
+                        value: 'livraison',
+                        label: Text('Livraison'),
+                        icon: Icon(Icons.local_shipping_outlined),
+                      ),
+                    ],
+                    selected: {_modeLivraison},
+                    showSelectedIcon: false,
+                    onSelectionChanged: (v) =>
+                        setState(() => _modeLivraison = v.first),
+                    style: SegmentedButton.styleFrom(
+                      selectedBackgroundColor: AppColor.kPrimary,
+                      selectedForegroundColor: AppColor.kWhite,
+                      textStyle: const TextStyle(
+                        fontFamily: kPolice,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  if (_modeLivraison == 'livraison') ...[
+                    const SizedBox(height: 12),
+                    _champ(
+                      _adresseCtrl,
+                      'Adresse de livraison',
+                      icone: Icons.place_outlined,
+                      requis: true,
+                    ),
+                  ],
+                  const SizedBox(height: 12),
+                  _champ(
+                    _noteCtrl,
+                    'Note (facultatif)',
+                    icone: Icons.notes_rounded,
+                    lignes: 2,
+                  ),
+                ],
+              ),
+            ),
           ],
+          bouton: _barreValidation(context),
         ),
       ),
     );

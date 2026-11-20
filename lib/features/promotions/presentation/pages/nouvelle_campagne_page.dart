@@ -15,6 +15,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/theme/app_color.dart';
 import '../../../../injection_container.dart';
 import '../../../abonnes/abonnes_page.dart';
+import '../../../../core/widgets/formulaire_defilant.dart';
 
 /// Ce que le vendeur envoie à ses abonnés.
 enum TypeCampagne { promotion, information }
@@ -279,140 +280,123 @@ class _NouvelleCampagnePageState extends State<NouvelleCampagnePage> {
           ),
         ),
       ),
-      // Le bouton fait partie du corps : un `bottomNavigationBar` reste sous le
-      // clavier, et il devenait impossible d'envoyer.
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Expanded(
-            child: ListView(
-              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-              children: [
-                SegmentedButton<TypeCampagne>(
-                  segments: const [
-                    ButtonSegment(
-                      value: TypeCampagne.promotion,
-                      icon: Icon(Icons.local_offer_outlined),
-                      label: Text('Promotion'),
-                    ),
-                    ButtonSegment(
-                      value: TypeCampagne.information,
-                      icon: Icon(Icons.campaign_outlined),
-                      label: Text('Information'),
-                    ),
-                  ],
-                  selected: {_type},
-                  onSelectionChanged: (s) => setState(() {
-                    _type = s.first;
-                    _appliquerModele();
-                  }),
-                ),
-                const SizedBox(height: 16),
-                if (_type == TypeCampagne.promotion)
-                  ..._sectionPromotion()
-                else
-                  _sectionInformation(),
-                if (_type == TypeCampagne.promotion) _carteNotifier(),
-                if (_avecMessage)
-                  _carte(
-                    titre: 'Votre message',
-                    enfant: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Text(
-                          'Personnalisez le message : c\'est exactement ce que '
-                          'vos clients liront dans la notification.',
-                          style: _discret(),
-                        ),
-                        const SizedBox(height: 12),
-                        TextField(
-                          controller: _titre,
-                          maxLength: 80,
-                          decoration: _deco(
-                            'Titre',
-                            'Ex. : Soldes de fin de mois',
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        TextField(
-                          controller: _message,
-                          onChanged: (_) => setState(() {}),
-                          maxLength: 500,
-                          minLines: 3,
-                          maxLines: 6,
-                          decoration: _deco(
-                            'Message',
-                            'Ex. : -20 % sur toute la collection jusqu\'à dimanche !',
-                          ),
-                        ),
-                        if (_type == TypeCampagne.promotion &&
-                            _message.text.trim().isEmpty)
-                          Align(
-                            alignment: Alignment.centerLeft,
-                            child: TextButton.icon(
-                              onPressed: () => setState(
-                                () => _message.text = _suggestionPromo,
-                              ),
-                              icon: const Icon(
-                                Icons.auto_awesome_outlined,
-                                size: 18,
-                              ),
-                              label: const Text('Utiliser une suggestion'),
-                            ),
-                          ),
-                        const SizedBox(height: 6),
-                        _choixImage(),
-                      ],
-                    ),
-                  ),
-                if (_avecMessage) _sectionDestinataires(),
-              ],
-            ),
+      // LE BOUTON N'EST PAS COLLÉ EN BAS. Il l'était, et il remontait
+      // au-dessus du clavier : il ne restait alors aux champs qu'une bande
+      // étroite, où le message à plusieurs lignes était coupé. Il descend
+      // désormais avec le contenu — clavier fermé, il reste en bas de
+      // l'écran, et rien ne change à l'usage. (Un `bottomNavigationBar`,
+      // lui, resterait SOUS le clavier : c'est l'autre travers, déjà évité.)
+      body: FormulaireDefilant(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+        enfants: [
+          SegmentedButton<TypeCampagne>(
+            segments: const [
+              ButtonSegment(
+                value: TypeCampagne.promotion,
+                icon: Icon(Icons.local_offer_outlined),
+                label: Text('Promotion'),
+              ),
+              ButtonSegment(
+                value: TypeCampagne.information,
+                icon: Icon(Icons.campaign_outlined),
+                label: Text('Information'),
+              ),
+            ],
+            selected: {_type},
+            onSelectionChanged: (s) => setState(() {
+              _type = s.first;
+              _appliquerModele();
+            }),
           ),
-          SafeArea(
-            top: false,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-              child: SizedBox(
-                height: 52,
-                child: ElevatedButton.icon(
-                  onPressed: _envoi ? null : _envoyer,
-                  icon: _envoi
-                      ? const SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: AppColor.kWhite,
-                          ),
-                        )
-                      : const Icon(Icons.send_rounded, size: 20),
-                  label: Text(
-                    _type == TypeCampagne.information
-                        ? 'Envoyer'
-                        : _notifier
-                        ? 'Créer et notifier mes clients'
-                        : 'Créer la promotion',
-                    style: const TextStyle(
-                      fontFamily: kPolice,
-                      fontSize: 15.5,
-                      fontWeight: FontWeight.w700,
+          const SizedBox(height: 16),
+          if (_type == TypeCampagne.promotion)
+            ..._sectionPromotion()
+          else
+            _sectionInformation(),
+          if (_type == TypeCampagne.promotion) _carteNotifier(),
+          if (_avecMessage)
+            _carte(
+              titre: 'Votre message',
+              enfant: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    'Personnalisez le message : c\'est exactement ce que '
+                    'vos clients liront dans la notification.',
+                    style: _discret(),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: _titre,
+                    maxLength: 80,
+                    decoration: _deco('Titre', 'Ex. : Soldes de fin de mois'),
+                  ),
+                  const SizedBox(height: 10),
+                  TextField(
+                    controller: _message,
+                    onChanged: (_) => setState(() {}),
+                    maxLength: 500,
+                    minLines: 3,
+                    maxLines: 6,
+                    decoration: _deco(
+                      'Message',
+                      'Ex. : -20 % sur toute la collection jusqu\'à dimanche !',
                     ),
                   ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColor.kPrimary,
-                    foregroundColor: AppColor.kWhite,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
+                  if (_type == TypeCampagne.promotion &&
+                      _message.text.trim().isEmpty)
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: TextButton.icon(
+                        onPressed: () =>
+                            setState(() => _message.text = _suggestionPromo),
+                        icon: const Icon(Icons.auto_awesome_outlined, size: 18),
+                        label: const Text('Utiliser une suggestion'),
+                      ),
                     ),
-                  ),
-                ),
+                  const SizedBox(height: 6),
+                  _choixImage(),
+                ],
+              ),
+            ),
+          if (_avecMessage) _sectionDestinataires(),
+        ],
+        bouton: SizedBox(
+          height: 52,
+          child: ElevatedButton.icon(
+            onPressed: _envoi ? null : _envoyer,
+            icon: _envoi
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: AppColor.kWhite,
+                    ),
+                  )
+                : const Icon(Icons.send_rounded, size: 20),
+            label: Text(
+              _type == TypeCampagne.information
+                  ? 'Envoyer'
+                  : _notifier
+                  ? 'Créer et notifier mes clients'
+                  : 'Créer la promotion',
+              style: const TextStyle(
+                fontFamily: kPolice,
+                fontSize: 15.5,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColor.kPrimary,
+              foregroundColor: AppColor.kWhite,
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
               ),
             ),
           ),
-        ],
+        ),
       ),
     );
   }

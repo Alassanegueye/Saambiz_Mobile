@@ -1,10 +1,12 @@
-import 'barre_navigation_verre.dart' show basBarreNavigation, kHauteurBarreNavigation;
+import 'barre_navigation_verre.dart'
+    show basBarreNavigation, kHauteurBarreNavigation;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../theme/app_color.dart';
 import '../theme/police.dart';
+import 'fermer_clavier.dart';
 
 /// Espace à laisser en bas d'un onglet vendeur pour que rien ne passe sous
 /// la barre d'onglets flottante.
@@ -55,49 +57,54 @@ class PageVendeur extends StatelessWidget {
       value: SystemUiOverlayStyle.light.copyWith(
         statusBarColor: Colors.transparent,
       ),
-      child: Scaffold(
-        backgroundColor: AppColor.kPrimary,
-        floatingActionButton: boutonFlottant == null
-            ? null
-            : Padding(
-                // Le bouton a deja 16 de marge propre sous lui.
-                padding: EdgeInsets.only(
-                  bottom: espaceBasVendeur(context) - 16,
+      // Toucher à côté d'un champ ferme le clavier, sur les seize écrans
+      // bâtis sur cette coquille. Posé ici plutôt que page par page : le
+      // geste doit être le même partout, et un écran neuf en hérite.
+      child: FermerClavierAuToucher(
+        child: Scaffold(
+          backgroundColor: AppColor.kPrimary,
+          floatingActionButton: boutonFlottant == null
+              ? null
+              : Padding(
+                  // Le bouton a deja 16 de marge propre sous lui.
+                  padding: EdgeInsets.only(
+                    bottom: espaceBasVendeur(context) - 16,
+                  ),
+                  child: boutonFlottant,
                 ),
-                child: boutonFlottant,
-              ),
-        body: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            SafeArea(
-              bottom: false,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 10, 14, 20),
-                child: Row(
-                  children: [
-                    if (Navigator.of(context).canPop()) ...[
-                      BoutonEnteteVendeur(
-                        icone: Icons.arrow_back_rounded,
-                        infobulle: 'Retour',
-                        onTap: () => Navigator.of(context).maybePop(),
-                      ),
-                      const SizedBox(width: 12),
+          body: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SafeArea(
+                bottom: false,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 10, 14, 20),
+                  child: Row(
+                    children: [
+                      if (Navigator.of(context).canPop()) ...[
+                        BoutonEnteteVendeur(
+                          icone: Icons.arrow_back_rounded,
+                          infobulle: 'Retour',
+                          onTap: () => Navigator.of(context).maybePop(),
+                        ),
+                        const SizedBox(width: 12),
+                      ],
+                      Expanded(child: titreWidget ?? _Titre(titre, sousTitre)),
+                      for (final a in actions) ...[const SizedBox(width: 8), a],
                     ],
-                    Expanded(child: titreWidget ?? _Titre(titre, sousTitre)),
-                    for (final a in actions) ...[const SizedBox(width: 8), a],
-                  ],
+                  ),
                 ),
               ),
-            ),
-            Expanded(
-              child: ClipRRect(
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(28),
+              Expanded(
+                child: ClipRRect(
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(28),
+                  ),
+                  child: Material(color: AppColor.kBackground, child: corps),
                 ),
-                child: Material(color: AppColor.kBackground, child: corps),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -245,19 +252,25 @@ class ScaffoldMarine extends StatelessWidget {
           ),
         ),
       ),
-      child: Scaffold(
-        backgroundColor: AppColor.kPrimary,
-        appBar: appBar,
-        floatingActionButton: floatingActionButton,
-        bottomNavigationBar: bottomNavigationBar,
-        resizeToAvoidBottomInset: resizeToAvoidBottomInset,
-        body: Padding(
-          padding: const EdgeInsets.only(top: 6),
-          child: ClipRRect(
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-            child: Material(
-              color: backgroundColor ?? AppColor.kBackground,
-              child: body ?? const SizedBox.shrink(),
+      // Même geste que sur PageVendeur, pour les vingt-six écrans bâtis sur
+      // cette coquille-ci.
+      child: FermerClavierAuToucher(
+        child: Scaffold(
+          backgroundColor: AppColor.kPrimary,
+          appBar: appBar,
+          floatingActionButton: floatingActionButton,
+          bottomNavigationBar: bottomNavigationBar,
+          resizeToAvoidBottomInset: resizeToAvoidBottomInset,
+          body: Padding(
+            padding: const EdgeInsets.only(top: 6),
+            child: ClipRRect(
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(28),
+              ),
+              child: Material(
+                color: backgroundColor ?? AppColor.kBackground,
+                child: body ?? const SizedBox.shrink(),
+              ),
             ),
           ),
         ),

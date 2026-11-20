@@ -18,6 +18,7 @@ import '../../../auth/domain/entities/user.dart';
 import '../bloc/compte_bloc.dart';
 import '../bloc/compte_event.dart';
 import '../bloc/compte_state.dart';
+import '../../../../core/widgets/formulaire_defilant.dart';
 
 class _C {
   static const green = Color(0xFF01154B);
@@ -190,153 +191,150 @@ class _EditProfileViewState extends State<_EditProfileView> {
           final loading = state is CompteActionEnCours;
           return Form(
             key: _formKey,
-            child: Column(
-              children: [
-                Expanded(
-                  child: ListView(
-                    padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
-                    children: [
-                      Center(child: _avatar()),
-                      const SizedBox(height: 6),
-                      Center(
-                        child: TextButton(
-                          onPressed: _choisirPhoto,
-                          child: const Text(
-                            'Changer la photo',
-                            style: TextStyle(
-                              fontFamily: kPolice,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w700,
-                              color: _C.green,
-                            ),
-                          ),
-                        ),
-                      ),
-                      if (email.isNotEmpty)
-                        Center(
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 6,
-                            ),
-                            decoration: BoxDecoration(
-                              color: AppColor.kPrimaryLight,
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(
-                                  Icons.mail_outline_rounded,
-                                  size: 15,
-                                  color: _C.green,
-                                ),
-                                const SizedBox(width: 6),
-                                Flexible(
-                                  child: Text(
-                                    email,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      fontFamily: kPolice,
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w600,
-                                      color: _C.green,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      const SizedBox(height: 24),
-                      _Groupe(
-                        titre: 'Informations personnelles',
-                        champs: [
-                          _champ(
-                            _prenomCtrl,
-                            'Prénom',
-                            Icons.person_outline_rounded,
-                            majuscules: true,
-                          ),
-                          _champ(
-                            _nomCtrl,
-                            'Nom',
-                            Icons.badge_outlined,
-                            majuscules: true,
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 18),
-                      _Groupe(
-                        titre: 'Coordonnées',
-                        champs: [
-                          _champ(
-                            _telephoneCtrl,
-                            'Téléphone',
-                            null,
-                            keyboard: TextInputType.phone,
-                            verifier: (v) =>
-                                verifierTelephone(v, _paysTel.value),
-                            formats: [FormatTelephone(_paysTel)],
-                            prefixe: BoutonIndicatif(
-                              pays: _paysTel,
-                              onChange: () => setState(_telephoneCtrl.clear),
-                            ),
-                          ),
-                          _champ(
-                            _adresseCtrl,
-                            'Adresse',
-                            Icons.location_on_outlined,
-                            aide: 'Quartier et ville, pour vos livraisons',
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-                  decoration: const BoxDecoration(
-                    color: _C.white,
-                    boxShadow: [
-                      BoxShadow(color: Color(0x12000000), blurRadius: 16),
-                    ],
-                  ),
-                  child: SafeArea(
-                    top: false,
-                    child: SizedBox(
-                      width: double.infinity,
-                      height: 52,
-                      child: FilledButton(
-                        onPressed: loading ? null : _soumettre,
-                        style: FilledButton.styleFrom(
-                          backgroundColor: _C.green,
-                          foregroundColor: _C.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          textStyle: const TextStyle(
-                            fontFamily: kPolice,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                        child: loading
-                            ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: Colors.white,
-                                ),
-                              )
-                            : const Text('Enregistrer'),
+            // Le bouton « Enregistrer » n'est plus collé en bas : collé, il
+            // remontait au-dessus du clavier et prenait la place du champ en
+            // cours de saisie. Clavier fermé, rien ne change à l'écran.
+            child: FormulaireDefilant(
+              padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
+              paddingBouton: EdgeInsets.zero,
+              enfants: [
+                Center(child: _avatar()),
+                const SizedBox(height: 6),
+                Center(
+                  child: TextButton(
+                    onPressed: _choisirPhoto,
+                    child: const Text(
+                      'Changer la photo',
+                      style: TextStyle(
+                        fontFamily: kPolice,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: _C.green,
                       ),
                     ),
                   ),
                 ),
+                if (email.isNotEmpty)
+                  Center(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColor.kPrimaryLight,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.mail_outline_rounded,
+                            size: 15,
+                            color: _C.green,
+                          ),
+                          const SizedBox(width: 6),
+                          Flexible(
+                            child: Text(
+                              email,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontFamily: kPolice,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: _C.green,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                const SizedBox(height: 24),
+                _Groupe(
+                  titre: 'Informations personnelles',
+                  champs: [
+                    _champ(
+                      _prenomCtrl,
+                      'Prénom',
+                      Icons.person_outline_rounded,
+                      majuscules: true,
+                    ),
+                    _champ(
+                      _nomCtrl,
+                      'Nom',
+                      Icons.badge_outlined,
+                      majuscules: true,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 18),
+                _Groupe(
+                  titre: 'Coordonnées',
+                  champs: [
+                    _champ(
+                      _telephoneCtrl,
+                      'Téléphone',
+                      null,
+                      keyboard: TextInputType.phone,
+                      verifier: (v) => verifierTelephone(v, _paysTel.value),
+                      formats: [FormatTelephone(_paysTel)],
+                      prefixe: BoutonIndicatif(
+                        pays: _paysTel,
+                        onChange: () => setState(_telephoneCtrl.clear),
+                      ),
+                    ),
+                    _champ(
+                      _adresseCtrl,
+                      'Adresse',
+                      Icons.location_on_outlined,
+                      aide: 'Quartier et ville, pour vos livraisons',
+                    ),
+                  ],
+                ),
               ],
+              bouton: Container(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+                decoration: const BoxDecoration(
+                  color: _C.white,
+                  boxShadow: [
+                    BoxShadow(color: Color(0x12000000), blurRadius: 16),
+                  ],
+                ),
+                child: SafeArea(
+                  top: false,
+                  child: SizedBox(
+                    width: double.infinity,
+                    height: 52,
+                    child: FilledButton(
+                      onPressed: loading ? null : _soumettre,
+                      style: FilledButton.styleFrom(
+                        backgroundColor: _C.green,
+                        foregroundColor: _C.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        textStyle: const TextStyle(
+                          fontFamily: kPolice,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      child: loading
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : const Text('Enregistrer'),
+                    ),
+                  ),
+                ),
+              ),
             ),
           );
         },
