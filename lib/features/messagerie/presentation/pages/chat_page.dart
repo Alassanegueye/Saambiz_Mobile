@@ -107,6 +107,10 @@ class _ChatViewState extends State<_ChatView> {
   Widget build(BuildContext context) {
     final nom = widget.interlocuteurNom;
     return ScaffoldMarine(
+      // La zone de saisie est blanche : en donnant ce fond au Scaffold,
+      // elle reste collée au clavier au lieu de laisser paraître un
+      // liseré derrière ses coins arrondis.
+      fondClavier: AppColor.kWhite,
       backgroundColor: AppColor.kBackground,
       appBar: AppBar(
         titleSpacing: 0,

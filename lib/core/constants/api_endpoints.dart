@@ -128,6 +128,13 @@ class VitrineEndpoints {
 
   /// Rendu du site tel qu'il sera publié, avant de le mettre en ligne.
   static const apercu = '/vendeur/ma-vitrine/apercu';
+
+  /// Photos du haut du site, qui y défilent en boucle : ajout (champ
+  /// `photos`, plusieurs fichiers), ordre (`{ ids }`) et retrait.
+  static const photos = '/vendeur/ma-vitrine/photos';
+  static const ordrePhotos = '/vendeur/ma-vitrine/photos/ordre';
+  static String photo(String id) =>
+      '/vendeur/ma-vitrine/photos/${Uri.encodeComponent(id)}';
 }
 
 /// Abonnement vendeur.

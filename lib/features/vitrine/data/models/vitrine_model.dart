@@ -57,6 +57,21 @@ List<SectionBoutique> _versSections(dynamic v) {
   return out;
 }
 
+/// Les photos du haut du site, dans l'ordre reçu. Une photo sans identifiant
+/// ou sans adresse est écartée : on ne pourrait ni l'afficher, ni la retirer.
+List<PhotoVitrine> _versPhotos(dynamic v) {
+  if (v is! List) return const [];
+  final out = <PhotoVitrine>[];
+  for (final e in v) {
+    if (e is! Map) continue;
+    final id = '${e['id'] ?? ''}'.trim();
+    final url = '${e['url'] ?? ''}'.trim();
+    if (id.isEmpty || url.isEmpty) continue;
+    out.add(PhotoVitrine(id: id, url: url));
+  }
+  return out;
+}
+
 class VitrineModel extends Vitrine {
   const VitrineModel({
     required super.slug,
@@ -80,6 +95,9 @@ class VitrineModel extends Vitrine {
     super.visitesSemaine,
     super.logoEnregistre,
     super.blocs,
+    super.photos,
+    super.photosMax,
+    super.slogan,
   });
 
   /// Attend la charge utile de `/vendeur/ma-vitrine`, qui enveloppe les
@@ -89,6 +107,11 @@ class VitrineModel extends Vitrine {
     final v = racine['vitrine'] is Map<String, dynamic>
         ? racine['vitrine'] as Map<String, dynamic>
         : racine;
+    // Le nom, le slogan… de la boutique, rappelés à côté des réglages.
+    final boutique = racine['boutique'] is Map
+        ? racine['boutique'] as Map
+        : const {};
+    final slogan = '${boutique['slogan'] ?? ''}'.trim();
 
     return VitrineModel(
       slug: '${v['slug'] ?? ''}',
@@ -119,6 +142,9 @@ class VitrineModel extends Vitrine {
       blocs: v['blocs'] is Map
           ? Map<String, dynamic>.from(v['blocs'] as Map)
           : const {},
+      photos: _versPhotos(v['photos']),
+      photosMax: (v['photosMax'] as num?)?.toInt() ?? 10,
+      slogan: slogan.isEmpty ? null : slogan,
     );
   }
 }

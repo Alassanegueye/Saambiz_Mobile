@@ -434,16 +434,18 @@ class _ChoixClientState extends State<_ChoixClient> {
   @override
   Widget build(BuildContext context) {
     final hauteur = MediaQuery.of(context).size.height * 0.75;
-    return Padding(
+    // Le fond de la feuille continue sous le clavier : c'est lui qui se voit
+    // derrière ses coins arrondis, et non la page assombrie.
+    return Container(
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,
       ),
-      child: Container(
+      decoration: const BoxDecoration(
+        color: AppColor.kBackground,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      child: SizedBox(
         height: hauteur,
-        decoration: const BoxDecoration(
-          color: AppColor.kBackground,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [

@@ -130,11 +130,11 @@ class _AppBootstrapState extends State<AppBootstrap> {
       }
     }
 
-    // Personne n'est connecté : déconnexion, session refusée après trois
-    // heures sans activité, ou toute première ouverture.
+    // Personne n'est connecté : déconnexion, session refusée après une
+    // semaine sans activité, ou toute première ouverture.
     //
     // L'onboarding ne se montre qu'une fois : une session se ferme après
-    // trois heures de silence, et revenir le matin ne doit pas obliger à
+    // une semaine de silence, et revenir ensuite ne doit pas obliger à
     // rebalayer trois écrans avant d'atteindre son compte.
     final vu = OnboardingPage.dejaVu();
 

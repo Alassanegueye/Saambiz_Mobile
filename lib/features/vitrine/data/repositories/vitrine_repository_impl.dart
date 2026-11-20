@@ -91,4 +91,17 @@ class VitrineRepositoryImpl implements VitrineRepository {
   @override
   Future<Either<Failure, void>> supprimerVitrine() =>
       _proteger(() => remoteDataSource.supprimerVitrine());
+
+  @override
+  Future<Either<Failure, ({Vitrine vitrine, String message})>> ajouterPhotos(
+    List<String> chemins,
+  ) => _proteger(() => remoteDataSource.ajouterPhotos(chemins));
+
+  @override
+  Future<Either<Failure, Vitrine>> retirerPhoto(String id) =>
+      _proteger(() => remoteDataSource.retirerPhoto(id));
+
+  @override
+  Future<Either<Failure, Vitrine>> ordonnerPhotos(List<String> ids) =>
+      _proteger(() => remoteDataSource.ordonnerPhotos(ids));
 }

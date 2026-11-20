@@ -7,7 +7,7 @@ import 'package:saambiz/core/services/veille_session.dart';
 /// Le guet qui ferme la session au retour, après un long silence.
 ///
 /// Le serveur tranche, et c'est lui qui fait foi : un renouvellement demandé
-/// après trois heures est refusé. Ce guet-ci sert au confort — sans lui,
+/// après une semaine est refusé. Ce guet-ci sert au confort — sans lui,
 /// revenir sur une application restée en arrière-plan affichait le compte une
 /// seconde, le temps qu'une requête parte, revienne en 401 et renvoie à la
 /// connexion. L'utilisateur voyait son compte s'ouvrir puis se fermer.
@@ -97,7 +97,7 @@ Future<VeilleSession> _absence(
   );
 
   veille.didChangeAppLifecycleState(AppLifecycleState.paused);
-  // L'horloge avance plutôt que le test d'attendre trois heures.
+  // L'horloge avance plutôt que le test d'attendre une semaine.
   horloge.avancer(absence);
   veille.didChangeAppLifecycleState(AppLifecycleState.resumed);
   await t.pumpAndSettle();
@@ -105,10 +105,10 @@ Future<VeilleSession> _absence(
 }
 
 void main() {
-  test('la durée est de trois heures, comme le serveur', () {
+  test('la durée est d’une semaine, comme le serveur', () {
     // Si les deux divergeaient, celle du serveur gagnerait : il refuserait
     // le renouvellement que ce guet aurait laissé passer.
-    expect(VeilleSession.duree, const Duration(hours: 3));
+    expect(VeilleSession.duree, const Duration(days: 7));
   });
 
   testWidgets('le guet observe dès la pose de l’écran', (t) async {
@@ -136,8 +136,16 @@ void main() {
     expect(await veille.jetons.isAuthenticated, isTrue);
   });
 
-  testWidgets('trois heures d’absence ferment la session', (t) async {
-    final veille = await _absence(t, const Duration(hours: 3, minutes: 1));
+  testWidgets('cinq heures d’absence ne ferment plus rien', (t) async {
+    // L'ancienne limite : une nuit sans ouvrir l'application ne déconnecte
+    // plus personne.
+    final veille = await _absence(t, const Duration(hours: 5));
+
+    expect(await veille.jetons.isAuthenticated, isTrue);
+  });
+
+  testWidgets('une semaine d’absence ferme la session', (t) async {
+    final veille = await _absence(t, const Duration(days: 7, minutes: 1));
 
     expect(await veille.jetons.isAuthenticated, isFalse);
   });
@@ -145,7 +153,7 @@ void main() {
   testWidgets('un visiteur n’est pas renvoyé à la connexion', (t) async {
     // Sans session, il n'y a rien à fermer — et surtout rien qui justifie
     // d'interrompre quelqu'un qui parcourait le catalogue.
-    final veille = await _absence(t, const Duration(hours: 5), connecte: false);
+    final veille = await _absence(t, const Duration(days: 8), connecte: false);
 
     expect(await veille.jetons.isAuthenticated, isFalse);
   });

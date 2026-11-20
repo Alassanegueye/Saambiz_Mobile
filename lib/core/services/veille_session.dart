@@ -14,7 +14,7 @@ import 'token_service.dart';
 /// perdu, prêté, ou qu'on le pose sur un comptoir.
 ///
 /// Le serveur tranche, et c'est lui qui fait foi : un renouvellement demandé
-/// après trois heures de silence est refusé. CE GUET N'EST PAS LA SÉCURITÉ,
+/// après une semaine de silence est refusé. CE GUET N'EST PAS LA SÉCURITÉ,
 /// il en est la bonne manière : sans lui, revenir sur une application restée
 /// en arrière-plan affichait le compte pendant une seconde — le temps qu'une
 /// requête parte, revienne en 401 et renvoie à la connexion. L'utilisateur
@@ -24,15 +24,15 @@ import 'token_service.dart';
 /// `AppBootstrap` qui lit le jeton, constate qu'il est périmé, tente un
 /// renouvellement et se fait refuser — même résultat, autre chemin.
 class VeilleSession with WidgetsBindingObserver {
-  /// Trois heures, la même valeur que le serveur (`inactiviteMaxMs`). Si
+  /// Une semaine, la même valeur que le serveur (`inactiviteMaxMs`). Si
   /// elles divergeaient, celle du serveur gagnerait : il refuserait le
   /// renouvellement que ce guet aurait laissé passer.
-  static const duree = Duration(hours: 3);
+  static const duree = Duration(days: 7);
 
   final TokenService jetons;
 
   /// L'heure courante. Injectable pour que les tests jouent une absence de
-  /// trois heures sans en attendre trois.
+  /// une semaine sans en attendre une.
   final DateTime Function() horloge;
 
   /// Dernier moment où l'application était à l'écran.

@@ -14,7 +14,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 ///
 /// Le défaut passait inaperçu tant que la session durait dix ans : on
 /// revenait toujours avec un jeton valide, donc jamais par ce chemin. Depuis
-/// que trois heures de silence ferment la session, revenir le matin
+/// qu'une semaine de silence ferme la session, revenir ensuite
 /// signifiait rebalayer trois écrans avant d'atteindre son compte.
 ///
 /// Ce fichier fige la lecture du drapeau. L'aiguillage qui s'en sert vit
