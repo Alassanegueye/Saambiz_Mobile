@@ -275,4 +275,3 @@ flutter analyze lib test
 - `PRIVACY_POLICY.md` — politique de confidentialité. **À publier sur une page
   web accessible** et à renseigner dans Play Console et l'App Store ; elle
   comporte encore des `[À COMPLÉTER]` (raison sociale, date, e-mail).
-- `AUDIT-API.md` — état de l'intégration des routes du backend.
