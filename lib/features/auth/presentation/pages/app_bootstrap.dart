@@ -8,6 +8,8 @@ import '../../../../core/widgets/intro_marque.dart';
 import '../../../../core/services/session_service.dart';
 import '../../data/models/user_model.dart';
 import '../../../../injection_container.dart';
+import '../../../../core/services/comptes_memorises.dart';
+import '../../../onboarding/presentation/pages/onboarding_page.dart';
 
 /// Premier écran sous le rideau d'arrivée ([IntroMarque]) : il lit la session
 /// et choisit où entrer (onboarding, connexion ou espace du rôle). Le logo
@@ -18,6 +20,24 @@ class AppBootstrap extends StatefulWidget {
 
   @override
   State<AppBootstrap> createState() => _AppBootstrapState();
+}
+
+/// Où aller quand aucune session n'est ouverte.
+///
+/// Extraite de l'aiguillage pour être vérifiable : le reste de `_router`
+/// interroge le réseau, le stockage sécurisé et le navigateur, et cette
+/// décision-là se lit en trois lignes.
+///
+/// * onboarding jamais vu → les trois écrans de présentation ;
+/// * déjà vu, des comptes sur ce téléphone → l'écran de connexion, qui les
+///   propose ;
+/// * déjà vu, aucun compte → l'inscription.
+///
+/// Les deux derniers cas sont exactement ce que donne la FIN de l'onboarding
+/// (`OnboardingPage._finish`) : on y va directement, sans rebalayer.
+String destinationSansSession({required bool vu, required bool comptes}) {
+  if (!vu) return AppRouter.onboardingRoute;
+  return comptes ? AppRouter.loginRoute : AppRouter.profileChoiceRoute;
 }
 
 class _AppBootstrapState extends State<AppBootstrap> {
@@ -110,11 +130,39 @@ class _AppBootstrapState extends State<AppBootstrap> {
       }
     }
 
-    // Personne n'est connecté (déconnexion, session refusée ou première
-    // ouverture) : l'onboarding s'affiche à chaque fois. À sa fin, il mène
-    // aux comptes déjà utilisés sur ce téléphone s'il y en a, sinon à
-    // l'inscription (voir [OnboardingPage]).
-    Navigator.of(context).pushReplacementNamed(AppRouter.onboardingRoute);
+    // Personne n'est connecté : déconnexion, session refusée après trois
+    // heures sans activité, ou toute première ouverture.
+    //
+    // L'ONBOARDING NE SE MONTRE QU'UNE FOIS. Il s'affichait à chaque
+    // démarrage sans session : `OnboardingPage.dejaVu()` existait, posait
+    // bien son drapeau au premier affichage et était documentée « ne se
+    // montre qu'à la première ouverture » — mais personne ne l'appelait.
+    // Deux parties du code décrivaient des intentions opposées, et celle
+    // qui ne vérifiait rien l'emportait.
+    //
+    // Le défaut passait inaperçu tant que la session durait dix ans : on
+    // revenait toujours avec un jeton valide. Depuis que trois heures de
+    // silence la ferment, revenir le matin signifiait rebalayer trois
+    // écrans avant d'atteindre son compte.
+    final vu = OnboardingPage.dejaVu();
+
+    // Les comptes ne sont lus que si l'onboarding a déjà été vu : à la
+    // première ouverture, il n'y en a de toute façon aucun.
+    var comptes = false;
+    if (vu) {
+      try {
+        comptes = (await sl<ComptesMemorises>().lister()).isNotEmpty;
+      } catch (_) {
+        // Stockage illisible : l'écran de connexion sait aussi se présenter
+        // sans compte mémorisé.
+        comptes = true;
+      }
+    }
+
+    if (!mounted) return;
+    Navigator.of(
+      context,
+    ).pushReplacementNamed(destinationSansSession(vu: vu, comptes: comptes));
   }
 
   @override
