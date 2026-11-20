@@ -653,7 +653,7 @@ class SbPageAuth extends StatelessWidget {
 // Validations partagees
 final RegExp kEmailRegExp = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]{2,}$');
 
-/// Regle du backend (MED-02) : 8 caracteres, une majuscule, un chiffre,
+/// Regle du backend : 8 caracteres, une majuscule, un chiffre,
 /// un caractere special. On la verifie cote app pour eviter un aller-retour.
 /// La même règle s'applique à l'inscription, à la réinitialisation et au
 /// changement du mot de passe (passwordSchema du serveur).

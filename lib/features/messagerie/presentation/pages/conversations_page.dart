@@ -7,6 +7,7 @@ import '../../../../core/widgets/confirmation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:saambiz/core/theme/app_color.dart';
 import 'package:saambiz/core/theme/police.dart';
+import 'package:saambiz/core/utils/app_logger.dart';
 import 'package:saambiz/core/utils/texte.dart';
 import 'package:saambiz/core/widgets/image_reseau.dart';
 import 'package:saambiz/core/widgets/messages.dart';
@@ -86,7 +87,9 @@ class _ConversationsViewState extends State<_ConversationsView> {
     try {
       final liste = await _site.lister();
       if (mounted) setState(() => _messagesSite = liste);
-    } catch (_) {}
+    } catch (e) {
+      logDebug('Messages du site non chargés : $e');
+    }
   }
 
   Future<void> _rafraichir() async {

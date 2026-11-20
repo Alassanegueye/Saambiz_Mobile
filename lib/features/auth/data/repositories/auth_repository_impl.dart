@@ -6,6 +6,7 @@ import '../../../../core/errors/failure.dart';
 import '../../../../core/errors/message_erreur.dart';
 import '../../../../core/services/comptes_memorises.dart';
 import '../../../../core/services/token_service.dart';
+import '../../../../core/utils/app_logger.dart';
 import '../../../../injection_container.dart';
 import '../../domain/entities/user.dart';
 import '../../domain/repositories/auth_repository.dart';
@@ -52,7 +53,9 @@ class AuthRepositoryImpl implements AuthRepository {
           authResponse.user,
           authResponse.refreshToken,
         );
-      } catch (_) {}
+      } catch (e) {
+        logDebug('Compte non mémorisé après la connexion : $e');
+      }
 
       return Right(authResponse.user);
     } on DioException catch (e) {

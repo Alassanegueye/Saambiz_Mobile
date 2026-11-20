@@ -194,7 +194,9 @@ class FcmService {
         if (charge == null || charge.isEmpty) return;
         try {
           _ouvrir(jsonDecode(charge) as Map<String, dynamic>);
-        } catch (_) {}
+        } catch (e) {
+          logDebug('Ouverture de la notification impossible : $e');
+        }
       },
     );
 

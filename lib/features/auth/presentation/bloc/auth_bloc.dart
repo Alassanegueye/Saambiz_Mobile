@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../../../core/services/token_service.dart';
 import '../../../../core/services/fcm_service.dart';
+import '../../../../core/utils/app_logger.dart';
 import '../../../../injection_container.dart';
 import '../../data/datasources/connexion_sociale_source.dart';
 import '../../data/models/user_model.dart';
@@ -181,7 +182,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           compte = UserModel.fromJson(
             Jwt.parseJwt(await jetons.getToken() ?? ''),
           );
-        } catch (_) {}
+        } catch (e) {
+          logDebug('Jeton illisible à la déconnexion : $e');
+        }
       }
       // Le serveur oublie la session : le jeton ne vaut plus rien.
       await sl<SessionService>().revoquer();
@@ -200,7 +203,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           compte = UserModel.fromJson(
             Jwt.parseJwt(await jetons.getToken() ?? ''),
           );
-        } catch (_) {}
+        } catch (e) {
+          logDebug('Jeton illisible au changement de compte : $e');
+        }
       }
       if (compte != null) {
         await sl<ComptesMemorises>().enregistrer(compte, refresh);

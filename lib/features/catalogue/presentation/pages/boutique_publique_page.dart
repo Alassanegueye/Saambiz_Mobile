@@ -14,6 +14,7 @@ import '../../../../core/services/token_service.dart';
 import '../../../../core/theme/app_color.dart';
 import '../../../../core/theme/app_dimensions.dart';
 import '../../../../core/theme/app_typo.dart';
+import '../../../../core/utils/app_logger.dart';
 import '../../../../core/utils/url_externe.dart';
 import '../../../../core/widgets/page_vendeur.dart';
 import '../../../../core/widgets/ui_kit.dart';
@@ -166,7 +167,9 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
           _cloche = s['clocheActive'] == true;
         });
       }
-    } catch (_) {}
+    } catch (e) {
+      logDebug('Statut de suivi non chargé : $e');
+    }
   }
 
   Future<void> _charger() async {

@@ -11,6 +11,7 @@ import 'package:saambiz/core/routes/app_router.dart';
 
 import '../../../../../core/constants/infos_app.dart';
 import '../../../../../core/theme/app_color.dart';
+import '../../../../../core/utils/app_logger.dart';
 import '../../../../../core/utils/url_externe.dart';
 import '../../../../../core/widgets/barre_navigation_verre.dart'
     show kEspaceBarreBas;
@@ -66,7 +67,9 @@ class _ProfilPageState extends State<ProfilPage> with RetourSurOnglet {
     try {
       final s = await CertificationService(sl<Dio>()).statut();
       if (mounted) setState(() => _certification = s);
-    } catch (_) {}
+    } catch (e) {
+      logDebug('Statut de certification non chargé : $e');
+    }
   }
 
   Future<void> _ouvrirCertification() async {

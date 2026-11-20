@@ -129,7 +129,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         _fetchBoutiques();
       }
     } catch (e) {
-      debugPrint('Erreur init bloc: $e');
+      logDebug('Initialisation de l’accueil impossible : $e');
     }
   }
 

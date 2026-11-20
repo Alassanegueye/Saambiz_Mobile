@@ -657,7 +657,9 @@ Future<bool> ajouterAuPanier(
   Timer(duree, () {
     try {
       bandeau.close();
-    } catch (_) {}
+    } catch (_) {
+      // Déjà fermé par l'utilisateur, ou remplacé par un autre bandeau.
+    }
   });
   return true;
 }

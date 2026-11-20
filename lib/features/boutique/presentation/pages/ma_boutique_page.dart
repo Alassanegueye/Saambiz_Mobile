@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:saambiz/core/theme/app_color.dart';
 import 'package:saambiz/core/theme/police.dart';
+import 'package:saambiz/core/utils/app_logger.dart';
 import 'package:saambiz/core/utils/texte.dart';
 import 'package:saambiz/core/widgets/image_reseau.dart';
 import 'package:saambiz/core/widgets/page_vendeur.dart';
@@ -467,7 +468,9 @@ class _LigneCategoriesState extends State<_LigneCategories> {
     try {
       final liste = await CategoriesRemoteDataSource(sl<Dio>()).lister();
       if (mounted && liste.isNotEmpty) setState(() => _referentiel = liste);
-    } catch (_) {}
+    } catch (e) {
+      logDebug('Catégories non chargées : $e');
+    }
   }
 
   @override

@@ -147,7 +147,9 @@ class _HomePageState extends State<HomePage>
     try {
       final s = await CertificationService(sl<Dio>()).statut();
       if (mounted) setState(() => _certificationAFaire = s.actionRequise);
-    } catch (_) {}
+    } catch (e) {
+      logDebug('Statut de certification non chargé : $e');
+    }
   }
 
   /// En cas d'échec, l'en-tête garde simplement ce qu'il connaît déjà.
@@ -174,7 +176,7 @@ class _HomePageState extends State<HomePage>
         _fetchBoutiques();
       }
     } catch (e) {
-      debugPrint('Erreur init bloc: $e');
+      logDebug('Initialisation de l’accueil impossible : $e');
     }
   }
 
@@ -235,7 +237,7 @@ class _HomePageState extends State<HomePage>
         });
       });
     } catch (e) {
-      debugPrint('dashboard stats error: $e');
+      logDebug('Statistiques du tableau de bord non chargées : $e');
     }
     // 2) Commandes récentes (3 dernières)
     try {
@@ -255,7 +257,7 @@ class _HomePageState extends State<HomePage>
         });
       }
     } catch (e) {
-      debugPrint('commandes récentes error: $e');
+      logDebug('Commandes récentes non chargées : $e');
     }
     if (mounted) setState(() => _loading = false);
   }
