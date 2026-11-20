@@ -12,9 +12,8 @@ import '../data/avis_remote_datasource.dart';
 
 /// Avis d'une boutique : les lire, laisser le sien, le corriger, le retirer.
 ///
-/// Le backend servait ces quatre routes depuis le début sans qu'aucun écran
-/// ne les appelle : seule la note moyenne apparaissait sur la fiche boutique,
-/// sans qu'on puisse savoir d'où elle venait ni la contredire.
+/// La fiche boutique n'affiche que la note moyenne : cette feuille dit d'où
+/// elle vient, et permet de la contredire.
 ///
 /// Ouvert aux visiteurs sans compte en lecture : la liste s'affiche, et
 /// l'invitation à se connecter remplace le formulaire.

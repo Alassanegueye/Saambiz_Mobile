@@ -44,8 +44,8 @@ class SocketService {
   /// Le serveur l'envoie à l'acheteur ET au vendeur, avec le strict
   /// nécessaire : `{id, statut, statutPaiement}`. Les écrans concernés s'en
   /// servent pour se relire — sans ça, le tableau de bord du vendeur et la
-  /// fiche de l'acheteur affichaient deux statuts différents pour la même
-  /// commande, chacun figé sur ce qu'il avait lu en arrivant.
+  /// fiche de l'acheteur afficheraient deux statuts différents pour la même
+  /// commande, chacun figé sur ce qu'il a lu en arrivant.
   Stream<Map<String, dynamic>> get onCommandeChangee =>
       _onCommandeChangeeCtrl.stream;
 
@@ -59,9 +59,9 @@ class SocketService {
 
   /// Origine du serveur socket.io (racine, sans le suffixe de chemin de l'API).
   String _socketOrigin() {
-    // Même adresse que le client HTTP. Ce service lisait `dotenv` en direct :
-    // il pouvait donc viser un serveur différent de celui des appels API dès
-    // que le --dart-define et le .env divergeaient.
+    // Même adresse que le client HTTP : en lisant `dotenv` en direct, ce
+    // service pourrait viser un serveur différent de celui des appels API dès
+    // que le --dart-define et le .env divergent.
     final baseUrl = Env.apiBaseUrlEffective.trim();
     final uri = Uri.tryParse(baseUrl);
     if (uri == null || !uri.hasAuthority) return baseUrl;

@@ -6,12 +6,12 @@ import '../utils/image_url.dart';
 
 /// Image distante (photos de produits, logos, avatars).
 ///
-/// Un seul endroit pour ce que chaque écran réglait à sa façon :
-/// - le cache disque (une photo vue n'est plus retéléchargée) ;
+/// Réunit en un seul endroit, pour tous les écrans :
+/// - le cache disque (une photo vue n'est pas retéléchargée) ;
 /// - la version réduite demandée à Cloudinary ([imageOptimisee]) ;
 /// - la taille de décodage, calée sur la place réellement occupée à l'écran
-///   (une photo de 1080 px décodée pour une vignette de 52 px coûtait
-///   inutilement de la mémoire et faisait saccader les listes) ;
+///   (une photo de 1080 px décodée pour une vignette de 52 px coûterait
+///   inutilement de la mémoire et ferait saccader les listes) ;
 /// - le fond d'attente, le fondu d'apparition et l'image de repli.
 class ImageReseau extends StatelessWidget {
   /// Adresse de l'image ; vide ou nulle : [repli] est affiché.

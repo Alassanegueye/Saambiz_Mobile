@@ -33,8 +33,8 @@ class SignalementModel {
 
   /// La boutique ou le produit visé, nommé par le serveur.
   ///
-  /// La liste n'en portait aucun : l'écran affichait la RAISON SAISIE en gros
-  /// titre, et l'on ne savait plus de quoi on avait parlé.
+  /// C'est le titre de la ligne dans la liste des signalements : la raison
+  /// saisie ne dit pas de quoi on a parlé.
   final CibleSignalement? cible;
 
   SignalementModel({

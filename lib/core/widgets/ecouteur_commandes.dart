@@ -12,7 +12,7 @@ import '../services/socket_service.dart';
 /// le cas d'un vendeur seul sur son téléphone. Il ne couvre pas celui-ci :
 /// l'acheteur paie, le vendeur accepte depuis un autre appareil, le site de
 /// la boutique enregistre une commande — et l'écran affiché pendant ce temps
-/// reste sur ce qu'il avait lu en arrivant. Le serveur diffuse désormais
+/// reste sur ce qu'il a lu en arrivant. Le serveur diffuse
 /// `commande:statut` aux deux parties ; il suffit de l'écouter.
 ///
 /// À placer SOUS le `BlocProvider` dont dépend [onChange].

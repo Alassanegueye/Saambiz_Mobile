@@ -62,8 +62,7 @@ class _GuestProfilPageState extends State<GuestProfilPage>
 
   @override
   Widget build(BuildContext context) {
-    // L'en-tête bleu du compte connecté, avec un visiteur dedans : c'était
-    // le dernier onglet sous une barre claire, avec une carte marine à part.
+    // L'en-tête bleu du compte connecté, avec un visiteur dedans.
     return PageVendeur(
       titre: 'Mon compte',
       titreWidget: const EnteteCompte.visiteur(),

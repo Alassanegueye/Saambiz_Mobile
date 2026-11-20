@@ -11,8 +11,8 @@ import '../models/panier_item.dart';
 /// même boutique ([basculer] remplace la sélection quand il change de
 /// boutique), et ne peut valider qu'avec au moins un produit coché.
 ///
-/// [PanierVendeurDifferentException] n'est plus levée ; elle reste déclarée
-/// pour les écrans qui l'attrapent encore.
+/// [PanierVendeurDifferentException] n'est levée nulle part ; elle reste
+/// déclarée pour les écrans qui l'attrapent encore.
 class PanierVendeurDifferentException implements Exception {
   final String message;
   PanierVendeurDifferentException([

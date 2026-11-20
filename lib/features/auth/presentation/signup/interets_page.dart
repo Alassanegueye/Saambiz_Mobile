@@ -23,9 +23,9 @@ const String kInteretsKey = 'client_interets';
 
 /// À qui appartient la copie locale : `invite`, ou l'identifiant du compte.
 ///
-/// Sans ce marqueur, un invité héritait des choix du dernier compte connecté
-/// sur le téléphone (la déconnexion ne les effaçait pas) et voyait un accueil
-/// « Pour vous » qu'il n'avait jamais demandé.
+/// Sans ce marqueur, un invité pourrait hériter des choix du dernier compte
+/// connecté sur le téléphone et voir un accueil « Pour vous » qu'il n'a
+/// jamais demandé.
 const String kInteretsProprietaireKey = 'client_interets_proprietaire';
 const String kProprietaireInvite = 'invite';
 

@@ -167,8 +167,8 @@ class _Contenu extends StatelessWidget {
                 vide: 'Ajoutez une description',
                 onTap: onModifier,
               ),
-              // Annoncées dans le compte (« Nom, logo, catégories, pause »),
-              // elles n'apparaissaient nulle part ici.
+              // Les catégories font partie de ce que le compte annonce pour
+              // cet écran (« Nom, logo, catégories, pause »).
               _LigneCategories(valeurs: b.categories, onTap: onModifier),
             ],
           ),

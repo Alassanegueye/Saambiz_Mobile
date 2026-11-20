@@ -748,7 +748,7 @@ class _RegleMotDePasse extends StatelessWidget {
 }
 
 /// Champ mot de passe avec son œil, pour afficher ou masquer ce qu'on
-/// tape : sans lui, on saisissait à l'aveugle.
+/// tape : sans lui, on saisirait à l'aveugle.
 class SbChampMotDePasse extends StatefulWidget {
   final String label;
   final String hint;

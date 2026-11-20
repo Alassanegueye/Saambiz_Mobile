@@ -133,17 +133,9 @@ class _AppBootstrapState extends State<AppBootstrap> {
     // Personne n'est connecté : déconnexion, session refusée après trois
     // heures sans activité, ou toute première ouverture.
     //
-    // L'ONBOARDING NE SE MONTRE QU'UNE FOIS. Il s'affichait à chaque
-    // démarrage sans session : `OnboardingPage.dejaVu()` existait, posait
-    // bien son drapeau au premier affichage et était documentée « ne se
-    // montre qu'à la première ouverture » — mais personne ne l'appelait.
-    // Deux parties du code décrivaient des intentions opposées, et celle
-    // qui ne vérifiait rien l'emportait.
-    //
-    // Le défaut passait inaperçu tant que la session durait dix ans : on
-    // revenait toujours avec un jeton valide. Depuis que trois heures de
-    // silence la ferment, revenir le matin signifiait rebalayer trois
-    // écrans avant d'atteindre son compte.
+    // L'onboarding ne se montre qu'une fois : une session se ferme après
+    // trois heures de silence, et revenir le matin ne doit pas obliger à
+    // rebalayer trois écrans avant d'atteindre son compte.
     final vu = OnboardingPage.dejaVu();
 
     // Les comptes ne sont lus que si l'onboarding a déjà été vu : à la

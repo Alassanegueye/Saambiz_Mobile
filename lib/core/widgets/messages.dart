@@ -84,8 +84,7 @@ void _afficher(
       message,
       style: const TextStyle(fontFamily: kPolice, fontSize: 13.5, height: 1.3),
     ),
-    // Fond de couleur, texte et icône en blanc (même rendu que l'ancien
-    // bandeau d'erreur de connexion).
+    // Fond de couleur, texte et icône en blanc.
     primaryColor: Colors.white,
     backgroundColor: couleur,
     foregroundColor: Colors.white,

@@ -201,7 +201,7 @@ class ProduitCard extends StatelessWidget {
         ),
         const SizedBox(height: 3),
         // Prix à gauche ; l'ajout au panier à droite, hors de la photo :
-        // posé dessus, il cachait le compte à rebours.
+        // posé dessus, il cacherait le compte à rebours.
         Row(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [

@@ -1008,10 +1008,10 @@ class _ConfigurationState extends State<_Configuration> {
             ),
           ),
 
-          // Retiré ici : le rappel « Votre site ne vous coûte rien… ». Il
-          // rassurait un vendeur qui découvre son site ; sous les réglages,
-          // consulté chaque jour, il n'apprenait plus rien. Le même message
-          // reste sur l'écran de mise en ligne, là où la question se pose.
+          // Pas de rappel « Votre site ne vous coûte rien… » ici : il rassure
+          // un vendeur qui découvre son site, mais sous les réglages, vus
+          // chaque jour, il n'apprendrait rien. Il figure sur l'écran de mise
+          // en ligne, là où la question se pose.
         ],
       ),
     );

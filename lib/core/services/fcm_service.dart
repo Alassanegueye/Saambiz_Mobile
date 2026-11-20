@@ -67,10 +67,10 @@ class FcmService {
   ///
   /// Les messages arrivent en push pour atteindre un téléphone rangé dans une
   /// poche. Mais application ouverte, c'est NOUS qui dessinons la bannière
-  /// (FCM n'affiche rien dans ce cas) : sans cette information, on affichait
-  /// une bannière pour le message que l'utilisateur était en train de lire,
-  /// par-dessus la conversation elle-même. Le temps réel l'a déjà posé dans
-  /// le fil.
+  /// (FCM n'affiche rien dans ce cas) : sans cette information, on
+  /// afficherait une bannière pour le message que l'utilisateur est en train
+  /// de lire, par-dessus la conversation elle-même. Le temps réel l'a déjà
+  /// posé dans le fil.
   static String? _conversationOuverte;
 
   /// Appelé par l'écran de discussion à son ouverture et à sa fermeture.
@@ -298,14 +298,10 @@ class FcmService {
     );
   }
 
-  /// Un toucher ouvre la liste des notifications, où le client retrouve le
-  /// message et la boutique.
   /// Toucher la notification, hors de l'application, ouvre l'ecran qu'elle
   /// annonce — la meme regle que dans la liste des notifications, voir
-  /// `destinationNotification`.
-  ///
-  /// Auparavant, toute notification touchee ouvrait la liste : le client
-  /// prevenu que sa commande etait prete devait encore la retrouver lui-meme.
+  /// `destinationNotification`. Le client prevenu que sa commande est prete
+  /// arrive ainsi sur la commande, sans avoir a la chercher lui-meme.
   static Future<void> _ouvrir(Map<String, dynamic> donnees) async {
     final navigateur = AuthInterceptor.navigatorKey.currentState;
     if (navigateur == null) return;

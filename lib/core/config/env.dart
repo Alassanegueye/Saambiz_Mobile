@@ -82,17 +82,16 @@ class Env {
   /// la configuration de production. Le `.env` ne sert que de repli pour les
   /// postes de développement qui ne le passent pas encore.
   ///
-  /// L'ordre était inversé, et silencieusement : le `.env` gagnait toujours.
-  /// Comme `pubspec.yaml` le déclare en asset, il part dans l'APK, un build
-  /// de production compilé avec l'URL HTTPS réelle continuait donc d'appeler
-  /// l'adresse LAN du poste de développement qui traînait dans ce fichier.
-  /// [verifier] ne voyait rien : elle contrôlait [apiBaseUrl], pas la valeur
-  /// employée.
+  /// Comme `pubspec.yaml` déclare le `.env` en asset, il part dans l'APK : s'il
+  /// l'emportait, un build de production compilé avec l'URL HTTPS réelle
+  /// appellerait l'adresse LAN du poste de développement qui traîne dans ce
+  /// fichier. [verifier] contrôle la valeur retenue ici, celle qu'emploie le
+  /// client HTTP, et non [apiBaseUrl].
   ///
   /// En RELEASE, le `.env` est ignoré, quoi qu'il contienne. C'est un fichier
   /// de confort pour les postes de développement, et il part dans l'IPA avec
   /// l'adresse qui y traîne — `10.0.2.2`, l'alias de l'émulateur Android.
-  /// Une application publiée qui prenait cette adresse n'appelait rien du
+  /// Une application publiée qui prendrait cette adresse n'appellerait rien du
   /// tout sur un vrai téléphone, sans le moindre message. Un `flutter build`
   /// lancé sans `--dart-define` vise donc la production, qui est la valeur
   /// par défaut compilée.

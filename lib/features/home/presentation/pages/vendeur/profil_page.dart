@@ -359,7 +359,7 @@ class _ProfilPageState extends State<ProfilPage> with RetourSurOnglet {
 /// une action qui ne fait rien serait pire que de n'en afficher aucune — et,
 /// à zéro, la ligne qui explique pourquoi.
 ///
-/// Carte blanche sous l'en-tête : en marine, elle se confondait avec lui.
+/// Carte blanche sous l'en-tête : en marine, elle se confondrait avec lui.
 class _CarteSolde extends StatelessWidget {
   final double montant;
   const _CarteSolde({required this.montant});

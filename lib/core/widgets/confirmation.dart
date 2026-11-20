@@ -6,10 +6,9 @@ import '../theme/police.dart';
 /// Demande confirmation avant une action importante, et rend `true` si
 /// l'utilisateur confirme.
 ///
-/// UNE SEULE FEUILLE POUR TOUTE L'APPLICATION. Elle vivait au milieu de
-/// `profil_kit.dart`, où personne n'allait la chercher : la moitié des
-/// écrans redessinaient leur propre `AlertDialog`, et certains gestes
-/// irréversibles partaient au premier appui, sans rien demander.
+/// UNE SEULE FEUILLE POUR TOUTE L'APPLICATION. Les écrans ne dessinent pas
+/// leur propre `AlertDialog` : tout geste irréversible passe par ici, et
+/// demande donc toujours confirmation avant de partir.
 ///
 /// Deux niveaux, pour que l'œil fasse la différence sans lire :
 ///   * [destructive] (défaut) — rouge. Ce qui efface, annule, retire.

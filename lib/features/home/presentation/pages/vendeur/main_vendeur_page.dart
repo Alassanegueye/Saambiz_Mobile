@@ -14,10 +14,10 @@ import '../../../../vitrine/presentation/pages/boutique_page.dart';
 /// Espace vendeur : tableau de bord, commandes, boutique, produits et
 /// promotions, barre de navigation en bas d'écran.
 ///
-/// Le compte n'est plus un onglet : il s'ouvre depuis l'avatar, en haut de
-/// l'accueil. La place libérée revient à « Boutique », au centre, parce que
-/// c'est là que le vendeur configure désormais sa boutique en ligne : mise
-/// en ligne du site, composition des sections, rangement de ses produits.
+/// Le compte n'est pas un onglet : il s'ouvre depuis l'avatar, en haut de
+/// l'accueil. Le centre revient à « Boutique », parce que c'est là que le
+/// vendeur configure sa boutique en ligne : mise en ligne du site,
+/// composition des sections, rangement de ses produits.
 class MainVendeurPage extends StatefulWidget {
   final User? user;
   const MainVendeurPage({super.key, this.user});

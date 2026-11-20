@@ -88,8 +88,8 @@ class _MesPromotionsView extends StatelessWidget {
     if (res == true) bloc.add(LoadMesPromotions());
   }
 
-  // Elle partait au premier appui, depuis un menu dont l'entrée voisine est
-  // « Modifier ».
+  // La suppression se confirme : elle part d'un menu dont l'entrée voisine
+  // est « Modifier ».
   Future<void> _supprimer(BuildContext context, PromotionModel p) async {
     final bloc = context.read<PromotionsBloc>();
     final confirme = await confirmerAction(

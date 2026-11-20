@@ -38,9 +38,8 @@ class Pagination {
 
 /// « Précédent · Page 2 sur 7 · Suivant », sous une liste.
 ///
-/// Les listes de l'application rendaient tout d'un bloc : toutes les
-/// commandes, toutes les notifications. Le serveur en rend désormais dix à
-/// la fois ; il faut donc de quoi atteindre les suivantes.
+/// Le serveur rend les listes (commandes, notifications…) dix éléments à la
+/// fois ; il faut donc de quoi atteindre les suivants.
 ///
 /// Elle ne s'affiche pas quand il n'y a qu'une page, et un bouton qui ne
 /// mène nulle part est grisé plutôt que caché : la place reste stable d'une

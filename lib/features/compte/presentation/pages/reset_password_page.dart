@@ -179,8 +179,8 @@ class _ResetPasswordViewState extends State<_ResetPasswordView> {
               onPressed: loading ? null : _confirmer,
             ),
             const SizedBox(height: 12),
-            // Si l'e-mail n'est pas arrivé : il fallait revenir à l'écran
-            // précédent pour en demander un autre.
+            // Si l'e-mail n'est pas arrivé, on en redemande un ici, sans
+            // revenir à l'écran précédent.
             Center(
               child: loading && _renvoi
                   ? const SizedBox(

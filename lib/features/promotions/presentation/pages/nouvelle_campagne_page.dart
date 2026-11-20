@@ -280,12 +280,11 @@ class _NouvelleCampagnePageState extends State<NouvelleCampagnePage> {
           ),
         ),
       ),
-      // LE BOUTON N'EST PAS COLLÉ EN BAS. Il l'était, et il remontait
-      // au-dessus du clavier : il ne restait alors aux champs qu'une bande
-      // étroite, où le message à plusieurs lignes était coupé. Il descend
-      // désormais avec le contenu — clavier fermé, il reste en bas de
-      // l'écran, et rien ne change à l'usage. (Un `bottomNavigationBar`,
-      // lui, resterait SOUS le clavier : c'est l'autre travers, déjà évité.)
+      // Le bouton n'est pas collé en bas : collé, il remonterait au-dessus du
+      // clavier et ne laisserait aux champs qu'une bande étroite, où le
+      // message à plusieurs lignes serait coupé. Il défile avec le contenu ;
+      // clavier fermé, il reste en bas de l'écran. (Un `bottomNavigationBar`,
+      // lui, resterait SOUS le clavier : c'est l'autre travers.)
       body: FormulaireDefilant(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
         enfants: [

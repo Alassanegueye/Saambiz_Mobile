@@ -77,7 +77,7 @@ class _SignalerFormViewState extends State<_SignalerFormView> {
   }
 
   /// Un signalement part vers une équipe qui va le lire et agir : il se
-  /// confirme. Il partait au premier appui, sans rien demander.
+  /// confirme.
   Future<void> _envoyer() async {
     final motif = _motif;
     if (motif == null || !_formKey.currentState!.validate()) return;

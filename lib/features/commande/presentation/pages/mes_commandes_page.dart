@@ -83,11 +83,10 @@ class _ListeState extends State<_Liste> with RetourSurOnglet {
     }
     // FILET DE SÉCURITÉ, PAS MÉCANISME PRINCIPAL.
     //
-    // Toutes les 30 secondes, cet écran retéléchargeait la liste entière des
-    // commandes — avec leurs lignes et leurs vendeurs — tant qu'il restait
-    // visible. Soit 120 requêtes par heure, par client, pour des données qui
-    // ne bougent presque jamais : une commande change deux ou trois fois dans
-    // sa vie, et le serveur le dit maintenant par `commande:statut`.
+    // Chaque passage retélécharge la liste entière des commandes, avec leurs
+    // lignes et leurs vendeurs, pour des données qui ne bougent presque
+    // jamais : une commande change deux ou trois fois dans sa vie, et le
+    // serveur le dit par `commande:statut`.
     //
     // Le sondage reste, parce que le temps réel peut être coupé — réseau
     // mobile, proxy qui ferme les websockets. Mais à deux minutes : c'est un

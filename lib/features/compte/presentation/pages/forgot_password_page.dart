@@ -13,8 +13,7 @@ import 'reset_password_page.dart';
 /// POST /account/forgot-password
 ///
 /// On y arrive depuis l'écran de connexion : même présentation que lui
-/// (en-tête bleu, carte blanche, champ à icône). C'était une simple barre
-/// de titre au-dessus d'un champ nu.
+/// (en-tête bleu, carte blanche, champ à icône).
 class ForgotPasswordPage extends StatelessWidget {
   const ForgotPasswordPage({super.key});
 

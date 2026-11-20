@@ -236,7 +236,7 @@ class _BoutiqueFormViewState extends State<_BoutiqueFormView> {
   }
 
   /// Le logo : un aperçu carré avec sa pastille d'appareil photo, et ce
-  /// que fait le toucher. C'était un grand cadre vide, sans un mot.
+  /// que fait le toucher.
   Widget _logoPicker() {
     final aUnLogo =
         _logoPath != null ||

@@ -187,8 +187,8 @@ class _PanierPageState extends State<PanierPage> {
                               ),
                               onRetirer: () async {
                                 // La croix est à portée de pouce, juste à
-                                // côté des boutons de quantité : elle vidait
-                                // la ligne sans rien demander.
+                                // côté des boutons de quantité : vider la
+                                // ligne se confirme.
                                 final confirme = await confirmerAction(
                                   context,
                                   icone: Icons.remove_shopping_cart_outlined,

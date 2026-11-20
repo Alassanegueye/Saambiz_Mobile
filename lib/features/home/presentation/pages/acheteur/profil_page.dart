@@ -208,8 +208,7 @@ class _ProfilPageState extends State<ProfilPage>
           afficherErreur(context, state.message);
         }
       },
-      // L'en-tête bleu des autres onglets, avec le profil dedans : le seul
-      // onglet sur fond clair, sous un titre centré, c'était celui-ci.
+      // L'en-tête bleu des autres onglets, avec le profil dedans.
       child: PageVendeur(
         titre: 'Mon compte',
         titreWidget: EnteteCompte(

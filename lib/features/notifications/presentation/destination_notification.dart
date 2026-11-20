@@ -78,10 +78,9 @@ DestinationNotification destinationNotification(NotificationModel n) {
   }
 
   // Réponse à une demande de certification, approuvée ou refusée. Elle ne
-  // porte aucun identifiant — ce n'est ni une commande, ni une boutique à
-  // visiter —, donc elle retombait sur la messagerie : le vendeur à qui on
-  // disait « vous pouvez renvoyer vos photos » arrivait dans ses
-  // conversations. L'écran de certification est celui qui le permet.
+  // porte aucun identifiant (ni commande, ni boutique à visiter) et
+  // retomberait sinon sur la messagerie. L'écran de certification est celui
+  // où le vendeur peut renvoyer ses photos, comme la notification l'y invite.
   if (n.certification != null) {
     return DestinationNotification(CibleNotification.certification);
   }

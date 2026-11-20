@@ -235,9 +235,9 @@ class CarteBoutiqueGrille extends StatelessWidget {
                     child: Column(
                       children: [
                         // Le nom seul. La pastille « vérifiée » vit sur le
-                        // logo : dans le fil du texte elle se retrouvait
+                        // logo : dans le fil du texte elle se retrouverait
                         // seule sur la deuxième ligne des que le nom
-                        // remplissait la première, et une espace insécable
+                        // remplit la première, et une espace insécable
                         // ne lie pas un WidgetSpan.
                         Text(
                           nom,

@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 ///
 /// Les grilles du catalogue — produits, boutiques, catégories — chargent la
 /// suite quand on approche du bas. Ce déclencheur est un geste : il n'arrive
-/// jamais si le contenu tient dans l'écran. Le serveur en rend désormais dix
-/// à la fois au lieu de quinze, et sur un grand écran dix fiches ne
-/// débordent pas toujours : la grille s'arrêtait alors à dix articles, avec
-/// deux cents disponibles et aucun moyen de les atteindre.
+/// jamais si le contenu tient dans l'écran. Le serveur en rend dix à la
+/// fois, et sur un grand écran dix fiches ne débordent pas toujours : la
+/// grille s'arrêterait alors à dix articles, sans moyen d'atteindre les
+/// suivants.
 ///
 /// À appeler après chaque chargement réussi. [chargerSuite] doit se garder
 /// elle-même — ne rien faire quand la dernière page est atteinte, ou qu'un

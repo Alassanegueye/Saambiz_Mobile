@@ -76,9 +76,9 @@ class _MesProduitsViewState extends State<_MesProduitsView> {
   bool _rechercheOuverte = false;
   String _recherche = '';
 
-  // « En ligne » = mis en ligne par le vendeur (interrupteur). C'était
-  // déduit du stock : l'interrupteur changeait bien le produit sur le
-  // serveur, mais l'écran restait figé tant qu'il y avait du stock.
+  // « En ligne » = mis en ligne par le vendeur (interrupteur), et non déduit
+  // du stock : déduit du stock, l'écran resterait figé tant qu'il y en a,
+  // quoi que fasse l'interrupteur.
   bool _enLigne(ProduitModel p) => p.disponible;
 
   Future<void> _ouvrirForm(BuildContext context, {dynamic produit}) async {
@@ -371,7 +371,7 @@ class _MesProduitsViewState extends State<_MesProduitsView> {
                 ),
               ),
               // Comme l'interrupteur « Boutique en ligne » : piste verte.
-              // L'ancienne couleur marine effaçait la pastille sur la piste
+              // Une couleur marine effacerait la pastille sur la piste
               // marine du thème.
               Switch.adaptive(
                 value: enLigne,

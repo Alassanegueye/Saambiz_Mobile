@@ -7,9 +7,9 @@ import '../constants/infos_app.dart';
 import '../theme/app_color.dart';
 import 'animations.dart';
 
-// `confirmerAction` a demenage dans son propre fichier — elle sert a toute
-// l'application, pas seulement au profil. Reexportee ici pour ne pas casser
-// les ecrans qui l'importaient d'ici.
+// `confirmerAction` vit dans son propre fichier : elle sert a toute
+// l'application, pas seulement au profil. Reexportee ici pour les ecrans
+// qui l'importent d'ici.
 export 'confirmation.dart' show confirmerAction;
 
 /// Briques des onglets « Compte » (acheteur et vendeur) : pastille de type
@@ -17,10 +17,6 @@ export 'confirmation.dart' show confirmerAction;
 ///
 /// L'en-tête marine, lui, vit dans `entete_compte.dart` : il est partagé
 /// par l'acheteur et le vendeur.
-
-// `CarteEnteteProfil` a ete retiree d'ici : elle n'avait plus aucun
-// appelant depuis que les deux onglets passent par `EnteteCompte`, et en
-// garder deux presque identiques laissait retoucher la mauvaise.
 
 /// Type de compte en pastille dorée : Acheteur, Vendeur…
 class BadgeTypeProfil extends StatelessWidget {

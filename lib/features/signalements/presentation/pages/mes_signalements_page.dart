@@ -17,11 +17,8 @@ import '../bloc/signalements_state.dart';
 
 /// Signalements envoyés par l'utilisateur connecté.
 ///
-/// L'écran montrait la RAISON SAISIE en gros titre — « dww » —, la valeur
-/// brute du statut en base — « en_attente », soulignés compris — et rien sur
-/// ce qui avait été signalé. On ne pouvait plus savoir de quoi on avait
-/// parlé. Il montre désormais la boutique ou le produit visé, son image, et
-/// où en est l'examen.
+/// Chaque ligne montre la boutique ou le produit visé, son image, et où en
+/// est l'examen : la raison saisie seule ne dit pas de quoi on a parlé.
 class MesSignalementsPage extends StatelessWidget {
   const MesSignalementsPage({super.key});
 

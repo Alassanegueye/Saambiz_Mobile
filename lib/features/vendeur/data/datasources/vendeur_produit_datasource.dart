@@ -69,8 +69,8 @@ class VendeurProduitDataSource {
   ///
   /// Pour les écrans qui doivent en PROPOSER UN À CHOISIR — nouvelle
   /// commande, formulaire de promotion, sections du site : un choix tronqué
-  /// aux dix premiers produits n'est pas un choix. Ils demandaient la liste
-  /// entière, et la pagination la leur aurait coupée sans prévenir.
+  /// aux dix premiers produits n'est pas un choix, et la pagination seule
+  /// couperait la liste sans prévenir.
   ///
   /// Bornée à vingt pages : au-delà, ce n'est plus une liste de choix mais
   /// un catalogue, et il faudra une recherche côté serveur.

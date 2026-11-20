@@ -76,10 +76,10 @@ class _HomePageState extends State<HomePage>
 
   /// Une commande a change d'etat, ici ou ailleurs.
   ///
-  /// Le retour d'onglet couvrait deja le vendeur seul sur son telephone. Il
-  /// ne couvrait pas le client qui paie ou annule pendant que le tableau de
-  /// bord est a l'ecran : les compteurs et « Dernieres commandes » restaient
-  /// alors sur ce qu'ils avaient lu en arrivant, statut compris.
+  /// Le retour d'onglet couvre le vendeur seul sur son telephone, pas le
+  /// client qui paie ou annule pendant que le tableau de bord est a l'ecran :
+  /// sans cet abonnement, les compteurs et « Dernieres commandes » resteraient
+  /// sur ce qu'ils ont lu en arrivant, statut compris.
   StreamSubscription<Map<String, dynamic>>? _surCommande;
 
   bool _loading = false;
@@ -291,7 +291,7 @@ class _HomePageState extends State<HomePage>
   }
 
   /// Mêmes libellés et couleurs que la liste des commandes : une table à part
-  /// ici affichait « En attente » pour tout statut qu'elle ne connaissait pas.
+  /// ici divergerait, et afficherait mal les statuts qu'elle ne connaît pas.
   ({String label, Color color}) _statutInfo(String statut) => (
     label: kStatutCommandeLabels[statut] ?? statut,
     color: couleurStatutCommande(statut),
@@ -478,7 +478,7 @@ class _HomePageState extends State<HomePage>
               AvatarUtilisateur(
                 utilisateur: _utilisateur,
                 pastille: _certificationAFaire,
-                // Le compte n'est plus un onglet : il s'ouvre ici, en haut,
+                // Le compte n'est pas un onglet : il s'ouvre ici, en haut,
                 // et se referme sur l'écran d'où il a été appelé.
                 onTap: () async {
                   await Navigator.of(context).push(

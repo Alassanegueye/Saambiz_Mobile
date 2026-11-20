@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 
 /// Un formulaire dont le bouton d'action n'est PAS collé en bas de l'écran.
 ///
-/// ## Le défaut qu'il corrige
+/// ## Le défaut qu'il évite
 ///
-/// Les écrans de saisie étaient bâtis ainsi :
+/// La mise en page habituelle d'un écran de saisie :
 ///
 /// ```dart
 /// Column([ Expanded(ListView(...champs...)), bouton ])
@@ -13,10 +13,9 @@ import 'package:flutter/material.dart';
 /// Le bouton, collé en bas, remonte au-dessus du clavier dès qu'il s'ouvre.
 /// Il ne reste alors aux champs qu'une bande étroite, prise entre l'en-tête
 /// et ce bouton — et un champ à plusieurs lignes n'y tient pas : son bas est
-/// coupé net. Sur « Nouvelle promotion », on écrivait son message sans voir
-/// ce qu'on écrivait.
+/// coupé net, et l'on écrit sans voir ce qu'on écrit.
 ///
-/// Le bouton ne cachait pas le champ : il lui prenait sa place.
+/// Le bouton ne cache pas le champ : il lui prend sa place.
 ///
 /// ## Ce que fait ce widget
 ///

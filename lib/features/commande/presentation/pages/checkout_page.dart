@@ -130,10 +130,10 @@ class _CheckoutViewState extends State<_CheckoutView> {
             absorbing: loading,
             child: Form(
               key: _formKey,
-              // LA BARRE N'EST PLUS COLLÉE EN BAS. Elle l'était, et elle
-              // remontait au-dessus du clavier : la note au vendeur, à trois
-              // lignes, se retrouvait coupée pendant qu'on l'écrivait.
-              // Clavier fermé, elle reste en bas de l'écran comme avant.
+              // La barre n'est pas collée en bas : collée, elle remonterait
+              // au-dessus du clavier, et la note au vendeur, à trois lignes,
+              // serait coupée pendant qu'on l'écrit. Clavier fermé, elle
+              // reste en bas de l'écran.
               child: FormulaireDefilant(
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
                 paddingBouton: EdgeInsets.zero,

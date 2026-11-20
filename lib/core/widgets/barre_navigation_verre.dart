@@ -39,8 +39,8 @@ class BarreNavigationVerre extends StatelessWidget {
   final ValueChanged<int> onDestinationSelected;
   final List<NavigationDestination> destinations;
 
-  /// Conservé pour compatibilité : l'espace sous la barre est désormais
-  /// calculé par [basBarreNavigation], le même pour clients et vendeurs.
+  /// Conservé pour compatibilité : l'espace sous la barre est calculé par
+  /// [basBarreNavigation], le même pour clients et vendeurs.
   final double margeBas;
 
   const BarreNavigationVerre({

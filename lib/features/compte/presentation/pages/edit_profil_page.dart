@@ -191,9 +191,9 @@ class _EditProfileViewState extends State<_EditProfileView> {
           final loading = state is CompteActionEnCours;
           return Form(
             key: _formKey,
-            // Le bouton « Enregistrer » n'est plus collé en bas : collé, il
-            // remontait au-dessus du clavier et prenait la place du champ en
-            // cours de saisie. Clavier fermé, rien ne change à l'écran.
+            // Le bouton « Enregistrer » n'est pas collé en bas : collé, il
+            // remonterait au-dessus du clavier et prendrait la place du champ
+            // en cours de saisie. Clavier fermé, il reste en bas de l'écran.
             child: FormulaireDefilant(
               padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
               paddingBouton: EdgeInsets.zero,

@@ -179,9 +179,9 @@ class _NouvelleCommandeVendeurPageState
       titre: 'Nouvelle commande',
       corps: Form(
         key: _formKey,
-        // La barre de validation n'est plus collée en bas : collée, elle
-        // remontait au-dessus du clavier et prenait la place du champ en
-        // cours de saisie. Clavier fermé, rien ne change à l'écran.
+        // La barre de validation n'est pas collée en bas : collée, elle
+        // remonterait au-dessus du clavier et prendrait la place du champ en
+        // cours de saisie. Clavier fermé, elle reste en bas de l'écran.
         child: FormulaireDefilant(
           padding: const EdgeInsets.fromLTRB(16, 22, 16, 0),
           paddingBouton: EdgeInsets.zero,

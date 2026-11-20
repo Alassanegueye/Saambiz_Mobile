@@ -536,8 +536,7 @@ class _EnteteAccueil extends StatelessWidget {
                   const SizedBox(width: 8),
                   // Bouton Panier en verre
                   const _BoutonPanierVerreRond(),
-                  // L'avatar menait nulle part : il avait ete retire faute de
-                  // destination. Le meme widget que l'espace vendeur, avec sa
+                  // L'avatar, le meme widget que l'espace vendeur, avec sa
                   // photo quand il y en a une, ouvre ici l'onglet « Compte ».
                   if (!isGuest && user != null) ...[
                     const SizedBox(width: 8),

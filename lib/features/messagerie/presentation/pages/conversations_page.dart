@@ -117,7 +117,7 @@ class _ConversationsViewState extends State<_ConversationsView> {
         message: m,
         onSupprimer: () async {
           // Suppression definitive d'un message laisse par un visiteur du
-          // site : elle partait d'un appui, sans retour possible.
+          // site, sans retour possible : elle se confirme.
           final confirme = await confirmerAction(
             context,
             icone: Icons.delete_outline_rounded,

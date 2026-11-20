@@ -564,10 +564,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         ),
         child: Stack(
           children: [
-            // Retiré ici : un cercle doré de 110 px à 15 % d'opacité, calé en
-            // dehors du cadre (right: -20, top: -25) et rogné par le coin de
-            // la bannière. Il ne portait aucune information et se lisait
-            // comme une tache claire dans l'angle.
             Row(
               children: [
                 Expanded(

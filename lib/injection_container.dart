@@ -125,7 +125,7 @@ Future<void> init() async {
   // d'erreur explicite au lancement qu'une application de production qui
   // parle à l'API de développement.
   // Le .env reste chargé en repli pour les postes de développement qui ne
-  // passent pas encore les --dart-define. Son absence n'est plus bloquante :
+  // passent pas encore les --dart-define. Son absence n'est pas bloquante :
   // Env fournit des valeurs par défaut.
   try {
     await dotenv.load(fileName: '.env');
@@ -182,8 +182,7 @@ Future<void> init() async {
   sl.registerLazySingleton(() {
     // Priorité au --dart-define ; le .env n'intervient que s'il apporte une
     // valeur là où la compilation n'en a pas fourni. L'arbitrage vit dans
-    // Env.resoudreApiBaseUrl : il était écrit ici, et à l'envers de ce que ce
-    // commentaire annonçait. Env.verifier() a déjà refusé les configurations
+    // Env.resoudreApiBaseUrl. Env.verifier() a déjà refusé les configurations
     // incohérentes au démarrage.
     final baseUrl = Env.apiBaseUrlEffective;
 

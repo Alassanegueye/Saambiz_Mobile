@@ -24,9 +24,8 @@ class AuthEndpoints {
   static const verifyEmail = '/auth/verify-email';
 
   // `/auth/resend-verification` n'est pas déclarée ici : l'inscription en deux
-  // temps renvoie un code par `envoyerCodeInscription`, et cette constante
-  // n'était appelée nulle part. La route existe toujours côté backend pour les
-  // comptes ouverts avant ce changement.
+  // temps renvoie un code par `envoyerCodeInscription`. La route reste servie
+  // par le backend pour les comptes ouverts avant l'inscription en deux temps.
 }
 
 /// Produits/boutiques côté acheteur (feature `home`).
@@ -226,10 +225,6 @@ class SignalementsEndpoints {
 }
 
 /// Réglages publics du backend, servis sans authentification.
-///
-/// Deux routes que l'application n'appelait pas alors qu'elles existaient :
-/// le prix de l'abonnement était donc inconnu côté mobile, et l'app ne voyait
-/// ni les mises en maintenance ni les versions minimales exigées.
 class ConfigEndpoints {
   ConfigEndpoints._();
 

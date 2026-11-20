@@ -18,8 +18,6 @@ import '../bloc/compte_state.dart';
 /// Dans l'application (Compte → Sécurité) : la barre bleue des pages du
 /// compte, puis les trois champs avec leur œil, les règles du serveur sous
 /// le nouveau mot de passe et une coche quand la confirmation correspond.
-/// On tapait trois mots de passe à l'aveugle, sans savoir ce qui était
-/// exigé.
 class ChangePasswordPage extends StatelessWidget {
   const ChangePasswordPage({super.key});
 

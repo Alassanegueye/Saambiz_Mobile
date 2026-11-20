@@ -158,13 +158,10 @@ class SignupRemoteDataSource {
       }
     }
     // AUCUNE réponse du serveur : la requête n'est jamais arrivée, ou sa
-    // réponse n'est jamais revenue. L'ancienne version n'énumérait que trois
-    // types sur les huit de Dio, et laissait passer `sendTimeout`,
-    // `badCertificate` et surtout `unknown` — celui qui enveloppe la plupart
-    // des SocketException. Le message affiché devenait alors « Impossible
-    // d'envoyer le code. » : l'utilisateur comprenait que son adresse posait
-    // problème, alors que le téléphone n'avait tout simplement pas joint le
-    // serveur. Sans réponse, la cause est le réseau, quel que soit le type.
+    // réponse n'est jamais revenue. La cause est alors le réseau, quel que
+    // soit le type d'erreur de Dio (`unknown` enveloppe la plupart des
+    // SocketException) : un message de repli comme « Impossible d'envoyer le
+    // code. » ferait croire à l'utilisateur que son adresse pose problème.
     if (e.response == null) {
       return 'Connexion impossible. Vérifiez votre réseau.';
     }

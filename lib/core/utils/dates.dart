@@ -1,10 +1,10 @@
 /// Formats de date partagés, construits une seule fois.
 ///
 /// `DateFormat('dd/MM/yyyy')` n'est pas un objet anodin : son constructeur
-/// analyse le motif et met en place la machinerie de localisation. Il était
-/// créé **à l'intérieur des constructeurs d'éléments de liste** — donc une
-/// fois par conversation, par signalement, par promotion, et de nouveau à
-/// chaque reconstruction pendant le défilement.
+/// analyse le motif et met en place la machinerie de localisation. Créé dans
+/// un élément de liste, il le serait une fois par conversation, par
+/// signalement, par promotion, et de nouveau à chaque reconstruction pendant
+/// le défilement.
 ///
 /// Ces instances-ci sont créées au premier usage et réutilisées ensuite. Un
 /// `DateFormat` ne porte aucun état entre deux appels à `format`, le partager

@@ -14,8 +14,8 @@ class EmptyState extends StatelessWidget {
   final VoidCallback? onAction;
   final String? actionLabel;
 
-  /// Conservé pour les écrans qui le passent encore ; la charte n'a plus
-  /// qu'une couleur d'état vide.
+  /// Conservé pour les écrans qui le passent encore ; la charte n'a qu'une
+  /// couleur d'état vide.
   final Color? accentColor;
   final bool scrollable;
 

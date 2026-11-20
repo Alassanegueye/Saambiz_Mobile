@@ -77,13 +77,11 @@ const Map<String, String> _statutSuivant = {
 /// règlement en ligne attend le paiement du client (le serveur refuse la
 /// transition dans ce second cas, voir commande.service.js).
 ///
-/// CE CALCUL DOIT RESTER UNIQUE. Il vivait en double : le bouton le faisait
-/// avec le cas `acceptee`, et le gestionnaire du clic lisait la table nue.
-/// Pour une commande acceptée à régler à la réception — le cas le plus
-/// courant en boutique — le bouton « Passer à : En préparation » s'affichait
-/// donc, et ne faisait STRICTEMENT RIEN au clic : la table ne connaît pas
-/// `acceptee`, le statut suivant valait `null`, et l'appel au serveur était
-/// passé sous silence. Aucune erreur, aucun message : un bouton mort.
+/// Ce calcul doit rester unique : le bouton et le gestionnaire du clic
+/// l'appellent tous deux. Un gestionnaire qui lirait la table nue obtiendrait
+/// `null` pour une commande acceptée à régler à la réception, le cas le plus
+/// courant en boutique : le bouton « Passer à : En préparation » serait
+/// affiché et ne ferait rien au clic, sans erreur ni message.
 String? statutSuivantPourVendeur(
   String statut, {
   required String modePaiement,
@@ -370,7 +368,7 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
           // DÉFILANT. Une `AlertDialog` ne fait pas défiler son contenu
           // d'elle-même : titre, explication, champ à trois lignes et deux
           // boutons ne tiennent pas toujours dans ce que le clavier laisse
-          // sur un petit téléphone, et le contenu débordait au lieu de
+          // sur un petit téléphone, et le contenu déborderait au lieu de
           // glisser. Rien ne change quand la place suffit.
           content: SingleChildScrollView(
             child: Column(
@@ -462,9 +460,9 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    // Une commande PAYÉE ne s'annule plus : elle passait en « remboursé »
+    // Une commande PAYÉE ne s'annule pas : elle passerait en « remboursé »
     // sans qu'aucun argent ne bouge. Elle se traite par un retour.
-    // Une commande EN PRÉPARATION ne s'annule plus non plus d'un geste : le
+    // Une commande EN PRÉPARATION ne s'annule pas non plus d'un geste : le
     // vendeur a engagé du travail, l'acheteur la DEMANDE (voir plus bas).
     final annulable =
         !isVendeur &&
@@ -617,13 +615,11 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
         },
       ),
       // Les boutons vivent dans la barre du bas, donc HORS du corps : le voile
-      // de chargement, lui, ne couvre que le corps. Ils restaient donc
-      // cliquables pendant la requête, et un deuxième appui partait avant le
-      // retour du premier. Le serveur traitait alors le premier (en_attente →
-      // acceptee), puis refusait le second : « Transition impossible :
-      // acceptee → acceptee », sur un écran qui montrait encore « en attente »
-      // puisque aucune réponse n'était arrivée. D'où ce BlocBuilder : pendant
-      // qu'une demande est en vol, plus rien n'est cliquable.
+      // de chargement, lui, ne couvre que le corps. Ce BlocBuilder les rend
+      // inactifs pendant qu'une demande est en vol : un deuxième appui
+      // partirait avant le retour du premier, et le serveur le refuserait
+      // (« Transition impossible : acceptee → acceptee ») sur un écran qui
+      // montre encore « en attente ».
       bottomNavigationBar: BlocBuilder<CommandeBloc, CommandeState>(
         builder: (context, state) =>
             // `_actions` rend `null` quand la commande n'offre aucune action ;
@@ -1089,7 +1085,7 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
           // Tant que le paiement en ligne est fermé, TOUTE commande se règle
           // avec la boutique : le vendeur doit pouvoir l'acter, y compris sur
           // une commande créée en « en ligne » avant la bascule. Sans cela
-          // elle restait « Non payée » pour toujours.
+          // elle resterait « Non payée » pour toujours.
           if (isVendeur &&
               (commande.modePaiement != 'en_ligne' ||
                   !ConfigPubliqueService.paiementEnLigneOuvert) &&
