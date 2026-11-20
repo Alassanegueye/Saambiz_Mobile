@@ -29,6 +29,7 @@ import '../widgets/commande_card.dart'
         montantFcfa;
 import '../widgets/sections_detail_commande.dart';
 import '../../../../core/widgets/page_vendeur.dart';
+import '../../../../core/services/config_publique_service.dart';
 
 /// Argument de navigation pour la page détail.
 class CommandeDetailArgs {
@@ -188,6 +189,25 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
   }
 
   Future<void> _payer() async {
+    // PAIEMENT EN LIGNE FERMÉ : on explique au lieu de proposer un choix qui
+    // n'aboutirait pas. Ce bouton subsiste sur les commandes créées AVANT la
+    // fermeture — les nouvelles partent toutes en « à la réception » et n'ont
+    // pas de bouton de paiement du tout.
+    if (!ConfigPubliqueService.paiementEnLigneOuvert) {
+      await informerAction(
+        context,
+        icone: Icons.phonelink_off_rounded,
+        titre: 'Paiement en ligne indisponible',
+        message:
+            'Le règlement par Wave et Orange Money n\'est pas encore ouvert '
+            'dans l\'application. Réglez votre commande directement avec la '
+            'boutique : en espèces à la réception, ou par transfert au numéro '
+            'qu\'elle vous indiquera. Le vendeur confirmera le paiement de '
+            'son côté.',
+      );
+      return;
+    }
+
     final bloc = context.read<CommandeBloc>();
     final methode = await showModalBottomSheet<String>(
       context: context,
@@ -1059,8 +1079,13 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
           ),
           // Réglée à la réception : c'est le vendeur qui confirme avoir été
           // payé, pour que la vente entre dans sa comptabilité.
+          // Tant que le paiement en ligne est fermé, TOUTE commande se règle
+          // avec la boutique : le vendeur doit pouvoir l'acter, y compris sur
+          // une commande créée en « en ligne » avant la bascule. Sans cela
+          // elle restait « Non payée » pour toujours.
           if (isVendeur &&
-              commande.modePaiement != 'en_ligne' &&
+              (commande.modePaiement != 'en_ligne' ||
+                  !ConfigPubliqueService.paiementEnLigneOuvert) &&
               commande.statutPaiement == 'non_paye' &&
               const {
                 'acceptee',

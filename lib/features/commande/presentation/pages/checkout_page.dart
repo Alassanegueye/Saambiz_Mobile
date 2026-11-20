@@ -17,6 +17,7 @@ import '../bloc/commande_bloc.dart';
 import '../bloc/commande_event.dart';
 import '../bloc/commande_state.dart';
 import '../../../../core/widgets/page_vendeur.dart';
+import '../../../../core/services/config_publique_service.dart';
 
 class _C {
   static const green = Color(0xFF01154B);
@@ -53,7 +54,16 @@ class _CheckoutViewState extends State<_CheckoutView> {
   final _noteCtrl = TextEditingController();
 
   String _modeLivraison = 'livraison';
-  String _modePaiement = 'en_ligne';
+
+  /// Wave et Orange Money ne sont pas branchés : le choix par défaut est
+  /// celui qui aboutit. Le serveur dit quand les rouvrir — voir
+  /// `ConfigPubliqueService.paiementEnLigneOuvert`.
+  late final bool _paiementEnLigneOuvert =
+      ConfigPubliqueService.paiementEnLigneOuvert;
+
+  late String _modePaiement = _paiementEnLigneOuvert
+      ? 'en_ligne'
+      : 'a_la_livraison';
 
   final _panier = sl<PanierService>();
 
@@ -184,6 +194,9 @@ class _CheckoutViewState extends State<_CheckoutView> {
                             ),
                           },
                           (v) => setState(() => _modePaiement = v),
+                          indisponibles: _paiementEnLigneOuvert
+                              ? const {}
+                              : const {'en_ligne'},
                           // Les logos des opérateurs remplacent l'icône : on
                           // reconnaît Wave et Orange Money d'un coup d'œil, bien
                           // avant d'avoir lu « Wave ou Orange Money ».
@@ -194,7 +207,34 @@ class _CheckoutViewState extends State<_CheckoutView> {
                             ],
                           },
                         ),
-                        if (_modePaiement == 'en_ligne')
+                        if (!_paiementEnLigneOuvert)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 10),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Icon(
+                                  Icons.info_outline_rounded,
+                                  size: 16,
+                                  color: AppColor.kErreur,
+                                ),
+                                const SizedBox(width: 7),
+                                Expanded(
+                                  child: Text(
+                                    'Le paiement en ligne n’est pas encore '
+                                    'disponible. Vous réglerez votre commande '
+                                    'directement avec la boutique.',
+                                    style: TextStyle(
+                                      fontSize: 12.5,
+                                      height: 1.45,
+                                      color: AppColor.kErreur,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        else if (_modePaiement == 'en_ligne')
                           const Padding(
                             padding: EdgeInsets.only(top: 8),
                             child: Text(
@@ -296,6 +336,7 @@ class _CheckoutViewState extends State<_CheckoutView> {
     Map<String, (IconData, String)> options,
     ValueChanged<String> onSelect, {
     Map<String, List<String>> logos = const {},
+    Set<String> indisponibles = const {},
   }) {
     // IntrinsicHeight borne la rangée : sans lui, `stretch` dans une
     // ListView demande une hauteur infinie, la mise en page échoue et tout
@@ -311,6 +352,7 @@ class _CheckoutViewState extends State<_CheckoutView> {
                 valeurs[i],
                 selected,
                 options,
+                indisponible: indisponibles.contains(valeurs[i]),
                 onSelect,
                 logos: logos[valeurs[i]] ?? const [],
               ),
@@ -327,48 +369,73 @@ class _CheckoutViewState extends State<_CheckoutView> {
     Map<String, (IconData, String)> options,
     ValueChanged<String> onSelect, {
     List<String> logos = const [],
+    bool indisponible = false,
   }) {
-    final sel = v == selected;
+    // Grisée, mais TOUJOURS VISIBLE. La retirer laisserait croire que
+    // l'application ne prendra jamais Wave ni Orange Money ; la montrer
+    // éteinte dit la vérité — c'est prévu, ce n'est pas encore ouvert.
+    final sel = v == selected && !indisponible;
     final (icone, libelle) = options[v]!;
-    return Material(
-      color: sel ? AppColor.kPrimaryLight : _C.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(14),
-        side: BorderSide(
-          color: sel ? _C.green : _C.border,
-          width: sel ? 1.5 : 1,
+    final teinte = indisponible
+        ? AppColor.kGrayscale30
+        : (sel ? _C.green : _C.sub);
+    return Opacity(
+      opacity: indisponible ? 0.55 : 1,
+      child: Material(
+        color: indisponible
+            ? AppColor.kBackground
+            : (sel ? AppColor.kPrimaryLight : _C.white),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(14),
+          side: BorderSide(
+            color: indisponible ? _C.border : (sel ? _C.green : _C.border),
+            width: sel ? 1.5 : 1,
+          ),
         ),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: () => onSelect(v),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
-          child: Column(
-            children: [
-              if (logos.isEmpty)
-                Icon(icone, size: 22, color: sel ? _C.green : _C.sub)
-              else
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    for (var i = 0; i < logos.length; i++) ...[
-                      if (i > 0) const SizedBox(width: 6),
-                      _LogoOperateur(logos[i], estime: sel),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          // `null` : l'option ne réagit pas au doigt, et aucun halo ne
+          // laisse espérer qu'elle va s'ouvrir.
+          onTap: indisponible ? null : () => onSelect(v),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
+            child: Column(
+              children: [
+                if (logos.isEmpty)
+                  Icon(icone, size: 22, color: teinte)
+                else
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      for (var i = 0; i < logos.length; i++) ...[
+                        if (i > 0) const SizedBox(width: 6),
+                        _LogoOperateur(logos[i], estime: sel),
+                      ],
                     ],
-                  ],
+                  ),
+                const SizedBox(height: 6),
+                Text(
+                  libelle,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 13.5,
+                    color: teinte,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
-              const SizedBox(height: 6),
-              Text(
-                libelle,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 13.5,
-                  color: sel ? _C.green : _C.sub,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ],
+                if (indisponible) ...[
+                  const SizedBox(height: 2),
+                  const Text(
+                    'Bientôt',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: AppColor.kGrayscale30,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ],
+            ),
           ),
         ),
       ),

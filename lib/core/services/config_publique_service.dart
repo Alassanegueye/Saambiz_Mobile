@@ -50,7 +50,10 @@ class ConfigPubliqueService {
       }
 
       final questions = <(String, String)>[
-        for (final q in (data['questions'] is List ? data['questions'] as List : const []))
+        for (final q
+            in (data['questions'] is List
+                ? data['questions'] as List
+                : const []))
           if (q is Map &&
               (q['question'] ?? '').toString().trim().isNotEmpty &&
               (q['reponse'] ?? '').toString().trim().isNotEmpty)
@@ -67,19 +70,36 @@ class ConfigPubliqueService {
     }
   }
 
+  /// Dernier état de service connu, pour les écrans qui en ont besoin sans
+  /// pouvoir attendre : l'écran de commande doit savoir tout de suite si le
+  /// paiement en ligne est ouvert. Rempli au démarrage par `AppBootstrap`.
+  static ConfigApp? dernierConnu;
+
+  /// Wave et Orange Money sont-ils ouverts ?
+  ///
+  /// FERMÉ TANT QU'ON NE SAIT PAS : au premier lancement, hors ligne, ou
+  /// face à un serveur plus ancien, l'application ne propose pas un
+  /// paiement qui n'aboutirait pas.
+  static bool get paiementEnLigneOuvert =>
+      dernierConnu?.paiementEnLigneActif ?? false;
+
   /// État de service de l'application.
   Future<ConfigApp?> configApp() async {
     try {
       final res = await dio.get(ConfigEndpoints.appConfig);
       final data = res.data;
       if (data is! Map) return null;
-      return ConfigApp(
+      final config = ConfigApp(
         minVersionAndroid: data['minVersionAndroid']?.toString(),
         minVersionIos: data['minVersionIos']?.toString(),
         maintenance: data['maintenance'] == true,
         message: data['message']?.toString(),
+        paiementEnLigneActif: data['paiementEnLigneActif'] == true,
       );
+      dernierConnu = config;
+      return config;
     } on DioException {
+      // Serveur injoignable : on garde ce qu'on savait, sans l'inventer.
       return null;
     }
   }
@@ -106,11 +126,21 @@ class ConfigApp {
   final bool maintenance;
   final String? message;
 
+  /// Wave et Orange Money sont-ils ouverts ?
+  ///
+  /// FAUX PAR DÉFAUT, et c'est volontaire : un serveur muet, une réponse
+  /// illisible, une version plus ancienne de l'API, et l'application
+  /// n'affiche pas un paiement qui n'aboutirait pas. Le jour de
+  /// l'ouverture, c'est le serveur qui le dira — aucune mise à jour de
+  /// l'application à installer.
+  final bool paiementEnLigneActif;
+
   const ConfigApp({
     this.minVersionAndroid,
     this.minVersionIos,
     required this.maintenance,
     this.message,
+    this.paiementEnLigneActif = false,
   });
 
   /// Vrai si [version] est strictement antérieure à la version minimale
