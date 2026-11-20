@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 
 import 'comptes_memorises.dart';
 import 'token_service.dart';
+import '../utils/app_logger.dart';
 
 enum ResultatRenouvellement {
   /// Nouveaux jetons enregistrés.
@@ -72,6 +73,16 @@ class SessionService {
       return ResultatRenouvellement.renouvele;
     } on DioException catch (e) {
       final resultat = _classer(e);
+      // VISIBLE EN PRODUCTION. Ces appels passent exprès à côté de
+      // l'intercepteur — ils ne doivent pas se déclencher eux-mêmes — donc
+      // rien d'autre ne les journalise. Or c'est ici que se joue « pourquoi
+      // ai-je été déconnecté » : jeton refusé, serveur en panne et réseau
+      // coupé ne se corrigent pas de la même façon.
+      logErreur(
+        'renouvellement de session : $resultat '
+        '(${e.response?.statusCode ?? e.type})',
+        e.message ?? e.type,
+      );
       if (resultat == ResultatRenouvellement.refuse) {
         await comptes?.majJeton(await _idCourant(), null);
         await jetons.clearToken();
@@ -131,6 +142,16 @@ class SessionService {
       return ResultatRenouvellement.renouvele;
     } on DioException catch (e) {
       final resultat = _classer(e);
+      // VISIBLE EN PRODUCTION. Ces appels passent exprès à côté de
+      // l'intercepteur — ils ne doivent pas se déclencher eux-mêmes — donc
+      // rien d'autre ne les journalise. Or c'est ici que se joue « pourquoi
+      // ai-je été déconnecté » : jeton refusé, serveur en panne et réseau
+      // coupé ne se corrigent pas de la même façon.
+      logErreur(
+        'renouvellement de session : $resultat '
+        '(${e.response?.statusCode ?? e.type})',
+        e.message ?? e.type,
+      );
       if (resultat == ResultatRenouvellement.refuse) {
         await comptes?.majJeton(compte.id, null);
       }

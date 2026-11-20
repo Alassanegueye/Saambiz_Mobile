@@ -91,7 +91,6 @@ import 'package:saambiz/features/signalements/data/datasources/signalements_remo
 import 'package:saambiz/features/signalements/data/repositories/signalements_repository.dart';
 import 'package:saambiz/features/signalements/presentation/bloc/signalements_bloc.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -103,18 +102,10 @@ import 'core/services/socket_service.dart';
 import 'core/connection/rejeu_reseau.dart';
 import 'core/utils/journal_sensible.dart';
 import 'features/vitrine/domain/usecases/supprimer_vitrine.dart';
+import 'core/utils/app_logger.dart';
 
 // Service Locator
 final sl = GetIt.instance;
-
-// Journalisation sécurisée : on n'imprime (token, corps de requête, données)
-// QU'EN DÉBOGAGE. En release, rien n'est loggué → pas de fuite de données sensibles.
-void _log(Object? message) {
-  if (kDebugMode) {
-    // ignore: avoid_print
-    print(message);
-  }
-}
 
 Future<void> init() async {
   //================================================
@@ -218,26 +209,26 @@ Future<void> init() async {
       InterceptorsWrapper(
         onRequest: (options, handler) async {
           // Logging des requêtes
-          _log('[REQUEST] ${options.method} ${options.path}');
+          logDebug('[REQUEST] ${options.method} ${options.path}');
           if (options.data != null) {
             if (options.data is FormData) {
               final formData = options.data as FormData;
-              _log('FormData fields:');
+              logDebug('FormData fields:');
               for (var field in formData.fields) {
                 // Masqué : un envoi multipart porte aussi des champs
                 // sensibles, le mot de passe à la création de compte notamment.
-                _log(
+                logDebug(
                   '${field.key}: '
                   '${masquerChampMultipart(field.key, field.value)}',
                 );
               }
               for (var file in formData.files) {
-                _log('${file.key}: ${file.value.filename}');
+                logDebug('${file.key}: ${file.value.filename}');
               }
             } else {
               // Masqué : ce corps porte le mot de passe sur /auth/login et
               // le jeton d'identité sur /auth/social.
-              _log('Body: ${masquerDonneesSensibles(options.data)}');
+              logDebug('Body: ${masquerDonneesSensibles(options.data)}');
             }
           }
 
@@ -260,28 +251,37 @@ Future<void> init() async {
 
               if (token != null && token.isNotEmpty) {
                 options.headers['Authorization'] = 'Bearer $token';
-                _log('Token ajouté à la requête');
+                logDebug('Token ajouté à la requête');
               }
             } catch (e) {
-              _log('Erreur lors de la récupération du token: $e');
+              logDebug('Erreur lors de la récupération du token: $e');
             }
           }
 
           return handler.next(options);
         },
         onResponse: (response, handler) {
-          _log(
+          logDebug(
             ' [RESPONSE] ${response.statusCode} ${response.requestOptions.path}',
           );
           if (response.data != null && response.data is Map) {
             // Masqué : la réponse de connexion porte le jeton de session et
             // son jeton de renouvellement.
-            _log('Data: ${masquerDonneesSensibles(response.data)}');
+            logDebug('Data: ${masquerDonneesSensibles(response.data)}');
           }
           return handler.next(response);
         },
         onError: (DioException e, handler) async {
-          _log('[ERROR] ${e.type} ${e.requestOptions.path}');
+          // VISIBLE EN PRODUCTION. Le reste de ce qui passe ici — corps de
+          // requête, réponse, jeton — reste réservé au débogage ; mais une
+          // requête qui échoue sur le téléphone d'un vendeur doit laisser une
+          // trace, sinon « ça ne marche pas » est tout ce qu'on en saura.
+          // Le chemin seul, jamais la charge utile.
+          logErreur(
+            'appel API en échec : ${e.requestOptions.method} '
+            '${e.requestOptions.path} (${e.response?.statusCode ?? e.type})',
+            e.message ?? e.type,
+          );
           // Jeton expiré : on en obtient un autre et on rejoue la requête, sans
           // que l'utilisateur s'en aperçoive.
           final requete = e.requestOptions;
@@ -305,10 +305,10 @@ Future<void> init() async {
                   ?.pushNamedAndRemoveUntil(AppRouter.loginRoute, (_) => false);
             }
           }
-          _log('Message: ${e.message}');
+          logDebug('Message: ${e.message}');
           if (e.response != null) {
-            _log('Status: ${e.response!.statusCode}');
-            _log('Data: ${masquerDonneesSensibles(e.response!.data)}');
+            logDebug('Status: ${e.response!.statusCode}');
+            logDebug('Data: ${masquerDonneesSensibles(e.response!.data)}');
           }
           return handler.next(e);
         },
@@ -625,7 +625,7 @@ void _validateEnvVariables() {
     );
   }
 
-  _log('Toutes les variables d\'environnement sont configurées');
+  logDebug('Toutes les variables d\'environnement sont configurées');
 
   // L'adresse RÉELLEMENT utilisée par Dio, et non celle du .env.
   //
@@ -636,10 +636,10 @@ void _validateEnvVariables() {
   // réelle : on cherche alors un problème de configuration qui n'existe pas.
   //
   // La provenance est indiquée, parce que c'est la question suivante.
-  _log(
+  logDebug(
     ' API Base URL: ${Env.apiBaseUrlEffective}'
     '${Env.apiBaseUrlCompilee ? ' (--dart-define)' : ' (.env)'}',
   );
-  _log('Auth Login Path: ${dotenv.get('AUTH_LOGIN_PATH')}');
-  _log('Auth Register Path: ${dotenv.get('AUTH_REGISTER_PATH')}');
+  logDebug('Auth Login Path: ${dotenv.get('AUTH_LOGIN_PATH')}');
+  logDebug('Auth Register Path: ${dotenv.get('AUTH_REGISTER_PATH')}');
 }
