@@ -23,6 +23,10 @@ plugins {
     id("org.jetbrains.kotlin.android") version "2.2.20" apply false
     // Firebase (notifications push) : appliqué par app/ si google-services.json existe.
     id("com.google.gms.google-services") version "4.4.4" apply false
+    // Remontée des erreurs. Le plugin dépose la table de symboles à chaque
+    // build release : sans elle, une pile d'appels arrive illisible dans la
+    // console Firebase. Appliqué par app/, aux mêmes conditions.
+    id("com.google.firebase.crashlytics") version "3.0.2" apply false
 }
 
 include(":app")

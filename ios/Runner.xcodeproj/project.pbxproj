@@ -205,6 +205,7 @@
 				9705A1C41CF9048500538489 /* Embed Frameworks */,
 				3B06AD1E1E4923F5004D2608 /* Thin Binary */,
 				ABACD92CA92CA4CA932FB73C /* [CP] Embed Pods Frameworks */,
+				C4A51071000000000000CR01 /* Crashlytics : envoi des symboles */,
 			);
 			buildRules = (
 			);
@@ -298,6 +299,23 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "/bin/sh \"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\" embed_and_thin";
+		};
+		C4A51071000000000000CR01 /* Crashlytics : envoi des symboles */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}",
+				"$(SRCROOT)/$(BUILT_PRODUCTS_DIR)/$(INFOPLIST_PATH)",
+			);
+			name = "Crashlytics : envoi des symboles";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Table des symboles de la build, envoyee a Crashlytics.\n#\n# Sans elle, une pile d'appels arrive en adresses memoire dans la console :\n# illisible, donc inutile. C'est la moitie du benefice de Crashlytics.\n#\n# Ce projet prend Firebase par Swift Package Manager, pas par CocoaPods :\n# l'outil n'est donc pas dans Pods/. Son emplacement a change selon les\n# versions du SDK, d'ou les trois essais.\n#\n# On NE FAIT PAS ECHOUER LA BUILD s'il est introuvable : une archive sans\n# symboles reste livrable, et un avertissement se lit dans le journal de\n# build. Mieux vaut une remontee imparfaite qu'une release bloquee.\nSPM=\"${BUILD_DIR%/Build/*}/SourcePackages\"\nGSP=\"${PROJECT_DIR}/Runner/GoogleService-Info.plist\"\nDSYM=\"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}\"\n\nif [ -f \"${PODS_ROOT}/FirebaseCrashlytics/run\" ]; then\n  \"${PODS_ROOT}/FirebaseCrashlytics/run\"\nelif [ -f \"$SPM/artifacts/firebase-ios-sdk/FirebaseCrashlytics/upload-symbols\" ]; then\n  \"$SPM/artifacts/firebase-ios-sdk/FirebaseCrashlytics/upload-symbols\" -gsp \"$GSP\" -p ios \"$DSYM\"\nelif [ -f \"$SPM/checkouts/firebase-ios-sdk/Crashlytics/run\" ]; then\n  \"$SPM/checkouts/firebase-ios-sdk/Crashlytics/run\"\nelse\n  echo \"warning: outil Crashlytics introuvable — les piles d'appels iOS arriveront sans symboles\"\nfi\n";
 		};
 		876022E782E1E4A1B46EBE50 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;

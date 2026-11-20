@@ -25,18 +25,22 @@ void main() async {
     () async {
       WidgetsFlutterBinding.ensureInitialized();
 
-      // Erreurs du framework Flutter (build/layout/paint) : loguées en debug
-      // uniquement (aucune fuite de données en production). À brancher plus tard
-      // sur un service de crash reporting (Crashlytics/Sentry) si besoin.
+      // Erreurs du framework Flutter (construction, mise en page, peinture).
+      // Remontées à Crashlytics : ce sont elles qui produisent l'écran blanc
+      // qu'un vendeur décrit par « ça ne marche pas ».
       FlutterError.onError = (FlutterErrorDetails details) {
         FlutterError.presentError(details);
-        logDebug('FlutterError: ${details.exceptionAsString()}');
+        logErreur(
+          'erreur Flutter : ${details.context ?? 'sans contexte'}',
+          details.exception,
+          details.stack,
+        );
       };
 
-      // Erreurs asynchrones non capturées (hors du framework Flutter).
+      // Erreurs asynchrones non capturées, hors du framework.
       PlatformDispatcher.instance.onError = (error, stack) {
-        logDebug('Erreur non interceptée: $error');
-        return true; // empêche le crash du process
+        logErreur('erreur asynchrone non interceptée', error, stack);
+        return true; // empêche l'arrêt du processus
       };
 
       // En release, remplace l'écran rouge par défaut (qui expose la stack trace)
@@ -73,7 +77,8 @@ void main() async {
       runApp(const MyApp());
     },
     (error, stack) {
-      logDebug('Erreur non gérée (zone racine): $error\n$stack');
+      // Dernier filet : ce qui n'a été attrapé nulle part ailleurs.
+      logErreur('erreur non gérée (zone racine)', error, stack);
     },
   );
 }

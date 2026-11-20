@@ -35,6 +35,19 @@ void main() {
     );
   });
 
+  test('sans Firebase, rien ne lève et rien n’est remonté', () {
+    // L'application doit tourner sans Firebase configuré — c'est un choix
+    // explicite ailleurs dans le code. Appeler Crashlytics dans cet état
+    // lèverait ; or ces fonctions sont appelées depuis des `catch`, et une
+    // journalisation qui lève remplacerait l'erreur qu'on voulait lire.
+    expect(
+      () => logErreur('envoi de la photo', Exception('503')),
+      returnsNormally,
+    );
+    expect(() => suivreUtilisateur('u-1'), returnsNormally);
+    expect(() => suivreUtilisateur(null), returnsNormally);
+  });
+
   test('logErreur accepte une erreur de n’importe quelle forme', () {
     // Elle est appelée depuis des `catch` : l'objet attrapé peut être une
     // exception, une chaîne, n'importe quoi. Aucune de ces formes ne doit

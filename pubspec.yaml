@@ -58,6 +58,9 @@ dependencies:
   # Notifications push (même mise en place que le projet SIGNS)
   firebase_core: ^4.0.0
   firebase_messaging: ^16.0.0
+  # Remontée des erreurs : une panne chez un vendeur devient lisible depuis
+  # la console Firebase, au lieu d'exiger son téléphone en main.
+  firebase_crashlytics: ^5.0.0
   flutter_local_notifications: ^20.0.0
 
   # The following adds the Cupertino Icons font to your application.

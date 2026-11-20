@@ -51,10 +51,15 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
     final result = await loginUser(identifiant, event.mot_de_passe);
 
-    result.fold(
-      (failure) => emit(AuthFailure(message: failure.errorMessage)),
-      (user) => emit(AuthSuccess(user: user)),
-    );
+    result.fold((failure) => emit(AuthFailure(message: failure.errorMessage)), (
+      user,
+    ) {
+      // L'identifiant suit les incidents remontés : sans lui, une erreur
+      // dans la console n'est rattachée à personne, et on ne peut pas
+      // rappeler le vendeur qui l'a subie.
+      suivreUtilisateur(user.id);
+      emit(AuthSuccess(user: user));
+    });
   }
 
   Future<void> _onConnexionSociale(
@@ -87,10 +92,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
 
     final result = await repository.connexionSociale(identite);
-    result.fold(
-      (failure) => emit(AuthFailure(message: failure.errorMessage)),
-      (user) => emit(AuthSuccess(user: user)),
-    );
+    result.fold((failure) => emit(AuthFailure(message: failure.errorMessage)), (
+      user,
+    ) {
+      suivreUtilisateur(user.id);
+      emit(AuthSuccess(user: user));
+    });
   }
 
   Future<void> _onRepriseCompte(
@@ -127,6 +134,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
             user,
             await sl<TokenService>().getRefreshToken(),
           );
+          suivreUtilisateur(user.id);
           emit(AuthSuccess(user: user));
         } catch (_) {
           emit(AuthCompteAReconnecter(compte));
@@ -223,6 +231,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       // Changer de profil ferme la session du compte quitté : pour y revenir,
       // son mot de passe sera demandé.
       await FcmService.desinscrire();
+      suivreUtilisateur(null);
       await _quitterCompte(event.compteQuitte, garderSession: false);
       emit(AuthInitial());
     } catch (e) {
@@ -239,6 +248,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       // Avant de quitter la session : ce téléphone ne reçoit plus les
       // notifications push du compte qui part.
       await FcmService.desinscrire();
+      suivreUtilisateur(null);
       if (event.compteSupprime) {
         final id = await sl<FlutterSecureStorage>().read(key: 'user_id');
         if (id != null) await sl<ComptesMemorises>().oublier(id);
