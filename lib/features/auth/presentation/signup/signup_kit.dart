@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:saambiz/core/theme/police.dart';
 
 import '../widgets/mise_en_page_auth.dart';
+import '../../../../core/widgets/fermer_clavier.dart';
 
 /// Briques communes aux ecrans du parcours d'inscription (choix du profil,
 /// formulaires, verification email, centres d'interet, creation de boutique).
@@ -488,150 +489,160 @@ class SbPageAuth extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final peutRevenir = onRetour != null || Navigator.of(context).canPop();
-    return Scaffold(
-      backgroundColor: Sb.bg,
-      body: AnnotatedRegion<SystemUiOverlayStyle>(
-        value: SystemUiOverlayStyle.light,
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          child: Column(
-            children: [
-              Container(
-                width: double.infinity,
-                decoration: const BoxDecoration(
-                  color: Sb.navy,
-                  borderRadius: BorderRadius.vertical(
-                    bottom: Radius.circular(32),
+    // Toucher à côté d'un champ ferme le clavier, comme sur les écrans bâtis
+    // sur `ScaffoldMarine` et `PageVendeur`. Ces écrans-ci ont leur propre
+    // coquille : sans cette ligne, le geste existait partout SAUF à
+    // l'inscription et aux mots de passe, là où l'on tape le plus.
+    return FermerClavierAuToucher(
+      child: Scaffold(
+        backgroundColor: Sb.bg,
+        body: AnnotatedRegion<SystemUiOverlayStyle>(
+          value: SystemUiOverlayStyle.light,
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            child: Column(
+              children: [
+                Container(
+                  width: double.infinity,
+                  decoration: const BoxDecoration(
+                    color: Sb.navy,
+                    borderRadius: BorderRadius.vertical(
+                      bottom: Radius.circular(32),
+                    ),
+                  ),
+                  child: SafeArea(
+                    bottom: false,
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(
+                        8,
+                        4,
+                        24,
+                        _chevauchement + 28,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            child: Row(
+                              children: [
+                                if (peutRevenir)
+                                  IconButton(
+                                    tooltip: 'Retour',
+                                    icon: const Icon(
+                                      Icons.arrow_back_ios_new_rounded,
+                                      color: Sb.white,
+                                      size: 20,
+                                    ),
+                                    onPressed:
+                                        onRetour ??
+                                        () => Navigator.of(context).maybePop(),
+                                  )
+                                else
+                                  const SizedBox(width: 16),
+                                if (etape != null)
+                                  Expanded(
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(left: 4),
+                                      child: SbEtapes(
+                                        courante: etape!,
+                                        vendeur: vendeur,
+                                        surFonce: true,
+                                      ),
+                                    ),
+                                  )
+                                else
+                                  const Spacer(),
+                                if (actionEntete != null) ...[
+                                  const SizedBox(width: 8),
+                                  actionEntete!,
+                                ],
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 14),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                if (icone == null)
+                                  Image.asset(
+                                    'assets/images/picto_clair.png',
+                                    height: 52,
+                                    fit: BoxFit.contain,
+                                    semanticLabel: 'SaamBiz',
+                                  )
+                                else
+                                  Container(
+                                    width: 52,
+                                    height: 52,
+                                    decoration: BoxDecoration(
+                                      color: Sb.white.withValues(alpha: 0.1),
+                                      borderRadius: BorderRadius.circular(16),
+                                      border: Border.all(
+                                        color: Sb.white.withValues(alpha: 0.18),
+                                      ),
+                                    ),
+                                    child: Icon(
+                                      icone,
+                                      color: Sb.gold,
+                                      size: 26,
+                                    ),
+                                  ),
+                                const SizedBox(height: 22),
+                                Text(
+                                  titre,
+                                  style: const TextStyle(
+                                    fontFamily: kPolice,
+                                    fontSize: 26,
+                                    fontWeight: FontWeight.w700,
+                                    color: Sb.white,
+                                    height: 1.2,
+                                  ),
+                                ),
+                                if (sousTitre != null) ...[
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    sousTitre!,
+                                    style: TextStyle(
+                                      fontFamily: kPolice,
+                                      fontSize: 14,
+                                      height: 1.45,
+                                      color: Sb.white.withValues(alpha: 0.8),
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
-                child: SafeArea(
-                  bottom: false,
+                Transform.translate(
+                  offset: const Offset(0, -_chevauchement),
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(
-                      8,
-                      4,
-                      24,
-                      _chevauchement + 28,
-                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8),
-                          child: Row(
-                            children: [
-                              if (peutRevenir)
-                                IconButton(
-                                  tooltip: 'Retour',
-                                  icon: const Icon(
-                                    Icons.arrow_back_ios_new_rounded,
-                                    color: Sb.white,
-                                    size: 20,
-                                  ),
-                                  onPressed:
-                                      onRetour ??
-                                      () => Navigator.of(context).maybePop(),
-                                )
-                              else
-                                const SizedBox(width: 16),
-                              if (etape != null)
-                                Expanded(
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(left: 4),
-                                    child: SbEtapes(
-                                      courante: etape!,
-                                      vendeur: vendeur,
-                                      surFonce: true,
-                                    ),
-                                  ),
-                                )
-                              else
-                                const Spacer(),
-                              if (actionEntete != null) ...[
-                                const SizedBox(width: 8),
-                                actionEntete!,
-                              ],
-                            ],
+                        if (carte != null)
+                          CarteAuth(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: carte!,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 14),
-                        Padding(
-                          padding: const EdgeInsets.only(left: 16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              if (icone == null)
-                                Image.asset(
-                                  'assets/images/picto_clair.png',
-                                  height: 52,
-                                  fit: BoxFit.contain,
-                                  semanticLabel: 'SaamBiz',
-                                )
-                              else
-                                Container(
-                                  width: 52,
-                                  height: 52,
-                                  decoration: BoxDecoration(
-                                    color: Sb.white.withValues(alpha: 0.1),
-                                    borderRadius: BorderRadius.circular(16),
-                                    border: Border.all(
-                                      color: Sb.white.withValues(alpha: 0.18),
-                                    ),
-                                  ),
-                                  child: Icon(icone, color: Sb.gold, size: 26),
-                                ),
-                              const SizedBox(height: 22),
-                              Text(
-                                titre,
-                                style: const TextStyle(
-                                  fontFamily: kPolice,
-                                  fontSize: 26,
-                                  fontWeight: FontWeight.w700,
-                                  color: Sb.white,
-                                  height: 1.2,
-                                ),
-                              ),
-                              if (sousTitre != null) ...[
-                                const SizedBox(height: 8),
-                                Text(
-                                  sousTitre!,
-                                  style: TextStyle(
-                                    fontFamily: kPolice,
-                                    fontSize: 14,
-                                    height: 1.45,
-                                    color: Sb.white.withValues(alpha: 0.8),
-                                  ),
-                                ),
-                              ],
-                            ],
-                          ),
-                        ),
+                        ...apres,
                       ],
                     ),
                   ),
                 ),
-              ),
-              Transform.translate(
-                offset: const Offset(0, -_chevauchement),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      if (carte != null)
-                        CarteAuth(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: carte!,
-                          ),
-                        ),
-                      ...apres,
-                    ],
-                  ),
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

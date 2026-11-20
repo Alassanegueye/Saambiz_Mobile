@@ -87,21 +87,26 @@ class _DialogueTitreSectionState extends State<_DialogueTitreSection> {
           color: _C.navy,
         ),
       ),
-      content: Form(
-        key: _cleForm,
-        child: TextFormField(
-          controller: _controleur,
-          autofocus: true,
-          maxLength: maxCaracteresTitre,
-          textCapitalization: TextCapitalization.sentences,
-          decoration: const InputDecoration(
-            hintText: 'Nouveautés, Promos du mois…',
-            helperText: 'Ce nom s\'affiche sur votre site.',
+      // Défilant, comme l'autre boîte à champ : une `AlertDialog` ne fait
+      // pas défiler son contenu d'elle-même, et le compteur de caractères
+      // sous le champ suffit à déborder quand le clavier est ouvert.
+      content: SingleChildScrollView(
+        child: Form(
+          key: _cleForm,
+          child: TextFormField(
+            controller: _controleur,
+            autofocus: true,
+            maxLength: maxCaracteresTitre,
+            textCapitalization: TextCapitalization.sentences,
+            decoration: const InputDecoration(
+              hintText: 'Nouveautés, Promos du mois…',
+              helperText: 'Ce nom s\'affiche sur votre site.',
+            ),
+            validator: (v) => (v ?? '').trim().isEmpty
+                ? 'Donnez un nom à cette section.'
+                : null,
+            onFieldSubmitted: (_) => _valider(),
           ),
-          validator: (v) => (v ?? '').trim().isEmpty
-              ? 'Donnez un nom à cette section.'
-              : null,
-          onFieldSubmitted: (_) => _valider(),
         ),
       ),
       actions: [

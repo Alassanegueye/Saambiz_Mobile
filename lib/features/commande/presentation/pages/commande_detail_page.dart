@@ -367,24 +367,31 @@ class _DetailViewState extends State<_DetailView> with WidgetsBindingObserver {
         context: context,
         builder: (ctx) => AlertDialog(
           title: Text(titre),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(explication, style: const TextStyle(fontSize: 13)),
-              const SizedBox(height: 12),
-              TextField(
-                controller: controleur,
-                maxLines: 3,
-                autofocus: true,
-                decoration: InputDecoration(
-                  label: obligatoire
-                      ? LibelleObligatoire(libelleChamp)
-                      : Text(libelleChamp),
-                  border: const OutlineInputBorder(),
+          // DÉFILANT. Une `AlertDialog` ne fait pas défiler son contenu
+          // d'elle-même : titre, explication, champ à trois lignes et deux
+          // boutons ne tiennent pas toujours dans ce que le clavier laisse
+          // sur un petit téléphone, et le contenu débordait au lieu de
+          // glisser. Rien ne change quand la place suffit.
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(explication, style: const TextStyle(fontSize: 13)),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: controleur,
+                  maxLines: 3,
+                  autofocus: true,
+                  decoration: InputDecoration(
+                    label: obligatoire
+                        ? LibelleObligatoire(libelleChamp)
+                        : Text(libelleChamp),
+                    border: const OutlineInputBorder(),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
           actions: [
             TextButton(

@@ -4,6 +4,7 @@ import 'package:saambiz/core/theme/police.dart';
 import 'package:saambiz/core/widgets/libelle_obligatoire.dart';
 
 import '../../../../core/theme/app_color.dart';
+import '../../../../core/widgets/fermer_clavier.dart';
 
 /// Mise en page commune des ecrans d'authentification (connexion, mot de
 /// passe oublie) : en-tete bleu marine (pictogramme, titre, sous-titre), puis
@@ -27,13 +28,16 @@ class MiseEnPageAuth extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColor.kBackground,
-      body: CorpsAuth(
-        titre: titre,
-        sousTitre: sousTitre,
-        icone: icone,
-        enfants: enfants,
+    // Même geste que partout ailleurs : toucher à côté ferme le clavier.
+    return FermerClavierAuToucher(
+      child: Scaffold(
+        backgroundColor: AppColor.kBackground,
+        body: CorpsAuth(
+          titre: titre,
+          sousTitre: sousTitre,
+          icone: icone,
+          enfants: enfants,
+        ),
       ),
     );
   }

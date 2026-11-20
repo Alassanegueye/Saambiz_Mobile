@@ -12,6 +12,7 @@ import '../bloc/vitrine_event.dart';
 import '../bloc/vitrine_state.dart';
 import 'vitrine_prete_page.dart';
 import '../widgets/etapes_contenus_vitrine.dart';
+import '../../../../core/widgets/formulaire_defilant.dart';
 
 class _C {
   static const navy = Color(0xFF01154B);
@@ -302,54 +303,43 @@ class _AssistantVitrinePageState extends State<AssistantVitrinePage> {
               ),
             ),
 
-            // Le bouton fait partie du corps : un `bottomNavigationBar` reste
-            // sous le clavier, et il devenait impossible de continuer.
+            // LE BOUTON N'EST PAS COLLÉ EN BAS. Collé, il remonte au-dessus
+            // du clavier et ne laisse au champ de l'étape qu'une bande
+            // étroite. Il descend donc avec le contenu, et `minHeight` le
+            // garde en bas tant que le clavier est fermé : rien ne change à
+            // l'usage. (Un `bottomNavigationBar`, lui, resterait SOUS le
+            // clavier : c'est l'autre travers, déjà évité ici.)
             body: genere
                 ? const _EcranGeneration()
-                : Column(
-                    children: [
-                      Expanded(
-                        child: SingleChildScrollView(
-                          keyboardDismissBehavior:
-                              ScrollViewKeyboardDismissBehavior.onDrag,
-                          padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
-                          child: _contenuEtape(state),
+                : FormulaireDefilant(
+                    padding: const EdgeInsets.fromLTRB(20, 18, 20, 0),
+                    paddingBouton: const EdgeInsets.fromLTRB(20, 8, 20, 14),
+                    enfants: [_contenuEtape(state)],
+                    bouton: SizedBox(
+                      width: double.infinity,
+                      child: FilledButton(
+                        style: FilledButton.styleFrom(
+                          backgroundColor: _C.navy,
+                          disabledBackgroundColor: _C.border,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
-                      ),
-                      SafeArea(
-                        top: false,
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(20, 8, 20, 14),
-                          child: SizedBox(
-                            width: double.infinity,
-                            child: FilledButton(
-                              style: FilledButton.styleFrom(
-                                backgroundColor: _C.navy,
-                                disabledBackgroundColor: _C.border,
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 16,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
-                              onPressed: _etapeValide ? _suivant : null,
-                              child: Text(
-                                _etape == _nombreEtapes - 1
-                                    ? (_modification
-                                          ? 'Enregistrer'
-                                          : 'Créer mon site')
-                                    : 'Continuer',
-                                style: const TextStyle(
-                                  fontSize: 15.5,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ),
+                        onPressed: _etapeValide ? _suivant : null,
+                        child: Text(
+                          _etape == _nombreEtapes - 1
+                              ? (_modification
+                                    ? 'Enregistrer'
+                                    : 'Créer mon site')
+                              : 'Continuer',
+                          style: const TextStyle(
+                            fontSize: 15.5,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
                       ),
-                    ],
+                    ),
                   ),
           ),
         );

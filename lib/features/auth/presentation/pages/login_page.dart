@@ -17,6 +17,7 @@ import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
 import '../widgets/choix_compte.dart';
 import '../widgets/mise_en_page_auth.dart';
+import '../../../../core/widgets/fermer_clavier.dart';
 
 /// Connexion : en-tete marine (logo, titre), puis une feuille blanche
 /// arrondie qui porte e-mail ou telephone et mot de passe, puis Google / Apple
@@ -162,157 +163,167 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      // Blanc comme la feuille du formulaire : quand le clavier monte, ce qui
-      // se voit derrière ses coins arrondis est la feuille, pas un liseré bleu.
-      backgroundColor: AppColor.kWhite,
-      body: BlocConsumer<AuthBloc, AuthState>(
-        listenWhen: (prev, curr) => prev != curr,
-        listener: (context, state) {
-          // AuthBloc est global : cette page ne reagit que lorsqu'elle est la
-          // route visible.
-          if (ModalRoute.of(context)?.isCurrent != true) return;
+    // Toucher à côté d'un champ ferme le clavier : la page de connexion ne
+    // le faisait pas non plus, alors qu'elle sert de référence aux autres.
+    return FermerClavierAuToucher(
+      child: Scaffold(
+        // Blanc comme la feuille du formulaire : quand le clavier monte, ce qui
+        // se voit derrière ses coins arrondis est la feuille, pas un liseré bleu.
+        backgroundColor: AppColor.kWhite,
+        body: BlocConsumer<AuthBloc, AuthState>(
+          listenWhen: (prev, curr) => prev != curr,
+          listener: (context, state) {
+            // AuthBloc est global : cette page ne reagit que lorsqu'elle est la
+            // route visible.
+            if (ModalRoute.of(context)?.isCurrent != true) return;
 
-          if (state is AuthSuccess) {
-            final role = state.user.role.toUpperCase();
-            final String? route = switch (role) {
-              'ACHETEUR' || 'CLIENT' => AppRouter.acheteurRoute,
-              'VENDEUR' => AppRouter.vendeurRoute,
-              _ => null,
-            };
-            if (route == null) {
+            if (state is AuthSuccess) {
+              final role = state.user.role.toUpperCase();
+              final String? route = switch (role) {
+                'ACHETEUR' || 'CLIENT' => AppRouter.acheteurRoute,
+                'VENDEUR' => AppRouter.vendeurRoute,
+                _ => null,
+              };
+              if (route == null) {
+                afficherErreur(
+                  context,
+                  'Ce type de compte ne peut pas se connecter à l\'application.',
+                  titre: 'Échec de la connexion',
+                );
+                return;
+              }
+              final prenom = state.user.prenom.trim();
+              afficherSucces(
+                context,
+                prenom.isEmpty
+                    ? 'Bienvenue sur SaamBiz.'
+                    : 'Bienvenue $prenom !',
+                titre: 'Connexion réussie',
+              );
+              Navigator.of(context).pushNamedAndRemoveUntil(
+                route,
+                (_) => false,
+                arguments: state.user,
+              );
+            } else if (state is AuthCompteAReconnecter) {
+              _reconnecter(state.compte);
+              if (state.message != null) {
+                afficherInfo(
+                  context,
+                  state.message!,
+                  titre: 'Reconnexion nécessaire',
+                );
+              }
+              _chargerComptes(); // le compte a perdu sa session
+            } else if (state is AuthConnexionIndisponible) {
+              afficherInfo(context, state.message, titre: 'Bientôt disponible');
+            } else if (state is AuthFailure) {
               afficherErreur(
                 context,
-                'Ce type de compte ne peut pas se connecter à l\'application.',
+                state.message.trim().isEmpty
+                    ? 'Identifiant ou mot de passe incorrect.'
+                    : state.message,
                 titre: 'Échec de la connexion',
               );
-              return;
             }
-            final prenom = state.user.prenom.trim();
-            afficherSucces(
-              context,
-              prenom.isEmpty ? 'Bienvenue sur SaamBiz.' : 'Bienvenue $prenom !',
-              titre: 'Connexion réussie',
-            );
-            Navigator.of(context).pushNamedAndRemoveUntil(
-              route,
-              (_) => false,
-              arguments: state.user,
-            );
-          } else if (state is AuthCompteAReconnecter) {
-            _reconnecter(state.compte);
-            if (state.message != null) {
-              afficherInfo(
-                context,
-                state.message!,
-                titre: 'Reconnexion nécessaire',
-              );
-            }
-            _chargerComptes(); // le compte a perdu sa session
-          } else if (state is AuthConnexionIndisponible) {
-            afficherInfo(context, state.message, titre: 'Bientôt disponible');
-          } else if (state is AuthFailure) {
-            afficherErreur(
-              context,
-              state.message.trim().isEmpty
-                  ? 'Identifiant ou mot de passe incorrect.'
-                  : state.message,
-              titre: 'Échec de la connexion',
-            );
-          }
-        },
-        builder: (context, state) {
-          final isLoading = state is AuthLoading;
-          final choix = _formulaireVisible == false && _comptes.isNotEmpty;
-          return AnnotatedRegion<SystemUiOverlayStyle>(
-            // En-tête marine : icônes de la barre d'état en blanc.
-            value: SystemUiOverlayStyle.light,
-            child: LayoutBuilder(
-              builder: (context, contraintes) => SingleChildScrollView(
-                physics: const ClampingScrollPhysics(),
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(minHeight: contraintes.maxHeight),
-                  child: IntrinsicHeight(
-                    child: Form(
-                      key: _formKey,
-                      child: AutofillGroup(
-                        child: ColoredBox(
-                          // Le bleu de l'en-tête, derrière les coins arrondis
-                          // de la feuille blanche.
-                          color: AppColor.kPrimary,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              _EnteteConnexion(titre: 'Se connecter'),
-                              Expanded(
-                                child: Container(
-                                  decoration: const BoxDecoration(
-                                    color: AppColor.kWhite,
-                                    borderRadius: BorderRadius.vertical(
-                                      top: Radius.circular(32),
+          },
+          builder: (context, state) {
+            final isLoading = state is AuthLoading;
+            final choix = _formulaireVisible == false && _comptes.isNotEmpty;
+            return AnnotatedRegion<SystemUiOverlayStyle>(
+              // En-tête marine : icônes de la barre d'état en blanc.
+              value: SystemUiOverlayStyle.light,
+              child: LayoutBuilder(
+                builder: (context, contraintes) => SingleChildScrollView(
+                  physics: const ClampingScrollPhysics(),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: contraintes.maxHeight,
+                    ),
+                    child: IntrinsicHeight(
+                      child: Form(
+                        key: _formKey,
+                        child: AutofillGroup(
+                          child: ColoredBox(
+                            // Le bleu de l'en-tête, derrière les coins arrondis
+                            // de la feuille blanche.
+                            color: AppColor.kPrimary,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                _EnteteConnexion(titre: 'Se connecter'),
+                                Expanded(
+                                  child: Container(
+                                    decoration: const BoxDecoration(
+                                      color: AppColor.kWhite,
+                                      borderRadius: BorderRadius.vertical(
+                                        top: Radius.circular(32),
+                                      ),
+                                    ),
+                                    padding: EdgeInsets.fromLTRB(
+                                      24,
+                                      20,
+                                      24,
+                                      16 + MediaQuery.paddingOf(context).bottom,
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.stretch,
+                                      children: [
+                                        if (_formulaireVisible != null)
+                                          AnimatedSwitcher(
+                                            duration: const Duration(
+                                              milliseconds: 220,
+                                            ),
+                                            child: choix
+                                                ? ChoixCompte(
+                                                    key: const ValueKey(
+                                                      'choix',
+                                                    ),
+                                                    comptes: _comptes,
+                                                    avecEntete: false,
+                                                    occupe: isLoading,
+                                                    compteEnCours:
+                                                        state
+                                                            is AuthRepriseEnCours
+                                                        ? state.idCompte
+                                                        : null,
+                                                    onChoisir: _choisirCompte,
+                                                    onRetirer: _retirerCompte,
+                                                    onAutreCompte: () =>
+                                                        setState(() {
+                                                          _formulaireVisible =
+                                                              true;
+                                                          _identifiantController
+                                                              .clear();
+                                                          _passwordController
+                                                              .clear();
+                                                        }),
+                                                  )
+                                                : KeyedSubtree(
+                                                    key: const ValueKey(
+                                                      'formulaire',
+                                                    ),
+                                                    child: _formulaire(
+                                                      isLoading,
+                                                      state,
+                                                    ),
+                                                  ),
+                                          ),
+                                        const Spacer(),
+                                        const SizedBox(height: 8),
+                                        _CreerCompte(
+                                          onTap: () =>
+                                              Navigator.of(context).pushNamed(
+                                                AppRouter.profileChoiceRoute,
+                                              ),
+                                        ),
+                                      ],
                                     ),
                                   ),
-                                  padding: EdgeInsets.fromLTRB(
-                                    24,
-                                    20,
-                                    24,
-                                    16 + MediaQuery.paddingOf(context).bottom,
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.stretch,
-                                    children: [
-                                      if (_formulaireVisible != null)
-                                        AnimatedSwitcher(
-                                          duration: const Duration(
-                                            milliseconds: 220,
-                                          ),
-                                          child: choix
-                                              ? ChoixCompte(
-                                                  key: const ValueKey('choix'),
-                                                  comptes: _comptes,
-                                                  avecEntete: false,
-                                                  occupe: isLoading,
-                                                  compteEnCours:
-                                                      state
-                                                          is AuthRepriseEnCours
-                                                      ? state.idCompte
-                                                      : null,
-                                                  onChoisir: _choisirCompte,
-                                                  onRetirer: _retirerCompte,
-                                                  onAutreCompte: () => setState(
-                                                    () {
-                                                      _formulaireVisible = true;
-                                                      _identifiantController
-                                                          .clear();
-                                                      _passwordController
-                                                          .clear();
-                                                    },
-                                                  ),
-                                                )
-                                              : KeyedSubtree(
-                                                  key: const ValueKey(
-                                                    'formulaire',
-                                                  ),
-                                                  child: _formulaire(
-                                                    isLoading,
-                                                    state,
-                                                  ),
-                                                ),
-                                        ),
-                                      const Spacer(),
-                                      const SizedBox(height: 8),
-                                      _CreerCompte(
-                                        onTap: () =>
-                                            Navigator.of(context).pushNamed(
-                                              AppRouter.profileChoiceRoute,
-                                            ),
-                                      ),
-                                    ],
-                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                       ),
@@ -320,9 +331,9 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }
