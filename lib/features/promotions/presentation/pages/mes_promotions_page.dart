@@ -9,7 +9,7 @@ import '../../../../core/theme/police.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/theme/app_color.dart';
-import '../../../../core/widgets/image_reseau.dart';
+import '../../../../core/widgets/image_produit.dart';
 import '../../../../injection_container.dart';
 import '../../../catalogue/presentation/widgets/produit_card.dart'
     show formaterPrix;
@@ -245,16 +245,6 @@ class _CartePromoVendeur extends StatelessWidget {
         Icons.history_rounded,
       ),
     };
-    const repli = ColoredBox(
-      color: AppColor.kPrimaryLight,
-      child: Center(
-        child: Icon(
-          Icons.local_offer_outlined,
-          size: 26,
-          color: AppColor.kPrimary,
-        ),
-      ),
-    );
 
     return Material(
       color: AppColor.kWhite,
@@ -272,50 +262,36 @@ class _CartePromoVendeur extends StatelessWidget {
             children: [
               Opacity(
                 opacity: terminee ? 0.5 : 1,
-                child: SizedBox(
-                  width: 80,
-                  height: 80,
-                  child: Stack(
-                    children: [
-                      Positioned.fill(
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(14),
-                          child: (p.produitImage ?? '').isNotEmpty
-                              ? ImageReseau(
-                                  p.produitImage!,
-                                  largeurServeur: 240,
-                                  fit: BoxFit.cover,
-                                  repli: repli,
-                                )
-                              : repli,
-                        ),
-                      ),
-                      if (remise != null)
-                        Positioned(
-                          top: 5,
-                          left: 5,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 6,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: AppColor.kSecondary,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              '-$remise %',
-                              style: const TextStyle(
-                                fontFamily: kPolice,
-                                fontSize: 11,
-                                fontWeight: FontWeight.w800,
-                                color: AppColor.kPrimary,
-                              ),
+                child: ImageProduit(
+                  p.produitImage,
+                  cote: 80,
+                  largeurServeur: 240,
+                  superpositions: [
+                    if (remise != null)
+                      Positioned(
+                        top: 5,
+                        left: 5,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColor.kSecondary,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            '-$remise %',
+                            style: const TextStyle(
+                              fontFamily: kPolice,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w800,
+                              color: AppColor.kPrimary,
                             ),
                           ),
                         ),
-                    ],
-                  ),
+                      ),
+                  ],
                 ),
               ),
               const SizedBox(width: 12),

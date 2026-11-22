@@ -2,8 +2,8 @@ import 'package:saambiz/core/widgets/page_vendeur.dart';
 import 'package:saambiz/core/errors/message_erreur.dart';
 import 'package:saambiz/core/widgets/messages.dart';
 import 'package:saambiz/core/widgets/libelle_obligatoire.dart';
-import 'package:saambiz/core/widgets/image_reseau.dart';
-import 'dart:io';
+import 'package:saambiz/core/widgets/image_produit.dart';
+import 'package:saambiz/core/utils/photo_produit.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../../injection_container.dart';
@@ -117,14 +117,14 @@ class _ProduitFormPageState extends State<ProduitFormPage> {
     super.dispose();
   }
 
+  /// Photo principale : source au choix, puis cadrage au carré.
+  ///
+  /// Une annulation du cadrage laisse la photo précédente en place : mieux
+  /// vaut l'ancienne que celle que le vendeur n'a pas validée.
   Future<void> _choisirImage() async {
-    final picker = ImagePicker();
-    final x = await picker.pickImage(
-      source: ImageSource.gallery,
-      imageQuality: 80,
-      maxWidth: 1200,
-    );
-    if (x != null) setState(() => _imagePath = x.path);
+    final chemin = await choisirPhotoProduit(context);
+    if (chemin == null || !mounted) return;
+    setState(() => _imagePath = chemin);
   }
 
   Future<void> _ajouterPhotosSupplementaires() async {
@@ -136,22 +136,31 @@ class _ProduitFormPageState extends State<ProduitFormPage> {
     }
     final picker = ImagePicker();
     var fichiers = await picker.pickMultiImage(
-      imageQuality: 80,
-      maxWidth: 1200,
+      imageQuality: 90,
+      maxWidth: 1600,
     );
     if (fichiers.isEmpty || !mounted) return;
     if (fichiers.length > reste) fichiers = fichiers.take(reste).toList();
+
+    // Cadrées une par une, au même rapport que la photo principale : une
+    // photo secondaire non recadrée réapparaîtrait de travers dans la
+    // galerie de la fiche produit. Celles que le vendeur n'a pas validées
+    // sont simplement laissées de côté.
+    final chemins = <String>[];
+    for (final fichier in fichiers) {
+      final rognee = await rognerPhotoProduit(fichier.path);
+      if (rognee != null) chemins.add(rognee);
+    }
+    if (chemins.isEmpty || !mounted) return;
+
     // Nouveau produit : les photos attendent l'enregistrement.
     if (!_isEdit) {
-      setState(() => _photosEnAttente.addAll(fichiers.map((f) => f.path)));
+      setState(() => _photosEnAttente.addAll(chemins));
       return;
     }
     setState(() => _uploadingImages = true);
     try {
-      await _ds.ajouterImages(
-        widget.produit!.id,
-        fichiers.map((f) => f.path).toList(),
-      );
+      await _ds.ajouterImages(widget.produit!.id, chemins);
       if (!mounted) return;
       afficherSucces(context, 'Photos ajoutées');
       // Le produit rafraîchi n'est pas re-fetch ici (pas de usecase dédié
@@ -362,36 +371,47 @@ class _ProduitFormPageState extends State<ProduitFormPage> {
     );
   }
 
+  /// Aperçu de la photo principale, au cadrage exact de la boutique.
+  ///
+  /// Le bandeau de 170 points de haut montrait une tranche de la photo que le
+  /// vendeur ne retrouvait nulle part ailleurs : l'aperçu est maintenant le
+  /// carré que verront les clients. Tant qu'il n'y a pas de photo, la zone
+  /// reste un simple bouton, sans prendre la hauteur d'un carré vide.
   Widget _imagePicker() {
-    Widget content;
-    if (_imagePath != null) {
-      content = Image.file(File(_imagePath!), fit: BoxFit.cover);
-    } else if (_isEdit && widget.produit!.image.isNotEmpty) {
-      content = ImageReseau(widget.produit!.image, fit: BoxFit.cover);
-    } else {
-      content = const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.add_a_photo_outlined, color: _C.sub, size: 32),
-            SizedBox(height: 8),
-            Text('Ajouter une photo', style: TextStyle(color: _C.sub)),
-          ],
-        ),
-      );
-    }
+    final urlExistante = _isEdit ? widget.produit!.image : '';
+    final aUnePhoto = _imagePath != null || urlExistante.isNotEmpty;
+
     return GestureDetector(
       onTap: _choisirImage,
-      child: Container(
-        height: 170,
-        width: double.infinity,
+      child: DecoratedBox(
         decoration: BoxDecoration(
           color: _C.white,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: _C.border),
         ),
-        clipBehavior: Clip.antiAlias,
-        child: content,
+        child: aUnePhoto
+            ? ImageProduit(
+                urlExistante,
+                fichier: _imagePath,
+                rayon: BorderRadius.circular(15),
+              )
+            : const SizedBox(
+                height: 170,
+                width: double.infinity,
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.add_a_photo_outlined, color: _C.sub, size: 32),
+                      SizedBox(height: 8),
+                      Text(
+                        'Ajouter une photo',
+                        style: TextStyle(color: _C.sub),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
       ),
     );
   }
@@ -445,15 +465,7 @@ class _ProduitFormPageState extends State<ProduitFormPage> {
                 itemBuilder: (context, i) => Stack(
                   clipBehavior: Clip.none,
                   children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: Image.file(
-                        File(_photosEnAttente[i]),
-                        width: 90,
-                        height: 90,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
+                    ImageProduit(null, fichier: _photosEnAttente[i], cote: 90),
                     Positioned(
                       top: -6,
                       right: -6,
@@ -498,24 +510,7 @@ class _ProduitFormPageState extends State<ProduitFormPage> {
                   return Stack(
                     clipBehavior: Clip.none,
                     children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: ImageReseau(
-                          img.url,
-                          width: 90,
-                          height: 90,
-                          fit: BoxFit.cover,
-                          repli: Container(
-                            width: 90,
-                            height: 90,
-                            color: _C.bg,
-                            child: const Icon(
-                              Icons.image_not_supported_outlined,
-                              color: _C.sub,
-                            ),
-                          ),
-                        ),
-                      ),
+                      ImageProduit(img.url, cote: 90, largeurServeur: 240),
                       Positioned(
                         top: -6,
                         right: -6,

@@ -955,7 +955,7 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
           ),
         ),
         SizedBox(
-          height: largeur / ratioCarteProduit,
+          height: hauteurCarteProduit(largeur),
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -979,7 +979,7 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
         SliverPadding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           sliver: SliverGrid(
-            gridDelegate: grilleProduits(context),
+            gridDelegate: grilleProduits(context, marge: 20),
             delegate: SliverChildBuilderDelegate(
               (_, __) => const _CarteFantome(),
               childCount: 4,
@@ -1024,7 +1024,7 @@ class _BoutiquePubliquePageState extends State<BoutiquePubliquePage> {
       SliverPadding(
         padding: const EdgeInsets.symmetric(horizontal: 20),
         sliver: SliverGrid(
-          gridDelegate: grilleProduits(context),
+          gridDelegate: grilleProduits(context, marge: 20),
           delegate: SliverChildBuilderDelegate(
             (_, i) => ProduitCard(produit: _produits[i], avecAjout: true),
             childCount: _produits.length,

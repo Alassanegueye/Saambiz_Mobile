@@ -8,6 +8,7 @@ import '../../../../core/theme/police.dart';
 import '../../../../core/utils/dates.dart';
 import '../../../../core/widgets/barre_pagination.dart';
 import '../../../../core/widgets/ui_kit.dart';
+import '../../../../core/widgets/image_produit.dart';
 import '../../../../core/widgets/image_reseau.dart';
 import '../../../../injection_container.dart';
 import '../../data/models/signalement_model.dart';
@@ -271,6 +272,11 @@ class _Vignette extends StatelessWidget {
         color: AppColor.kPrimary,
       ),
     );
+    // Un produit signalé se présente comme partout ailleurs ; une boutique
+    // garde sa vignette et son pictogramme de devanture.
+    if (!estBoutique) {
+      return ImageProduit(image, cote: 48, largeurServeur: 160, repli: repli);
+    }
     return ClipRRect(
       borderRadius: BorderRadius.circular(12),
       child: SizedBox(

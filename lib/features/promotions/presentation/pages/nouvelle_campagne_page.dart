@@ -2,7 +2,7 @@ import 'package:saambiz/core/utils/fichier_envoi.dart';
 import 'package:saambiz/core/widgets/messages.dart';
 import 'package:saambiz/core/widgets/page_vendeur.dart';
 import 'package:saambiz/core/widgets/libelle_obligatoire.dart';
-import 'package:saambiz/core/widgets/image_reseau.dart';
+import 'package:saambiz/core/widgets/image_produit.dart';
 import 'dart:convert';
 import 'dart:io';
 
@@ -446,25 +446,10 @@ class _NouvelleCampagnePageState extends State<NouvelleCampagnePage> {
                       ),
                       contentPadding: EdgeInsets.zero,
                       controlAffinity: ListTileControlAffinity.leading,
-                      secondary: ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: SizedBox(
-                          width: 44,
-                          height: 44,
-                          child: p.image.isNotEmpty
-                              ? ImageReseau(
-                                  p.image,
-                                  largeurServeur: 120,
-                                  fit: BoxFit.cover,
-                                )
-                              : ColoredBox(
-                                  color: AppColor.kPrimaryLight,
-                                  child: const Icon(
-                                    Icons.image_outlined,
-                                    size: 18,
-                                  ),
-                                ),
-                        ),
+                      secondary: ImageProduit(
+                        p.image,
+                        cote: 44,
+                        largeurServeur: 120,
                       ),
                       title: Text(
                         p.nom,

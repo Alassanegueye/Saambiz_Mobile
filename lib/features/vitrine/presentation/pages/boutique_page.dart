@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:saambiz/core/theme/police.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../../core/widgets/image_produit.dart';
 import '../../../../core/widgets/image_reseau.dart';
 import '../../../../core/widgets/page_vendeur.dart';
 import '../../../../core/widgets/ui_kit.dart';
@@ -2456,44 +2457,27 @@ class _ProduitSite extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          SizedBox(
-            height: largeur,
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                Container(
-                  color: _S.papierFonce,
-                  padding: const EdgeInsets.all(9),
-                  child: produit.image.isEmpty
-                      ? const Icon(
-                          Icons.image_not_supported_outlined,
-                          color: _S.encrePale,
-                        )
-                      : ImageReseau(
-                          produit.image,
-                          largeurServeur: 320,
-                          fit: BoxFit.contain,
-                          fond: _S.papierFonce,
-                          repli: const Icon(
-                            Icons.image_not_supported_outlined,
-                            color: _S.encrePale,
-                          ),
-                        ),
-                ),
-                if (pastille != null)
-                  Positioned(top: 9, left: 9, child: pastille),
-                if (onMenu != null)
-                  Positioned(
-                    top: 6,
-                    right: 6,
-                    child: _PastilleAction(
-                      icone: Icons.more_vert_rounded,
-                      infobulle: 'Actions sur ce produit',
-                      onTap: onMenu,
-                    ),
+          // La photo touche les bords de la carte : la marge de 9 points
+          // autour d'une photo « contain » faisait flotter le produit, alors
+          // que la même photo remplissait sa vignette ailleurs.
+          ImageProduit(
+            produit.image,
+            largeurServeur: 320,
+            rayon: BorderRadius.zero,
+            superpositions: [
+              if (pastille != null)
+                Positioned(top: 9, left: 9, child: pastille),
+              if (onMenu != null)
+                Positioned(
+                  top: 6,
+                  right: 6,
+                  child: _PastilleAction(
+                    icone: Icons.more_vert_rounded,
+                    infobulle: 'Actions sur ce produit',
+                    onTap: onMenu,
                   ),
-              ],
-            ),
+                ),
+            ],
           ),
           Expanded(
             child: Padding(

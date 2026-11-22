@@ -1,7 +1,7 @@
 import 'package:saambiz/core/widgets/messages.dart';
 import 'package:saambiz/core/widgets/page_vendeur.dart';
 import 'package:flutter/material.dart';
-import 'package:saambiz/core/widgets/image_reseau.dart';
+import 'package:saambiz/core/widgets/image_produit.dart';
 import 'package:saambiz/core/theme/police.dart';
 
 import '../../../../core/widgets/ui_kit.dart';
@@ -665,27 +665,7 @@ class _Vignette extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final repli = Container(
-      width: cote,
-      height: cote,
-      color: _C.navyLight,
-      alignment: Alignment.center,
-      child: Icon(
-        Icons.image_not_supported_outlined,
-        size: cote * 0.42,
-        color: _C.muted,
-      ),
-    );
-
-    if (produit.image.isEmpty) return repli;
-    return ImageReseau(
-      produit.image,
-      largeurServeur: 240,
-      width: cote,
-      height: cote,
-      fit: BoxFit.cover,
-      repli: repli,
-    );
+    return ImageProduit(produit.image, cote: cote, largeurServeur: 240);
   }
 }
 

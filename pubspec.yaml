@@ -62,6 +62,10 @@ dependencies:
   # la console Firebase, au lieu d'exiger son téléphone en main.
   firebase_crashlytics: ^5.0.0
   flutter_local_notifications: ^20.0.0
+  # Recadrage des photos de produit avant l'envoi : le vendeur choisit ce que
+  # le carré de la vitrine garde, au lieu de subir un cadrage automatique.
+  # Android : déclare UCropActivity dans AndroidManifest.xml. iOS : rien.
+  image_cropper: ^14.0.0
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.

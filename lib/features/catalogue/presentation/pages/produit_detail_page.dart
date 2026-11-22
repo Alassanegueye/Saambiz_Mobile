@@ -2,6 +2,7 @@ import 'package:saambiz/core/widgets/messages.dart';
 import 'dart:async';
 
 import 'package:dio/dio.dart';
+import 'package:saambiz/core/widgets/image_produit.dart';
 import 'package:saambiz/core/widgets/image_reseau.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -261,16 +262,11 @@ class _ProduitDetailPageState extends State<ProduitDetailPage> {
               controller: _galerie,
               itemCount: images.length,
               onPageChanged: (i) => setState(() => _page = i),
+              // Le carré de la vignette, en grand : le client retrouve
+              // exactement le cadrage qui l'a fait ouvrir la fiche.
               itemBuilder: (_, i) => Padding(
                 padding: EdgeInsets.fromLTRB(20, haut + 60, 20, 28),
-                child: ImageReseau(
-                  images[i],
-                  fit: BoxFit.contain,
-                  repli: const Icon(
-                    Icons.image_outlined,
-                    color: AppColor.kGrayscale30,
-                  ),
-                ),
+                child: Center(child: ImageProduit(images[i])),
               ),
             ),
           if (images.length > 1)
@@ -764,7 +760,7 @@ class _ProduitDetailPageState extends State<ProduitDetailPage> {
           ),
           const SizedBox(height: 12),
           SizedBox(
-            height: largeur / ratioCarteProduit,
+            height: hauteurCarteProduit(largeur),
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 16),

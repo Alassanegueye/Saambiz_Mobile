@@ -12,7 +12,7 @@ import '../../../../injection_container.dart';
 import '../../../../core/routes/app_router.dart';
 import '../../data/models/panier_item.dart';
 import '../../data/services/panier_service.dart';
-import 'package:saambiz/core/widgets/image_reseau.dart';
+import 'package:saambiz/core/widgets/image_produit.dart';
 import '../bloc/commande_bloc.dart';
 import '../bloc/commande_event.dart';
 import '../bloc/commande_state.dart';
@@ -527,18 +527,7 @@ class _Recapitulatif extends StatelessWidget {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: it.image.isNotEmpty
-                        ? ImageReseau(
-                            it.image,
-                            width: 44,
-                            height: 44,
-                            fit: BoxFit.cover,
-                            repli: const _Vignette(),
-                          )
-                        : const _Vignette(),
-                  ),
+                  ImageProduit(it.image, cote: 44, largeurServeur: 120),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Column(
@@ -598,17 +587,6 @@ class _Recapitulatif extends StatelessWidget {
       ),
     );
   }
-}
-
-class _Vignette extends StatelessWidget {
-  const _Vignette();
-  @override
-  Widget build(BuildContext context) => Container(
-    width: 44,
-    height: 44,
-    color: _C.bg,
-    child: const Icon(Icons.shopping_bag_outlined, size: 20, color: _C.sub),
-  );
 }
 
 /// Total et bouton de confirmation, toujours visibles en bas de l'écran.

@@ -2,7 +2,7 @@ import 'package:saambiz/core/widgets/barre_pagination.dart';
 import 'package:saambiz/core/widgets/confirmation.dart';
 import 'package:saambiz/core/widgets/messages.dart';
 import 'package:saambiz/core/widgets/onglets_conserves.dart';
-import 'package:saambiz/core/widgets/image_reseau.dart';
+import 'package:saambiz/core/widgets/image_produit.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/widgets/page_vendeur.dart';
 import 'package:saambiz/core/theme/app_color.dart';
@@ -24,7 +24,6 @@ class _C {
   static const sub = Color(0xFF5B6C8A);
   static const border = Color(0xFFE6EAF0);
   static const danger = Color(0xFFD64533);
-  static const greenLight = Color(0xFFE8EEF7);
 }
 
 /// Le statut en mots et en couleur. La modération d'abord : un produit
@@ -297,18 +296,7 @@ class _MesProduitsViewState extends State<_MesProduitsView> {
               // Caché aux clients, la photo pâlit.
               Opacity(
                 opacity: visible ? 1 : 0.45,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: p.image.isNotEmpty
-                      ? ImageReseau(
-                          p.image,
-                          width: 68,
-                          height: 68,
-                          fit: BoxFit.cover,
-                          repli: _imgFallback(),
-                        )
-                      : _imgFallback(),
-                ),
+                child: ImageProduit(p.image, cote: 68, largeurServeur: 200),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -475,12 +463,4 @@ class _MesProduitsViewState extends State<_MesProduitsView> {
     );
     if (ok) bloc.add(SupprimerProduit(p.id));
   }
-
-  // Même taille que la photo, pour que les cartes restent alignées.
-  Widget _imgFallback() => Container(
-    width: 68,
-    height: 68,
-    color: _C.greenLight,
-    child: const Icon(Icons.image_not_supported_outlined, color: _C.sub),
-  );
 }

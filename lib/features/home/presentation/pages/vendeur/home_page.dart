@@ -4,6 +4,7 @@ import 'package:saambiz/core/services/socket_service.dart';
 import 'package:saambiz/core/widgets/messages.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:saambiz/core/widgets/onglets_conserves.dart';
+import 'package:saambiz/core/widgets/image_produit.dart';
 import 'package:saambiz/core/widgets/image_reseau.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -45,7 +46,6 @@ class _C {
   static const black = Color(0xFF01154B);
   static const white = Color(0xFFFFFFFF);
   static const bg = Color(0xFFF4F5F8);
-  static const surface = Color(0xFFF7F9FC);
   static const border = Color(0xFFE8EDF7);
   static const label = Color(0xFF93A1B8);
   static const sub = Color(0xFF5B6C8A);
@@ -1355,7 +1355,10 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
                             crossAxisCount: 2,
                             crossAxisSpacing: 12,
                             mainAxisSpacing: 12,
-                            childAspectRatio: 0.75,
+                            // La photo est carrée (voir ImageProduit) :
+                            // la cellule lui laisse sa largeur, puis la
+                            // hauteur du bloc nom / ville / prix.
+                            childAspectRatio: 0.66,
                           ),
                       itemCount: _produits.length,
                       itemBuilder: (_, i) => _buildProductCard(_produits[i]),
@@ -1444,42 +1447,29 @@ class _BoutiqueSheetState extends State<_BoutiqueSheet> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Image
-          Expanded(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: _C.surface,
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(17),
-                ),
-                image: produit.image.isNotEmpty
-                    ? DecorationImage(
-                        image: fournisseurImageReseau(produit.image),
-                        fit: BoxFit.cover,
-                      )
-                    : null,
-              ),
-              child: Stack(
-                children: [
-                  Positioned(
-                    top: 8,
-                    right: 8,
-                    child: Container(
-                      width: 28,
-                      height: 28,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.9),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.favorite_border_rounded,
-                        size: 14,
-                        color: _C.label,
-                      ),
-                    ),
+          ImageProduit(
+            produit.image,
+            largeurServeur: 400,
+            rayon: const BorderRadius.vertical(top: Radius.circular(17)),
+            superpositions: [
+              Positioned(
+                top: 8,
+                right: 8,
+                child: Container(
+                  width: 28,
+                  height: 28,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.9),
+                    shape: BoxShape.circle,
                   ),
-                ],
+                  child: const Icon(
+                    Icons.favorite_border_rounded,
+                    size: 14,
+                    color: _C.label,
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
           // Infos + boutons
           Padding(

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/widgets/confirmation.dart';
 import '../../../../core/theme/police.dart';
 import '../../data/models/panier_item.dart';
-import 'package:saambiz/core/widgets/image_reseau.dart';
+import 'package:saambiz/core/widgets/image_produit.dart';
 import 'package:saambiz/features/commande/presentation/widgets/commande_card.dart'
     show montantFcfa;
 import '../../../../injection_container.dart';
@@ -447,18 +447,7 @@ class _LignePanier extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 4),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(14),
-            child: item.image.isNotEmpty
-                ? ImageReseau(
-                    item.image,
-                    width: 76,
-                    height: 76,
-                    fit: BoxFit.cover,
-                    repli: const _ImgFallback(),
-                  )
-                : const _ImgFallback(),
-          ),
+          ImageProduit(item.image, cote: 76, largeurServeur: 220),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -762,15 +751,4 @@ class _PanierVide extends StatelessWidget {
       ),
     );
   }
-}
-
-class _ImgFallback extends StatelessWidget {
-  const _ImgFallback();
-  @override
-  Widget build(BuildContext context) => Container(
-    width: 76,
-    height: 76,
-    color: _C.bg,
-    child: const Icon(Icons.shopping_bag_outlined, color: _C.sub),
-  );
 }

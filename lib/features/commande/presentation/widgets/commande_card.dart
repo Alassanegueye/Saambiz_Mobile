@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:saambiz/core/widgets/image_produit.dart';
 import 'package:saambiz/core/widgets/image_reseau.dart';
 import 'package:saambiz/core/theme/police.dart';
 
@@ -748,32 +749,6 @@ class _VignetteProduit extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const defaut = ColoredBox(
-      color: AppColor.kPrimaryLight,
-      child: Center(
-        child: Icon(
-          Icons.shopping_bag_outlined,
-          size: 24,
-          color: AppColor.kPrimary,
-        ),
-      ),
-    );
-    final img = image;
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(14),
-      child: Container(
-        width: 54,
-        height: 54,
-        color: AppColor.kPrimaryLight,
-        child: img != null && img.isNotEmpty
-            ? ImageReseau(
-                img,
-                largeurServeur: 160,
-                fit: BoxFit.cover,
-                repli: defaut,
-              )
-            : defaut,
-      ),
-    );
+    return ImageProduit(image, cote: 54, largeurServeur: 160);
   }
 }

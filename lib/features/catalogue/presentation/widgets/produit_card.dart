@@ -1,6 +1,6 @@
 import 'package:saambiz/core/widgets/messages.dart';
 import 'dart:async';
-import 'package:saambiz/core/widgets/image_reseau.dart';
+import 'package:saambiz/core/widgets/image_produit.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -28,23 +28,41 @@ String formaterMontant(double montant) =>
 
 String formaterPrix(double montant) => '${formaterMontant(montant)} FCFA';
 
-/// Rapport largeur/hauteur d'une [ProduitCard] (grille et carrousels) :
-/// la photo à peu près carrée, puis trois lignes de texte.
-const double ratioCarteProduit = 0.64;
+/// Hauteur du bloc sous la photo d'une [ProduitCard] : le nom sur deux
+/// lignes, le prix et la ligne du prix barré, toutes réservées même vides
+/// pour que les cartes d'une rangée restent alignées.
+const double _hauteurTexteCarteProduit = 84;
+
+/// Hauteur d'une [ProduitCard] large de [largeur].
+///
+/// La photo est carrée ([kRatioImageProduit]) : la hauteur se déduit par
+/// addition. Un simple rapport largeur/hauteur se trompait dès que la
+/// largeur changeait — trop court sur un petit écran, où le prix passait
+/// sous la carte, trop haut sur un grand.
+///
+/// [surFond] : la carte posée sur un fond coloré a sa propre marge blanche.
+double hauteurCarteProduit(double largeur, {bool surFond = false}) =>
+    largeur + _hauteurTexteCarteProduit + (surFond ? 10 : 0);
 
 /// Grille de produits adaptée à la largeur de l'écran.
-SliverGridDelegate grilleProduits(BuildContext context) {
-  final largeur = MediaQuery.sizeOf(context).width;
-  final colonnes = largeur >= 900
+///
+/// [marge] : le retrait horizontal de la liste qui reçoit cette grille, sans
+/// lequel la largeur d'une colonne — et donc la hauteur d'une carte — serait
+/// surestimée.
+SliverGridDelegate grilleProduits(BuildContext context, {double marge = 16}) {
+  final ecran = MediaQuery.sizeOf(context).width;
+  final colonnes = ecran >= 900
       ? 4
-      : largeur >= 600
+      : ecran >= 600
       ? 3
       : 2;
+  const espace = 12.0;
+  final largeurCarte = (ecran - 2 * marge - espace * (colonnes - 1)) / colonnes;
   return SliverGridDelegateWithFixedCrossAxisCount(
     crossAxisCount: colonnes,
-    crossAxisSpacing: 12,
+    crossAxisSpacing: espace,
     mainAxisSpacing: 18,
-    childAspectRatio: ratioCarteProduit,
+    mainAxisExtent: hauteurCarteProduit(largeurCarte),
   );
 }
 
@@ -180,7 +198,7 @@ class ProduitCard extends StatelessWidget {
     final contenu = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(child: _visuel()),
+        _visuel(),
         const SizedBox(height: 8),
         // Deux lignes réservées : les prix d'une rangée restent alignés,
         // nom court ou long.
@@ -268,87 +286,73 @@ class ProduitCard extends StatelessWidget {
 
   Widget _visuel() {
     final p = produit;
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(surFond ? 12 : 14),
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          ImageReseau(
-            p.image,
-            largeurServeur: 480,
-            fit: BoxFit.cover,
-            fond: AppColor.kBackground,
-            repli: const Center(
-              child: Icon(
-                Icons.image_outlined,
-                color: AppColor.kGrayscale30,
-                size: 30,
-              ),
-            ),
+    return ImageProduit(
+      p.image,
+      largeurServeur: 480,
+      rayon: BorderRadius.circular(surFond ? 12 : 14),
+      superpositions: [
+        if (p.remise > 0)
+          Positioned(
+            top: 8,
+            left: 8,
+            child: PastilleReduction(pourcentage: p.remise),
           ),
-          if (p.remise > 0)
-            Positioned(
-              top: 8,
-              left: 8,
-              child: PastilleReduction(pourcentage: p.remise),
-            ),
-          if (p.remise == 0 && p.nouveau)
-            Positioned(
-              top: 8,
-              left: 8,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-                decoration: BoxDecoration(
-                  color: AppColor.kWhite,
-                  borderRadius: BorderRadius.circular(7),
-                ),
-                child: const Text(
-                  'Nouveau',
-                  style: TextStyle(
-                    fontFamily: kPolice,
-                    fontSize: 10.5,
-                    fontWeight: FontWeight.w700,
-                    color: AppColor.kPrimary,
-                  ),
-                ),
+        if (p.remise == 0 && p.nouveau)
+          Positioned(
+            top: 8,
+            left: 8,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+              decoration: BoxDecoration(
+                color: AppColor.kWhite,
+                borderRadius: BorderRadius.circular(7),
               ),
-            ),
-          // Promotion à durée limitée : le temps qu'il reste, sur la photo.
-          if (p.finPromotion != null && p.prixBarre != null)
-            Positioned(
-              left: 8,
-              bottom: 8,
-              child: CompteARebours(fin: p.finPromotion!, compact: true),
-            ),
-          if (!p.disponible)
-            Container(
-              color: Colors.white.withValues(alpha: 0.72),
-              alignment: Alignment.center,
               child: const Text(
-                'Indisponible',
+                'Nouveau',
                 style: TextStyle(
                   fontFamily: kPolice,
-                  fontSize: 12,
+                  fontSize: 10.5,
                   fontWeight: FontWeight.w700,
-                  color: AppColor.kGrayscale40,
+                  color: AppColor.kPrimary,
                 ),
               ),
             ),
-          if (p.disponible && p.enRupture) ...[
-            Container(color: Colors.white.withValues(alpha: 0.4)),
-            const Positioned(
-              left: 8,
-              bottom: 8,
-              child: BadgeRupture(compact: true),
-            ),
-          ],
+          ),
+        // Promotion à durée limitée : le temps qu'il reste, sur la photo.
+        if (p.finPromotion != null && p.prixBarre != null)
           Positioned(
-            right: 6,
-            top: 6,
-            child: BoutonFavoriProduit(produit: p, taille: 32),
+            left: 8,
+            bottom: 8,
+            child: CompteARebours(fin: p.finPromotion!, compact: true),
+          ),
+        if (!p.disponible)
+          Container(
+            color: Colors.white.withValues(alpha: 0.72),
+            alignment: Alignment.center,
+            child: const Text(
+              'Indisponible',
+              style: TextStyle(
+                fontFamily: kPolice,
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: AppColor.kGrayscale40,
+              ),
+            ),
+          ),
+        if (p.disponible && p.enRupture) ...[
+          Container(color: Colors.white.withValues(alpha: 0.4)),
+          const Positioned(
+            left: 8,
+            bottom: 8,
+            child: BadgeRupture(compact: true),
           ),
         ],
-      ),
+        Positioned(
+          right: 6,
+          top: 6,
+          child: BoutonFavoriProduit(produit: p, taille: 32),
+        ),
+      ],
     );
   }
 }

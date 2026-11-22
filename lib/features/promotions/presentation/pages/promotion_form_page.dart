@@ -6,7 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/theme/app_color.dart';
 import '../../../../core/theme/police.dart';
-import '../../../../core/widgets/image_reseau.dart';
+import '../../../../core/widgets/image_produit.dart';
 import '../../../../injection_container.dart';
 import '../../../catalogue/presentation/widgets/produit_card.dart'
     show formaterPrix;
@@ -395,12 +395,6 @@ class _CarteProduit extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const repli = ColoredBox(
-      color: AppColor.kPrimaryLight,
-      child: Center(
-        child: Icon(Icons.local_offer_outlined, color: AppColor.kPrimary),
-      ),
-    );
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -410,21 +404,7 @@ class _CarteProduit extends StatelessWidget {
       ),
       child: Row(
         children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: SizedBox(
-              width: 60,
-              height: 60,
-              child: (image ?? '').isNotEmpty
-                  ? ImageReseau(
-                      image!,
-                      largeurServeur: 180,
-                      fit: BoxFit.cover,
-                      repli: repli,
-                    )
-                  : repli,
-            ),
-          ),
+          ImageProduit(image, cote: 60, largeurServeur: 180),
           const SizedBox(width: 12),
           Expanded(
             child: Column(

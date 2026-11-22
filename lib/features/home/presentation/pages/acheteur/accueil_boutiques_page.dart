@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:saambiz/core/theme/police.dart';
-import 'package:saambiz/core/widgets/image_reseau.dart';
+import 'package:saambiz/core/widgets/image_produit.dart';
 
 import '../../../../../core/routes/observateur_routes.dart';
 import '../../../../../core/services/localisation_service.dart';
@@ -899,7 +899,8 @@ class _BlocPromotions extends StatelessWidget {
                   ),
                 ),
                 SizedBox(
-                  height: (largeurCarte - 12) / ratioCarteProduit + 24,
+                  // La carte, plus le retrait du bas de la liste.
+                  height: hauteurCarteProduit(largeurCarte, surFond: true) + 14,
                   child: ListView.separated(
                     scrollDirection: Axis.horizontal,
                     padding: const EdgeInsets.fromLTRB(12, 0, 12, 14),
@@ -995,7 +996,7 @@ class _SectionProduits extends StatelessWidget {
       children: [
         _TitreSection(section: section, onVoirTout: onVoirTout),
         SizedBox(
-          height: largeurCarte / ratioCarteProduit,
+          height: hauteurCarteProduit(largeurCarte),
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -1365,7 +1366,7 @@ class _SqueletteAccueil extends StatelessWidget {
             const Os(largeur: 140, hauteur: 16, rayon: 6),
             const SizedBox(height: 14),
             SizedBox(
-              height: largeurCarte / ratioCarteProduit,
+              height: hauteurCarteProduit(largeurCarte),
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
                 physics: const NeverScrollableScrollPhysics(),
@@ -1516,25 +1517,12 @@ class _CarteProduitPourVous extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Photo du produit
-              Stack(
-                children: [
-                  AspectRatio(
-                    aspectRatio: 0.96,
-                    child: produit.image.isNotEmpty
-                        ? ImageReseau(
-                            produit.image,
-                            fit: BoxFit.cover,
-                            largeurServeur: 400,
-                          )
-                        : ColoredBox(
-                            color: AppColor.kPrimaryLight,
-                            child: const Icon(
-                              Icons.shopping_bag_outlined,
-                              size: 38,
-                              color: AppColor.kPrimary,
-                            ),
-                          ),
-                  ),
+              ImageProduit(
+                produit.image,
+                largeurServeur: 400,
+                // La carte découpe déjà ses coins hauts.
+                rayon: BorderRadius.zero,
+                superpositions: [
                   // Badge promo / categorie en haut a gauche
                   if (aRemise)
                     Positioned(

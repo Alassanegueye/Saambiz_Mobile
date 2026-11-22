@@ -271,7 +271,7 @@ class _RangeeProduits extends StatelessWidget {
   Widget build(BuildContext context) {
     const largeur = 150.0;
     return SizedBox(
-      height: largeur / ratioCarteProduit,
+      height: hauteurCarteProduit(largeur),
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),

@@ -6,6 +6,7 @@ import '../../../../core/theme/app_color.dart';
 import '../../../../core/theme/police.dart';
 import '../../../../core/utils/texte.dart';
 import '../../../../core/utils/url_externe.dart';
+import '../../../../core/widgets/image_produit.dart';
 import '../../../../core/widgets/image_reseau.dart';
 import '../../../../core/widgets/logo_boutique.dart';
 import '../../../../core/widgets/messages.dart';
@@ -351,14 +352,6 @@ class _LigneArticleState extends State<_LigneArticle> {
   Widget build(BuildContext context) {
     final l = widget.ligne;
     final ouvrable = (l.produitId ?? '').isNotEmpty;
-    const repli = ColoredBox(
-      color: AppColor.kSurface,
-      child: Icon(
-        Icons.shopping_bag_outlined,
-        size: 22,
-        color: AppColor.kGrayscale30,
-      ),
-    );
     final image = l.imageProduit;
     return InkWell(
       onTap: ouvrable ? _ouvrirProduit : null,
@@ -366,21 +359,7 @@ class _LigneArticleState extends State<_LigneArticle> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: SizedBox(
-              width: 64,
-              height: 64,
-              child: image != null && image.isNotEmpty
-                  ? ImageReseau(
-                      image,
-                      largeurServeur: 200,
-                      fit: BoxFit.cover,
-                      repli: repli,
-                    )
-                  : repli,
-            ),
-          ),
+          ImageProduit(image, cote: 64, largeurServeur: 200),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
