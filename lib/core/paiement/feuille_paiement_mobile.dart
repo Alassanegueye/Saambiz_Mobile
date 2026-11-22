@@ -80,13 +80,15 @@ class _FeuillePaiementMobileState extends State<FeuillePaiementMobile> {
   Widget build(BuildContext context) {
     final bas = MediaQuery.of(context).viewInsets.bottom;
     final montant = widget.montant;
-    return Padding(
-      padding: EdgeInsets.only(bottom: bas),
-      child: DecoratedBox(
-        decoration: const BoxDecoration(
-          color: AppColor.kWhite,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        ),
+    // Le blanc de la feuille continue sous le clavier : c'est lui qui se voit
+    // derrière ses coins arrondis, et non la page assombrie.
+    return DecoratedBox(
+      decoration: const BoxDecoration(
+        color: AppColor.kWhite,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      child: Padding(
+        padding: EdgeInsets.only(bottom: bas),
         child: SafeArea(
           top: false,
           child: SingleChildScrollView(

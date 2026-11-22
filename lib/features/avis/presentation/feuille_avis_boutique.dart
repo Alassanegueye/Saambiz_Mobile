@@ -189,45 +189,59 @@ class _FeuilleAvisState extends State<_FeuilleAvis> {
     // se retrouve caché dès qu'on le touche.
     final clavier = MediaQuery.viewInsetsOf(context).bottom;
 
-    return Padding(
-      padding: EdgeInsets.only(bottom: clavier),
-      child: DraggableScrollableSheet(
-        initialChildSize: 0.75,
-        minChildSize: 0.5,
-        maxChildSize: 0.95,
-        expand: false,
-        builder: (context, controleur) => DecoratedBox(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-          ),
-          child: _chargement
-              ? const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 64),
-                  child: Center(child: CircularProgressIndicator()),
-                )
-              : ListView(
-                  controller: controleur,
-                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
-                  children: [
-                    const _Poignee(),
-                    const SizedBox(height: 12),
-                    _enTete(),
-                    const SizedBox(height: 20),
-                    if (_connecte) _formulaire() else _inviteConnexion(),
-                    if (_erreur != null) ...[
-                      const SizedBox(height: 12),
-                      Text(
-                        _erreur!,
-                        style: const TextStyle(color: Color(0xFFC6382B)),
-                      ),
-                    ],
-                    const SizedBox(height: 24),
-                    _listeAvis(),
-                  ],
-                ),
+    return Stack(
+      fit: StackFit.passthrough,
+      children: [
+        // Le blanc de la feuille continue sous le clavier : c'est lui qui se
+        // voit derrière ses coins arrondis, et non la page assombrie.
+        Positioned(
+          left: 0,
+          right: 0,
+          bottom: 0,
+          height: clavier,
+          child: const ColoredBox(color: Colors.white),
         ),
-      ),
+        Padding(
+          padding: EdgeInsets.only(bottom: clavier),
+          child: DraggableScrollableSheet(
+            initialChildSize: 0.75,
+            minChildSize: 0.5,
+            maxChildSize: 0.95,
+            expand: false,
+            builder: (context, controleur) => DecoratedBox(
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+              ),
+              child: _chargement
+                  ? const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 64),
+                      child: Center(child: CircularProgressIndicator()),
+                    )
+                  : ListView(
+                      controller: controleur,
+                      padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
+                      children: [
+                        const _Poignee(),
+                        const SizedBox(height: 12),
+                        _enTete(),
+                        const SizedBox(height: 20),
+                        if (_connecte) _formulaire() else _inviteConnexion(),
+                        if (_erreur != null) ...[
+                          const SizedBox(height: 12),
+                          Text(
+                            _erreur!,
+                            style: const TextStyle(color: Color(0xFFC6382B)),
+                          ),
+                        ],
+                        const SizedBox(height: 24),
+                        _listeAvis(),
+                      ],
+                    ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 

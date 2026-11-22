@@ -173,6 +173,8 @@ class _EditProfileViewState extends State<_EditProfileView> {
     final email = (widget.user?.email ?? '').trim();
     return ScaffoldMarine(
       backgroundColor: _C.bg,
+      // La barre « Enregistrer », blanche, reste collée au clavier.
+      fondClavier: _C.white,
       appBar: AppBar(title: const Text('Modifier le profil')),
       body: BlocConsumer<CompteBloc, CompteState>(
         listener: (context, state) {

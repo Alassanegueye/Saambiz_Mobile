@@ -177,6 +177,8 @@ class _NouvelleCommandeVendeurPageState
   Widget build(BuildContext context) {
     return PageVendeur(
       titre: 'Nouvelle commande',
+      // La barre de validation, blanche, reste collée au clavier.
+      fondClavier: AppColor.kWhite,
       corps: Form(
         key: _formKey,
         // La barre de validation n'est pas collée en bas : collée, elle

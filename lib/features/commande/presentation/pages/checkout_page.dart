@@ -105,6 +105,8 @@ class _CheckoutViewState extends State<_CheckoutView> {
   Widget build(BuildContext context) {
     return ScaffoldMarine(
       backgroundColor: _C.bg,
+      // La barre du total, blanche, reste collée au clavier.
+      fondClavier: _C.white,
       appBar: AppBar(title: const Text('Validation de la commande')),
       body: BlocConsumer<CommandeBloc, CommandeState>(
         listener: (context, state) async {

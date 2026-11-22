@@ -98,7 +98,7 @@ class MyApp extends StatelessWidget {
         // Défilement élastique partout, Android compris : les listes
         // « respirent » au lieu de buter sur un halo.
         scrollBehavior: const _DefilementSouple(),
-        // Sous surveillance : trois heures sans revenir, et la session se
+        // Sous surveillance : une semaine sans revenir, et la session se
         // ferme d'elle-même au retour, sans laisser le compte s'afficher une
         // seconde avant que le serveur ne refuse le renouvellement.
         home: const SousVeille(enfant: AppBootstrap()),

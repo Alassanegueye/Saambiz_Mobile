@@ -43,6 +43,18 @@ abstract class VitrineRemoteDataSource {
 
   /// Reprise des réglages, une fois le site créé.
   Future<VitrineModel> modifierVitrine(Map<String, dynamic> champs);
+
+  /// Ajoute des photos au haut du site. Renvoie le site à jour et la phrase
+  /// du serveur, qui dit combien sont entrées et pourquoi les autres non.
+  Future<({VitrineModel vitrine, String message})> ajouterPhotos(
+    List<String> chemins,
+  );
+
+  /// Retire une photo du haut du site.
+  Future<VitrineModel> retirerPhoto(String id);
+
+  /// Range les photos dans l'ordre donné (leurs identifiants).
+  Future<VitrineModel> ordonnerPhotos(List<String> ids);
 }
 
 class VitrineRemoteDataSourceImpl implements VitrineRemoteDataSource {
@@ -143,5 +155,36 @@ class VitrineRemoteDataSourceImpl implements VitrineRemoteDataSource {
   @override
   Future<void> supprimerVitrine() async {
     await dio.delete(VitrineEndpoints.maVitrine);
+  }
+
+  // ── Photos du haut du site ──────────────────────────────────────────
+  // Chaque route répond le site à jour : l'écran repart de ce que le
+  // serveur a réellement enregistré.
+
+  @override
+  Future<({VitrineModel vitrine, String message})> ajouterPhotos(
+    List<String> chemins,
+  ) async {
+    // Toutes les photos dans un seul envoi : le serveur les met en ligne en
+    // parallèle et dit, dans sa réponse, celles qui n'ont pas pu entrer.
+    final form = FormData.fromMap({
+      'photos': [for (final chemin in chemins) await fichierAEnvoyer(chemin)],
+    });
+    final res = await dio.post(VitrineEndpoints.photos, data: form);
+    final data = res.data;
+    final message = data is Map ? '${data['message'] ?? ''}'.trim() : '';
+    return (vitrine: VitrineModel.fromJson(data), message: message);
+  }
+
+  @override
+  Future<VitrineModel> retirerPhoto(String id) async {
+    final res = await dio.delete(VitrineEndpoints.photo(id));
+    return VitrineModel.fromJson(res.data);
+  }
+
+  @override
+  Future<VitrineModel> ordonnerPhotos(List<String> ids) async {
+    final res = await dio.put(VitrineEndpoints.ordrePhotos, data: {'ids': ids});
+    return VitrineModel.fromJson(res.data);
   }
 }

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:saambiz/core/widgets/messages.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -25,6 +27,7 @@ import '../bloc/vitrine_event.dart';
 import '../bloc/vitrine_state.dart';
 import '../lien_apercu.dart';
 import 'assistant_vitrine_page.dart';
+import 'photos_site_page.dart';
 import 'sections_boutique_page.dart';
 
 /// Palette locale, même convention que les autres écrans vendeur.
@@ -793,6 +796,38 @@ class _ConfigurationState extends State<_Configuration> {
     if (mounted) _chargerBoutique();
   }
 
+  /// Les photos du haut du site s'ajoutent, se retirent et se rangent sur
+  /// leur propre écran, où chaque geste est enregistré tout de suite. Au
+  /// retour, l'aperçu est rechargé s'il y a eu du changement.
+  Future<void> _gererPhotos() async {
+    final bloc = context.read<VitrineBloc>();
+    var modifie = false;
+    var ferme = false;
+    void recharger() {
+      if (!bloc.isClosed) bloc.add(ChargerVitrine());
+    }
+
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => PhotosSitePage(
+          photos: vitrine.photos,
+          max: vitrine.photosMax,
+          onModifie: () {
+            // Un envoi peut se terminer après la fermeture de l'écran des
+            // photos : l'aperçu est alors rechargé à ce moment-là.
+            if (ferme) {
+              recharger();
+            } else {
+              modifie = true;
+            }
+          },
+        ),
+      ),
+    );
+    ferme = true;
+    if (modifie) recharger();
+  }
+
   void _modifierApparence() =>
       _ouvrirAssistant(context, widget.secteurs, vitrine: vitrine);
 
@@ -881,12 +916,17 @@ class _ConfigurationState extends State<_Configuration> {
             adresse: vitrine.url,
             pied: teintes.pied,
             nomBoutique: _boutique?.nom ?? 'Ma boutique',
-            barre: _BarreSite(
-              nom: _boutique?.nom ?? 'Ma boutique',
-              logo: _boutique?.logo,
-              logoForme: vitrine.logoForme,
-              teintes: teintes,
-              avecPanier: vitrine.commande,
+            // Le nom et le logo se modifient avec la fiche de la boutique.
+            barre: InkWell(
+              onTap: occupe ? null : _modifierIdentite,
+              child: _BarreSite(
+                nom: _boutique?.nom ?? 'Ma boutique',
+                logo: _boutique?.logo,
+                logoForme: vitrine.logoForme,
+                teintes: teintes,
+                avecPanier: vitrine.commande,
+                verifiee: _verifiee,
+              ),
             ),
             piedDePage: _PiedSite(
               nom: _boutique?.nom ?? 'Ma boutique',
@@ -908,17 +948,44 @@ class _ConfigurationState extends State<_Configuration> {
               fond: teintes.pied,
             ),
             enfants: [
+              // Le haut de l'accueil, comme sur le site : le grand bandeau
+              // (les photos du vendeur, qui défilent ; sans photo, ses
+              // couleurs), puis les infos utiles.
               _BlocModifiable(
-                infobulle: 'Modifier le nom, le logo et l\'adresse',
-                onModifier: occupe ? null : _modifierIdentite,
-                // Son crayon est monté dans l'en-tête (« Modifier mon
-                // site ») ; le bloc, lui, reste touchable.
-                avecCrayon: false,
-                enfant: _EnteteSite(
-                  boutique: _boutique,
-                  vitrine: vitrine,
+                icone: Icons.add_photo_alternate_outlined,
+                infobulle: 'Ajouter ou retirer des photos',
+                onModifier: occupe ? null : _gererPhotos,
+                enfant: _UneSite(
+                  // Photos ajoutées, retirées ou rangées : le défilement
+                  // repart de la première.
+                  key: ValueKey(vitrine.photos.map((p) => p.id).join('|')),
+                  photos: vitrine.photos,
+                  // Le slogan, à défaut le nom ; puis le premier paragraphe
+                  // de la description (la suite est sur « À propos »).
+                  titre: (vitrine.slogan ?? '').trim().isNotEmpty
+                      ? vitrine.slogan!.trim()
+                      : (_boutique?.nom ?? 'Ma boutique'),
+                  texte: (_boutique?.description ?? '')
+                      .split(RegExp(r'\n{2,}'))
+                      .first
+                      .trim(),
                   teintes: teintes,
-                  verifiee: _verifiee,
+                ),
+              ),
+              // L'adresse et le téléphone viennent de la fiche de la boutique.
+              InkWell(
+                onTap: occupe ? null : _modifierIdentite,
+                child: _InfosCleSite(
+                  adresse: (_boutique?.localisation ?? '').trim(),
+                  horaires: horaires,
+                  telephone: (_boutique?.telephone ?? '').trim(),
+                  whatsapp:
+                      (vitrine.reseaux['whatsapp'] ??
+                              _boutique?.telephone ??
+                              '')
+                          .trim()
+                          .isNotEmpty,
+                  teintes: teintes,
                 ),
               ),
               if (_sections.isNotEmpty && rayons.length > 1)
@@ -985,6 +1052,24 @@ class _ConfigurationState extends State<_Configuration> {
                 ),
                 const Divider(height: 1, color: _C.border),
                 _LigneReglage(
+                  icone: Icons.photo_library_outlined,
+                  titre: 'Photos du haut du site',
+                  sousTitre: switch (vitrine.photos.length) {
+                    0 => 'Aucune photo : le haut prend vos couleurs',
+                    1 => '1 photo, en haut de votre site',
+                    final n => '$n photos qui défilent en boucle',
+                  },
+                  onTap: occupe ? null : _gererPhotos,
+                ),
+                const Divider(height: 1, color: _C.border),
+                _LigneReglage(
+                  icone: Icons.storefront_outlined,
+                  titre: 'Nom, logo et coordonnées',
+                  sousTitre: 'Description, adresse, téléphone',
+                  onTap: occupe ? null : _modifierIdentite,
+                ),
+                const Divider(height: 1, color: _C.border),
+                _LigneReglage(
                   icone: Icons.inventory_2_outlined,
                   titre: 'Gérer mes produits',
                   sousTitre: 'Créer, modifier ou retirer un produit',
@@ -1037,6 +1122,11 @@ class _Teintes {
   final Color teinte;
   final Color teinteLigne;
 
+  /// Le grand bandeau du haut, sans photo : un dégradé de [texte] (assez
+  /// profond pour qu'un texte blanc s'y lise) vers cette couleur, plus claire
+  /// (variables --bq-haut-1 et --bq-haut-2 du site).
+  final Color haut2;
+
   const _Teintes({
     required this.texte,
     required this.bouton,
@@ -1044,6 +1134,7 @@ class _Teintes {
     required this.pied,
     required this.teinte,
     required this.teinteLigne,
+    required this.haut2,
   });
 
   static const _encre = Color(0xFF121418);
@@ -1087,13 +1178,19 @@ class _Teintes {
       pied = Color.lerp(accent, Colors.black, t)!;
     }
 
+    final texte = _lisible(accent, Colors.white, 4.6);
     return _Teintes(
-      texte: _lisible(accent, Colors.white, 4.6),
+      texte: texte,
       bouton: bouton,
       surBouton: surBouton,
       pied: pied,
       teinte: Color.lerp(Colors.white, accent, 0.07)!,
       teinteLigne: Color.lerp(Colors.white, accent, 0.16)!,
+      haut2: _lisible(
+        Color.lerp(texte, Colors.white, 0.22)!,
+        Colors.white,
+        4.6,
+      ),
     );
   }
 }
@@ -1557,10 +1654,12 @@ class _CadreSite extends StatelessWidget {
 
 /// La barre du haut du site, telle qu'elle s'affiche sur un téléphone.
 ///
-/// Sur saambiz.com cette barre porte le logo, le nom, la navigation, le
-/// panier et un bouton menu. À largeur de téléphone — la seule que montre cet
-/// aperçu — la navigation se replie dans le bouton menu : on reproduit donc
-/// la marque, le panier et le menu, et rien de plus.
+/// Comme sur saambiz.com : à gauche le logo, le nom (avec le badge
+/// « certifiée ») et dessous un mot d'accueil ; à droite le panier avec son
+/// nombre d'articles, puis le menu, dans un carré doux. À largeur de
+/// téléphone — la seule que montre cet aperçu — la navigation se replie dans
+/// ce menu. Sur le site, le mot d'accueil laisse la place à la note de la
+/// boutique dès qu'un client en a laissé une.
 ///
 /// Le panier n'apparaît que si la boutique prend les commandes, comme sur le
 /// site : l'aperçu ne doit pas promettre un bouton que les clients n'auront
@@ -1571,18 +1670,20 @@ class _BarreSite extends StatelessWidget {
   final String logoForme;
   final _Teintes teintes;
   final bool avecPanier;
+  final bool verifiee;
   const _BarreSite({
     required this.nom,
     required this.logo,
     required this.logoForme,
     required this.teintes,
     required this.avecPanier,
+    this.verifiee = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    const cote = 30.0;
-    final rayon = BorderRadius.circular(logoForme == 'rond' ? cote / 2 : 8);
+    const cote = 38.0;
+    final rayon = BorderRadius.circular(logoForme == 'rond' ? cote / 2 : 10);
     final initiale = Container(
       width: cote,
       height: cote,
@@ -1592,7 +1693,7 @@ class _BarreSite extends StatelessWidget {
         nom.trim().isEmpty ? '?' : nom.trim()[0].toUpperCase(),
         style: TextStyle(
           fontFamily: kPolice,
-          fontSize: 14,
+          fontSize: 16,
           fontWeight: FontWeight.w700,
           color: teintes.surBouton,
         ),
@@ -1600,47 +1701,139 @@ class _BarreSite extends StatelessWidget {
     );
 
     return DecoratedBox(
-      decoration: const BoxDecoration(
+      // Le filet de la couleur de la boutique, en haut de la barre.
+      decoration: BoxDecoration(
         color: _C.white,
-        border: Border(bottom: BorderSide(color: _S.ligne)),
+        border: Border(
+          top: BorderSide(color: teintes.texte, width: 3),
+          bottom: const BorderSide(color: _S.ligne),
+        ),
       ),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(14, 10, 10, 10),
+        padding: const EdgeInsets.fromLTRB(12, 9, 10, 9),
         child: Row(
           children: [
-            ClipRRect(
-              borderRadius: rayon,
-              child: (logo ?? '').isEmpty
-                  ? initiale
-                  : ImageReseau(
-                      logo!,
-                      largeurServeur: 96,
-                      width: cote,
-                      height: cote,
-                      fit: BoxFit.cover,
-                      repli: initiale,
-                    ),
+            DecoratedBox(
+              decoration: BoxDecoration(
+                borderRadius: rayon,
+                border: Border.all(color: _S.ligne),
+              ),
+              child: ClipRRect(
+                borderRadius: rayon,
+                child: (logo ?? '').isEmpty
+                    ? initiale
+                    : ImageReseau(
+                        logo!,
+                        largeurServeur: 120,
+                        width: cote,
+                        height: cote,
+                        fit: BoxFit.cover,
+                        repli: initiale,
+                      ),
+              ),
             ),
-            const SizedBox(width: 9),
+            const SizedBox(width: 10),
             Expanded(
-              child: Text(
-                nom,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontFamily: kPolice,
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: -0.2,
-                  color: _S.encre,
-                ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          nom,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontFamily: kPolice,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: -0.3,
+                            height: 1.2,
+                            color: _S.encre,
+                          ),
+                        ),
+                      ),
+                      if (verifiee) ...[
+                        const SizedBox(width: 4),
+                        Icon(
+                          Icons.verified_outlined,
+                          size: 16,
+                          color: teintes.texte,
+                        ),
+                      ],
+                    ],
+                  ),
+                  const SizedBox(height: 1),
+                  const Text(
+                    'Bienvenue dans ma boutique 👋',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 11.5,
+                      height: 1.3,
+                      color: _S.encreDouce,
+                    ),
+                  ),
+                ],
               ),
             ),
             if (avecPanier) ...[
-              Icon(Icons.shopping_bag_outlined, size: 20, color: teintes.texte),
-              const SizedBox(width: 14),
+              const SizedBox(width: 6),
+              // Le nombre d'articles est toujours affiché, zéro compris.
+              SizedBox(
+                width: 38,
+                height: 38,
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    const Center(
+                      child: Icon(
+                        Icons.shopping_cart_outlined,
+                        size: 22,
+                        color: _S.encre,
+                      ),
+                    ),
+                    Positioned(
+                      top: 1,
+                      right: -2,
+                      child: Container(
+                        constraints: const BoxConstraints(minWidth: 18),
+                        height: 18,
+                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: teintes.bouton,
+                          borderRadius: BorderRadius.circular(9),
+                          border: Border.all(color: _C.white, width: 1.5),
+                        ),
+                        child: Text(
+                          '0',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                            height: 1,
+                            color: teintes.surBouton,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ],
-            const Icon(Icons.menu_rounded, size: 21, color: _S.encre),
+            const SizedBox(width: 6),
+            Container(
+              width: 38,
+              height: 38,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: _S.papierFonce,
+                borderRadius: BorderRadius.circular(11),
+              ),
+              child: const Icon(Icons.menu_rounded, size: 21, color: _S.encre),
+            ),
           ],
         ),
       ),
@@ -1891,11 +2084,16 @@ class _BlocModifiable extends StatelessWidget {
   /// Faux quand le crayon vit ailleurs (l'en-tête) : le bloc reste
   /// touchable.
   final bool avecCrayon;
+
+  /// Le crayon par défaut ; une autre icône quand elle dit mieux le geste
+  /// (ajouter des photos).
+  final IconData icone;
   const _BlocModifiable({
     required this.enfant,
     required this.infobulle,
     this.onModifier,
     this.avecCrayon = true,
+    this.icone = Icons.edit_rounded,
   });
 
   @override
@@ -1912,7 +2110,7 @@ class _BlocModifiable extends StatelessWidget {
             top: 10,
             right: 10,
             child: _PastilleAction(
-              icone: Icons.edit_rounded,
+              icone: icone,
               infobulle: infobulle,
               onTap: onModifier,
             ),
@@ -1930,7 +2128,6 @@ class _S {
   static const ligne = Color(0xFFE4E7EC);
   static const papierFonce = Color(0xFFF5F6F8);
   static const remise = Color(0xFFC2410C);
-  static const verifie = Color(0xFF1A8CD8);
 }
 
 /// « 14 900 » : le montant, espaces fines entre les milliers.
@@ -1944,186 +2141,474 @@ String _montant(double v) {
   return b.toString();
 }
 
-/// Le haut du site, comme sur saambiz.com : logo et nom (avec le badge
-/// « vérifiée »), activité, adresse et horaires, puis WhatsApp, Appeler et
-/// Partager.
-class _EnteteSite extends StatelessWidget {
-  final Boutique? boutique;
-  final Vitrine vitrine;
+/// Le haut de l'accueil du site, comme sur saambiz.com : le grand bandeau.
+///
+/// Les photos du vendeur y défilent toutes seules, en boucle, toutes les
+/// cinq secondes, et le doigt les fait aussi glisser. Sans photo, le bandeau
+/// prend les couleurs de la boutique, en dégradé. Dans les deux cas, la même
+/// accroche à gauche : le slogan (à défaut, le nom), le début de la
+/// description et le bouton « Voir nos produits ».
+///
+/// Le nom et le logo ne sont pas répétés ici : ils sont dans la barre du haut.
+class _UneSite extends StatefulWidget {
+  final List<PhotoVitrine> photos;
+  final String titre;
+  final String texte;
   final _Teintes teintes;
-  final bool verifiee;
-  const _EnteteSite({
-    required this.boutique,
-    required this.vitrine,
+  const _UneSite({
+    super.key,
+    required this.photos,
+    required this.titre,
+    required this.texte,
     required this.teintes,
-    required this.verifiee,
+  });
+
+  @override
+  State<_UneSite> createState() => _UneSiteState();
+}
+
+class _UneSiteState extends State<_UneSite> {
+  /// Les mêmes temps que sur le site (DefilePhotos.jsx).
+  static const _delai = Duration(seconds: 5);
+  static const _duree = Duration(milliseconds: 650);
+  static const _courbe = Cubic(0.22, 0.61, 0.36, 1);
+
+  /// La boucle part de loin : on peut aussi faire glisser vers la photo
+  /// précédente, et la suivante vient toujours par la droite.
+  static const _tours = 1000;
+
+  late final PageController _controleur;
+  Timer? _minuteur;
+  late int _page;
+
+  /// Un doigt est posé sur les photos : le défilement attend.
+  bool _touche = false;
+
+  int get _n => widget.photos.length;
+
+  @override
+  void initState() {
+    super.initState();
+    // Nouvelles photos, nouvel état : la clé posée par l'appelant le
+    // recrée quand la liste change, et la boucle repart de la première.
+    _page = _n > 1 ? _n * _tours : 0;
+    _controleur = PageController(initialPage: _page);
+    _programmer();
+  }
+
+  @override
+  void dispose() {
+    _minuteur?.cancel();
+    _controleur.dispose();
+    super.dispose();
+  }
+
+  void _programmer() {
+    _minuteur?.cancel();
+    if (_n < 2 || _touche) return;
+    _minuteur = Timer(_delai, _suivante);
+  }
+
+  void _suivante() {
+    if (!mounted || !_controleur.hasClients) return;
+    // Écran recouvert (une autre page ouverte par-dessus) ou application en
+    // arrière-plan : on attend le tour suivant.
+    final etat = WidgetsBinding.instance.lifecycleState;
+    final visible =
+        (ModalRoute.of(context)?.isCurrent ?? true) &&
+        (etat == null || etat == AppLifecycleState.resumed);
+    if (visible) {
+      if (MediaQuery.disableAnimationsOf(context)) {
+        _controleur.jumpToPage(_page + 1);
+      } else {
+        _controleur.animateToPage(_page + 1, duration: _duree, curve: _courbe);
+      }
+    }
+    // `onPageChanged` relance aussi le minuteur ; ceci couvre le cas où le
+    // glissement aurait été interrompu.
+    _programmer();
+  }
+
+  void _relacher() {
+    _touche = false;
+    _programmer();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final avecPhotos = _n > 0;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(18),
+        child: Stack(
+          children: [
+            Positioned.fill(child: avecPhotos ? _photos() : _couleurs()),
+            // Un voile clair à gauche, pour que l'accroche se lise sur
+            // n'importe quelle photo.
+            if (avecPhotos)
+              const Positioned.fill(
+                child: IgnorePointer(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          Color(0xF2FFFFFF),
+                          Color(0xDBFFFFFF),
+                          Color(0x61FFFFFF),
+                          Color(0x00FFFFFF),
+                        ],
+                        stops: [0, 0.36, 0.62, 0.8],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            // L'accroche donne sa hauteur au bandeau. Elle laisse passer le
+            // doigt : on fait glisser les photos depuis n'importe où.
+            IgnorePointer(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(minHeight: 196),
+                child: Row(
+                  children: [
+                    Flexible(
+                      flex: avecPhotos ? 66 : 88,
+                      child: Padding(
+                        padding: EdgeInsets.fromLTRB(
+                          16,
+                          18,
+                          4,
+                          _n > 1 ? 34 : 24,
+                        ),
+                        child: _accroche(surPhoto: avecPhotos),
+                      ),
+                    ),
+                    Spacer(flex: avecPhotos ? 34 : 12),
+                  ],
+                ),
+              ),
+            ),
+            if (_n > 1)
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 8,
+                child: IgnorePointer(child: Center(child: _points())),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _photo(PhotoVitrine p) =>
+      ImageReseau(p.url, largeurServeur: 1080, fond: widget.teintes.teinte);
+
+  Widget _photos() {
+    if (_n == 1) return _photo(widget.photos.first);
+    return Listener(
+      onPointerDown: (_) {
+        _touche = true;
+        _minuteur?.cancel();
+      },
+      onPointerUp: (_) => _relacher(),
+      onPointerCancel: (_) => _relacher(),
+      child: PageView.builder(
+        controller: _controleur,
+        onPageChanged: (p) {
+          setState(() => _page = p);
+          _programmer();
+        },
+        itemBuilder: (context, i) => _photo(widget.photos[i % _n]),
+      ),
+    );
+  }
+
+  /// Sans photo : la couleur de la boutique, en dégradé, avec un grand rond
+  /// pâle pour que le bandeau ne soit pas plat.
+  Widget _couleurs() {
+    final t = widget.teintes;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [t.texte, t.haut2],
+        ),
+      ),
+      child: Stack(
+        children: [
+          Positioned(
+            right: -64,
+            bottom: -100,
+            child: Container(
+              width: 250,
+              height: 250,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withValues(alpha: 0.08),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _accroche({required bool surPhoto}) {
+    final t = widget.teintes;
+    final couleurBouton = surPhoto ? t.surBouton : t.texte;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          widget.titre,
+          maxLines: 3,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            fontFamily: kPolice,
+            fontSize: 20,
+            fontWeight: FontWeight.w800,
+            letterSpacing: -0.5,
+            height: 1.12,
+            color: surPhoto ? _S.encre : Colors.white,
+          ),
+        ),
+        if (widget.texte.isNotEmpty) ...[
+          const SizedBox(height: 6),
+          Text(
+            widget.texte,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 12.5,
+              height: 1.45,
+              color: surPhoto
+                  ? _S.encreDouce
+                  : Colors.white.withValues(alpha: 0.86),
+            ),
+          ),
+        ],
+        const SizedBox(height: 12),
+        Container(
+          height: 36,
+          padding: const EdgeInsets.symmetric(horizontal: 14),
+          decoration: BoxDecoration(
+            color: surPhoto ? t.bouton : Colors.white,
+            borderRadius: BorderRadius.circular(18),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Voir nos produits',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: couleurBouton,
+                ),
+              ),
+              const SizedBox(width: 6),
+              Icon(Icons.arrow_forward_rounded, size: 16, color: couleurBouton),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Un point par photo ; celui de la photo affichée s'allonge.
+  Widget _points() {
+    final actif = _page % _n;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.75),
+        borderRadius: BorderRadius.circular(99),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          for (var i = 0; i < _n; i++)
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 250),
+              margin: const EdgeInsets.symmetric(horizontal: 2.5),
+              width: i == actif ? 16 : 6,
+              height: 6,
+              decoration: BoxDecoration(
+                color: i == actif
+                    ? widget.teintes.texte
+                    : const Color(0x4712151C),
+                borderRadius: BorderRadius.circular(3),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Les infos utiles, sous le grand bandeau, comme sur le site : l'adresse,
+/// les horaires, le téléphone et le bouton WhatsApp, deux par ligne. Avec un
+/// nombre impair de cases, la dernière prend toute la ligne.
+class _InfosCleSite extends StatelessWidget {
+  final String adresse;
+  final String horaires;
+  final String telephone;
+  final bool whatsapp;
+  final _Teintes teintes;
+  const _InfosCleSite({
+    required this.adresse,
+    required this.horaires,
+    required this.telephone,
+    required this.whatsapp,
+    required this.teintes,
   });
 
   @override
   Widget build(BuildContext context) {
-    final b = boutique;
-    final nom = b?.nom ?? 'Ma boutique';
-    const cote = 66.0;
-    final rond = vitrine.logoForme == 'rond';
-    final rayon = BorderRadius.circular(rond ? cote / 2 : 16);
-
-    final initiale = Container(
-      width: cote,
-      height: cote,
-      decoration: BoxDecoration(color: teintes.bouton, borderRadius: rayon),
-      alignment: Alignment.center,
-      child: Text(
-        nom.trim().isEmpty ? '?' : nom.trim()[0].toUpperCase(),
-        style: TextStyle(
-          fontFamily: kPolice,
-          fontSize: 28,
-          fontWeight: FontWeight.w700,
-          color: teintes.surBouton,
+    final cases = <Widget>[
+      if (adresse.isNotEmpty)
+        _CleSite(
+          icone: Icons.place_outlined,
+          texte: adresse,
+          legende: 'Voir sur la carte',
+          couleur: teintes.texte,
         ),
-      ),
-    );
+      if (horaires.isNotEmpty)
+        _CleSite(
+          icone: Icons.schedule_rounded,
+          texte: horaires,
+          legende: 'Nos horaires',
+          couleur: teintes.texte,
+        ),
+      if (telephone.isNotEmpty)
+        _CleSite(
+          icone: Icons.call_outlined,
+          texte: _telephoneAffiche(telephone),
+          legende: 'Appelez-nous',
+          couleur: teintes.texte,
+        ),
+      if (whatsapp) const _WhatsappSite(),
+    ];
+    if (cases.isEmpty) return const SizedBox(height: 4);
 
-    final activite = (vitrine.activite ?? '').trim();
-    final sousTitre = activite.isNotEmpty
-        ? activite
-        : (b?.description ?? '').split('\n').first.trim();
-    final adresse = b?.localisation ?? '';
-    final horaires = (vitrine.horaires ?? '').trim();
-    final whatsapp = (vitrine.reseaux['whatsapp'] ?? b?.telephone ?? '').trim();
-    final telephone = (b?.telephone ?? '').trim();
-
-    return DecoratedBox(
+    return Container(
+      margin: const EdgeInsets.fromLTRB(12, 10, 12, 4),
+      padding: const EdgeInsets.all(5),
       decoration: BoxDecoration(
-        color: teintes.teinte,
-        border: Border(bottom: BorderSide(color: teintes.teinteLigne)),
+        color: _C.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: _S.ligne),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x59101828),
+            blurRadius: 20,
+            spreadRadius: -14,
+            offset: Offset(0, 6),
+          ),
+        ],
       ),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 22, 16, 22),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
+      child: Column(
+        children: [
+          for (var i = 0; i < cases.length; i += 2)
             Row(
               children: [
-                DecoratedBox(
-                  decoration: BoxDecoration(
-                    borderRadius: rayon,
-                    border: Border.all(color: _S.ligne),
-                  ),
-                  child: ClipRRect(
-                    borderRadius: rayon,
-                    child: (b?.logo ?? '').isEmpty
-                        ? initiale
-                        : ImageReseau(
-                            b!.logo,
-                            largeurServeur: 200,
-                            width: cote,
-                            height: cote,
-                            fit: BoxFit.cover,
-                            repli: initiale,
-                          ),
+                Expanded(child: cases[i]),
+                if (i + 1 < cases.length) Expanded(child: cases[i + 1]),
+              ],
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Une case des infos utiles : l'icône à la couleur de la boutique, l'info,
+/// et dessous ce qu'on en fait.
+class _CleSite extends StatelessWidget {
+  final IconData icone;
+  final String texte;
+  final String legende;
+  final Color couleur;
+  const _CleSite({
+    required this.icone,
+    required this.texte,
+    required this.legende,
+    required this.couleur,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 9),
+      child: Row(
+        children: [
+          Icon(icone, size: 18, color: couleur),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  texte,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    height: 1.3,
+                    color: _S.encre,
                   ),
                 ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Padding(
-                    // Laisse la place au crayon, en haut à droite.
-                    padding: const EdgeInsets.only(right: 34),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text.rich(
-                          TextSpan(
-                            text: nom,
-                            children: [
-                              if (verifiee)
-                                const WidgetSpan(
-                                  alignment: PlaceholderAlignment.middle,
-                                  child: Padding(
-                                    padding: EdgeInsets.only(left: 6),
-                                    child: Icon(
-                                      Icons.verified_rounded,
-                                      size: 20,
-                                      color: _S.verifie,
-                                    ),
-                                  ),
-                                ),
-                            ],
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontFamily: kPolice,
-                            fontSize: 21,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: -0.4,
-                            height: 1.18,
-                            color: _S.encre,
-                          ),
-                        ),
-                        if (sousTitre.isNotEmpty) ...[
-                          const SizedBox(height: 3),
-                          Text(
-                            sousTitre,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 14,
-                              height: 1.4,
-                              color: _S.encreDouce,
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
+                Text(
+                  legende,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    height: 1.35,
+                    color: _S.encreDouce,
                   ),
                 ),
               ],
             ),
-            if (adresse.isNotEmpty || horaires.isNotEmpty) ...[
-              const SizedBox(height: 14),
-              Wrap(
-                spacing: 18,
-                runSpacing: 8,
-                children: [
-                  if (adresse.isNotEmpty)
-                    _Repere(icone: Icons.place_outlined, texte: adresse),
-                  if (horaires.isNotEmpty)
-                    _Repere(icone: Icons.schedule_rounded, texte: horaires),
-                ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Le bouton WhatsApp des infos utiles, au vert de WhatsApp.
+class _WhatsappSite extends StatelessWidget {
+  const _WhatsappSite();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(4),
+      child: Container(
+        height: 40,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: const Color(0xFF128041),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: const Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.chat_outlined, size: 17, color: Colors.white),
+            SizedBox(width: 7),
+            Text(
+              'WhatsApp',
+              style: TextStyle(
+                fontSize: 13.5,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
               ),
-            ],
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                if (whatsapp.isNotEmpty) ...[
-                  Expanded(
-                    child: _ActionSite(
-                      icone: Icons.chat_outlined,
-                      texte: 'WhatsApp',
-                      fond: teintes.bouton,
-                      couleur: teintes.surBouton,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                ],
-                if (telephone.isNotEmpty) ...[
-                  Expanded(
-                    child: _ActionSite(
-                      icone: Icons.call_outlined,
-                      texte: 'Appeler',
-                      couleurIcone: teintes.texte,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                ],
-                Expanded(
-                  child: _ActionSite(
-                    icone: Icons.share_outlined,
-                    texte: 'Partager',
-                    couleurIcone: teintes.texte,
-                  ),
-                ),
-              ],
             ),
           ],
         ),
@@ -2132,77 +2617,15 @@ class _EnteteSite extends StatelessWidget {
   }
 }
 
-class _Repere extends StatelessWidget {
-  final IconData icone;
-  final String texte;
-  const _Repere({required this.icone, required this.texte});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icone, size: 16, color: _S.encre),
-        const SizedBox(width: 5),
-        Flexible(
-          child: Text(
-            texte,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(fontSize: 13.5, color: _S.encre),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-/// Bouton du haut du site (WhatsApp, Appeler, Partager), tel qu'affiché.
-class _ActionSite extends StatelessWidget {
-  final IconData icone;
-  final String texte;
-  final Color? fond;
-  final Color couleur;
-  final Color? couleurIcone;
-  const _ActionSite({
-    required this.icone,
-    required this.texte,
-    this.fond,
-    this.couleur = _S.encre,
-    this.couleurIcone,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 44,
-      padding: const EdgeInsets.symmetric(horizontal: 6),
-      decoration: BoxDecoration(
-        color: fond ?? Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: fond == null ? Border.all(color: _S.ligne) : null,
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icone, size: 17, color: couleurIcone ?? couleur),
-          const SizedBox(width: 6),
-          Flexible(
-            child: Text(
-              texte,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: couleur,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+/// « 77 123 45 67 » : le numéro tel que l'écrit le site, sans l'indicatif du
+/// Sénégal, qui prendrait la place d'un chiffre sur un écran étroit.
+String _telephoneAffiche(String numero) {
+  final brut = numero.trim();
+  final m = RegExp(
+    r'^(?:\+?221)?(\d{2})(\d{3})(\d{2})(\d{2})$',
+  ).firstMatch(brut.replaceAll(RegExp(r'[.\s-]'), ''));
+  if (m == null) return brut;
+  return '${m[1]} ${m[2]} ${m[3]} ${m[4]}';
 }
 
 /// Les catégories du catalogue, en pastilles qui défilent (comme sur le site

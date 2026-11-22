@@ -41,4 +41,13 @@ abstract class VitrineRepository {
   /// La boutique reste, seul son site disparaît : le vendeur peut en
   /// regénérer un ensuite avec l'assistant.
   Future<Either<Failure, void>> supprimerVitrine();
+
+  /// Photos du haut du site, qui y défilent en boucle. Chaque geste est
+  /// enregistré tout de suite et renvoie le site à jour ; l'ajout y joint la
+  /// phrase du serveur (« 3 photos ajoutées… »).
+  Future<Either<Failure, ({Vitrine vitrine, String message})>> ajouterPhotos(
+    List<String> chemins,
+  );
+  Future<Either<Failure, Vitrine>> retirerPhoto(String id);
+  Future<Either<Failure, Vitrine>> ordonnerPhotos(List<String> ids);
 }

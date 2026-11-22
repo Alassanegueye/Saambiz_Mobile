@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:saambiz/features/abonnement/data/datasources/abonnement_remote_datasource.dart';
@@ -258,6 +260,110 @@ void main() {
         VitrineRemoteDataSourceImpl(dio).supprimerVitrine(),
         throwsA(isA<DioException>()),
       );
+    });
+
+    // Les photos du haut du site : chaque route répond le site à jour, dans
+    // l'enveloppe `{ success, message, data: { vitrine, boutique } }`.
+    Map<String, dynamic> siteAJour(List<Map<String, String>> photos) => {
+      'success': true,
+      'message': '2 photos ajoutées à votre site.',
+      'data': {
+        'vitrine': {
+          'slug': 'maison-ndella',
+          'url': 'https://saambiz.com/b/maison-ndella',
+          'photos': photos,
+          'photosMax': 10,
+        },
+        'boutique': {
+          'nom': 'Maison Ndella',
+          'slogan': 'La déco qui vous ressemble',
+        },
+      },
+    };
+
+    test(
+      "l'ajout de photos part en multipart, toutes sous « photos »",
+      () async {
+        final dossier = Directory.systemTemp.createTempSync('photos_site');
+        addTearDown(() => dossier.deleteSync(recursive: true));
+        final chemins = [
+          for (final nom in ['a.jpg', 'b.png'])
+            (File(
+              '${dossier.path}/$nom',
+            )..writeAsBytesSync([0xFF, 0xD8, 0xFF])).path,
+        ];
+        espion.repond(
+          siteAJour([
+            {'id': 'p1', 'url': 'https://res.cloudinary.com/x/a.jpg'},
+            {'id': 'p2', 'url': 'https://res.cloudinary.com/x/b.png'},
+          ]),
+        );
+
+        final res = await VitrineRemoteDataSourceImpl(
+          dio,
+        ).ajouterPhotos(chemins);
+
+        expect(espion.appel, 'POST /vendeur/ma-vitrine/photos');
+        // Multer lit `upload.array('photos')` : un seul nom de champ, répété.
+        final form = espion.requete.data as FormData;
+        expect(form.files.map((f) => f.key), ['photos', 'photos']);
+        expect(form.files.map((f) => f.value.contentType?.mimeType), [
+          'image/jpeg',
+          'image/png',
+        ]);
+        expect(res.vitrine.photos.map((p) => p.id), ['p1', 'p2']);
+        expect(res.vitrine.slogan, 'La déco qui vous ressemble');
+        // La phrase du serveur dit ce qui est entré : l'écran la reprend.
+        expect(res.message, '2 photos ajoutées à votre site.');
+      },
+    );
+
+    test("le retrait d'une photo", () async {
+      espion.repond(
+        siteAJour([
+          {'id': 'p2', 'url': 'https://res.cloudinary.com/x/b.png'},
+        ]),
+      );
+
+      final v = await VitrineRemoteDataSourceImpl(dio).retirerPhoto('p1');
+
+      expect(espion.appel, 'DELETE /vendeur/ma-vitrine/photos/p1');
+      expect(v.photos.map((p) => p.id), ['p2']);
+    });
+
+    test("l'ordre des photos part en JSON, par identifiants", () async {
+      espion.repond(
+        siteAJour([
+          {'id': 'p2', 'url': 'https://res.cloudinary.com/x/b.png'},
+          {'id': 'p1', 'url': 'https://res.cloudinary.com/x/a.jpg'},
+        ]),
+      );
+
+      final v = await VitrineRemoteDataSourceImpl(
+        dio,
+      ).ordonnerPhotos(['p2', 'p1']);
+
+      expect(espion.appel, 'PUT /vendeur/ma-vitrine/photos/ordre');
+      expect(espion.corpsEnvoye, {
+        'ids': ['p2', 'p1'],
+      });
+      expect(v.photos.map((p) => p.id), ['p2', 'p1']);
+    });
+
+    test('une photo sans identifiant ou sans adresse est écartée', () async {
+      // On ne pourrait ni l'afficher, ni la retirer.
+      espion.repond(
+        siteAJour([
+          {'id': 'p1', 'url': 'https://res.cloudinary.com/x/a.jpg'},
+          {'id': '', 'url': 'https://res.cloudinary.com/x/b.jpg'},
+          {'id': 'p3', 'url': ''},
+        ]),
+      );
+
+      final v = await VitrineRemoteDataSourceImpl(dio).getMaVitrine();
+
+      expect(v.photos.map((p) => p.id), ['p1']);
+      expect(v.photosMax, 10);
     });
   });
 

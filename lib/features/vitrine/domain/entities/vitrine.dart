@@ -38,6 +38,19 @@ class SectionBoutique extends Equatable {
   List<Object?> get props => [id, titre, produitIds];
 }
 
+/// Une photo du haut du site. Les photos y défilent toutes seules, en
+/// boucle, dans l'ordre choisi par le vendeur.
+class PhotoVitrine extends Equatable {
+  /// Donné par le serveur : sert à retirer la photo ou à la déplacer.
+  final String id;
+  final String url;
+
+  const PhotoVitrine({required this.id, required this.url});
+
+  @override
+  List<Object?> get props => [id, url];
+}
+
 /// Le site web public de la boutique : `saambiz.com/b/<slug>`.
 ///
 /// À ne pas confondre avec l'affichage de la boutique DANS l'application, qui
@@ -90,6 +103,17 @@ class Vitrine extends Equatable {
   /// avantages: [{icone, titre, texte}] }.
   final Map<String, dynamic> blocs;
 
+  /// Les photos du haut du site, dans l'ordre où elles défilent. Sans photo,
+  /// le haut du site prend les couleurs de la boutique.
+  final List<PhotoVitrine> photos;
+
+  /// Le nombre de photos que le serveur accepte.
+  final int photosMax;
+
+  /// Le slogan de la boutique : c'est le titre du haut du site (à défaut,
+  /// le nom de la boutique).
+  final String? slogan;
+
   const Vitrine({
     required this.slug,
     required this.url,
@@ -112,6 +136,9 @@ class Vitrine extends Equatable {
     this.visitesSemaine = 0,
     this.logoEnregistre,
     this.blocs = const {},
+    this.photos = const [],
+    this.photosMax = 10,
+    this.slogan,
   });
 
   @override
@@ -137,6 +164,9 @@ class Vitrine extends Equatable {
     visitesSemaine,
     logoEnregistre,
     blocs,
+    photos,
+    photosMax,
+    slogan,
   ];
 }
 

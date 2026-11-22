@@ -41,6 +41,12 @@ class PageVendeur extends StatelessWidget {
   final Widget corps;
   final Widget? boutonFlottant;
 
+  /// Ce qui se voit derrière les coins arrondis du clavier quand il est
+  /// ouvert : la couleur du bas de l'écran. Par défaut celle de la feuille ;
+  /// blanc pour un écran dont une barre d'actions blanche reste collée au
+  /// clavier.
+  final Color fondClavier;
+
   const PageVendeur({
     super.key,
     required this.titre,
@@ -49,6 +55,7 @@ class PageVendeur extends StatelessWidget {
     this.titreWidget,
     this.actions = const [],
     this.boutonFlottant,
+    this.fondClavier = AppColor.kBackground,
   });
 
   @override
@@ -62,7 +69,12 @@ class PageVendeur extends StatelessWidget {
       // geste doit être le même partout, et un écran neuf en hérite.
       child: FermerClavierAuToucher(
         child: Scaffold(
-          backgroundColor: AppColor.kPrimary,
+          // Le fond du Scaffold est celui du BAS de l'écran, et le bleu de
+          // l'en-tête est peint dans le corps. Quand le clavier monte, le
+          // corps raccourcit et c'est ce fond qui se voit derrière les coins
+          // arrondis du clavier ; en bleu, il dessinait un liseré de chaque
+          // côté.
+          backgroundColor: fondClavier,
           floatingActionButton: boutonFlottant == null
               ? null
               : Padding(
@@ -72,38 +84,47 @@ class PageVendeur extends StatelessWidget {
                   ),
                   child: boutonFlottant,
                 ),
-          body: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              SafeArea(
-                bottom: false,
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 10, 14, 20),
-                  child: Row(
-                    children: [
-                      if (Navigator.of(context).canPop()) ...[
-                        BoutonEnteteVendeur(
-                          icone: Icons.arrow_back_rounded,
-                          infobulle: 'Retour',
-                          onTap: () => Navigator.of(context).maybePop(),
+          body: ColoredBox(
+            // Le bleu de l'en-tête, derrière les coins arrondis de la feuille.
+            color: AppColor.kPrimary,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                SafeArea(
+                  bottom: false,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 10, 14, 20),
+                    child: Row(
+                      children: [
+                        if (Navigator.of(context).canPop()) ...[
+                          BoutonEnteteVendeur(
+                            icone: Icons.arrow_back_rounded,
+                            infobulle: 'Retour',
+                            onTap: () => Navigator.of(context).maybePop(),
+                          ),
+                          const SizedBox(width: 12),
+                        ],
+                        Expanded(
+                          child: titreWidget ?? _Titre(titre, sousTitre),
                         ),
-                        const SizedBox(width: 12),
+                        for (final a in actions) ...[
+                          const SizedBox(width: 8),
+                          a,
+                        ],
                       ],
-                      Expanded(child: titreWidget ?? _Titre(titre, sousTitre)),
-                      for (final a in actions) ...[const SizedBox(width: 8), a],
-                    ],
+                    ),
                   ),
                 ),
-              ),
-              Expanded(
-                child: ClipRRect(
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(28),
+                Expanded(
+                  child: ClipRRect(
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(28),
+                    ),
+                    child: Material(color: AppColor.kBackground, child: corps),
                   ),
-                  child: Material(color: AppColor.kBackground, child: corps),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -211,6 +232,12 @@ class ScaffoldMarine extends StatelessWidget {
   final Widget? bottomNavigationBar;
   final bool? resizeToAvoidBottomInset;
 
+  /// Ce qui se voit derrière les coins arrondis du clavier quand il est
+  /// ouvert : la couleur du bas de l'écran. Par défaut celle de la feuille
+  /// ([backgroundColor]) ; blanc pour un écran dont une barre d'actions
+  /// blanche reste collée au clavier.
+  final Color? fondClavier;
+
   const ScaffoldMarine({
     super.key,
     this.appBar,
@@ -219,6 +246,7 @@ class ScaffoldMarine extends StatelessWidget {
     this.floatingActionButton,
     this.bottomNavigationBar,
     this.resizeToAvoidBottomInset,
+    this.fondClavier,
   });
 
   @override
@@ -256,20 +284,27 @@ class ScaffoldMarine extends StatelessWidget {
       // cette coquille-ci.
       child: FermerClavierAuToucher(
         child: Scaffold(
-          backgroundColor: AppColor.kPrimary,
+          // Le fond du Scaffold est celui du BAS de l'écran ; le bleu de
+          // l'en-tête est peint dans le corps. Voir PageVendeur ci-dessus.
+          backgroundColor:
+              fondClavier ?? backgroundColor ?? AppColor.kBackground,
           appBar: appBar,
           floatingActionButton: floatingActionButton,
           bottomNavigationBar: bottomNavigationBar,
           resizeToAvoidBottomInset: resizeToAvoidBottomInset,
-          body: Padding(
-            padding: const EdgeInsets.only(top: 6),
-            child: ClipRRect(
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(28),
-              ),
-              child: Material(
-                color: backgroundColor ?? AppColor.kBackground,
-                child: body ?? const SizedBox.shrink(),
+          body: ColoredBox(
+            // Le bleu de l'en-tête, derrière les coins arrondis de la feuille.
+            color: AppColor.kPrimary,
+            child: Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: ClipRRect(
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(28),
+                ),
+                child: Material(
+                  color: backgroundColor ?? AppColor.kBackground,
+                  child: body ?? const SizedBox.shrink(),
+                ),
               ),
             ),
           ),
