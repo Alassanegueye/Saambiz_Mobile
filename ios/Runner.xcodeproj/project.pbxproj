@@ -52,6 +52,7 @@
 		331C807B294A618700263BE5 /* RunnerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunnerTests.swift; sourceTree = "<group>"; };
 		331C8081294A63A400263BE5 /* RunnerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RunnerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = AppFrameworkInfo.plist; path = Flutter/AppFrameworkInfo.plist; sourceTree = "<group>"; };
+		5A4B1C0DE0F10000000A0001 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		5E59D3974CC40F3ED6F67394 /* Pods_Runner.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Runner.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		659C759AA59DB629E128746C /* Pods-Runner.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.release.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"; sourceTree = "<group>"; };
 		74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Runner-Bridging-Header.h"; sourceTree = "<group>"; };
@@ -66,7 +67,6 @@
 		97C146FD1CF9000F007C117D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		97C147001CF9000F007C117D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		97C147021CF9000F007C117D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		5A4B1C0DE0F10000000A0001 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		E6732C35D60BD25887D97498 /* Pods-RunnerTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.release.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.release.xcconfig"; sourceTree = "<group>"; };
 		FF851198F7E2F43B4D0ED7BA /* Pods-RunnerTests.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.profile.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.profile.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -249,7 +249,7 @@
 			);
 			mainGroup = 97C146E51CF9000F007C117D;
 			packageReferences = (
-				781AD8BC2B33823900A9FFBB /* XCLocalSwiftPackageReference "FlutterGeneratedPluginSwiftPackage" */,
+				781AD8BC2B33823900A9FFBB /* XCLocalSwiftPackageReference "Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage" */,
 			);
 			productRefGroup = 97C146EF1CF9000F007C117D /* Products */;
 			projectDirPath = "";
@@ -300,23 +300,6 @@
 			shellPath = /bin/sh;
 			shellScript = "/bin/sh \"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\" embed_and_thin";
 		};
-		C4A51071000000000000CR01 /* Crashlytics : envoi des symboles */ = {
-			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}",
-				"$(SRCROOT)/$(BUILT_PRODUCTS_DIR)/$(INFOPLIST_PATH)",
-			);
-			name = "Crashlytics : envoi des symboles";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "# Table des symboles de la build, envoyee a Crashlytics.\n#\n# Sans elle, une pile d'appels arrive en adresses memoire dans la console :\n# illisible, donc inutile. C'est la moitie du benefice de Crashlytics.\n#\n# Ce projet prend Firebase par Swift Package Manager, pas par CocoaPods :\n# l'outil n'est donc pas dans Pods/. Son emplacement a change selon les\n# versions du SDK, d'ou les trois essais.\n#\n# On NE FAIT PAS ECHOUER LA BUILD s'il est introuvable : une archive sans\n# symboles reste livrable, et un avertissement se lit dans le journal de\n# build. Mieux vaut une remontee imparfaite qu'une release bloquee.\nSPM=\"${BUILD_DIR%/Build/*}/SourcePackages\"\nGSP=\"${PROJECT_DIR}/Runner/GoogleService-Info.plist\"\nDSYM=\"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}\"\n\nif [ -f \"${PODS_ROOT}/FirebaseCrashlytics/run\" ]; then\n  \"${PODS_ROOT}/FirebaseCrashlytics/run\"\nelif [ -f \"$SPM/artifacts/firebase-ios-sdk/FirebaseCrashlytics/upload-symbols\" ]; then\n  \"$SPM/artifacts/firebase-ios-sdk/FirebaseCrashlytics/upload-symbols\" -gsp \"$GSP\" -p ios \"$DSYM\"\nelif [ -f \"$SPM/checkouts/firebase-ios-sdk/Crashlytics/run\" ]; then\n  \"$SPM/checkouts/firebase-ios-sdk/Crashlytics/run\"\nelse\n  echo \"warning: outil Crashlytics introuvable — les piles d'appels iOS arriveront sans symboles\"\nfi\n";
-		};
 		876022E782E1E4A1B46EBE50 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -362,9 +345,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -392,6 +379,23 @@
 			shellPath = /bin/sh;
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
+		};
+		C4A51071000000000000CR01 /* Crashlytics : envoi des symboles */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}",
+				"$(SRCROOT)/$(BUILT_PRODUCTS_DIR)/$(INFOPLIST_PATH)",
+			);
+			name = "Crashlytics : envoi des symboles";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Table des symboles de la build, envoyee a Crashlytics.\n#\n# Sans elle, une pile d'appels arrive en adresses memoire dans la console :\n# illisible, donc inutile. C'est la moitie du benefice de Crashlytics.\n#\n# Ce projet prend Firebase par Swift Package Manager, pas par CocoaPods :\n# l'outil n'est donc pas dans Pods/. Son emplacement a change selon les\n# versions du SDK, d'ou les trois essais.\n#\n# On NE FAIT PAS ECHOUER LA BUILD s'il est introuvable : une archive sans\n# symboles reste livrable, et un avertissement se lit dans le journal de\n# build. Mieux vaut une remontee imparfaite qu'une release bloquee.\nSPM=\"${BUILD_DIR%/Build/*}/SourcePackages\"\nGSP=\"${PROJECT_DIR}/Runner/GoogleService-Info.plist\"\nDSYM=\"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}\"\n\nif [ -f \"${PODS_ROOT}/FirebaseCrashlytics/run\" ]; then\n  \"${PODS_ROOT}/FirebaseCrashlytics/run\"\nelif [ -f \"$SPM/artifacts/firebase-ios-sdk/FirebaseCrashlytics/upload-symbols\" ]; then\n  \"$SPM/artifacts/firebase-ios-sdk/FirebaseCrashlytics/upload-symbols\" -gsp \"$GSP\" -p ios \"$DSYM\"\nelif [ -f \"$SPM/checkouts/firebase-ios-sdk/Crashlytics/run\" ]; then\n  \"$SPM/checkouts/firebase-ios-sdk/Crashlytics/run\"\nelse\n  echo \"warning: outil Crashlytics introuvable — les piles d'appels iOS arriveront sans symboles\"\nfi\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -762,7 +766,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
-		781AD8BC2B33823900A9FFBB /* XCLocalSwiftPackageReference "FlutterGeneratedPluginSwiftPackage" */ = {
+		781AD8BC2B33823900A9FFBB /* XCLocalSwiftPackageReference "Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage;
 		};
