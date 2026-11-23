@@ -11,6 +11,32 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
 
+    <!-- FONCTIONS MATÉRIELLES DÉCLARÉES FACULTATIVES.
+         Sans ces lignes, Google Play les considère OBLIGATOIRES et retire
+         l'application du catalogue des appareils qui en sont dépourvus — sans
+         qu'aucune ne soit écrite nulle part : Play les DÉDUIT du manifeste.
+         Chacune ci-dessous a une cause précise, et aucune n'est nécessaire
+         pour se servir de SaamBiz.
+
+         screen.portrait : déduite du `android:screenOrientation="portrait"`
+         de l'écran de recadrage (UCropActivity, plus bas). Elle a bloqué
+         l'examen du build 10 : « affecte les utilisateurs de Téléphone,
+         Tablette, Desktop et Android XR ».
+
+         fingerprint : déduite de USE_FINGERPRINT, que `google_sign_in`
+         apporte sans qu'on l'ait demandé (androidx.credentials →
+         androidx.biometric). 25 appareils perdus au build 10, pour un
+         capteur dont l'application ne se sert à aucun moment.
+
+         location.gps / location.network : déduites des deux permissions de
+         position ci-dessus. La position est facultative dans SaamBiz — un
+         refus laisse les boutiques accessibles par centres d'intérêt — donc
+         une tablette sans puce GPS doit pouvoir installer l'application. -->
+    <uses-feature android:name="android.hardware.screen.portrait" android:required="false"/>
+    <uses-feature android:name="android.hardware.fingerprint" android:required="false"/>
+    <uses-feature android:name="android.hardware.location.gps" android:required="false"/>
+    <uses-feature android:name="android.hardware.location.network" android:required="false"/>
+
     <!-- `usesCleartextTraffic` : le trafic HTTP non chiffré est REFUSÉ.
          Il était autorisé pour tous les builds, vestige du développement
          contre l'émulateur (http://10.0.2.2) : l'application acceptait
